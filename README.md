@@ -134,6 +134,8 @@ Done when:
 - Output activations should default to identity in Phase 0.
 - Softmax and cross-entropy are later additions, not initial requirements.
 - The first implementation is expected to prioritize correctness and inspectability over speed.
+- In prediction mode with `state_init="forward"`, inference reduces to the forward pass under the current Phase 0 formulation because the initialized local prediction errors are already zero.
+- That prediction-time behavior is expected for this baseline and should not be treated as a bug unless the mathematical spec changes.
 
 ## Non-goals for the first version
 
