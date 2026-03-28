@@ -161,18 +161,18 @@ Phase 1 now standardizes the on-disk run layout as:
 ```text
 outputs/
   <experiment_name>/
-    <run_id>/
-      config.json
-      epoch_metrics.csv
-      summary.json
-      energy_traces.npz
-      energy_traces_manifest.json
-      plots/                 # only when plot generation is enabled
+    config.json
+    epoch_metrics.csv
+    summary.json
+    energy_traces.npz
+    energy_traces_manifest.json
+    plots/                 # only when plot generation is enabled
 ```
 
 Notes on the saved artifacts:
 
-- `run_id` accepts an explicit override; timestamps are only the default when no override is provided.
+- each benchmark now writes into a single stable directory under `outputs/`; rerunning the same benchmark overwrites the previous artifacts in that directory.
+- `run_id` still exists in `config.json` and `summary.json` for traceability; timestamps are only the default when no override is provided.
 - `epoch_metrics.csv` is 1-based and records one row per completed epoch.
 - `epoch=1` means the first parameter update has already finished.
 - `train_steps` is recorded in every metrics row for traceability.
@@ -180,6 +180,11 @@ Notes on the saved artifacts:
 - `summary.json` also records `primary_metric_higher_is_better` so metric direction is explicit.
 - raw inference traces are saved even when plotting is disabled.
 - plot generation is optional and requires `matplotlib`.
+- the toy benchmark scripts now enable plotting by default, so direct script runs produce `plots/*.png`.
+- `config.json` records seed roles explicitly: `seed` remains the run seed, while `seeds.run_seed`, `seeds.data_seed`, and `seeds.model_init_seed` make the current reproducibility semantics explicit.
+- The three seed roles may differ even when a benchmark is otherwise unchanged.
+- For the current toy benchmarks, `data.data_seed` and `model.model_init_seed` are also written directly into the corresponding sections for local traceability.
+- The current linear and sine toy datasets are closed-form deterministic generators, so their `data_seed` is recorded for reproducibility semantics even though those generators do not currently consume randomness.
 
 ## Benchmark commands
 

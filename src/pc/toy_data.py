@@ -5,15 +5,23 @@ import numpy as np
 from .utils import make_rng
 
 
-def make_linear_regression_data(num_points: int = 16) -> tuple[np.ndarray, np.ndarray]:
+def make_linear_regression_data(
+    num_points: int = 16,
+    seed: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """Create deterministic 1D linear regression data shaped (batch, 1)."""
+    _ = seed
     x = np.linspace(-1.0, 1.0, num_points, dtype=np.float64).reshape(-1, 1)
     y = (0.75 * x) - 0.1
     return x, y
 
 
-def make_sine_regression_data(num_points: int = 32) -> tuple[np.ndarray, np.ndarray]:
+def make_sine_regression_data(
+    num_points: int = 32,
+    seed: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
     """Create deterministic 1D nonlinear regression data shaped (batch, 1)."""
+    _ = seed
     x = np.linspace(-np.pi, np.pi, num_points, dtype=np.float64).reshape(-1, 1)
     y = np.sin(x)
     return x, y

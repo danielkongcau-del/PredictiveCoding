@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +24,8 @@ class ExperimentConfig:
     experiment_name: str
     seed: int
     epochs: int
+    data_seed: int | None = None
+    model_init_seed: int | None = None
     output_root: str | Path = "outputs"
     run_id: str | None = None
     plot_energy: bool = False
@@ -53,6 +56,15 @@ class ExperimentRunResult:
     trace_arrays: dict[str, np.ndarray]
 
 
+def _prepare_run_dir(output_root: str | Path, experiment_name: str) -> Path:
+    """Return the single output directory for an experiment, overwriting prior artifacts."""
+    run_dir = Path(output_root) / experiment_name
+    if run_dir.exists():
+        shutil.rmtree(run_dir)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    return run_dir
+
+
 def _stringify_trace_policy(trace_policy: str | Sequence[int]) -> str | list[int]:
     if isinstance(trace_policy, str):
         return trace_policy
@@ -64,6 +76,11 @@ def _config_dict(config: ExperimentConfig, run_id: str) -> dict[str, Any]:
         "experiment_name": config.experiment_name,
         "run_id": run_id,
         "seed": config.seed,
+        "seeds": {
+            "run_seed": config.seed,
+            "data_seed": config.data_seed,
+            "model_init_seed": config.model_init_seed,
+        },
         "task": dict(config.task),
         "data": dict(config.data),
         "model": dict(config.model),
@@ -168,8 +185,7 @@ def run_supervised_experiment(
 
     set_seed(config.seed)
     run_id = config.resolved_run_id()
-    run_dir = Path(config.output_root) / config.experiment_name / run_id
-    run_dir.mkdir(parents=True, exist_ok=True)
+    run_dir = _prepare_run_dir(config.output_root, config.experiment_name)
 
     config_payload = _config_dict(config, run_id)
     _write_json(run_dir / "config.json", config_payload)

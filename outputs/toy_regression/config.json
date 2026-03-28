@@ -1,7 +1,12 @@
 {
   "experiment_name": "toy_regression",
-  "run_id": "20260329_042120_seed_0",
+  "run_id": "20260329_043815_seed_0",
   "seed": 0,
+  "seeds": {
+    "run_seed": 0,
+    "data_seed": 0,
+    "model_init_seed": 0
+  },
   "task": {
     "name": "regression"
   },
@@ -9,7 +14,8 @@
     "dataset_name": "linear_regression",
     "num_points": 16,
     "input_dim": 1,
-    "target_dim": 1
+    "target_dim": 1,
+    "data_seed": 0
   },
   "model": {
     "layer_dims": [
@@ -19,7 +25,8 @@
     ],
     "hidden_activation": "tanh",
     "output_activation": "identity",
-    "state_init": "forward"
+    "state_init": "forward",
+    "model_init_seed": 0
   },
   "training": {
     "epochs": 60,
@@ -27,11 +34,12 @@
     "eta_w": 0.05,
     "eta_b": 0.05,
     "train_steps": 25,
-    "eval_steps": 25
+    "eval_steps": 25,
+    "run_seed": 0
   },
   "logging": {
     "output_root": "outputs",
-    "plot_energy": false,
+    "plot_energy": true,
     "trace_policy": "default"
   }
 }

@@ -18,17 +18,20 @@ from pc.toy_data import make_sine_regression_data
 def run(
     output_root: str | Path = "outputs",
     run_id: str | None = None,
-    plot_energy: bool = False,
+    plot_energy: bool = True,
 ) -> ExperimentRunResult:
     """Run the deterministic sine regression benchmark and save structured outputs."""
-    x, y = make_sine_regression_data()
+    run_seed = 3
+    data_seed = 3
+    model_init_seed = 3
+    x, y = make_sine_regression_data(seed=data_seed)
     model = PCNetwork(
         layers=init_mlp_layers(
             layer_dims=[1, 8, 1],
             hidden_activation="tanh",
             output_activation="identity",
             weight_scale=0.12,
-            seed=3,
+            seed=model_init_seed,
         ),
         eta_x=0.15,
         eta_w=0.03,
@@ -39,20 +42,37 @@ def run(
     )
     config = ExperimentConfig(
         experiment_name="toy_sine_regression",
-        seed=3,
+        seed=run_seed,
+        data_seed=data_seed,
+        model_init_seed=model_init_seed,
         epochs=80,
         output_root=output_root,
         run_id=run_id,
         plot_energy=plot_energy,
         task={"name": "regression"},
-        data={"dataset_name": "sine_regression", "num_points": int(x.shape[0]), "input_dim": 1, "target_dim": 1},
+        data={
+            "dataset_name": "sine_regression",
+            "num_points": int(x.shape[0]),
+            "input_dim": 1,
+            "target_dim": 1,
+            "data_seed": data_seed,
+        },
         model={
             "layer_dims": [1, 8, 1],
             "hidden_activation": "tanh",
             "output_activation": "identity",
             "state_init": "forward",
+            "model_init_seed": model_init_seed,
         },
-        training={"epochs": 80, "eta_x": 0.15, "eta_w": 0.03, "eta_b": 0.03, "train_steps": 30, "eval_steps": 30},
+        training={
+            "epochs": 80,
+            "eta_x": 0.15,
+            "eta_w": 0.03,
+            "eta_b": 0.03,
+            "train_steps": 30,
+            "eval_steps": 30,
+            "run_seed": run_seed,
+        },
     )
     return run_supervised_experiment(
         config=config,

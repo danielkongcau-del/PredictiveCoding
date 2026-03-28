@@ -18,17 +18,20 @@ from pc.toy_data import make_blobs_classification_data
 def run(
     output_root: str | Path = "outputs",
     run_id: str | None = None,
-    plot_energy: bool = False,
+    plot_energy: bool = True,
 ) -> ExperimentRunResult:
     """Run the deterministic Gaussian-blobs classification benchmark and save structured outputs."""
-    x, y = make_blobs_classification_data(seed=11, points_per_class=24)
+    run_seed = 11
+    data_seed = 11
+    model_init_seed = 11
+    x, y = make_blobs_classification_data(seed=data_seed, points_per_class=24)
     model = PCNetwork(
         layers=init_mlp_layers(
             layer_dims=[2, 10, 3],
             hidden_activation="tanh",
             output_activation="identity",
             weight_scale=0.08,
-            seed=11,
+            seed=model_init_seed,
         ),
         eta_x=0.15,
         eta_w=0.05,
@@ -39,20 +42,37 @@ def run(
     )
     config = ExperimentConfig(
         experiment_name="toy_blobs_classification",
-        seed=11,
+        seed=run_seed,
+        data_seed=data_seed,
+        model_init_seed=model_init_seed,
         epochs=70,
         output_root=output_root,
         run_id=run_id,
         plot_energy=plot_energy,
         task={"name": "classification", "num_classes": 3},
-        data={"dataset_name": "gaussian_blobs", "points_per_class": 24, "input_dim": 2, "target_dim": 3},
+        data={
+            "dataset_name": "gaussian_blobs",
+            "points_per_class": 24,
+            "input_dim": 2,
+            "target_dim": 3,
+            "data_seed": data_seed,
+        },
         model={
             "layer_dims": [2, 10, 3],
             "hidden_activation": "tanh",
             "output_activation": "identity",
             "state_init": "forward",
+            "model_init_seed": model_init_seed,
         },
-        training={"epochs": 70, "eta_x": 0.15, "eta_w": 0.05, "eta_b": 0.05, "train_steps": 30, "eval_steps": 30},
+        training={
+            "epochs": 70,
+            "eta_x": 0.15,
+            "eta_w": 0.05,
+            "eta_b": 0.05,
+            "train_steps": 30,
+            "eval_steps": 30,
+            "run_seed": run_seed,
+        },
     )
     return run_supervised_experiment(
         config=config,

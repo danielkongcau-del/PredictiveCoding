@@ -1,7 +1,12 @@
 {
   "experiment_name": "toy_sine_regression",
-  "run_id": "20260329_042120_seed_3",
+  "run_id": "20260329_043815_seed_3",
   "seed": 3,
+  "seeds": {
+    "run_seed": 3,
+    "data_seed": 3,
+    "model_init_seed": 3
+  },
   "task": {
     "name": "regression"
   },
@@ -9,7 +14,8 @@
     "dataset_name": "sine_regression",
     "num_points": 32,
     "input_dim": 1,
-    "target_dim": 1
+    "target_dim": 1,
+    "data_seed": 3
   },
   "model": {
     "layer_dims": [
@@ -19,7 +25,8 @@
     ],
     "hidden_activation": "tanh",
     "output_activation": "identity",
-    "state_init": "forward"
+    "state_init": "forward",
+    "model_init_seed": 3
   },
   "training": {
     "epochs": 80,
@@ -27,11 +34,12 @@
     "eta_w": 0.03,
     "eta_b": 0.03,
     "train_steps": 30,
-    "eval_steps": 30
+    "eval_steps": 30,
+    "run_seed": 3
   },
   "logging": {
     "output_root": "outputs",
-    "plot_energy": false,
+    "plot_energy": true,
     "trace_policy": "default"
   }
 }
