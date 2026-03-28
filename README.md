@@ -4,25 +4,27 @@ A NumPy-first research codebase for building a **reliable, extensible, near-pape
 
 This repository is intended to be developed collaboratively with Codex. The design goal is to avoid the common failure mode of producing code that merely "looks like predictive coding" without being mathematically pinned down, testable, or extensible.
 
-## Current scope
+## Project status
 
-Phase 0 and Phase 1 focus on a **supervised, fully-connected, batch-first predictive coding network** implemented with:
+Current stable milestone:
 
-- Python 3.11+
-- NumPy
-- SciPy (optional, for numerical checks / solvers in later phases)
-- pytest
-- matplotlib
+- Phase 0 complete: predictive coding baseline math and tests are stable
+- Phase 1 complete: structured experiment outputs and benchmark scripts added
+- Phase 1.5 complete: reproducibility seed semantics clarified and output layout supports:
+  - default: `single_dir`
+  - optional archival mode: `run_id_subdir`
 
-Out of scope for the first implementation:
+Current scope:
 
-- PyTorch / JAX / TensorFlow
-- CNNs
-- RNNs / temporal PC
-- advanced optimizers
-- mixed precision / GPU kernels
+- NumPy-only predictive coding baseline
+- structured outputs under `outputs/`
+- toy regression, sine regression, and blobs classification benchmarks
 
-Those may be added later, but only after the Phase 0–2 math and tests are stable.
+Not included yet:
+
+- baseline MLP comparison
+- CNN/RNN/temporal PC
+- MNIST-scale experiments
 
 ## Read order for Codex and human contributors
 
@@ -86,7 +88,7 @@ predictive-coding/
 
 The first usable milestone is a minimal supervised PC network with:
 
-- 2–3 fully connected layers
+- 2-3 fully connected layers
 - configurable hidden activation
 - squared-error energy
 - iterative hidden-state inference
@@ -154,7 +156,7 @@ Every experiment script should eventually save:
 - a JSON or YAML config dump
 - scalar logs per epoch
 - optionally, per-inference-step energy traces
-- at least one plot to `outputs/`
+- optional plots to `outputs/` when plot generation is enabled
 
 Phase 1 now standardizes the on-disk run layout as:
 
@@ -172,6 +174,8 @@ outputs/
 Notes on the saved artifacts:
 
 - each benchmark now writes into a single stable directory under `outputs/`; rerunning the same benchmark overwrites the previous artifacts in that directory.
+- the current default output layout is therefore `single_dir`.
+- an optional archival layout is already supported as `run_id_subdir`; that layout restores `outputs/<experiment_name>/<run_id>/...` without changing the rest of the runner logic.
 - `run_id` still exists in `config.json` and `summary.json` for traceability; timestamps are only the default when no override is provided.
 - `epoch_metrics.csv` is 1-based and records one row per completed epoch.
 - `epoch=1` means the first parameter update has already finished.
@@ -182,9 +186,9 @@ Notes on the saved artifacts:
 - plot generation is optional and requires `matplotlib`.
 - the toy benchmark scripts now enable plotting by default, so direct script runs produce `plots/*.png`.
 - `config.json` records seed roles explicitly: `seed` remains the run seed, while `seeds.run_seed`, `seeds.data_seed`, and `seeds.model_init_seed` make the current reproducibility semantics explicit.
-- The three seed roles may differ even when a benchmark is otherwise unchanged.
-- For the current toy benchmarks, `data.data_seed` and `model.model_init_seed` are also written directly into the corresponding sections for local traceability.
-- The current linear and sine toy datasets are closed-form deterministic generators, so their `data_seed` is recorded for reproducibility semantics even though those generators do not currently consume randomness.
+- the three seed roles may differ even when a benchmark is otherwise unchanged.
+- for the current toy benchmarks, `data.data_seed` and `model.model_init_seed` are also written directly into the corresponding sections for local traceability.
+- the current linear and sine toy datasets are closed-form deterministic generators, so their `data_seed` is recorded for reproducibility semantics even though those generators do not currently consume randomness.
 
 ## Benchmark commands
 
@@ -195,6 +199,15 @@ With the `pc` environment active, the Phase 1 toy benchmarks are:
 & 'D:\Anaconda\envs\pc\python.exe' experiments/toy_sine_regression.py
 & 'D:\Anaconda\envs\pc\python.exe' experiments/toy_blobs_classification.py
 ```
+
+## Current freeze state
+
+The repository is currently frozen at the end of Phase 1.5:
+
+- the baseline predictive-coding math is frozen
+- the current toy benchmarks and output schemas are frozen
+- repository hygiene now assumes generated outputs, egg-info, caches, and temporary artifacts are not versioned
+- the next planned work should start with a narrow Phase 2 comparison against a standard MLP baseline
 
 ## A note on predictive coding variants
 
