@@ -112,9 +112,60 @@ def test_timestamp_run_id_is_used_only_when_none_and_plots_are_optional(tmp_path
     with (run_dir / "config.json").open("r", encoding="utf-8") as handle:
         config_payload = json.load(handle)
     assert re.fullmatch(r"\d{8}_\d{6}_seed_19", config_payload["run_id"]) is not None
+    assert config_payload["logging"]["output_layout"] == "single_dir"
     assert (run_dir / "plots").exists()
     png_paths = sorted(path.name for path in (run_dir / "plots").glob("*.png"))
     assert png_paths
 
     traces = np.load(run_dir / "energy_traces.npz")
     assert sorted(traces.files)
+
+
+def test_run_id_subdir_layout_is_available_without_changing_runner_logic(tmp_path: Path) -> None:
+    x, y = make_linear_regression_data(num_points=8)
+    model = PCNetwork(
+        layers=init_mlp_layers([1, 3, 1], seed=31, weight_scale=0.12),
+        eta_x=0.2,
+        eta_w=0.05,
+        eta_b=0.05,
+        train_steps=12,
+        eval_steps=12,
+        state_init="forward",
+    )
+    config = ExperimentConfig(
+        experiment_name="tiny_regression_outputs",
+        seed=31,
+        data_seed=37,
+        model_init_seed=41,
+        epochs=2,
+        output_root=tmp_path,
+        run_id="nested_run",
+        output_layout="run_id_subdir",
+        plot_energy=False,
+        task={"name": "regression"},
+        data={"dataset_name": "linear_regression", "num_points": 8, "data_seed": 37},
+        model={
+            "layer_dims": [1, 3, 1],
+            "hidden_activation": "tanh",
+            "output_activation": "identity",
+            "model_init_seed": 41,
+        },
+        training={"epochs": 2, "train_steps": 12, "eval_steps": 12, "run_seed": 31},
+    )
+    result = run_supervised_experiment(
+        config=config,
+        model=model,
+        x=x,
+        y=y,
+        task_name="regression",
+        primary_metric_name="mse",
+        primary_metric_higher_is_better=False,
+        primary_metric_fn=regression_mse,
+        baseline_metric_name="baseline_mse",
+        baseline_metric_fn=regression_mean_baseline_mse,
+    )
+
+    assert result.run_dir == tmp_path / "tiny_regression_outputs" / "nested_run"
+    with (result.run_dir / "config.json").open("r", encoding="utf-8") as handle:
+        config_payload = json.load(handle)
+    assert config_payload["logging"]["output_layout"] == "run_id_subdir"

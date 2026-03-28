@@ -6,7 +6,7 @@ import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Literal, Sequence
 
 import numpy as np
 
@@ -15,6 +15,7 @@ from .utils import set_seed
 
 MetricFn = Callable[[np.ndarray, np.ndarray], float]
 BaselineMetricFn = Callable[[np.ndarray], float]
+OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 
 @dataclass
@@ -28,6 +29,7 @@ class ExperimentConfig:
     model_init_seed: int | None = None
     output_root: str | Path = "outputs"
     run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
     plot_energy: bool = False
     trace_policy: str | Sequence[int] = "default"
     task: dict[str, Any] = field(default_factory=dict)
@@ -56,9 +58,22 @@ class ExperimentRunResult:
     trace_arrays: dict[str, np.ndarray]
 
 
-def _prepare_run_dir(output_root: str | Path, experiment_name: str) -> Path:
-    """Return the single output directory for an experiment, overwriting prior artifacts."""
-    run_dir = Path(output_root) / experiment_name
+def _resolve_run_dir(
+    output_root: str | Path,
+    experiment_name: str,
+    run_id: str,
+    output_layout: OutputLayout,
+) -> Path:
+    """Resolve the output path for the selected layout without changing semantics elsewhere."""
+    if output_layout == "single_dir":
+        return Path(output_root) / experiment_name
+    if output_layout == "run_id_subdir":
+        return Path(output_root) / experiment_name / run_id
+    raise ValueError(f"Unsupported output_layout '{output_layout}'.")
+
+
+def _prepare_run_dir(run_dir: Path) -> Path:
+    """Create a fresh run directory at the already-resolved output path."""
     if run_dir.exists():
         shutil.rmtree(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -87,6 +102,7 @@ def _config_dict(config: ExperimentConfig, run_id: str) -> dict[str, Any]:
         "training": dict(config.training),
         "logging": {
             "output_root": str(config.output_root),
+            "output_layout": config.output_layout,
             "plot_energy": config.plot_energy,
             "trace_policy": _stringify_trace_policy(config.trace_policy),
             **config.logging,
@@ -185,7 +201,14 @@ def run_supervised_experiment(
 
     set_seed(config.seed)
     run_id = config.resolved_run_id()
-    run_dir = _prepare_run_dir(config.output_root, config.experiment_name)
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(
+            config.output_root,
+            config.experiment_name,
+            run_id,
+            config.output_layout,
+        )
+    )
 
     config_payload = _config_dict(config, run_id)
     _write_json(run_dir / "config.json", config_payload)
