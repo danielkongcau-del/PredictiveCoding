@@ -1,3 +1,15 @@
+Metadata-Version: 2.4
+Name: predictive-coding
+Version: 0.1.0
+Summary: NumPy-first predictive coding baseline
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.26
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Provides-Extra: plots
+Requires-Dist: matplotlib>=3.8; extra == "plots"
+
 # Predictive Coding from Scratch
 
 A NumPy-first research codebase for building a **reliable, extensible, near-paper-grade** predictive coding (PC) implementation.

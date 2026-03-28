@@ -1,0 +1,38 @@
+{
+  "data": {
+    "dataset_name": "gaussian_blobs",
+    "input_dim": 2,
+    "points_per_class": 24,
+    "target_dim": 3
+  },
+  "experiment_name": "toy_blobs_classification",
+  "logging": {
+    "output_root": "outputs",
+    "plot_energy": false,
+    "trace_policy": "default"
+  },
+  "model": {
+    "hidden_activation": "tanh",
+    "layer_dims": [
+      2,
+      10,
+      3
+    ],
+    "output_activation": "identity",
+    "state_init": "forward"
+  },
+  "run_id": "20260329_042052_seed_11",
+  "seed": 11,
+  "task": {
+    "name": "classification",
+    "num_classes": 3
+  },
+  "training": {
+    "epochs": 70,
+    "eta_b": 0.05,
+    "eta_w": 0.05,
+    "eta_x": 0.15,
+    "eval_steps": 30,
+    "train_steps": 30
+  }
+}

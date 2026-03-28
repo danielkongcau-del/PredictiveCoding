@@ -12,7 +12,7 @@ from pc.experiment import ExperimentConfig, ExperimentRunResult, run_supervised_
 from pc.layers import init_mlp_layers
 from pc.metrics import regression_mean_baseline_mse, regression_mse
 from pc.models import PCNetwork
-from pc.toy_data import make_linear_regression_data
+from pc.toy_data import make_sine_regression_data
 
 
 def run(
@@ -20,39 +20,39 @@ def run(
     run_id: str | None = None,
     plot_energy: bool = False,
 ) -> ExperimentRunResult:
-    """Run the deterministic linear regression benchmark and save structured outputs."""
-    x, y = make_linear_regression_data()
+    """Run the deterministic sine regression benchmark and save structured outputs."""
+    x, y = make_sine_regression_data()
     model = PCNetwork(
         layers=init_mlp_layers(
-            layer_dims=[1, 4, 1],
+            layer_dims=[1, 8, 1],
             hidden_activation="tanh",
             output_activation="identity",
-            weight_scale=0.15,
-            seed=0,
+            weight_scale=0.12,
+            seed=3,
         ),
-        eta_x=0.2,
-        eta_w=0.05,
-        eta_b=0.05,
-        train_steps=25,
-        eval_steps=25,
+        eta_x=0.15,
+        eta_w=0.03,
+        eta_b=0.03,
+        train_steps=30,
+        eval_steps=30,
         state_init="forward",
     )
     config = ExperimentConfig(
-        experiment_name="toy_regression",
-        seed=0,
-        epochs=60,
+        experiment_name="toy_sine_regression",
+        seed=3,
+        epochs=80,
         output_root=output_root,
         run_id=run_id,
         plot_energy=plot_energy,
         task={"name": "regression"},
-        data={"dataset_name": "linear_regression", "num_points": int(x.shape[0]), "input_dim": 1, "target_dim": 1},
+        data={"dataset_name": "sine_regression", "num_points": int(x.shape[0]), "input_dim": 1, "target_dim": 1},
         model={
-            "layer_dims": [1, 4, 1],
+            "layer_dims": [1, 8, 1],
             "hidden_activation": "tanh",
             "output_activation": "identity",
             "state_init": "forward",
         },
-        training={"epochs": 60, "eta_x": 0.2, "eta_w": 0.05, "eta_b": 0.05, "train_steps": 25, "eval_steps": 25},
+        training={"epochs": 80, "eta_x": 0.15, "eta_w": 0.03, "eta_b": 0.03, "train_steps": 30, "eval_steps": 30},
     )
     return run_supervised_experiment(
         config=config,
@@ -71,7 +71,7 @@ def run(
 def main() -> None:
     """Run the benchmark with default Phase 1 output settings."""
     result = run()
-    print("Toy regression completed.")
+    print("Toy sine regression completed.")
     print(f"Run directory: {result.run_dir}")
     print(f"Final pre-update energy: {result.summary['final_pre_update_energy']:.6f}")
     print(f"Final post-update energy: {result.summary['final_post_update_energy']:.6f}")

@@ -10,9 +10,9 @@ if str(SRC_ROOT) not in sys.path:
 
 from pc.experiment import ExperimentConfig, ExperimentRunResult, run_supervised_experiment
 from pc.layers import init_mlp_layers
-from pc.metrics import regression_mean_baseline_mse, regression_mse
+from pc.metrics import classification_accuracy, majority_class_baseline_accuracy
 from pc.models import PCNetwork
-from pc.toy_data import make_linear_regression_data
+from pc.toy_data import make_blobs_classification_data
 
 
 def run(
@@ -20,62 +20,62 @@ def run(
     run_id: str | None = None,
     plot_energy: bool = False,
 ) -> ExperimentRunResult:
-    """Run the deterministic linear regression benchmark and save structured outputs."""
-    x, y = make_linear_regression_data()
+    """Run the deterministic Gaussian-blobs classification benchmark and save structured outputs."""
+    x, y = make_blobs_classification_data(seed=11, points_per_class=24)
     model = PCNetwork(
         layers=init_mlp_layers(
-            layer_dims=[1, 4, 1],
+            layer_dims=[2, 10, 3],
             hidden_activation="tanh",
             output_activation="identity",
-            weight_scale=0.15,
-            seed=0,
+            weight_scale=0.08,
+            seed=11,
         ),
-        eta_x=0.2,
+        eta_x=0.15,
         eta_w=0.05,
         eta_b=0.05,
-        train_steps=25,
-        eval_steps=25,
+        train_steps=30,
+        eval_steps=30,
         state_init="forward",
     )
     config = ExperimentConfig(
-        experiment_name="toy_regression",
-        seed=0,
-        epochs=60,
+        experiment_name="toy_blobs_classification",
+        seed=11,
+        epochs=70,
         output_root=output_root,
         run_id=run_id,
         plot_energy=plot_energy,
-        task={"name": "regression"},
-        data={"dataset_name": "linear_regression", "num_points": int(x.shape[0]), "input_dim": 1, "target_dim": 1},
+        task={"name": "classification", "num_classes": 3},
+        data={"dataset_name": "gaussian_blobs", "points_per_class": 24, "input_dim": 2, "target_dim": 3},
         model={
-            "layer_dims": [1, 4, 1],
+            "layer_dims": [2, 10, 3],
             "hidden_activation": "tanh",
             "output_activation": "identity",
             "state_init": "forward",
         },
-        training={"epochs": 60, "eta_x": 0.2, "eta_w": 0.05, "eta_b": 0.05, "train_steps": 25, "eval_steps": 25},
+        training={"epochs": 70, "eta_x": 0.15, "eta_w": 0.05, "eta_b": 0.05, "train_steps": 30, "eval_steps": 30},
     )
     return run_supervised_experiment(
         config=config,
         model=model,
         x=x,
         y=y,
-        task_name="regression",
-        primary_metric_name="mse",
-        primary_metric_higher_is_better=False,
-        primary_metric_fn=regression_mse,
-        baseline_metric_name="baseline_mse",
-        baseline_metric_fn=regression_mean_baseline_mse,
+        task_name="classification",
+        primary_metric_name="accuracy",
+        primary_metric_higher_is_better=True,
+        primary_metric_fn=classification_accuracy,
+        baseline_metric_name="baseline_accuracy",
+        baseline_metric_fn=majority_class_baseline_accuracy,
     )
 
 
 def main() -> None:
     """Run the benchmark with default Phase 1 output settings."""
     result = run()
-    print("Toy regression completed.")
+    print("Toy blobs classification completed.")
     print(f"Run directory: {result.run_dir}")
     print(f"Final pre-update energy: {result.summary['final_pre_update_energy']:.6f}")
     print(f"Final post-update energy: {result.summary['final_post_update_energy']:.6f}")
-    print(f"Final MSE: {result.summary['primary_metric_value']:.6f}")
+    print(f"Final accuracy: {result.summary['primary_metric_value']:.6f}")
 
 
 if __name__ == "__main__":

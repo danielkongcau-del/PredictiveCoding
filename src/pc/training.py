@@ -16,6 +16,7 @@ from .utils import ensure_finite_array, set_seed
 class TrainBatchResult:
     """Training outputs for one batch with batch-first x and y arrays."""
 
+    train_steps: int
     energy_trace: list[float]
     pre_update_energy: float
     post_update_energy: float | None
@@ -135,6 +136,7 @@ def train_batch(
         post_update_energy = post_result.final_energy
 
     return TrainBatchResult(
+        train_steps=model.train_steps,
         energy_trace=inference_result.energy_trace,
         pre_update_energy=inference_result.final_energy,
         post_update_energy=post_update_energy,

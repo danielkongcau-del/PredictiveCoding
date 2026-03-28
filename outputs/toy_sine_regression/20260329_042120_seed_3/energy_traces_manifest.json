@@ -1,0 +1,22 @@
+[
+  {
+    "key": "train_initial_pre_update",
+    "epoch": 0,
+    "stage": "pre_update_inference",
+    "mode": "train",
+    "steps": 30,
+    "eta_x": 0.15,
+    "state_init": "forward",
+    "trace_length": 31
+  },
+  {
+    "key": "train_epoch_final_pre_update",
+    "epoch": 80,
+    "stage": "pre_update_inference",
+    "mode": "train",
+    "steps": 30,
+    "eta_x": 0.15,
+    "state_init": "forward",
+    "trace_length": 31
+  }
+]
