@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
+
+MetricFn = Callable[[np.ndarray, np.ndarray], float]
+BaselineMetricFn = Callable[[np.ndarray], float]
 
 
 def regression_mse(predictions: np.ndarray, targets: np.ndarray) -> float:
@@ -26,3 +31,15 @@ def majority_class_baseline_accuracy(targets: np.ndarray) -> float:
     target_labels = np.argmax(targets, axis=1)
     class_counts = np.bincount(target_labels, minlength=targets.shape[1])
     return float(np.max(class_counts) / target_labels.shape[0])
+
+
+def metric_higher_is_better(metric_name: str) -> bool:
+    """Return whether larger metric values indicate better model performance."""
+    mapping = {
+        "accuracy": True,
+        "mse": False,
+    }
+    try:
+        return mapping[metric_name]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported metric '{metric_name}'.") from exc

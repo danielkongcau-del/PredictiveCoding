@@ -19,12 +19,14 @@ Current scope:
 - NumPy-only predictive coding baseline
 - structured outputs under `outputs/`
 - toy regression, sine regression, and blobs classification benchmarks
+- Phase 2 comparison runs against a minimal standard MLP baseline
+- narrow Phase 2b PC sensitivity studies on the regression toy benchmarks
 
 Not included yet:
 
-- baseline MLP comparison
 - CNN/RNN/temporal PC
 - MNIST-scale experiments
+- generic hyperparameter tuning frameworks or large search grids
 
 ## Read order for Codex and human contributors
 
@@ -192,7 +194,7 @@ Notes on the saved artifacts:
 
 ## Benchmark commands
 
-With the `pc` environment active, the Phase 1 toy benchmarks are:
+With the `pc` environment active, the existing PC toy benchmarks are:
 
 ```powershell
 & 'D:\Anaconda\envs\pc\python.exe' experiments/toy_regression.py
@@ -200,14 +202,81 @@ With the `pc` environment active, the Phase 1 toy benchmarks are:
 & 'D:\Anaconda\envs\pc\python.exe' experiments/toy_blobs_classification.py
 ```
 
-## Current freeze state
+Phase 2a adds a minimal standard-MLP comparison script:
 
-The repository is currently frozen at the end of Phase 1.5:
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/compare_pc_vs_mlp.py
+```
+
+Phase 2b adds a narrow predictive-coding sensitivity script:
+
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py toy_regression
+```
+
+The first Phase 2b pass stays intentionally small:
+
+- only `toy_regression` and `toy_sine_regression`
+- only one-at-a-time PC trials around the current default
+- only the current PC knobs:
+  - `eta_x`
+  - `eta_w` with `eta_b = eta_w`
+  - `train_steps` with `eval_steps = train_steps`
+  - `state_init`
+
+The first MLP classification baseline stays intentionally narrow:
+
+- it uses the same toy one-hot targets as the current PC benchmark
+- it trains with mean squared error averaged over all output elements
+- it is still evaluated with argmax accuracy
+
+For Phase 2 comparison summaries, `primary_metric_difference_mlp_minus_pc` always means:
+
+- `mlp_primary_metric_value - pc_primary_metric_value`
+- for `accuracy`, a positive value means the MLP is better
+- for `mse`, a negative value means the MLP is better because lower is better
+
+Phase 2b sensitivity outputs follow the existing repository style:
+
+```text
+outputs/
+  pc_sensitivity_<benchmark>/
+    base_pc_config.json
+    candidate_grid.json
+    trial_table.csv
+    aggregate_summary.json
+    mlp_reference/
+      config.json
+      epoch_metrics.csv
+      summary.json
+    trials/
+      default/
+      eta_x_half/
+      ...
+    plots/                 # only when summary plotting is enabled
+```
+
+Important note on `state_init` in Phase 2b:
+
+- `state_init` is not treated as a tiny numeric tweak
+- it affects the full predictive-coding run path
+- that includes hidden-state initialization during training inference and during prediction/eval inference
+
+For `trial_table.csv`, the numeric delta columns are raw subtractions from the default PC trial:
+
+- `primary_metric_delta_vs_default = trial_primary_metric_value - default_primary_metric_value`
+- `final_pre_update_energy_delta_vs_default = trial_final_pre_update_energy - default_final_pre_update_energy`
+- for `mse`, a negative `primary_metric_delta_vs_default` means the trial improved on the default
+
+## Frozen reference point
+
+The repository's frozen pre-Phase-2 baseline remains the `phase1_5-stable` tag:
 
 - the baseline predictive-coding math is frozen
 - the current toy benchmarks and output schemas are frozen
 - repository hygiene now assumes generated outputs, egg-info, caches, and temporary artifacts are not versioned
-- the next planned work should start with a narrow Phase 2 comparison against a standard MLP baseline
+- the current Phase 2 branch builds a minimal MLP comparison path on top of that frozen baseline
 
 ## A note on predictive coding variants
 
