@@ -19,12 +19,14 @@ Current scope:
 - NumPy-only predictive coding baseline
 - structured outputs under `outputs/`
 - toy regression, sine regression, and blobs classification benchmarks
+- Phase 2 comparison runs against a minimal standard MLP baseline
+- narrow Phase 2b PC sensitivity studies on the regression toy benchmarks
 
 Not included yet:
 
-- baseline MLP comparison
 - CNN/RNN/temporal PC
 - MNIST-scale experiments
+- generic hyperparameter tuning frameworks or large search grids
 
 ## Read order for Codex and human contributors
 
@@ -206,6 +208,23 @@ Phase 2a adds a minimal standard-MLP comparison script:
 & 'D:\Anaconda\envs\pc\python.exe' experiments/compare_pc_vs_mlp.py
 ```
 
+Phase 2b adds a narrow predictive-coding sensitivity script:
+
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py toy_regression
+```
+
+The first Phase 2b pass stays intentionally small:
+
+- only `toy_regression` and `toy_sine_regression`
+- only one-at-a-time PC trials around the current default
+- only the current PC knobs:
+  - `eta_x`
+  - `eta_w` with `eta_b = eta_w`
+  - `train_steps` with `eval_steps = train_steps`
+  - `state_init`
+
 The first MLP classification baseline stays intentionally narrow:
 
 - it uses the same toy one-hot targets as the current PC benchmark
@@ -217,6 +236,38 @@ For Phase 2 comparison summaries, `primary_metric_difference_mlp_minus_pc` alway
 - `mlp_primary_metric_value - pc_primary_metric_value`
 - for `accuracy`, a positive value means the MLP is better
 - for `mse`, a negative value means the MLP is better because lower is better
+
+Phase 2b sensitivity outputs follow the existing repository style:
+
+```text
+outputs/
+  pc_sensitivity_<benchmark>/
+    base_pc_config.json
+    candidate_grid.json
+    trial_table.csv
+    aggregate_summary.json
+    mlp_reference/
+      config.json
+      epoch_metrics.csv
+      summary.json
+    trials/
+      default/
+      eta_x_half/
+      ...
+    plots/                 # only when summary plotting is enabled
+```
+
+Important note on `state_init` in Phase 2b:
+
+- `state_init` is not treated as a tiny numeric tweak
+- it affects the full predictive-coding run path
+- that includes hidden-state initialization during training inference and during prediction/eval inference
+
+For `trial_table.csv`, the numeric delta columns are raw subtractions from the default PC trial:
+
+- `primary_metric_delta_vs_default = trial_primary_metric_value - default_primary_metric_value`
+- `final_pre_update_energy_delta_vs_default = trial_final_pre_update_energy - default_final_pre_update_energy`
+- for `mse`, a negative `primary_metric_delta_vs_default` means the trial improved on the default
 
 ## Frozen reference point
 
