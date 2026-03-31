@@ -21,6 +21,8 @@ Current scope:
 - toy regression, sine regression, and blobs classification benchmarks
 - Phase 2 comparison runs against a minimal standard MLP baseline
 - narrow Phase 2b PC sensitivity studies on the regression toy benchmarks
+- narrow Phase 2c multi-seed aggregate studies on the regression toy benchmarks
+- narrow Phase 2d diagnostic studies on the regression toy benchmarks
 
 Not included yet:
 
@@ -215,6 +217,20 @@ Phase 2b adds a narrow predictive-coding sensitivity script:
 & 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py toy_regression
 ```
 
+Phase 2c adds a narrow multi-seed aggregate script:
+
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_multiseed.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_multiseed.py toy_regression
+```
+
+Phase 2d adds a narrow diagnostic script for understanding the tuned-PC vs MLP gap:
+
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_diagnostics.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_diagnostics.py toy_regression
+```
+
 The first Phase 2b pass stays intentionally small:
 
 - only `toy_regression` and `toy_sine_regression`
@@ -268,6 +284,68 @@ For `trial_table.csv`, the numeric delta columns are raw subtractions from the d
 - `primary_metric_delta_vs_default = trial_primary_metric_value - default_primary_metric_value`
 - `final_pre_update_energy_delta_vs_default = trial_final_pre_update_energy - default_final_pre_update_energy`
 - for `mse`, a negative `primary_metric_delta_vs_default` means the trial improved on the default
+
+Phase 2c keeps the seed policy small and explicit:
+
+- default benchmarks:
+  - `toy_regression`: `[0, 1, 2, 3, 4]`
+  - `toy_sine_regression`: `[3, 4, 5, 6, 7]`
+- `data_seed` stays fixed at the benchmark default
+- `run_seed` and `model_init_seed` vary together
+- this phase therefore mainly measures initialization stability, not dataset sampling variability
+
+Phase 2c outputs follow the existing repository style:
+
+```text
+outputs/
+  pc_multiseed_<benchmark>/
+    study_config.json
+    seed_records.csv
+    aggregate_summary.json
+    seeds/
+      seed_0000/
+        default_pc/
+        tuned_pc/
+        mlp/
+    plots/                 # only when summary plotting is enabled
+```
+
+For `seed_records.csv`, the pairwise comparison fields mean:
+
+- `primary_metric_delta_tuned_pc_minus_default_pc = tuned_pc_metric - default_pc_metric`
+- `primary_metric_delta_mlp_minus_tuned_pc = mlp_metric - tuned_pc_metric`
+- `tuned_pc_beats_default_pc` and `tuned_pc_beats_mlp` respect the current metric direction
+- for `mse`, `True` means the tuned PC metric is lower
+
+Phase 2d diagnostics also keep the repository style small and explicit:
+
+```text
+outputs/
+  pc_diagnostics_<benchmark>/
+    study_config.json
+    seed_records.csv
+    epoch_records.csv
+    epoch_summary.csv
+    diagnostic_summary.json
+    seeds/
+      seed_0000/
+        default_pc/
+        tuned_pc/
+        tuned_pc_budget2x/
+        mlp/
+    plots/                 # only when summary plotting is enabled
+```
+
+Important Phase 2d notes:
+
+- `default_pc` and `tuned_pc` are the main PC variants
+- `tuned_pc_budget2x` is only a budget diagnostic branch, not a new main comparison model
+- `mlp` is the MLP reference
+- Pearson correlations in `diagnostic_summary.json` are computed on the aggregated epoch-level mean curves for each benchmark and PC variant, not on pooled `seed x epoch` rows
+- `final_minus_best_metric = final_metric - best_metric`
+- for the current regression tasks with `mse`, `final_minus_best_metric` should be non-negative
+- values closer to zero mean less late-epoch degradation from the best epoch
+- the default Phase 2d seed sets still keep `data_seed` fixed while `run_seed` and `model_init_seed` vary together, so this phase mainly measures initialization stability rather than dataset sampling variability
 
 ## Frozen reference point
 
