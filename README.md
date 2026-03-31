@@ -14,6 +14,13 @@ Current stable milestone:
   - default: `single_dir`
   - optional archival mode: `run_id_subdir`
 
+Current status split:
+
+- Stable infrastructure phases: Phase 0, Phase 1, and Phase 1.5
+- Experimental findings phases: Phase 2a through Phase 2e
+- The current Phase 2 freeze summary lives in `RESULTS.md`
+- Current stable regression conclusion: tuned PC beats default PC on both regression toy benchmarks, still trails MLP, and benefits from larger inference budgets with diminishing returns
+
 Current scope:
 
 - NumPy-only predictive coding baseline
@@ -23,6 +30,7 @@ Current scope:
 - narrow Phase 2b PC sensitivity studies on the regression toy benchmarks
 - narrow Phase 2c multi-seed aggregate studies on the regression toy benchmarks
 - narrow Phase 2d diagnostic studies on the regression toy benchmarks
+- narrow Phase 2e tuned-PC budget tradeoff studies on the regression toy benchmarks
 
 Not included yet:
 
@@ -231,6 +239,13 @@ Phase 2d adds a narrow diagnostic script for understanding the tuned-PC vs MLP g
 & 'D:\Anaconda\envs\pc\python.exe' experiments/pc_diagnostics.py toy_regression
 ```
 
+Phase 2e adds a narrow tuned-PC budget tradeoff script:
+
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_budget_tradeoff.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_budget_tradeoff.py toy_regression
+```
+
 The first Phase 2b pass stays intentionally small:
 
 - only `toy_regression` and `toy_sine_regression`
@@ -346,6 +361,33 @@ Important Phase 2d notes:
 - for the current regression tasks with `mse`, `final_minus_best_metric` should be non-negative
 - values closer to zero mean less late-epoch degradation from the best epoch
 - the default Phase 2d seed sets still keep `data_seed` fixed while `run_seed` and `model_init_seed` vary together, so this phase mainly measures initialization stability rather than dataset sampling variability
+
+Phase 2e keeps the repository style narrow and explicit:
+
+```text
+outputs/
+  pc_budget_tradeoff_<benchmark>/
+    study_config.json
+    seed_budget_records.csv
+    budget_summary.csv
+    aggregate_summary.json
+    seeds/
+      seed_0000/
+        tuned_pc_1x/
+        tuned_pc_2x/
+        tuned_pc_4x/
+        mlp/
+    plots/                 # only when summary plotting is enabled
+```
+
+Important Phase 2e notes:
+
+- Phase 2e is not a wall-clock- or FLOP-matched efficiency comparison
+- it is a tuned-PC inference-budget vs performance study with MLP as a fixed reference
+- `tuned_pc_1x`, `tuned_pc_2x`, and `tuned_pc_4x` are the only tuned-PC budget variants
+- `mlp` is a fixed reference line and is not part of the tuned-PC budget axis
+- `budget = inference step count`, not runtime or hardware efficiency
+- the default Phase 2e seed sets keep `data_seed` fixed while `run_seed` and `model_init_seed` vary together, so this phase still mainly measures initialization stability rather than dataset sampling variability
 
 ## Frozen reference point
 
