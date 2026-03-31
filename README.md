@@ -192,7 +192,7 @@ Notes on the saved artifacts:
 
 ## Benchmark commands
 
-With the `pc` environment active, the Phase 1 toy benchmarks are:
+With the `pc` environment active, the existing PC toy benchmarks are:
 
 ```powershell
 & 'D:\Anaconda\envs\pc\python.exe' experiments/toy_regression.py
@@ -200,14 +200,32 @@ With the `pc` environment active, the Phase 1 toy benchmarks are:
 & 'D:\Anaconda\envs\pc\python.exe' experiments/toy_blobs_classification.py
 ```
 
-## Current freeze state
+Phase 2a adds a minimal standard-MLP comparison script:
 
-The repository is currently frozen at the end of Phase 1.5:
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/compare_pc_vs_mlp.py
+```
+
+The first MLP classification baseline stays intentionally narrow:
+
+- it uses the same toy one-hot targets as the current PC benchmark
+- it trains with mean squared error averaged over all output elements
+- it is still evaluated with argmax accuracy
+
+For Phase 2 comparison summaries, `primary_metric_difference_mlp_minus_pc` always means:
+
+- `mlp_primary_metric_value - pc_primary_metric_value`
+- for `accuracy`, a positive value means the MLP is better
+- for `mse`, a negative value means the MLP is better because lower is better
+
+## Frozen reference point
+
+The repository's frozen pre-Phase-2 baseline remains the `phase1_5-stable` tag:
 
 - the baseline predictive-coding math is frozen
 - the current toy benchmarks and output schemas are frozen
 - repository hygiene now assumes generated outputs, egg-info, caches, and temporary artifacts are not versioned
-- the next planned work should start with a narrow Phase 2 comparison against a standard MLP baseline
+- the current Phase 2 branch builds a minimal MLP comparison path on top of that frozen baseline
 
 ## A note on predictive coding variants
 
