@@ -116,7 +116,236 @@ Establish stronger confidence that the implementation behaves as intended.
 
 ---
 
+## Phase 2f — Generalization-aware evaluation and joint tuning
+
+Status:
+
+- Completed as a protocol-hardening phase
+- Superseded for final comparative claims by the fairer Phase 2g matched-search workflow
+
+### Goal
+
+Reduce methodological confounds in the current Phase 2 conclusions by introducing a small, explicit evaluation protocol that separates tuning from final comparison.
+
+### Scope
+
+- keep the current NumPy-only PC baseline and current minimal MLP baseline
+- keep the current toy benchmarks as the immediate evaluation domain
+- add explicit train / validation / final-eval protocol support for benchmark comparisons
+- support small fixed joint tuning for both PC and MLP under the same evaluation rules
+- refresh downstream PC-vs-MLP comparison artifacts using the new protocol
+- keep search spaces narrow and deterministic
+- do not introduce a generic tuning framework or change the baseline math
+
+### Deliverables
+
+- split-aware benchmark protocol definitions for the current comparison tasks
+- a small joint-tuning runner that can evaluate both PC and MLP under the same protocol
+- refreshed comparison summaries produced from the new protocol rather than single fixed settings alone
+- documentation of the exact tuning budget, validation criterion, and final evaluation rule
+- regression tests for artifact generation, protocol correctness, and deterministic behavior
+
+### Exit criteria
+
+- the repository can run a reproducible comparison with explicit tuning and held-out final evaluation
+- PC and MLP are both tuned under the same narrow, documented protocol
+- refreshed comparison outputs clearly separate:
+  - tuning criterion
+  - selected configuration
+  - final evaluation metric
+- the resulting conclusions are traceable to saved artifacts rather than single-run defaults
+
+### Risks
+
+- expanding the scope into a generic experiment-management or search framework
+- creating data leakage between tuning and final evaluation
+- overfitting conclusions to tiny validation splits on the current toy benchmarks
+- interpreting better protocol discipline as evidence of a new model capability
+
+### Initial implementation plan
+
+Files likely to touch:
+
+- `PLANS.md`
+- `README.md`
+- `RESULTS.md`
+- `src/pc/benchmark_specs.py`
+- `src/pc/comparison.py`
+- `src/pc/pc_multiseed.py`
+- one new narrow protocol module such as `src/pc/evaluation_protocol.py`
+- one new narrow runner such as `src/pc/joint_tuning.py`
+- one new experiment entry script such as `experiments/joint_tuning_compare.py`
+- focused tests for protocol and artifact generation
+
+Tests that should verify success:
+
+- deterministic split generation under fixed seeds
+- artifact generation for the new protocol runner
+- protocol correctness:
+  - validation metric is used for model/config selection
+  - final evaluation metric is written separately
+- metric-direction correctness when selecting the best tuned configuration
+- reproducibility across repeated runs with the same explicit seeds
+
+Assumptions:
+
+- Phase 0 predictive-coding math remains unchanged
+- the immediate Phase 2f target is methodology, not a new model family
+- the current toy benchmarks are still useful as a first-pass protocol testbed
+- any search space must remain small, explicit, and comparable across PC and MLP
+
+---
+
+## Phase 2g — Matched validation-selected PC/MLP search
+
+Status:
+
+- Completed as the current end-of-Phase-2 comparison protocol
+- Current strongest repository-level comparison claims should be grounded in the Phase 2g matched-search artifacts together with the Phase 2g.1 closure pass and downstream refreshes, rather than earlier train-only or train/eval-style conclusions
+
+### Goal
+
+Make the PC-vs-MLP comparison fairer by giving both baselines matched small-scope tuning, selecting configurations on validation performance, and reporting the headline result on held-out test performance.
+
+### Scope
+
+- keep the NumPy-only predictive-coding baseline and current minimal MLP baseline
+- keep the existing toy benchmarks as the current experimental domain
+- keep the Phase 2f train/val/test protocol
+- add a deterministic small PC search space
+- add a deterministic small MLP search space
+- refresh downstream multiseed and budget-tradeoff studies so they consume the selected Phase 2g PC and MLP configs
+- keep search spaces modest, explicit, and interpretable
+- do not introduce a generic HPO framework or alter the baseline math
+
+### Deliverables
+
+- a matched-search runner that searches both PC and MLP on the same protocol
+- per-benchmark best-config summaries for PC and MLP
+- aggregate matched-search artifacts that explicitly separate:
+  - selection metric source
+  - final report metric source
+  - selected PC config
+  - selected MLP config
+  - held-out test winner
+- refreshed multiseed studies for the selected Phase 2g configs
+- refreshed budget-tradeoff studies sourced from the selected Phase 2g PC and MLP configs
+- documentation updates that distinguish:
+  - legacy Phase 2 conclusions
+  - Phase 2f conclusions
+  - Phase 2g conclusions
+  - Phase 2g.1 conclusions
+
+### Exit criteria
+
+- PC and MLP are both tuned under a small matched validation-selected search
+- best-config selection is driven by `val_metric`, not `test_metric`
+- final headline comparisons are reported on held-out `test_metric`
+- downstream multiseed and budget studies use the selected Phase 2g configs
+- artifacts make it immediately obvious:
+  - how configs were selected
+  - which split determined selection
+  - which split determined the final headline result
+  - which PC and MLP configs were selected
+  - how they compare on held-out test
+
+### Risks
+
+- overclaiming from simple toy benchmarks
+- finite search spaces being mistaken for exhaustive tuning
+- single-seed search selection overstating robustness of the chosen configs
+- mixing legacy, Phase 2f, and Phase 2g outputs when interpreting conclusions
+- reading budget-tradeoff results as wall-clock efficiency evidence rather than inference-budget evidence
+
+### Current takeaway
+
+- `toy_regression`: the matched-tuned PC baseline beats the matched-tuned MLP baseline on held-out test and remains ahead across the current multi-seed check
+- `toy_sine_regression`: the matched-tuned MLP baseline beats the matched-tuned PC baseline on held-out test and remains ahead on most seeds in the current multi-seed check
+- extra PC inference budget no longer helps on `toy_regression`
+- extra PC inference budget helps partially on `toy_sine_regression`, but the best current budget still trails the selected MLP baseline on held-out test
+- local output-retention policy should treat the Phase 2g matched-search and refreshed downstream artifacts as the default retained evidence set; older generated outputs can be regenerated if needed
+
+---
+
+## Phase 2g.1 — Local boundary-check closure pass
+
+Status:
+
+- Completed as a small closure check on search-space truncation risk
+- Phase 2 is now considered methodologically stable enough to proceed to Phase 3
+- The best-known Phase 2 evidence chain now consists of:
+  - Phase 2g matched PC/MLP selection
+  - Phase 2g.1 local boundary extension
+  - Phase 2g.1-refreshed downstream multiseed and budget-tradeoff studies
+- Remaining caveat: Phase 2 is not search-exhaustive and should not be described as globally saturated
+
+### Goal
+
+Test whether the current Phase 2g headline conclusions are materially changed by a small local extension beyond the matched-search boundaries.
+
+### Scope
+
+- keep the full Phase 2g train/val/test protocol unchanged
+- keep benchmark definitions unchanged
+- keep the matched-search conclusion as the baseline reference point
+- add only a compact local neighborhood around the current Phase 2g best configs
+- probe boundary-hit dimensions without exploding into a new full Cartesian HPO stage
+
+### Deliverables
+
+- a small `phase2g1_boundary_check` runner
+- per-benchmark artifacts that record:
+  - previous Phase 2g best PC config and metrics
+  - previous Phase 2g best MLP config and metrics
+  - boundary-check best PC config and metrics
+  - boundary-check best MLP config and metrics
+  - whether the held-out test headline changed
+  - whether the boundary-check best configs moved outside the old search bounds
+- documentation updates stating whether the benchmark-level winners survived the closure pass
+
+### Exit criteria
+
+- local boundary extensions are evaluated under the same rules:
+  - selection by validation
+  - headline reporting by held-out test
+- the artifacts make it obvious whether the prior benchmark-level conclusion changed
+- the repository has an explicit answer to:
+  - did the prior Phase 2g headline survive the boundary check?
+  - which benchmark is still boundary-sensitive?
+  - is Phase 2 stable enough to move on?
+
+### Risks
+
+- interpreting a local closure pass as exhaustive search coverage
+- understating residual boundary sensitivity because the local neighborhood is still finite
+- confusing “winner survived the check” with “best possible config has been found”
+
+### Current takeaway
+
+- `toy_regression`:
+  - the held-out test winner remained `PC`
+  - both PC and MLP improved when allowed a small extension beyond the old bounds
+  - the headline conclusion survived
+  - the refined downstream multiseed and budget-tradeoff outputs remained aligned with that winner
+- `toy_sine_regression`:
+  - the held-out test winner remained `MLP`
+  - both PC and MLP improved under the local extension
+  - the headline conclusion survived
+  - the refined downstream multiseed and budget-tradeoff outputs remained aligned with that winner
+- both benchmarks remain boundary-sensitive in the narrow sense that selected best configs moved beyond the old search edges
+- nonetheless, the benchmark-level winners did not flip, so Phase 2 is stable enough to proceed to Phase 3 as long as the remaining caveats stay explicit
+
+---
+
 ## Phase 3 — Real dataset baseline
+
+Status:
+
+- Next active phase
+- Should inherit the Phase 2g / 2g.1 protocol discipline:
+  - explicit train / val / test separation
+  - matched small-scope tuning where comparison baselines are involved
+  - held-out test for final headline reporting
 
 ### Goal
 

@@ -10,10 +10,29 @@ from typing import Any, Sequence
 
 import numpy as np
 
-from .benchmark_specs import PCTrainingSpec, ToyBenchmarkSpec, get_benchmark_spec, run_pc_benchmark
+from .benchmark_specs import (
+    MLPTrainingSpec,
+    PCTrainingSpec,
+    ToyBenchmarkSpec,
+    get_benchmark_spec,
+    run_pc_benchmark,
+)
 from .experiment import OutputLayout
 from .metrics import metric_higher_is_better
-from .pc_multiseed import default_seed_values_for_benchmark, get_phase2c_tuned_pc_training
+from .pc_multiseed import (
+    MLPSelection,
+    PHASE2_MLP_SOURCE_DEFAULT,
+    PHASE2_MLP_SOURCE_PHASE2G,
+    PHASE2_MLP_SOURCE_PHASE2G1,
+    PHASE2_TUNED_SOURCE_LEGACY,
+    PHASE2_TUNED_SOURCE_PHASE2F,
+    PHASE2_TUNED_SOURCE_PHASE2G,
+    PHASE2_TUNED_SOURCE_PHASE2G1,
+    TunedPCSelection,
+    default_seed_values_for_benchmark,
+    resolve_mlp_selection,
+    resolve_tuned_pc_selection,
+)
 from .utils import set_seed
 
 PHASE2E_BENCHMARK_NAMES = (
@@ -55,13 +74,72 @@ def _resolve_run_id(run_id: str | None) -> str:
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 
+def _tradeoff_experiment_name(
+    benchmark_name: str,
+    *,
+    tuned_source: str,
+    mlp_source: str,
+) -> str:
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_LEGACY
+        and mlp_source == PHASE2_MLP_SOURCE_DEFAULT
+    ):
+        return f"pc_budget_tradeoff_{benchmark_name}"
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_PHASE2F
+        and mlp_source == PHASE2_MLP_SOURCE_DEFAULT
+    ):
+        return f"pc_budget_tradeoff_phase2f_{benchmark_name}"
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_PHASE2G
+        and mlp_source == PHASE2_MLP_SOURCE_PHASE2G
+    ):
+        return f"pc_budget_tradeoff_phase2g_{benchmark_name}"
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_PHASE2G1
+        and mlp_source == PHASE2_MLP_SOURCE_PHASE2G1
+    ):
+        return f"pc_budget_tradeoff_phase2g1_{benchmark_name}"
+    return f"pc_budget_tradeoff_custom_{benchmark_name}"
+
+
+def _tradeoff_phase_label(*, tuned_source: str, mlp_source: str) -> str:
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_LEGACY
+        and mlp_source == PHASE2_MLP_SOURCE_DEFAULT
+    ):
+        return "Phase 2e"
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_PHASE2F
+        and mlp_source == PHASE2_MLP_SOURCE_DEFAULT
+    ):
+        return "Phase 2e-refresh"
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_PHASE2G
+        and mlp_source == PHASE2_MLP_SOURCE_PHASE2G
+    ):
+        return "Phase 2g-budget-refresh"
+    if (
+        tuned_source == PHASE2_TUNED_SOURCE_PHASE2G1
+        and mlp_source == PHASE2_MLP_SOURCE_PHASE2G1
+    ):
+        return "Phase 2g.1-budget-refresh"
+    return "Phase 2e-refresh-custom"
+
+
 def _resolve_tradeoff_root(
     output_root: str | Path,
     benchmark_name: str,
     run_id: str,
     output_layout: OutputLayout,
+    tuned_source: str,
+    mlp_source: str,
 ) -> Path:
-    experiment_name = f"pc_budget_tradeoff_{benchmark_name}"
+    experiment_name = _tradeoff_experiment_name(
+        benchmark_name,
+        tuned_source=tuned_source,
+        mlp_source=mlp_source,
+    )
     if output_layout == "single_dir":
         return Path(output_root) / experiment_name
     if output_layout == "run_id_subdir":
@@ -150,9 +228,27 @@ def _write_mlp_epoch_metrics(
     fieldnames.extend([f"weight_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     fieldnames.extend([f"bias_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     if task_name == "regression":
-        fieldnames.extend(["mse", "baseline_mse"])
+        fieldnames.extend(
+            [
+                "train_mse",
+                "val_mse",
+                "train_baseline_mse",
+                "val_baseline_mse",
+                "mse",
+                "baseline_mse",
+            ]
+        )
     elif task_name == "classification":
-        fieldnames.extend(["accuracy", "baseline_accuracy"])
+        fieldnames.extend(
+            [
+                "train_accuracy",
+                "val_accuracy",
+                "train_baseline_accuracy",
+                "val_baseline_accuracy",
+                "accuracy",
+                "baseline_accuracy",
+            ]
+        )
     else:
         raise ValueError(f"Unsupported task '{task_name}'.")
 
@@ -191,6 +287,52 @@ def _compare_metric_values(metric_name: str, left_value: float, right_value: flo
     return "left" if left_value < right_value else "right"
 
 
+def _headline_test_comparison(
+    *,
+    metric_name: str,
+    pc_value: float | None,
+    mlp_value: float | None,
+    comparison_target: str,
+) -> dict[str, Any]:
+    if pc_value is None or mlp_value is None:
+        return {
+            "headline_test_comparison_target": comparison_target,
+            "headline_test_comparison_split": "test",
+            "headline_test_winner": None,
+            "headline_test_winner_reason": None,
+            "headline_test_pc_metric_mean": pc_value,
+            "headline_test_mlp_metric_mean": mlp_value,
+            "headline_test_metric_difference_mlp_minus_pc": None,
+            "headline_test_pc_beats_mlp": None,
+        }
+
+    comparison = _compare_metric_values(metric_name, pc_value, mlp_value)
+    if comparison == "left":
+        winner = "pc"
+    elif comparison == "right":
+        winner = "mlp"
+    else:
+        winner = "tie"
+
+    if comparison == "tie":
+        reason = "metrics_equal_within_tolerance"
+    elif metric_higher_is_better(metric_name):
+        reason = f"higher_is_better: {winner}_metric_mean is larger on held-out test"
+    else:
+        reason = f"lower_is_better: {winner}_metric_mean is smaller on held-out test"
+
+    return {
+        "headline_test_comparison_target": comparison_target,
+        "headline_test_comparison_split": "test",
+        "headline_test_winner": winner,
+        "headline_test_winner_reason": reason,
+        "headline_test_pc_metric_mean": pc_value,
+        "headline_test_mlp_metric_mean": mlp_value,
+        "headline_test_metric_difference_mlp_minus_pc": mlp_value - pc_value,
+        "headline_test_pc_beats_mlp": winner == "pc",
+    }
+
+
 def _training_dict(training: PCTrainingSpec, *, epochs: int) -> dict[str, Any]:
     return {
         "epochs": epochs,
@@ -225,6 +367,8 @@ def _seeded_spec(
     *,
     seed: int,
     pc_training: PCTrainingSpec | None = None,
+    mlp_training: MLPTrainingSpec | None = None,
+    epochs: int | None = None,
 ) -> ToyBenchmarkSpec:
     return replace(
         base_spec,
@@ -232,6 +376,8 @@ def _seeded_spec(
         model_init_seed=seed,
         data_seed=base_spec.data_seed,
         pc_training=base_spec.pc_training if pc_training is None else pc_training,
+        mlp_training=base_spec.mlp_training if mlp_training is None else mlp_training,
+        epochs=base_spec.epochs if epochs is None else epochs,
     )
 
 
@@ -268,8 +414,7 @@ def _mlp_config_payload(
     run_id: str,
     output_root: str | Path,
     output_layout: OutputLayout,
-    x: np.ndarray,
-    y: np.ndarray,
+    split,
 ) -> dict[str, Any]:
     return {
         "experiment_name": "mlp",
@@ -284,7 +429,7 @@ def _mlp_config_payload(
             "model_init_seed": spec.model_init_seed,
         },
         "task": spec.task_config(),
-        "data": spec.data_config(x, y),
+        "data": spec.data_config(split),
         "model": spec.mlp_model_config(),
         "training": {
             "epochs": spec.epochs,
@@ -308,21 +453,30 @@ def _run_mlp_variant(
     variant_dir: Path,
     run_id: str,
     output_layout: OutputLayout,
-    x: np.ndarray,
-    y: np.ndarray,
+    split,
 ) -> tuple[Path, list[dict[str, Any]], dict[str, Any]]:
     variant_dir.mkdir(parents=True, exist_ok=True)
     set_seed(spec.run_seed)
     model = spec.build_mlp_model()
-    config_payload = _mlp_config_payload(spec, run_id, variant_dir.parent, output_layout, x, y)
+    config_payload = _mlp_config_payload(spec, run_id, variant_dir.parent, output_layout, split)
     _write_json(variant_dir / "config.json", config_payload)
 
-    baseline_metric_value = spec.baseline_metric_fn(y)
+    x_train = split.x_train
+    y_train = split.y_train
+    x_val = split.x_val
+    y_val = split.y_val
+    x_test = split.x_test
+    y_test = split.y_test
+    train_baseline_metric_value = spec.baseline_metric_fn(y_train)
+    val_baseline_metric_value = spec.baseline_metric_fn(y_val)
+    test_baseline_metric_value = spec.baseline_metric_fn(y_test)
     epoch_rows: list[dict[str, Any]] = []
     for epoch in range(1, spec.epochs + 1):
-        batch_result = model.train_batch(x, y)
-        predictions = model.predict(x)
-        primary_metric_value = spec.primary_metric_fn(predictions, y)
+        batch_result = model.train_batch(x_train, y_train)
+        train_predictions = model.predict(x_train)
+        val_predictions = model.predict(x_val)
+        train_metric_value = spec.primary_metric_fn(train_predictions, y_train)
+        val_metric_value = spec.primary_metric_fn(val_predictions, y_val)
         row: dict[str, Any] = {
             "epoch": epoch,
             "loss": batch_result.loss,
@@ -332,15 +486,25 @@ def _run_mlp_variant(
         for layer_index, value in enumerate(batch_result.parameter_norms["bias_norms"], start=1):
             row[f"bias_norm_l{layer_index}"] = value
         if spec.task_name == "regression":
-            row["mse"] = primary_metric_value
-            row["baseline_mse"] = baseline_metric_value
+            row["train_mse"] = train_metric_value
+            row["val_mse"] = val_metric_value
+            row["train_baseline_mse"] = train_baseline_metric_value
+            row["val_baseline_mse"] = val_baseline_metric_value
+            row["mse"] = val_metric_value
+            row["baseline_mse"] = val_baseline_metric_value
         elif spec.task_name == "classification":
-            row["accuracy"] = primary_metric_value
-            row["baseline_accuracy"] = baseline_metric_value
+            row["train_accuracy"] = train_metric_value
+            row["val_accuracy"] = val_metric_value
+            row["train_baseline_accuracy"] = train_baseline_metric_value
+            row["val_baseline_accuracy"] = val_baseline_metric_value
+            row["accuracy"] = val_metric_value
+            row["baseline_accuracy"] = val_baseline_metric_value
         else:
             raise ValueError(f"Unsupported task '{spec.task_name}'.")
         epoch_rows.append(row)
 
+    test_predictions = model.predict(x_test)
+    test_metric_value = spec.primary_metric_fn(test_predictions, y_test)
     best_row = (
         max(epoch_rows, key=lambda row: row[spec.primary_metric_name])
         if spec.primary_metric_higher_is_better
@@ -363,12 +527,27 @@ def _run_mlp_variant(
         },
         "final_epoch": final_row["epoch"],
         "final_loss": final_row["loss"],
+        "metric_name": spec.primary_metric_name,
+        "metric_higher_is_better": spec.primary_metric_higher_is_better,
+        "train_metric": final_row[f"train_{spec.primary_metric_name}"],
+        "val_metric": final_row[f"val_{spec.primary_metric_name}"],
+        "test_metric": test_metric_value,
+        "eval_metric": final_row[f"val_{spec.primary_metric_name}"],
         "primary_metric_name": spec.primary_metric_name,
-        "primary_metric_value": final_row[spec.primary_metric_name],
+        "primary_metric_value": test_metric_value,
         "primary_metric_higher_is_better": spec.primary_metric_higher_is_better,
+        "selection_metric_source": "val_metric",
+        "selection_metric_value": final_row[f"val_{spec.primary_metric_name}"],
+        "report_metric_source": "test_metric",
+        "report_metric_value": test_metric_value,
         "baseline_metric_name": spec.baseline_metric_name,
-        "baseline_metric_value": baseline_metric_value,
+        "train_baseline_metric": train_baseline_metric_value,
+        "val_baseline_metric": val_baseline_metric_value,
+        "test_baseline_metric": test_baseline_metric_value,
+        "eval_baseline_metric": val_baseline_metric_value,
+        "baseline_metric_value": test_baseline_metric_value,
         "best_epoch": best_row["epoch"],
+        "best_val_metric": best_row[f"val_{spec.primary_metric_name}"],
     }
     _write_mlp_epoch_metrics(
         variant_dir / "epoch_metrics.csv",
@@ -408,20 +587,43 @@ def _metric_improvement_amount(metric_name: str, old_value: float, new_value: fl
     return old_value - new_value
 
 
+def _combined_config_source(*, tuned_source: str, mlp_source: str) -> str:
+    if tuned_source == mlp_source:
+        return tuned_source
+    return "mixed_config_sources"
+
+
 def _build_study_config(
     base_spec: ToyBenchmarkSpec,
     *,
     run_id: str,
     output_layout: OutputLayout,
     seed_values: Sequence[int],
+    tuned_selection: TunedPCSelection,
+    mlp_selection: MLPSelection,
+    split,
 ) -> dict[str, Any]:
-    tuned_training = get_phase2c_tuned_pc_training(base_spec.benchmark_name)
+    tuned_training = tuned_selection.pc_training
+    experiment_name = _tradeoff_experiment_name(
+        base_spec.benchmark_name,
+        tuned_source=tuned_selection.source,
+        mlp_source=mlp_selection.source,
+    )
     return {
-        "experiment_name": f"pc_budget_tradeoff_{base_spec.benchmark_name}",
+        "experiment_name": experiment_name,
         "run_id": run_id,
-        "phase": "Phase 2e",
+        "phase": _tradeoff_phase_label(
+            tuned_source=tuned_selection.source,
+            mlp_source=mlp_selection.source,
+        ),
         "benchmark_name": base_spec.benchmark_name,
         "task_name": base_spec.task_name,
+        "config_source": _combined_config_source(
+            tuned_source=tuned_selection.source,
+            mlp_source=mlp_selection.source,
+        ),
+        "selected_by_metric_source": "val_metric",
+        "final_report_metric_source": "test_metric",
         "seed_values": [int(seed) for seed in seed_values],
         "seed_semantics": {
             "data_seed": "fixed",
@@ -430,12 +632,28 @@ def _build_study_config(
             "notes": "This phase mainly measures initialization stability rather than dataset sampling variability.",
         },
         "data_seed_fixed": base_spec.data_seed,
-        "tuned_pc_base_training": _training_dict(tuned_training, epochs=base_spec.epochs),
+        "data": base_spec.data_config(split),
+        "tuned_pc_source": tuned_selection.source,
+        "tuned_pc_preset_name": tuned_selection.name,
+        "tuned_pc_selection_config_id": tuned_selection.selection_config_id,
+        "tuned_pc_selection_run_id": tuned_selection.selection_run_id,
+        "tuned_pc_selection_val_metric": tuned_selection.selection_val_metric,
+        "tuned_pc_selection_test_metric": tuned_selection.selection_test_metric,
+        "tuned_pc_selection_eval_metric": tuned_selection.selection_eval_metric,
+        "tuned_pc_selection_artifact_path": tuned_selection.selection_artifact_path,
+        "tuned_pc_base_training": _training_dict(tuned_training, epochs=tuned_selection.epochs),
         "budget_levels": _budget_levels(tuned_training),
+        "mlp_source": mlp_selection.source,
+        "mlp_preset_name": mlp_selection.name,
+        "mlp_selection_config_id": mlp_selection.selection_config_id,
+        "mlp_selection_run_id": mlp_selection.selection_run_id,
+        "mlp_selection_val_metric": mlp_selection.selection_val_metric,
+        "mlp_selection_test_metric": mlp_selection.selection_test_metric,
+        "mlp_selection_artifact_path": mlp_selection.selection_artifact_path,
         "mlp_training": {
-            "epochs": base_spec.epochs,
-            "eta_w": base_spec.mlp_training.eta_w,
-            "eta_b": base_spec.mlp_training.eta_b,
+            "epochs": mlp_selection.epochs,
+            "eta_w": mlp_selection.mlp_training.eta_w,
+            "eta_b": mlp_selection.mlp_training.eta_b,
         },
         "variant_groups": dict(PHASE2E_VARIANT_GROUPS),
         "budget_definition": "budget = inference step count, not wall-clock or FLOP matching",
@@ -553,6 +771,8 @@ def _build_aggregate_summary(
     seed_values: Sequence[int],
     seed_budget_records: list[dict[str, Any]],
     budget_summary_rows: list[dict[str, Any]],
+    tuned_selection: TunedPCSelection,
+    mlp_selection: MLPSelection,
 ) -> dict[str, Any]:
     tuned_1x = _summary_row_for_variant(budget_summary_rows, "tuned_pc_1x")
     tuned_2x = _summary_row_for_variant(budget_summary_rows, "tuned_pc_2x")
@@ -613,19 +833,64 @@ def _build_aggregate_summary(
         "2x": tuned_2x["final_post_update_energy_mean"],
         "4x": tuned_4x["final_post_update_energy_mean"],
     }
+    headline_test = _headline_test_comparison(
+        metric_name=base_spec.primary_metric_name,
+        pc_value=tuned_1x["primary_metric_mean"],
+        mlp_value=mlp["primary_metric_mean"],
+        comparison_target="selected_pc_1x_vs_selected_mlp",
+    )
 
     return {
-        "experiment_name": f"pc_budget_tradeoff_{base_spec.benchmark_name}",
+        "experiment_name": _tradeoff_experiment_name(
+            base_spec.benchmark_name,
+            tuned_source=tuned_selection.source,
+            mlp_source=mlp_selection.source,
+        ),
         "run_id": run_id,
-        "phase": "Phase 2e",
+        "phase": _tradeoff_phase_label(
+            tuned_source=tuned_selection.source,
+            mlp_source=mlp_selection.source,
+        ),
         "benchmark_name": base_spec.benchmark_name,
         "task_name": base_spec.task_name,
         "primary_metric_name": base_spec.primary_metric_name,
         "primary_metric_higher_is_better": base_spec.primary_metric_higher_is_better,
+        "config_source": _combined_config_source(
+            tuned_source=tuned_selection.source,
+            mlp_source=mlp_selection.source,
+        ),
+        "selected_by_metric_source": "val_metric",
+        "final_report_metric_source": "test_metric",
         "seed_values": [int(seed) for seed in seed_values],
         "variant_groups": dict(PHASE2E_VARIANT_GROUPS),
-        "budget_levels": _budget_levels(get_phase2c_tuned_pc_training(base_spec.benchmark_name)),
+        "budget_levels": _budget_levels(tuned_selection.pc_training),
+        "tuned_pc_source": tuned_selection.source,
+        "tuned_pc_preset_name": tuned_selection.name,
+        "selected_pc_base_config": _training_dict(
+            tuned_selection.pc_training,
+            epochs=tuned_selection.epochs,
+        ),
+        "tuned_pc_selection_config_id": tuned_selection.selection_config_id,
+        "tuned_pc_selection_run_id": tuned_selection.selection_run_id,
+        "tuned_pc_selection_val_metric": tuned_selection.selection_val_metric,
+        "tuned_pc_selection_test_metric": tuned_selection.selection_test_metric,
+        "tuned_pc_selection_eval_metric": tuned_selection.selection_eval_metric,
+        "tuned_pc_selection_artifact_path": tuned_selection.selection_artifact_path,
+        "mlp_source": mlp_selection.source,
+        "mlp_preset_name": mlp_selection.name,
+        "selected_mlp_config": {
+            "epochs": mlp_selection.epochs,
+            "eta_w": mlp_selection.mlp_training.eta_w,
+            "eta_b": mlp_selection.mlp_training.eta_b,
+        },
+        "mlp_selection_config_id": mlp_selection.selection_config_id,
+        "mlp_selection_run_id": mlp_selection.selection_run_id,
+        "mlp_selection_val_metric": mlp_selection.selection_val_metric,
+        "mlp_selection_test_metric": mlp_selection.selection_test_metric,
+        "mlp_selection_artifact_path": mlp_selection.selection_artifact_path,
         "budget_definition": "budget = inference step count, not wall-clock or FLOP matching",
+        "selection_split": "validation",
+        "final_report_split": "test",
         "planned_seed_count": len(seed_values),
         "mlp_success_count": int(mlp["seed_count"]),
         "tuned_pc_1x_success_count": int(tuned_1x["seed_count"]),
@@ -691,12 +956,42 @@ def _build_aggregate_summary(
         "final_pre_update_energy_mean_by_budget": final_pre_update_energy_mean_by_budget,
         "final_post_update_energy_mean_by_budget": final_post_update_energy_mean_by_budget,
         "evidence_of_diminishing_returns": evidence_of_diminishing_returns,
+        **headline_test,
         "tie_rtol": TIE_RTOL,
         "tie_atol": TIE_ATOL,
         "notes": {
             "budget_definition": "This is not a wall-clock- or FLOP-matched efficiency comparison. It studies tuned PC inference budget vs performance with MLP as a fixed reference.",
             "primary_metric_delta_tuned_pc_minus_mlp": "tuned_pc_budget_metric - mlp_metric",
             "gap_to_mlp_for_mse": "For the current regression tasks with MSE, a positive gap means tuned PC is still worse than MLP.",
+            "refresh": (
+                "This run uses the legacy Phase 2c tuned preset and the benchmark-default MLP config."
+                if (
+                    tuned_selection.source == PHASE2_TUNED_SOURCE_LEGACY
+                    and mlp_selection.source == PHASE2_MLP_SOURCE_DEFAULT
+                )
+                else (
+                    "This run uses the best eval-ranked Phase 2f joint-search PC config and the benchmark-default MLP config."
+                    if (
+                        tuned_selection.source == PHASE2_TUNED_SOURCE_PHASE2F
+                        and mlp_selection.source == PHASE2_MLP_SOURCE_DEFAULT
+                    )
+                    else (
+                        "This run uses the Phase 2g matched-search selected PC and MLP configs, with final comparisons reported on held-out test metrics."
+                        if (
+                            tuned_selection.source == PHASE2_TUNED_SOURCE_PHASE2G
+                            and mlp_selection.source == PHASE2_MLP_SOURCE_PHASE2G
+                        )
+                        else (
+                            "This run uses the Phase 2g.1 boundary-check refined PC and MLP configs, with final comparisons reported on held-out test metrics."
+                            if (
+                                tuned_selection.source == PHASE2_TUNED_SOURCE_PHASE2G1
+                                and mlp_selection.source == PHASE2_MLP_SOURCE_PHASE2G1
+                            )
+                            else "This run uses a custom combination of selected PC/MLP configs."
+                        )
+                    )
+                )
+            ),
         },
     }
 
@@ -773,6 +1068,9 @@ def run_pc_budget_tradeoff_study(
     plot_energy: bool = False,
     plot_summary: bool = False,
     seed_values: Sequence[int] | None = None,
+    tuned_source: str = PHASE2_TUNED_SOURCE_PHASE2G1,
+    mlp_source: str | None = None,
+    joint_search_output_root: str | Path = "outputs",
 ) -> PCBudgetTradeoffRunResult:
     """Run the fixed Phase 2e tuned-PC budget tradeoff study for one regression benchmark."""
     if benchmark_name not in PHASE2E_BENCHMARK_NAMES:
@@ -781,6 +1079,26 @@ def run_pc_budget_tradeoff_study(
         )
 
     base_spec = get_benchmark_spec(benchmark_name)
+    split = base_spec.make_dataset_split()
+    resolved_mlp_source = (
+        PHASE2_MLP_SOURCE_PHASE2G1
+        if mlp_source is None and tuned_source == PHASE2_TUNED_SOURCE_PHASE2G1
+        else PHASE2_MLP_SOURCE_PHASE2G
+        if mlp_source is None and tuned_source == PHASE2_TUNED_SOURCE_PHASE2G
+        else PHASE2_MLP_SOURCE_DEFAULT
+        if mlp_source is None
+        else mlp_source
+    )
+    tuned_selection = resolve_tuned_pc_selection(
+        benchmark_name,
+        tuned_source=tuned_source,
+        joint_search_output_root=joint_search_output_root,
+    )
+    mlp_selection = resolve_mlp_selection(
+        benchmark_name,
+        mlp_source=resolved_mlp_source,
+        joint_search_output_root=joint_search_output_root,
+    )
     resolved_run_id = _resolve_run_id(run_id)
     resolved_seed_values = (
         list(seed_values)
@@ -788,18 +1106,27 @@ def run_pc_budget_tradeoff_study(
         else list(default_seed_values_for_benchmark(benchmark_name))
     )
     run_dir = _prepare_run_dir(
-        _resolve_tradeoff_root(output_root, benchmark_name, resolved_run_id, output_layout)
+        _resolve_tradeoff_root(
+            output_root,
+            benchmark_name,
+            resolved_run_id,
+            output_layout,
+            tuned_selection.source,
+            mlp_selection.source,
+        )
     )
     study_config = _build_study_config(
         base_spec,
         run_id=resolved_run_id,
         output_layout=output_layout,
         seed_values=resolved_seed_values,
+        tuned_selection=tuned_selection,
+        mlp_selection=mlp_selection,
+        split=split,
     )
     _write_json(run_dir / "study_config.json", study_config)
 
-    x, y = base_spec.make_data()
-    tuned_base_training = get_phase2c_tuned_pc_training(benchmark_name)
+    tuned_base_training = tuned_selection.pc_training
     tuned_budget_trainings = {
         multiplier: _tuned_budget_training(tuned_base_training, multiplier=multiplier)
         for multiplier in PHASE2E_BUDGET_MULTIPLIERS
@@ -815,7 +1142,12 @@ def run_pc_budget_tradeoff_study(
         for multiplier in PHASE2E_BUDGET_MULTIPLIERS:
             variant = _variant_name_for_multiplier(multiplier)
             training = tuned_budget_trainings[multiplier]
-            spec = _seeded_spec(base_spec, seed=int(seed), pc_training=training)
+            spec = _seeded_spec(
+                base_spec,
+                seed=int(seed),
+                pc_training=training,
+                epochs=tuned_selection.epochs,
+            )
             row: dict[str, Any] = {
                 "seed_index": seed_index,
                 "run_seed": int(seed),
@@ -848,11 +1180,10 @@ def run_pc_budget_tradeoff_study(
                     plot_energy=plot_energy,
                     output_layout="single_dir",
                     experiment_name=variant,
-                    x=x,
-                    y=y,
+                    split=split,
                 )
                 row["status"] = "ok"
-                row["primary_metric_value"] = float(result.summary["primary_metric_value"])
+                row["primary_metric_value"] = float(result.summary["test_metric"])
                 row["final_pre_update_energy"] = float(result.summary["final_pre_update_energy"])
                 row["final_post_update_energy"] = float(result.summary["final_post_update_energy"])
                 row["summary_path"] = _summary_path_for_seed_variant(seed, variant)
@@ -887,18 +1218,22 @@ def run_pc_budget_tradeoff_study(
             "variant_beats_tuned_pc_1x": None,
             "variant_beats_mlp": None,
         }
-        mlp_spec = _seeded_spec(base_spec, seed=int(seed))
+        mlp_spec = _seeded_spec(
+            base_spec,
+            seed=int(seed),
+            mlp_training=mlp_selection.mlp_training,
+            epochs=mlp_selection.epochs,
+        )
         try:
             _, _, mlp_summary = _run_mlp_variant(
                 mlp_spec,
                 variant_dir=seed_dir / mlp_variant,
                 run_id=resolved_run_id,
                 output_layout="single_dir",
-                x=x,
-                y=y,
+                split=split,
             )
             mlp_row["status"] = "ok"
-            mlp_row["primary_metric_value"] = float(mlp_summary["primary_metric_value"])
+            mlp_row["primary_metric_value"] = float(mlp_summary["test_metric"])
             mlp_row["final_loss"] = float(mlp_summary["final_loss"])
             mlp_row["summary_path"] = _summary_path_for_seed_variant(seed, mlp_variant)
         except Exception as exc:
@@ -946,6 +1281,8 @@ def run_pc_budget_tradeoff_study(
         seed_values=resolved_seed_values,
         seed_budget_records=seed_budget_records,
         budget_summary_rows=budget_summary_rows,
+        tuned_selection=tuned_selection,
+        mlp_selection=mlp_selection,
     )
 
     _write_seed_budget_records(run_dir / "seed_budget_records.csv", seed_budget_records)

@@ -33,7 +33,9 @@ def main() -> None:
     print(f"Run directory: {result.run_dir}")
     print(f"Final pre-update energy: {result.summary['final_pre_update_energy']:.6f}")
     print(f"Final post-update energy: {result.summary['final_post_update_energy']:.6f}")
-    print(f"Final MSE: {result.summary['primary_metric_value']:.6f}")
+    print(f"Final train MSE: {result.summary['train_metric']:.6f}")
+    print(f"Final val MSE: {result.summary['val_metric']:.6f}")
+    print(f"Final test MSE: {result.summary['test_metric']:.6f}")
 
 
 if __name__ == "__main__":

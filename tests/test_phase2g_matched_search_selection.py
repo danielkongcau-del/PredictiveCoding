@@ -1,0 +1,171 @@
+from __future__ import annotations
+
+from pc.phase2g_matched_search import _build_aggregate_summary, rank_search_rows
+
+
+def test_phase2g_ranks_pc_and_mlp_by_validation_metric_not_test_metric() -> None:
+    pc_rows = [
+        {
+            "config_id": "cfg_001",
+            "model_family": "predictive_coding",
+            "eta_x": 0.1,
+            "eta_w": 0.1,
+            "eta_b": 0.1,
+            "train_steps": 25,
+            "eval_steps": 25,
+            "epochs": 60,
+            "state_init": "forward",
+            "status": "ok",
+            "failure_reason": "",
+            "metric_name": "mse",
+            "metric_higher_is_better": False,
+            "train_metric": 0.20,
+            "val_metric": 0.10,
+            "test_metric": 0.30,
+            "selection_metric_source": "val_metric",
+            "selection_metric_value": 0.10,
+            "report_metric_source": "test_metric",
+            "report_metric_value": 0.30,
+            "selection_metric_rank": None,
+            "selection_metric_delta_vs_best": None,
+            "train_baseline_metric": 0.25,
+            "val_baseline_metric": 0.35,
+            "test_baseline_metric": 0.35,
+            "beats_val_baseline": True,
+            "best_epoch": 12,
+            "final_pre_update_energy": 0.15,
+            "final_post_update_energy": 0.14,
+            "final_loss": None,
+            "summary_path": "pc_trials/cfg_001/summary.json",
+        },
+        {
+            "config_id": "cfg_002",
+            "model_family": "predictive_coding",
+            "eta_x": 0.2,
+            "eta_w": 0.2,
+            "eta_b": 0.2,
+            "train_steps": 50,
+            "eval_steps": 50,
+            "epochs": 60,
+            "state_init": "forward",
+            "status": "ok",
+            "failure_reason": "",
+            "metric_name": "mse",
+            "metric_higher_is_better": False,
+            "train_metric": 0.10,
+            "val_metric": 0.20,
+            "test_metric": 0.05,
+            "selection_metric_source": "val_metric",
+            "selection_metric_value": 0.20,
+            "report_metric_source": "test_metric",
+            "report_metric_value": 0.05,
+            "selection_metric_rank": None,
+            "selection_metric_delta_vs_best": None,
+            "train_baseline_metric": 0.25,
+            "val_baseline_metric": 0.35,
+            "test_baseline_metric": 0.35,
+            "beats_val_baseline": True,
+            "best_epoch": 20,
+            "final_pre_update_energy": 0.10,
+            "final_post_update_energy": 0.09,
+            "final_loss": None,
+            "summary_path": "pc_trials/cfg_002/summary.json",
+        },
+    ]
+    mlp_rows = [
+        {
+            "config_id": "cfg_001",
+            "model_family": "mlp",
+            "eta_x": None,
+            "eta_w": 0.05,
+            "eta_b": 0.05,
+            "train_steps": None,
+            "eval_steps": None,
+            "epochs": 80,
+            "state_init": None,
+            "status": "ok",
+            "failure_reason": "",
+            "metric_name": "mse",
+            "metric_higher_is_better": False,
+            "train_metric": 0.08,
+            "val_metric": 0.11,
+            "test_metric": 0.12,
+            "selection_metric_source": "val_metric",
+            "selection_metric_value": 0.11,
+            "report_metric_source": "test_metric",
+            "report_metric_value": 0.12,
+            "selection_metric_rank": None,
+            "selection_metric_delta_vs_best": None,
+            "train_baseline_metric": 0.25,
+            "val_baseline_metric": 0.35,
+            "test_baseline_metric": 0.35,
+            "beats_val_baseline": True,
+            "best_epoch": 40,
+            "final_pre_update_energy": None,
+            "final_post_update_energy": None,
+            "final_loss": 0.08,
+            "summary_path": "mlp_trials/cfg_001/summary.json",
+        },
+        {
+            "config_id": "cfg_002",
+            "model_family": "mlp",
+            "eta_x": None,
+            "eta_w": 0.10,
+            "eta_b": 0.10,
+            "train_steps": None,
+            "eval_steps": None,
+            "epochs": 160,
+            "state_init": None,
+            "status": "ok",
+            "failure_reason": "",
+            "metric_name": "mse",
+            "metric_higher_is_better": False,
+            "train_metric": 0.07,
+            "val_metric": 0.09,
+            "test_metric": 0.20,
+            "selection_metric_source": "val_metric",
+            "selection_metric_value": 0.09,
+            "report_metric_source": "test_metric",
+            "report_metric_value": 0.20,
+            "selection_metric_rank": None,
+            "selection_metric_delta_vs_best": None,
+            "train_baseline_metric": 0.25,
+            "val_baseline_metric": 0.35,
+            "test_baseline_metric": 0.35,
+            "beats_val_baseline": True,
+            "best_epoch": 60,
+            "final_pre_update_energy": None,
+            "final_post_update_energy": None,
+            "final_loss": 0.07,
+            "summary_path": "mlp_trials/cfg_002/summary.json",
+        },
+    ]
+
+    ranked_pc_rows = rank_search_rows(pc_rows, "mse")
+    ranked_mlp_rows = rank_search_rows(mlp_rows, "mse")
+    assert {row["config_id"]: row["selection_metric_rank"] for row in ranked_pc_rows} == {
+        "cfg_001": 1,
+        "cfg_002": 2,
+    }
+    assert {row["config_id"]: row["selection_metric_rank"] for row in ranked_mlp_rows} == {
+        "cfg_001": 2,
+        "cfg_002": 1,
+    }
+
+    summary = _build_aggregate_summary(
+        benchmark_name="toy_regression",
+        run_id="selection_fixture",
+        task_name="regression",
+        metric_name="mse",
+        pc_search_rows=ranked_pc_rows,
+        mlp_search_rows=ranked_mlp_rows,
+    )
+    assert summary["best_pc_config_id"] == "cfg_001"
+    assert summary["best_pc_val_metric"] == 0.10
+    assert summary["best_pc_test_metric"] == 0.30
+    assert summary["best_mlp_config_id"] == "cfg_002"
+    assert summary["best_mlp_val_metric"] == 0.09
+    assert summary["best_mlp_test_metric"] == 0.20
+    assert summary["test_winner"] == "mlp"
+    assert summary["selected_by_metric_source"] == "val_metric"
+    assert summary["final_report_metric_source"] == "test_metric"

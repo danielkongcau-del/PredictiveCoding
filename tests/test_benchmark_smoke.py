@@ -34,12 +34,17 @@ def test_benchmark_scripts_write_outputs_and_beat_baselines(tmp_path: Path) -> N
         assert (result.run_dir / "config.json").exists()
         assert (result.run_dir / "epoch_metrics.csv").exists()
         assert (result.run_dir / "summary.json").exists()
+        assert "train_metric" in result.summary
+        assert "val_metric" in result.summary
+        assert "test_metric" in result.summary
+        assert "metric_name" in result.summary
 
-    assert regression_result.summary["primary_metric_value"] < regression_result.summary["baseline_metric_value"]
-    assert sine_result.summary["primary_metric_value"] < sine_result.summary["baseline_metric_value"]
+    assert regression_result.summary["test_metric"] < regression_result.summary["test_baseline_metric"]
+    assert sine_result.summary["test_metric"] < sine_result.summary["test_baseline_metric"]
 
-    best_accuracy = max(row["accuracy"] for row in classification_result.epoch_metrics)
-    assert best_accuracy > classification_result.summary["baseline_metric_value"]
+    best_accuracy = max(row["val_accuracy"] for row in classification_result.epoch_metrics)
+    assert best_accuracy > classification_result.summary["val_baseline_metric"]
+    assert classification_result.summary["test_metric"] > classification_result.summary["test_baseline_metric"]
 
 
 def test_benchmark_configs_record_explicit_seed_roles(tmp_path: Path) -> None:
@@ -62,3 +67,6 @@ def test_benchmark_configs_record_explicit_seed_roles(tmp_path: Path) -> None:
         assert config_payload["seeds"] == expected
         assert config_payload["data"]["data_seed"] == expected["data_seed"]
         assert config_payload["model"]["model_init_seed"] == expected["model_init_seed"]
+        assert config_payload["data"]["train_size"] > 0
+        assert config_payload["data"]["val_size"] > 0
+        assert config_payload["data"]["test_size"] > 0

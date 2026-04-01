@@ -73,9 +73,27 @@ def _write_mlp_epoch_metrics(
     fieldnames.extend([f"weight_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     fieldnames.extend([f"bias_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     if task_name == "regression":
-        fieldnames.extend(["mse", "baseline_mse"])
+        fieldnames.extend(
+            [
+                "train_mse",
+                "val_mse",
+                "train_baseline_mse",
+                "val_baseline_mse",
+                "mse",
+                "baseline_mse",
+            ]
+        )
     elif task_name == "classification":
-        fieldnames.extend(["accuracy", "baseline_accuracy"])
+        fieldnames.extend(
+            [
+                "train_accuracy",
+                "val_accuracy",
+                "train_baseline_accuracy",
+                "val_baseline_accuracy",
+                "accuracy",
+                "baseline_accuracy",
+            ]
+        )
     else:
         raise ValueError(f"Unsupported task '{task_name}'.")
 
@@ -115,8 +133,7 @@ def _mlp_config_payload(
     run_id: str,
     output_root: str | Path,
     output_layout: OutputLayout,
-    x: np.ndarray,
-    y: np.ndarray,
+    split,
 ) -> dict[str, Any]:
     return {
         "experiment_name": "mlp",
@@ -131,7 +148,7 @@ def _mlp_config_payload(
             "model_init_seed": spec.model_init_seed,
         },
         "task": spec.task_config(),
-        "data": spec.data_config(x, y),
+        "data": spec.data_config(split),
         "model": spec.mlp_model_config(),
         "training": {
             "epochs": spec.epochs,
@@ -155,8 +172,7 @@ def _run_mlp_experiment(
     output_root: Path,
     run_id: str,
     output_layout: OutputLayout,
-    x: np.ndarray,
-    y: np.ndarray,
+    split,
 ) -> tuple[Path, list[dict[str, Any]], dict[str, Any]]:
     mlp_run_dir = output_root / "mlp"
     mlp_run_dir.mkdir(parents=True, exist_ok=True)
@@ -167,18 +183,27 @@ def _run_mlp_experiment(
         run_id,
         output_root,
         output_layout,
-        x,
-        y,
+        split,
     )
     _write_json(mlp_run_dir / "config.json", config_payload)
 
-    baseline_metric_value = spec.baseline_metric_fn(y)
+    x_train = split.x_train
+    y_train = split.y_train
+    x_val = split.x_val
+    y_val = split.y_val
+    x_test = split.x_test
+    y_test = split.y_test
+    train_baseline_metric_value = spec.baseline_metric_fn(y_train)
+    val_baseline_metric_value = spec.baseline_metric_fn(y_val)
+    test_baseline_metric_value = spec.baseline_metric_fn(y_test)
     epoch_rows: list[dict[str, Any]] = []
 
     for epoch in range(1, spec.epochs + 1):
-        batch_result = model.train_batch(x, y)
-        predictions = model.predict(x)
-        primary_metric_value = spec.primary_metric_fn(predictions, y)
+        batch_result = model.train_batch(x_train, y_train)
+        train_predictions = model.predict(x_train)
+        val_predictions = model.predict(x_val)
+        train_metric_value = spec.primary_metric_fn(train_predictions, y_train)
+        val_metric_value = spec.primary_metric_fn(val_predictions, y_val)
         row: dict[str, Any] = {
             "epoch": epoch,
             "loss": batch_result.loss,
@@ -189,16 +214,26 @@ def _run_mlp_experiment(
             row[f"bias_norm_l{layer_index}"] = value
 
         if spec.task_name == "regression":
-            row["mse"] = primary_metric_value
-            row["baseline_mse"] = baseline_metric_value
+            row["train_mse"] = train_metric_value
+            row["val_mse"] = val_metric_value
+            row["train_baseline_mse"] = train_baseline_metric_value
+            row["val_baseline_mse"] = val_baseline_metric_value
+            row["mse"] = val_metric_value
+            row["baseline_mse"] = val_baseline_metric_value
         elif spec.task_name == "classification":
-            row["accuracy"] = primary_metric_value
-            row["baseline_accuracy"] = baseline_metric_value
+            row["train_accuracy"] = train_metric_value
+            row["val_accuracy"] = val_metric_value
+            row["train_baseline_accuracy"] = train_baseline_metric_value
+            row["val_baseline_accuracy"] = val_baseline_metric_value
+            row["accuracy"] = val_metric_value
+            row["baseline_accuracy"] = val_baseline_metric_value
         else:
             raise ValueError(f"Unsupported task '{spec.task_name}'.")
 
         epoch_rows.append(row)
 
+    test_predictions = model.predict(x_test)
+    test_metric_value = spec.primary_metric_fn(test_predictions, y_test)
     best_row = (
         max(epoch_rows, key=lambda row: row[spec.primary_metric_name])
         if spec.primary_metric_higher_is_better
@@ -221,12 +256,27 @@ def _run_mlp_experiment(
         },
         "final_epoch": final_row["epoch"],
         "final_loss": final_row["loss"],
+        "metric_name": spec.primary_metric_name,
+        "metric_higher_is_better": spec.primary_metric_higher_is_better,
+        "train_metric": final_row[f"train_{spec.primary_metric_name}"],
+        "val_metric": final_row[f"val_{spec.primary_metric_name}"],
+        "test_metric": test_metric_value,
+        "eval_metric": final_row[f"val_{spec.primary_metric_name}"],
         "primary_metric_name": spec.primary_metric_name,
-        "primary_metric_value": final_row[spec.primary_metric_name],
+        "primary_metric_value": test_metric_value,
         "primary_metric_higher_is_better": spec.primary_metric_higher_is_better,
+        "selection_metric_source": "val_metric",
+        "selection_metric_value": final_row[f"val_{spec.primary_metric_name}"],
+        "report_metric_source": "test_metric",
+        "report_metric_value": test_metric_value,
         "baseline_metric_name": spec.baseline_metric_name,
-        "baseline_metric_value": baseline_metric_value,
+        "train_baseline_metric": train_baseline_metric_value,
+        "val_baseline_metric": val_baseline_metric_value,
+        "test_baseline_metric": test_baseline_metric_value,
+        "eval_baseline_metric": val_baseline_metric_value,
+        "baseline_metric_value": test_baseline_metric_value,
         "best_epoch": best_row["epoch"],
+        "best_val_metric": best_row[f"val_{spec.primary_metric_name}"],
     }
 
     _write_mlp_epoch_metrics(
@@ -248,7 +298,7 @@ def run_benchmark_comparison(
 ) -> ComparisonRunResult:
     """Run one PC-vs-MLP comparison for an existing toy benchmark."""
     spec = get_benchmark_spec(benchmark_name)
-    x, y = spec.make_data()
+    split = spec.make_dataset_split()
     resolved_run_id = _resolve_run_id(run_id)
     comparison_root = _prepare_run_dir(
         _resolve_comparison_root(
@@ -266,20 +316,18 @@ def run_benchmark_comparison(
         plot_energy=plot_energy,
         output_layout="single_dir",
         experiment_name="pc",
-        x=x,
-        y=y,
+        split=split,
     )
     mlp_run_dir, mlp_epoch_metrics, mlp_summary = _run_mlp_experiment(
         spec,
         output_root=comparison_root,
         run_id=resolved_run_id,
         output_layout=output_layout,
-        x=x,
-        y=y,
+        split=split,
     )
 
-    pc_metric = float(pc_result.summary["primary_metric_value"])
-    mlp_metric = float(mlp_summary["primary_metric_value"])
+    pc_metric = float(pc_result.summary["test_metric"])
+    mlp_metric = float(mlp_summary["test_metric"])
     winner, winner_reason = select_comparison_winner(
         spec.primary_metric_name,
         pc_metric,
@@ -294,7 +342,15 @@ def run_benchmark_comparison(
         "primary_metric_name": spec.primary_metric_name,
         "primary_metric_higher_is_better": spec.primary_metric_higher_is_better,
         "baseline_metric_name": spec.baseline_metric_name,
-        "baseline_metric_value": float(pc_result.summary["baseline_metric_value"]),
+        "metric_name": spec.primary_metric_name,
+        "metric_higher_is_better": spec.primary_metric_higher_is_better,
+        "pc_train_metric_value": float(pc_result.summary["train_metric"]),
+        "pc_val_metric_value": float(pc_result.summary["val_metric"]),
+        "pc_test_metric_value": float(pc_result.summary["test_metric"]),
+        "mlp_train_metric_value": float(mlp_summary["train_metric"]),
+        "mlp_val_metric_value": float(mlp_summary["val_metric"]),
+        "mlp_test_metric_value": float(mlp_summary["test_metric"]),
+        "baseline_metric_value": float(pc_result.summary["test_baseline_metric"]),
         "pc_primary_metric_value": pc_metric,
         "mlp_primary_metric_value": mlp_metric,
         "primary_metric_difference_mlp_minus_pc": mlp_metric - pc_metric,
