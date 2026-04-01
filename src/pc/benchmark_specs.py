@@ -20,8 +20,12 @@ from .metrics import (
 from .mlp_baseline import MLPNetwork, init_mlp_baseline_layers
 from .models import PCNetwork
 from .toy_data import (
+    SupervisedDataSplit,
+    make_blobs_classification_split,
     make_blobs_classification_data,
+    make_linear_regression_split,
     make_linear_regression_data,
+    make_sine_regression_split,
     make_sine_regression_data,
 )
 
@@ -55,7 +59,7 @@ class ToyBenchmarkSpec:
     benchmark_name: str
     task_name: TaskName
     dataset_name: str
-    data_builder: Callable[..., tuple[np.ndarray, np.ndarray]]
+    data_split_builder: Callable[..., SupervisedDataSplit]
     data_kwargs: dict[str, Any]
     primary_metric_name: str
     primary_metric_fn: MetricFn
@@ -76,9 +80,14 @@ class ToyBenchmarkSpec:
     def primary_metric_higher_is_better(self) -> bool:
         return metric_higher_is_better(self.primary_metric_name)
 
+    def make_dataset_split(self) -> SupervisedDataSplit:
+        """Return deterministic train/val/test arrays shaped (batch, features)."""
+        return self.data_split_builder(seed=self.data_seed, **self.data_kwargs)
+
     def make_data(self) -> tuple[np.ndarray, np.ndarray]:
-        """Return deterministic benchmark data shaped (batch, features)."""
-        return self.data_builder(seed=self.data_seed, **self.data_kwargs)
+        """Return the deterministic training arrays shaped (batch, features)."""
+        split = self.make_dataset_split()
+        return split.x_train, split.y_train
 
     def task_config(self) -> dict[str, Any]:
         task = {"name": self.task_name}
@@ -86,16 +95,36 @@ class ToyBenchmarkSpec:
             task["num_classes"] = int(self.layer_dims[-1])
         return task
 
-    def data_config(self, x: np.ndarray, y: np.ndarray) -> dict[str, Any]:
+    def data_config(
+        self,
+        split_or_x: SupervisedDataSplit | np.ndarray,
+        y: np.ndarray | None = None,
+    ) -> dict[str, Any]:
+        if isinstance(split_or_x, SupervisedDataSplit):
+            split = split_or_x
+        else:
+            if y is None:
+                raise ValueError("y must be provided when data_config is called with x arrays.")
+            split = SupervisedDataSplit(
+                x_train=np.asarray(split_or_x, dtype=np.float64),
+                y_train=np.asarray(y, dtype=np.float64),
+                x_val=np.asarray(split_or_x, dtype=np.float64),
+                y_val=np.asarray(y, dtype=np.float64),
+                x_test=np.asarray(split_or_x, dtype=np.float64),
+                y_test=np.asarray(y, dtype=np.float64),
+                metadata={"evaluation_protocol": "train_equals_val_equals_test"},
+            )
         data = {
             "dataset_name": self.dataset_name,
-            "input_dim": int(x.shape[1]),
-            "target_dim": int(y.shape[1]),
+            "input_dim": int(split.x_train.shape[1]),
+            "target_dim": int(split.y_train.shape[1]),
             "data_seed": self.data_seed,
+            "train_size": int(split.x_train.shape[0]),
+            "val_size": int(split.x_val.shape[0]),
+            "test_size": int(split.x_test.shape[0]),
         }
         data.update(self.data_kwargs)
-        if "num_points" not in data and self.task_name == "regression":
-            data["num_points"] = int(x.shape[0])
+        data.update(split.metadata)
         return data
 
     def pc_model_config(self) -> dict[str, Any]:
@@ -157,12 +186,11 @@ class ToyBenchmarkSpec:
         plot_energy: bool,
         output_layout: OutputLayout = "single_dir",
         experiment_name: str | None = None,
-        x: np.ndarray | None = None,
-        y: np.ndarray | None = None,
+        split: SupervisedDataSplit | None = None,
     ) -> ExperimentConfig:
         """Return the existing ExperimentConfig for the predictive-coding benchmark run."""
-        if x is None or y is None:
-            x, y = self.make_data()
+        if split is None:
+            split = self.make_dataset_split()
         return ExperimentConfig(
             experiment_name=self.benchmark_name if experiment_name is None else experiment_name,
             seed=self.run_seed,
@@ -174,7 +202,7 @@ class ToyBenchmarkSpec:
             output_layout=output_layout,
             plot_energy=plot_energy,
             task=self.task_config(),
-            data=self.data_config(x, y),
+            data=self.data_config(split),
             model=self.pc_model_config(),
             training={
                 "epochs": self.epochs,
@@ -198,24 +226,63 @@ def run_pc_benchmark(
     experiment_name: str | None = None,
     x: np.ndarray | None = None,
     y: np.ndarray | None = None,
+    x_val: np.ndarray | None = None,
+    y_val: np.ndarray | None = None,
+    x_test: np.ndarray | None = None,
+    y_test: np.ndarray | None = None,
+    split: SupervisedDataSplit | None = None,
 ) -> ExperimentRunResult:
     """Run the existing predictive-coding benchmark path without changing its behavior."""
+    if split is None and x is None and y is None:
+        split = spec.make_dataset_split()
+    if split is not None:
+        x = split.x_train
+        y = split.y_train
+        x_val = split.x_val
+        y_val = split.y_val
+        x_test = split.x_test
+        y_test = split.y_test
     if x is None or y is None:
-        x, y = spec.make_data()
+        raise ValueError("Training data must be provided when split is not used.")
+    if x_val is None or y_val is None:
+        x_val = x
+        y_val = y
+    if x_test is None or y_test is None:
+        x_test = x_val
+        y_test = y_val
+    if split is None:
+        split = SupervisedDataSplit(
+            x_train=np.asarray(x, dtype=np.float64),
+            y_train=np.asarray(y, dtype=np.float64),
+            x_val=np.asarray(x_val, dtype=np.float64),
+            y_val=np.asarray(y_val, dtype=np.float64),
+            x_test=np.asarray(x_test, dtype=np.float64),
+            y_test=np.asarray(y_test, dtype=np.float64),
+            metadata={
+                "evaluation_protocol": (
+                    "train_equals_val_equals_test"
+                    if x_val is x and y_val is y and x_test is x and y_test is y
+                    else "explicit_val_test_arrays"
+                ),
+            },
+        )
     config = spec.build_pc_config(
         output_root=output_root,
         run_id=run_id,
         plot_energy=plot_energy,
         output_layout=output_layout,
         experiment_name=experiment_name,
-        x=x,
-        y=y,
+        split=split,
     )
     return run_supervised_experiment(
         config=config,
         model=spec.build_pc_model(),
         x=x,
         y=y,
+        x_val=x_val,
+        y_val=y_val,
+        x_test=x_test,
+        y_test=y_test,
         task_name=spec.task_name,
         primary_metric_name=spec.primary_metric_name,
         primary_metric_higher_is_better=spec.primary_metric_higher_is_better,
@@ -239,8 +306,8 @@ def get_benchmark_spec(name: str) -> ToyBenchmarkSpec:
             benchmark_name="toy_regression",
             task_name="regression",
             dataset_name="linear_regression",
-            data_builder=make_linear_regression_data,
-            data_kwargs={"num_points": 16},
+            data_split_builder=make_linear_regression_split,
+            data_kwargs={"num_points": 16, "val_num_points": 129, "test_num_points": 129},
             primary_metric_name="mse",
             primary_metric_fn=regression_mse,
             baseline_metric_name="baseline_mse",
@@ -268,8 +335,8 @@ def get_benchmark_spec(name: str) -> ToyBenchmarkSpec:
             benchmark_name="toy_sine_regression",
             task_name="regression",
             dataset_name="sine_regression",
-            data_builder=make_sine_regression_data,
-            data_kwargs={"num_points": 32},
+            data_split_builder=make_sine_regression_split,
+            data_kwargs={"num_points": 32, "val_num_points": 257, "test_num_points": 257},
             primary_metric_name="mse",
             primary_metric_fn=regression_mse,
             baseline_metric_name="baseline_mse",
@@ -297,8 +364,12 @@ def get_benchmark_spec(name: str) -> ToyBenchmarkSpec:
             benchmark_name="toy_blobs_classification",
             task_name="classification",
             dataset_name="gaussian_blobs",
-            data_builder=make_blobs_classification_data,
-            data_kwargs={"points_per_class": 24},
+            data_split_builder=make_blobs_classification_split,
+            data_kwargs={
+                "points_per_class": 24,
+                "val_points_per_class": 48,
+                "test_points_per_class": 48,
+            },
             primary_metric_name="accuracy",
             primary_metric_fn=classification_accuracy,
             baseline_metric_name="baseline_accuracy",

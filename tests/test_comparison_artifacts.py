@@ -31,8 +31,16 @@ def test_comparison_runs_write_expected_artifacts(tmp_path: Path) -> None:
             mlp_summary = json.load(handle)
 
         assert comparison_summary["benchmark_name"] == benchmark_name
+        assert comparison_summary["metric_name"] == spec.primary_metric_name
+        assert comparison_summary["metric_higher_is_better"] == spec.primary_metric_higher_is_better
         assert comparison_summary["primary_metric_name"] == spec.primary_metric_name
         assert comparison_summary["baseline_metric_name"] == spec.baseline_metric_name
+        assert "pc_train_metric_value" in comparison_summary
+        assert "pc_val_metric_value" in comparison_summary
+        assert "pc_test_metric_value" in comparison_summary
+        assert "mlp_train_metric_value" in comparison_summary
+        assert "mlp_val_metric_value" in comparison_summary
+        assert "mlp_test_metric_value" in comparison_summary
         assert comparison_summary["winner_tolerance_rtol"] == 1.0e-12
         assert comparison_summary["winner_tolerance_atol"] == 1.0e-12
         assert comparison_summary["pc_summary_path"] == "pc/summary.json"
@@ -50,6 +58,10 @@ def test_comparison_runs_write_expected_artifacts(tmp_path: Path) -> None:
         assert mlp_summary["run_seed"] == spec.run_seed
         assert mlp_summary["data_seed"] == spec.data_seed
         assert mlp_summary["model_init_seed"] == spec.model_init_seed
+        assert "train_metric" in mlp_summary
+        assert "val_metric" in mlp_summary
+        assert "test_metric" in mlp_summary
+        assert mlp_summary["metric_name"] == spec.primary_metric_name
         assert mlp_summary["seeds"] == {
             "run_seed": spec.run_seed,
             "data_seed": spec.data_seed,

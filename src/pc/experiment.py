@@ -147,9 +147,27 @@ def _write_epoch_metrics(path: Path, rows: list[dict[str, Any]], num_layers: int
     fieldnames.extend([f"weight_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     fieldnames.extend([f"bias_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     if task_name == "regression":
-        fieldnames.extend(["mse", "baseline_mse"])
+        fieldnames.extend(
+            [
+                "train_mse",
+                "val_mse",
+                "train_baseline_mse",
+                "val_baseline_mse",
+                "mse",
+                "baseline_mse",
+            ]
+        )
     elif task_name == "classification":
-        fieldnames.extend(["accuracy", "baseline_accuracy"])
+        fieldnames.extend(
+            [
+                "train_accuracy",
+                "val_accuracy",
+                "train_baseline_accuracy",
+                "val_baseline_accuracy",
+                "accuracy",
+                "baseline_accuracy",
+            ]
+        )
     else:
         raise ValueError(f"Unsupported task '{task_name}'.")
 
@@ -188,6 +206,12 @@ def run_supervised_experiment(
     model: PCNetwork,
     x: np.ndarray,
     y: np.ndarray,
+    x_val: np.ndarray | None = None,
+    y_val: np.ndarray | None = None,
+    x_test: np.ndarray | None = None,
+    y_test: np.ndarray | None = None,
+    x_eval: np.ndarray | None = None,
+    y_eval: np.ndarray | None = None,
     task_name: str,
     primary_metric_name: str,
     primary_metric_higher_is_better: bool,
@@ -195,9 +219,24 @@ def run_supervised_experiment(
     baseline_metric_name: str,
     baseline_metric_fn: BaselineMetricFn,
 ) -> ExperimentRunResult:
-    """Run a supervised experiment and save structured Phase 1 artifacts under outputs/."""
+    """Run a supervised experiment with train/val/test metrics.
+
+    Shapes:
+    - `x`, `y`: training arrays shaped `(batch_train, features)` / `(batch_train, targets)`
+    - `x_val`, `y_val`: validation arrays shaped `(batch_val, features)` / `(batch_val, targets)`
+    - `x_test`, `y_test`: test arrays shaped `(batch_test, features)` / `(batch_test, targets)`
+    """
     if config.epochs <= 0:
         raise ValueError("config.epochs must be positive.")
+    if x_val is None or y_val is None:
+        x_val = x_eval
+        y_val = y_eval
+    if x_val is None or y_val is None:
+        x_val = x
+        y_val = y
+    if x_test is None or y_test is None:
+        x_test = x_val
+        y_test = y_val
 
     set_seed(config.seed)
     run_id = config.resolved_run_id()
@@ -213,15 +252,19 @@ def run_supervised_experiment(
     config_payload = _config_dict(config, run_id)
     _write_json(run_dir / "config.json", config_payload)
 
-    baseline_metric_value = baseline_metric_fn(y)
+    train_baseline_metric_value = baseline_metric_fn(y)
+    val_baseline_metric_value = baseline_metric_fn(y_val)
+    test_baseline_metric_value = baseline_metric_fn(y_test)
     epoch_rows: list[dict[str, Any]] = []
     trace_arrays: dict[str, np.ndarray] = {}
     trace_manifest: list[dict[str, Any]] = []
 
     for epoch in range(1, config.epochs + 1):
         batch_result = model.train_batch(x, y, compute_post_update_energy=True)
-        predictions = model.predict(x)
-        primary_metric_value = primary_metric_fn(predictions, y)
+        train_predictions = model.predict(x)
+        val_predictions = model.predict(x_val)
+        train_metric_value = primary_metric_fn(train_predictions, y)
+        val_metric_value = primary_metric_fn(val_predictions, y_val)
         trace_saved = _should_save_trace(epoch, config.epochs, config.trace_policy)
 
         if trace_saved:
@@ -254,18 +297,32 @@ def run_supervised_experiment(
             row[f"bias_norm_l{layer_index}"] = value
 
         if task_name == "regression":
-            row["mse"] = primary_metric_value
-            row["baseline_mse"] = baseline_metric_value
+            row["train_mse"] = train_metric_value
+            row["val_mse"] = val_metric_value
+            row["train_baseline_mse"] = train_baseline_metric_value
+            row["val_baseline_mse"] = val_baseline_metric_value
+            row["mse"] = val_metric_value
+            row["baseline_mse"] = val_baseline_metric_value
         elif task_name == "classification":
-            row["accuracy"] = primary_metric_value
-            row["baseline_accuracy"] = baseline_metric_value
+            row["train_accuracy"] = train_metric_value
+            row["val_accuracy"] = val_metric_value
+            row["train_baseline_accuracy"] = train_baseline_metric_value
+            row["val_baseline_accuracy"] = val_baseline_metric_value
+            row["accuracy"] = val_metric_value
+            row["baseline_accuracy"] = val_baseline_metric_value
         else:
             raise ValueError(f"Unsupported task '{task_name}'.")
 
         epoch_rows.append(row)
 
-    best_row = max(epoch_rows, key=lambda row: row[primary_metric_name]) if primary_metric_higher_is_better else min(epoch_rows, key=lambda row: row[primary_metric_name])
+    best_row = (
+        max(epoch_rows, key=lambda row: row[f"val_{primary_metric_name}"])
+        if primary_metric_higher_is_better
+        else min(epoch_rows, key=lambda row: row[f"val_{primary_metric_name}"])
+    )
     final_row = epoch_rows[-1]
+    test_predictions = model.predict(x_test)
+    test_metric_value = primary_metric_fn(test_predictions, y_test)
     summary = {
         "experiment_name": config.experiment_name,
         "run_id": run_id,
@@ -275,12 +332,27 @@ def run_supervised_experiment(
         "final_epoch": final_row["epoch"],
         "final_pre_update_energy": final_row["pre_update_energy"],
         "final_post_update_energy": final_row["post_update_energy"],
+        "metric_name": primary_metric_name,
+        "metric_higher_is_better": primary_metric_higher_is_better,
+        "train_metric": final_row[f"train_{primary_metric_name}"],
+        "val_metric": final_row[f"val_{primary_metric_name}"],
+        "test_metric": test_metric_value,
+        "eval_metric": final_row[f"val_{primary_metric_name}"],
         "primary_metric_name": primary_metric_name,
-        "primary_metric_value": final_row[primary_metric_name],
+        "primary_metric_value": test_metric_value,
         "primary_metric_higher_is_better": primary_metric_higher_is_better,
+        "selection_metric_source": "val_metric",
+        "selection_metric_value": final_row[f"val_{primary_metric_name}"],
+        "report_metric_source": "test_metric",
+        "report_metric_value": test_metric_value,
         "baseline_metric_name": baseline_metric_name,
-        "baseline_metric_value": baseline_metric_value,
+        "train_baseline_metric": train_baseline_metric_value,
+        "val_baseline_metric": val_baseline_metric_value,
+        "test_baseline_metric": test_baseline_metric_value,
+        "eval_baseline_metric": val_baseline_metric_value,
+        "baseline_metric_value": test_baseline_metric_value,
         "best_epoch": best_row["epoch"],
+        "best_val_metric": best_row[f"val_{primary_metric_name}"],
         "saved_trace_keys": sorted(trace_arrays.keys()),
     }
 
