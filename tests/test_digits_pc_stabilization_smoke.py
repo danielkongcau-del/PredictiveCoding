@@ -60,10 +60,12 @@ def test_digits_pc_stabilization_smoke_runs_small_sweep_and_writes_summary(tmp_p
     assert summary["selection_metric_source"] == "val_metric"
     assert summary["report_metric_source"] == "test_metric"
     assert summary["selected_config_id"] in {"cfg_a", "cfg_b"}
+    assert "selected_candidate_rank" not in summary
     assert len(summary["candidates"]) == 2
 
     best_val_metric = max(float(candidate["val_metric"]) for candidate in summary["candidates"])
     assert float(summary["selected_candidate"]["val_metric"]) == best_val_metric
+    assert summary["selected_candidate"]["config_id"] == summary["selected_config_id"]
 
     for candidate in summary["candidates"]:
         assert Path(candidate["run_dir"]).exists()

@@ -167,7 +167,6 @@ def run(
         records.append(_candidate_record(candidate_spec, config, result))
 
     selected = _select_best_candidate(records)
-    selected_index = next(index for index, record in enumerate(records) if record["config_id"] == selected["config_id"])
     canonical_reference = records[0]
 
     sweep_summary = {
@@ -180,7 +179,6 @@ def run(
         "config_source": "manual_small_stabilization_sweep",
         "canonical_reference_config_id": canonical_reference["config_id"],
         "selected_config_id": selected["config_id"],
-        "selected_candidate_rank": selected_index + 1,
         "selected_candidate": selected,
         "candidates": records,
         "selected_val_metric_minus_reference": float(selected["val_metric"]) - float(canonical_reference["val_metric"]),

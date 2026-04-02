@@ -449,7 +449,7 @@ Move from toy data to first-pass real-data baselines while keeping the codebase 
 
 ---
 
-## Phase 4 ? Controlled real-data comparison protocol
+## Phase 4 - Controlled real-data comparison protocol
 
 ### Goal
 

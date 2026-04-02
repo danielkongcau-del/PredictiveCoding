@@ -9,6 +9,7 @@
   - `outputs/digits_baselines/`
   - optional retained reference: `outputs/digits_pc_stabilization/`
 - Removed lingering wording that implied the current Phase 3 state was still pending or undefined
+- Removed the ambiguous `selected_candidate_rank` field from the standalone PC stabilization summary artifact
 - Reframed the next phase as a controlled real-data comparison protocol, not a large immediate comparison push
 
 ## phase3-closure
