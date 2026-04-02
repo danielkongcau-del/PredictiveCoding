@@ -337,75 +337,162 @@ Test whether the current Phase 2g headline conclusions are materially changed by
 
 ---
 
-## Phase 3 — Real dataset baseline
+## Phase 3 — Standalone real-data digits baselines
 
 Status:
 
-- Next active phase
-- Should inherit the Phase 2g / 2g.1 protocol discipline:
-  - explicit train / val / test separation
-  - matched small-scope tuning where comparison baselines are involved
-  - held-out test for final headline reporting
+- Completed as a narrow standalone-baseline slice
+- This phase now means:
+  - a clean real-data entry point using `sklearn.datasets.load_digits`
+  - a deterministic mini-batch utility layer
+  - a reproducible real-data MLP baseline with explicit train / val / test reporting
+  - a reproducible real-data predictive-coding baseline on the same protocol
+  - protocol-alignment checks across the standalone MLP and PC baselines
+  - a standalone side-by-side summary digest for human inspection
+- This phase does not mean:
+  - a real-data matched PC-vs-MLP comparison already exists
+  - matched tuning has already been completed
+  - multi-seed real-data aggregation has already been completed
+  - a second real dataset or MNIST has already been implemented
 
 ### Goal
 
-Move from toy data to a standard small dataset while keeping the codebase simple.
+Move from toy data to first-pass real-data baselines while keeping the codebase simple, the protocol explicit, and the artifacts easy to inspect.
 
 ### Scope
 
-- MNIST or another small tabular / image baseline
-- mini-batch training
-- train / validation split
-- saved learning curves
+- Phase 3a:
+  - add a deterministic `load_digits` data-loading entry point
+  - add a deterministic mini-batch helper
+  - add a real-data MLP baseline on `digits`
+- Phase 3b:
+  - add a real-data predictive-coding baseline on the same `digits` protocol
+  - add protocol-alignment checks between the standalone MLP and PC baselines
+  - add a first-pass side-by-side summary digest and a narrow PC stabilization sweep
+- Across both slices:
+  - keep explicit train / val / test separation
+  - avoid changing the existing toy benchmark registry
+- Not part of Phase 3:
+  - real-data matched PC-vs-MLP comparison
+  - real-data matched tuning
+  - multi-seed real-data aggregation
+  - any broader real-data tuning or multi-dataset comparison studies
 
 ### Deliverables
 
-- `experiments/mnist_mlp.py`
-- dataset loading helper(s)
-- validation metrics
-- reproducible config for at least one baseline run
+- `src/pc/datasets.py`
+- deterministic `load_digits` split helper returning `SupervisedDataSplit`
+- `src/pc/minibatch.py`
+- `src/pc/real_mlp.py`
+- `src/pc/real_pc.py`
+- `experiments/digits_mlp.py`
+- `experiments/digits_pc.py`
+- `experiments/summarize_digits_baselines.py`
+- metadata recording split fractions, seed, normalization, split sizes, and class counts
+- deterministic mini-batch ordering with explicit `batch_order_seed`
+- a reproducible artifact set:
+  - `outputs/digits_mlp/`
+  - `outputs/digits_pc/`
+  - `outputs/digits_baselines/`
+- tests covering reproducibility, shape contracts, one-hot targets, split integrity, minibatch determinism, MLP/PC smoke runs, and protocol alignment
+- a narrow stabilization sweep that hardens the canonical `digits_pc` default without becoming formal HPO
 
 ### Exit criteria
 
-- stable training on a standard dataset
-- clear logs and plots for training / validation behavior
-- documented runtime and hyperparameters
+- Phase 3 exit:
+  - `load_digits` split loading is deterministic and well-tested
+  - inputs are batch-first `(batch, 64)` float64 arrays normalized by `16.0`
+  - targets are batch-first `(batch, 10)` float64 one-hot arrays
+  - train / val / test metadata is explicit and self-consistent
+  - deterministic mini-batch iteration is available and well-tested
+  - the digits MLP baseline writes reproducible artifacts and clearly separates:
+    - `train_metric`
+    - `val_metric`
+    - `test_metric`
+    - `selection_metric_source = "val_metric"`
+    - `report_metric_source = "test_metric"`
+  - the digits PC baseline writes reproducible artifacts and clearly separates:
+    - `train_metric`
+    - `val_metric`
+    - `test_metric`
+    - `selection_metric_source = "val_metric"`
+    - `report_metric_source = "test_metric"`
+  - both standalone baselines perform clearly above the majority-class baseline
+  - the protocol-alignment checks confirm no hidden mismatch in:
+    - dataset entry
+    - seed roles
+    - baseline metric definition
+    - validation-selected best-checkpoint rule
+  - the repository has a first-pass side-by-side summary artifact for the canonical digits baselines
 
 ### Risks
 
-- blaming the implementation for dataset preprocessing issues
-- performance chasing before baseline stability is established
+- overstating standalone digits baselines as a real-data PC-vs-MLP conclusion
+- letting the first real-data step sprawl into matched tuning or a larger framework refactor
+- treating a narrow PC stabilization sweep as formal HPO
+- confusing a side-by-side digest with a fair comparison protocol
+
+### Current takeaway
+
+- Phase 3 is complete only in the narrow sense of standalone real-data digits baselines
+- the repository now has:
+  - a deterministic real-data `digits` split
+  - a deterministic mini-batch helper
+  - a reproducible MLP baseline run under explicit train / val / test reporting
+  - a reproducible PC baseline run under the same protocol
+  - protocol-alignment checks between those baselines
+  - a first-pass side-by-side summary artifact
+- the next natural work item is a cautious Phase 4 start:
+  - define a narrow real-data comparison protocol on `digits`
+  - keep validation-selected checkpoints and held-out test reporting
+  - keep the initial comparison scope small before considering matched tuning or broader search
 
 ---
 
-## Phase 4 — Deeper networks and scaling groundwork
+## Phase 4 - Controlled real-data comparison protocol
 
 ### Goal
 
-Prepare the implementation for deeper architectures without losing interpretability.
+Define and validate a narrow, explicit real-data comparison protocol on `digits` before any matched tuning or broader real-data claim set.
 
 ### Scope
 
-- deeper MLP support
-- improved initialization choices
-- more careful inference scheduling
-- optional damping / clipping / normalization safeguards
+- keep the existing standalone `digits_mlp` and `digits_pc` baselines as the starting point
+- define one narrow real-data comparison contract:
+  - which configs are canonical starting points
+  - which split is used for selection
+  - which split is used for final reporting
+  - which artifacts count as authority artifacts
+- keep the first comparison scope small:
+  - one dataset
+  - one protocol
+  - no broad search framework
+  - no multi-dataset claims
+- delay matched tuning and broader multi-seed aggregation until the comparison contract is stable
 
 ### Deliverables
 
-- experiments showing depth > initial baseline
-- documented stabilization heuristics
-- tests that cover multi-layer edge cases
+- a documented real-data comparison protocol for `digits`
+- a narrow comparison artifact contract that stays distinct from the Phase 2 toy comparison pipeline
+- documentation updates clarifying:
+  - what counts as a comparison-ready baseline
+  - what is still out of scope
+- focused tests that confirm the comparison protocol does not drift from the current Phase 3 standalone-baseline rules
 
 ### Exit criteria
 
-- deeper networks run reliably on small benchmarks
-- stabilization logic is documented and not hidden in ad hoc code
+- the repository has a comparison protocol on `digits` that is explicit enough to implement without hidden assumptions
+- the protocol preserves:
+  - validation-selected checkpoints
+  - held-out test reporting
+  - deterministic seed roles
+- the repository can begin a formal real-data comparison step without first re-litigating protocol semantics
 
 ### Risks
 
-- hiding fundamental math issues behind heuristics
-- introducing too many tuning knobs at once
+- letting a narrow real-data comparison step sprawl immediately into matched tuning or large search
+- silently drifting away from the current standalone-baseline protocol
+- overstating first-pass comparison outputs as a stronger claim than the protocol supports
 
 ---
 
