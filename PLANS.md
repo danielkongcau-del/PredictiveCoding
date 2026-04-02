@@ -337,44 +337,85 @@ Test whether the current Phase 2g headline conclusions are materially changed by
 
 ---
 
-## Phase 3 — Real dataset baseline
+## Phase 3 — Small real-data MLP baseline
 
 Status:
 
-- Next active phase
-- Should inherit the Phase 2g / 2g.1 protocol discipline:
-  - explicit train / val / test separation
-  - matched small-scope tuning where comparison baselines are involved
-  - held-out test for final headline reporting
+- Completed as a narrow Phase 3a baseline slice
+- This phase now means:
+  - a clean real-data entry point using `sklearn.datasets.load_digits`
+  - a deterministic mini-batch utility layer
+  - a reproducible real-data MLP baseline with explicit train / val / test reporting
+- This phase does not mean:
+  - a real-data predictive-coding baseline already exists
+  - a real-data matched PC-vs-MLP comparison already exists
+  - MNIST has already been implemented
 
 ### Goal
 
-Move from toy data to a standard small dataset while keeping the codebase simple.
+Move from toy data to a first small real dataset while keeping the codebase simple and the protocol explicit.
 
 ### Scope
 
-- MNIST or another small tabular / image baseline
-- mini-batch training
-- train / validation split
-- saved learning curves
+- Phase 3a:
+  - add a deterministic `load_digits` data-loading entry point
+  - add a deterministic mini-batch helper
+  - add a real-data MLP baseline on `digits`
+  - keep explicit train / val / test separation
+  - avoid changing the existing toy benchmark registry
+- Later Phase 3 steps:
+  - real-data predictive-coding baseline
+  - real-data matched PC-vs-MLP comparison
+  - any later broader real-data tuning or comparison studies
 
 ### Deliverables
 
-- `experiments/mnist_mlp.py`
-- dataset loading helper(s)
-- validation metrics
-- reproducible config for at least one baseline run
+- `src/pc/datasets.py`
+- deterministic `load_digits` split helper returning `SupervisedDataSplit`
+- `src/pc/minibatch.py`
+- `src/pc/real_mlp.py`
+- `experiments/digits_mlp.py`
+- metadata recording split fractions, seed, normalization, split sizes, and class counts
+- deterministic mini-batch ordering with explicit `batch_order_seed`
+- a reproducible artifact set:
+  - `config.json`
+  - `epoch_metrics.csv`
+  - `summary.json`
+  - optional `plots/`
+- tests covering reproducibility, shape contracts, one-hot targets, split integrity, minibatch determinism, and a digits MLP smoke run
 
 ### Exit criteria
 
-- stable training on a standard dataset
-- clear logs and plots for training / validation behavior
-- documented runtime and hyperparameters
+- Phase 3a exit:
+  - `load_digits` split loading is deterministic and well-tested
+  - inputs are batch-first `(batch, 64)` float64 arrays normalized by `16.0`
+  - targets are batch-first `(batch, 10)` float64 one-hot arrays
+  - train / val / test metadata is explicit and self-consistent
+  - deterministic mini-batch iteration is available and well-tested
+  - the digits MLP baseline writes reproducible artifacts and clearly separates:
+    - `train_metric`
+    - `val_metric`
+    - `test_metric`
+    - `selection_metric_source = "val_metric"`
+    - `report_metric_source = "test_metric"`
+  - the digits MLP baseline performs clearly above the majority-class baseline
 
 ### Risks
 
-- blaming the implementation for dataset preprocessing issues
-- performance chasing before baseline stability is established
+- overstating a small real-data MLP baseline as a real-data PC-vs-MLP conclusion
+- letting the first real-data step sprawl into a larger search or framework refactor
+- performance chasing before the first real-data predictive-coding baseline exists
+
+### Current takeaway
+
+- Phase 3 is complete only in the narrow sense of a small real-data MLP baseline
+- the repository now has:
+  - a deterministic real-data `digits` split
+  - a deterministic mini-batch helper
+  - a reproducible MLP baseline run under explicit train / val / test reporting
+- the next natural work item is:
+  - the first real-data predictive-coding baseline on `digits`
+  - followed by a real-data PC-vs-MLP comparison only after that baseline is stable
 
 ---
 

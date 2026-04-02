@@ -4,10 +4,20 @@ This note freezes the repository's current Phase 2 state after the fairness-hard
 
 It is an internal research-engineering summary, not a paper-style claim set.
 
+Phase 3 follow-on status:
+
+- the repository has now completed a narrow Phase 3a step:
+  - a small real-data MLP baseline on `sklearn.datasets.load_digits`
+  - explicit `train / val / test` reporting
+  - deterministic mini-batch ordering
+  - reproducible artifacts under `outputs/digits_mlp/`
+- this file still remains a Phase 2 summary
+- it should not be read as evidence that a real-data predictive-coding baseline or real-data PC-vs-MLP comparison is already complete
+
 Local artifact-retention note:
 
 - the scientific conclusions in this file reflect the full Phase 2 history
-- the locally retained `outputs/` tree may keep only the current Phase 2g matched-search artifacts, the Phase 2g.1 boundary-check artifacts, and the Phase 2g.1-refreshed downstream artifacts after cleanup
+- the locally retained `outputs/` tree may be lighter than the full Phase 2 history after cleanup and may keep only the current `digits_mlp` Phase 3 baseline run plus `.gitkeep`
 - older generated outputs are treated as reproducible artifacts that can be regenerated when needed
 
 ## Project State
@@ -353,14 +363,15 @@ Interpretation:
 - the matched searches are still single-seed model-selection procedures rather than nested multi-seed selection protocols
 - the boundary-check closure pass and refined downstream refreshes improve confidence, but they still do not saturate the finite search spaces
 - Phase 2e-style budget studies are about inference-step budget, not wall-clock or FLOP efficiency
-- Phase 3 real-data evaluation is still pending
+- a real-data predictive-coding baseline is still pending
+- a real-data matched PC-vs-MLP evaluation is still pending
 
 ## Recommended Next Step
 
-Proceed to Phase 3 on a small real dataset, but carry forward the Phase 2g / 2g.1 protocol discipline:
+Proceed from the completed Phase 3a `digits` MLP baseline to the first real-data predictive-coding baseline, while carrying forward the Phase 2g / 2g.1 protocol discipline:
 
 - keep explicit train/val/test separation
-- keep deterministic matched small-scope tuning
+- keep deterministic seed roles and explicit checkpoint selection by validation
 - keep held-out test as the final headline metric
 
 Why this is justified now:
@@ -369,5 +380,6 @@ Why this is justified now:
 - the strongest current conclusion is no longer a simple "PC always trails MLP" story
 - the Phase 2g.1 closure pass did not reverse the benchmark-level winners
 - the Phase 2g.1 downstream refresh did not reverse those winners either
-- the most informative unresolved question is now external validity:
-  - do these benchmark-dependent Phase 2g conclusions survive on a small real dataset?
+- the most informative unresolved questions are now:
+  - does a real-data predictive-coding baseline train stably on `digits` under the same protocol?
+  - after that, do the benchmark-dependent Phase 2 conclusions survive in a real-data PC-vs-MLP comparison?

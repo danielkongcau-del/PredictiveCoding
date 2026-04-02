@@ -217,7 +217,7 @@ Evidence used:
 - `outputs/pc_budget_tradeoff_phase2g1_toy_regression/aggregate_summary.json`
 - `outputs/pc_budget_tradeoff_phase2g1_toy_sine_regression/aggregate_summary.json`
 
-These are the current Phase 2 authority artifacts retained locally by default after output cleanup.
+These are the Phase 2 authority artifacts used to establish the current conclusions. Depending on local cleanup policy, you may need to regenerate some of them before inspecting the corresponding directories again.
 
 #### `toy_regression`
 
@@ -376,34 +376,54 @@ This keeps the earlier diagnostic interpretation narrow:
 - it does not show that the current matched selection is equivalent to nested multi-seed selection
 - it does not show that the toy-benchmark conclusions automatically transfer to real datasets
 
+### Phase 3 done means what
+
+Phase 3 is now complete in a deliberately narrow sense:
+
+- a small real-data baseline exists on `sklearn.datasets.load_digits`
+- the real-data protocol uses explicit `train / val / test` splits
+- a deterministic mini-batch pipeline exists
+- the digits MLP baseline writes a reproducible artifact set under `outputs/digits_mlp/`
+
+Concretely, the current Phase 3 baseline establishes:
+
+- `src/pc/datasets.py` provides a deterministic, stratified `load_digits` split returning `SupervisedDataSplit`
+- inputs are batch-first `(batch, 64)` `float64` arrays normalized by `16.0`
+- targets are batch-first `(batch, 10)` `float64` one-hot arrays
+- `src/pc/minibatch.py` provides deterministic mini-batch ordering under an explicit `batch_order_seed`
+- `experiments/digits_mlp.py` runs a real-data MLP baseline without changing the existing MLP math
+- the resulting `summary.json` explicitly separates:
+  - `train_metric`
+  - `val_metric`
+  - `test_metric`
+  - `selection_metric_source = "val_metric"`
+  - `report_metric_source = "test_metric"`
+
+### Phase 3 done does not mean what
+
+Phase 3 completion does **not** mean:
+
+- a real-data predictive-coding baseline has already been completed
+- a real-data matched PC-vs-MLP comparison has already been completed
+- MNIST is already part of the repository's active baseline workflow
+- the real-data search space has been explored or tuned aggressively
+
 ### Recommended next engineering step
 
-Phase 2 is now stable enough to proceed to Phase 3, but that statement has a precise meaning:
-
-- stable enough means the current benchmark-level winners survived the Phase 2g.1 boundary extension
-- it does not mean the toy-search spaces are exhaustive or that the best configs are fully saturated
-
-The most justified next step is therefore to proceed to Phase 3 on a small real dataset, while carrying forward the Phase 2g / 2g.1 protocol discipline:
+The next natural step is now the first real-data predictive-coding baseline on `digits`, while keeping the same protocol discipline used by the current MLP baseline:
 
 - keep explicit train/val/test separation
-- keep deterministic matched small-scope tuning
+- keep deterministic seed roles, including `batch_order_seed`
 - keep held-out test for final reporting
-- avoid falling back to train-only or train/eval-style headline claims
-
-Why this is the better next step:
-
-- the repository now has a fairer toy-benchmark comparison protocol
-- the strongest current conclusion is not a universal winner but a benchmark-dependent split result
-- the most informative unresolved question is therefore external validity:
-  - do these conclusions hold on a small real dataset?
+- avoid introducing a real-data PC-vs-MLP comparison until the standalone PC baseline is stable
 
 Important caveats that should remain explicit:
 
 - the current toy benchmarks are still simple
 - the current search spaces are finite and not exhaustive
-- both benchmarks still show boundary sensitivity in the sense that the local boundary-check best configs moved beyond the old search bounds
-- the matched searches are still single-seed selection procedures, not nested multi-seed model-selection protocols
-- Phase 3 real-data evaluation is still pending
+- both Phase 2 toy benchmarks still showed boundary sensitivity even though the benchmark-level winners survived the local boundary check
+- the matched Phase 2 searches are still single-seed selection procedures, not nested multi-seed model-selection protocols
+- the current Phase 3 result is a small real-data MLP baseline only
 
 ---
 
