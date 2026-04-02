@@ -11,19 +11,21 @@ from typing import Any, Literal
 import numpy as np
 
 from .datasets import load_digits_split
+from .layers import init_mlp_layers
 from .metrics import classification_accuracy, majority_class_baseline_accuracy
 from .minibatch import iter_minibatches
-from .mlp_baseline import MLPNetwork, init_mlp_baseline_layers
+from .models import PCNetwork
+from .training import TrainBatchResult
 from .utils import set_seed
 
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 
 @dataclass
-class RealMLPConfig:
-    """Configuration for a Phase 3 real-data MLP experiment."""
+class RealPCConfig:
+    """Configuration for a Phase 3 real-data predictive-coding experiment."""
 
-    experiment_name: str = "digits_mlp"
+    experiment_name: str = "digits_pc"
     dataset_name: str = "digits"
     task_name: str = "classification"
     run_seed: int = 0
@@ -41,9 +43,14 @@ class RealMLPConfig:
     hidden_activation: str = "tanh"
     output_activation: str = "identity"
     weight_scale: float = 0.05
-    eta_w: float = 0.05
-    eta_b: float | None = None
-    epochs: int = 100
+    sigma2: float | tuple[float, ...] = 1.0
+    eta_x: float = 0.10
+    eta_w: float = 0.02
+    eta_b: float | None = 0.02
+    train_steps: int = 30
+    eval_steps: int | None = 30
+    state_init: str = "forward"
+    epochs: int = 60
     batch_size: int = 64
     shuffle_batches: bool = True
     logging: dict[str, Any] = field(default_factory=dict)
@@ -57,8 +64,8 @@ class RealMLPConfig:
 
 
 @dataclass
-class RealMLPRunResult:
-    """Materialized outputs of a Phase 3 real-data MLP run."""
+class RealPCRunResult:
+    """Materialized outputs of a Phase 3 real-data PC run."""
 
     run_dir: Path
     config: dict[str, Any]
@@ -96,6 +103,9 @@ def _write_epoch_metrics(path: Path, rows: list[dict[str, Any]], num_layers: int
         "epoch",
         "batch_size",
         "batches_per_epoch",
+        "train_steps",
+        "eval_steps",
+        "state_init",
         "train_loss",
         "train_accuracy",
         "val_loss",
@@ -104,6 +114,9 @@ def _write_epoch_metrics(path: Path, rows: list[dict[str, Any]], num_layers: int
         "val_baseline_accuracy",
         "accuracy",
         "baseline_accuracy",
+        "train_mean_pre_update_energy",
+        "train_mean_post_update_energy",
+        "train_mean_energy_delta",
     ]
     fieldnames.extend([f"weight_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
     fieldnames.extend([f"bias_norm_l{layer_index}" for layer_index in range(1, num_layers + 1)])
@@ -116,7 +129,7 @@ def _write_epoch_metrics(path: Path, rows: list[dict[str, Any]], num_layers: int
 
 
 def _evaluate_model(
-    model: MLPNetwork,
+    model: PCNetwork,
     x: np.ndarray,
     y: np.ndarray,
 ) -> tuple[float, float]:
@@ -128,11 +141,11 @@ def _evaluate_model(
     return loss, accuracy
 
 
-def _snapshot_parameters(model: MLPNetwork) -> list[tuple[np.ndarray, np.ndarray]]:
+def _snapshot_parameters(model: PCNetwork) -> list[tuple[np.ndarray, np.ndarray]]:
     return [(layer.weight.copy(), layer.bias.copy()) for layer in model.layers]
 
 
-def _restore_parameters(model: MLPNetwork, snapshot: list[tuple[np.ndarray, np.ndarray]]) -> None:
+def _restore_parameters(model: PCNetwork, snapshot: list[tuple[np.ndarray, np.ndarray]]) -> None:
     if len(snapshot) != len(model.layers):
         raise ValueError("Parameter snapshot must align with model layers.")
     for layer, (weight, bias) in zip(model.layers, snapshot, strict=True):
@@ -140,11 +153,18 @@ def _restore_parameters(model: MLPNetwork, snapshot: list[tuple[np.ndarray, np.n
         layer.bias = bias.copy()
 
 
+def _sigma2_payload(sigma2: float | tuple[float, ...]) -> float | list[float]:
+    if isinstance(sigma2, tuple):
+        return [float(value) for value in sigma2]
+    return float(sigma2)
+
+
 def _config_payload(
-    config: RealMLPConfig,
+    config: RealPCConfig,
     run_id: str,
     data_metadata: dict[str, Any],
     batches_per_epoch: int,
+    model: PCNetwork,
 ) -> dict[str, Any]:
     return {
         "experiment_name": config.experiment_name,
@@ -169,19 +189,24 @@ def _config_payload(
         },
         "data": dict(data_metadata),
         "model": {
-            "model_family": "mlp",
+            "model_family": "pc",
             "layer_dims": list(config.layer_dims),
             "hidden_activation": config.hidden_activation,
             "output_activation": config.output_activation,
             "weight_scale": config.weight_scale,
+            "sigma2": _sigma2_payload(config.sigma2),
             "model_init_seed": config.model_init_seed,
         },
         "training": {
             "epochs": config.epochs,
             "batch_size": config.batch_size,
             "batches_per_epoch": batches_per_epoch,
+            "eta_x": config.eta_x,
             "eta_w": config.eta_w,
-            "eta_b": config.eta_w if config.eta_b is None else config.eta_b,
+            "eta_b": model.eta_b,
+            "train_steps": config.train_steps,
+            "eval_steps": model.eval_steps,
+            "state_init": config.state_init,
             "shuffle_batches": config.shuffle_batches,
             "batch_order_seed": config.batch_order_seed,
         },
@@ -212,7 +237,7 @@ def _plot_learning_curves(run_dir: Path, epoch_rows: list[dict[str, Any]]) -> No
     axis.plot(epochs, [row["val_loss"] for row in epoch_rows], label="val_loss")
     axis.set_xlabel("Epoch")
     axis.set_ylabel("MSE loss")
-    axis.set_title("Digits MLP Loss Curves")
+    axis.set_title("Digits PC Loss Curves")
     axis.legend()
     figure.tight_layout()
     figure.savefig(plots_dir / "loss_curves.png")
@@ -224,19 +249,32 @@ def _plot_learning_curves(run_dir: Path, epoch_rows: list[dict[str, Any]]) -> No
     axis.plot(epochs, [row["val_accuracy"] for row in epoch_rows], label="val_accuracy")
     axis.set_xlabel("Epoch")
     axis.set_ylabel("Accuracy")
-    axis.set_title("Digits MLP Accuracy Curves")
+    axis.set_title("Digits PC Accuracy Curves")
     axis.legend()
     figure.tight_layout()
     figure.savefig(plots_dir / "accuracy_curves.png")
     plt.close(figure)
 
 
-def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
-    """Run a deterministic Phase 3a digits MLP baseline experiment."""
+def _mean_batch_energy(train_batch_results: list[TrainBatchResult]) -> tuple[float, float, float]:
+    pre = np.array([result.pre_update_energy for result in train_batch_results], dtype=np.float64)
+    post = np.array(
+        [0.0 if result.post_update_energy is None else result.post_update_energy for result in train_batch_results],
+        dtype=np.float64,
+    )
+    return float(np.mean(pre)), float(np.mean(post)), float(np.mean(post - pre))
+
+
+def run_digits_pc_experiment(config: RealPCConfig) -> RealPCRunResult:
+    """Run a deterministic Phase 3b digits predictive-coding baseline experiment."""
     if config.epochs <= 0:
         raise ValueError("epochs must be positive.")
     if config.batch_size <= 0:
         raise ValueError("batch_size must be positive.")
+    if config.train_steps < 0:
+        raise ValueError("train_steps must be non-negative.")
+    if config.eval_steps is not None and config.eval_steps < 0:
+        raise ValueError("eval_steps must be non-negative when provided.")
 
     set_seed(config.run_seed)
     split = load_digits_split(
@@ -246,32 +284,36 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
         test_fraction=config.test_fraction,
     )
 
-    model = MLPNetwork(
-        layers=init_mlp_baseline_layers(
+    model = PCNetwork(
+        layers=init_mlp_layers(
             config.layer_dims,
             hidden_activation=config.hidden_activation,
             output_activation=config.output_activation,
             weight_scale=config.weight_scale,
+            sigma2=config.sigma2,
             seed=config.model_init_seed,
             dtype=np.float64,
         ),
+        eta_x=config.eta_x,
         eta_w=config.eta_w,
         eta_b=config.eta_b,
+        train_steps=config.train_steps,
+        eval_steps=config.eval_steps,
+        state_init=config.state_init,
     )
 
     train_baseline_accuracy = majority_class_baseline_accuracy(split.y_train)
     val_baseline_accuracy = majority_class_baseline_accuracy(split.y_val)
     test_baseline_accuracy = majority_class_baseline_accuracy(split.y_test)
 
-    batches_per_epoch = len(
-        list(
-            iter_minibatches(
-                split.x_train,
-                split.y_train,
-                config.batch_size,
-                shuffle=config.shuffle_batches,
-                seed=config.batch_order_seed,
-            )
+    batches_per_epoch = sum(
+        1
+        for _ in iter_minibatches(
+            split.x_train,
+            split.y_train,
+            config.batch_size,
+            shuffle=config.shuffle_batches,
+            seed=config.batch_order_seed,
         )
     )
 
@@ -285,6 +327,7 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
         run_id=run_id,
         data_metadata=split.metadata,
         batches_per_epoch=batches_per_epoch,
+        model=model,
     )
     _write_json(run_dir / "config.json", config_payload)
 
@@ -295,6 +338,7 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
     epoch_rows: list[dict[str, Any]] = []
 
     for epoch in range(1, config.epochs + 1):
+        batch_results: list[TrainBatchResult] = []
         minibatches = iter_minibatches(
             split.x_train,
             split.y_train,
@@ -303,15 +347,19 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
             seed=config.batch_order_seed + (epoch - 1),
         )
         for x_batch, y_batch in minibatches:
-            model.train_batch(x_batch, y_batch)
+            batch_results.append(model.train_batch(x_batch, y_batch, compute_post_update_energy=True))
 
         train_loss, train_accuracy = _evaluate_model(model, split.x_train, split.y_train)
         val_loss, val_accuracy = _evaluate_model(model, split.x_val, split.y_val)
+        mean_pre_update_energy, mean_post_update_energy, mean_energy_delta = _mean_batch_energy(batch_results)
 
         row: dict[str, Any] = {
             "epoch": epoch,
             "batch_size": config.batch_size,
             "batches_per_epoch": batches_per_epoch,
+            "train_steps": config.train_steps,
+            "eval_steps": model.eval_steps,
+            "state_init": config.state_init,
             "train_loss": train_loss,
             "train_accuracy": train_accuracy,
             "val_loss": val_loss,
@@ -320,6 +368,9 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
             "val_baseline_accuracy": val_baseline_accuracy,
             "accuracy": val_accuracy,
             "baseline_accuracy": val_baseline_accuracy,
+            "train_mean_pre_update_energy": mean_pre_update_energy,
+            "train_mean_post_update_energy": mean_post_update_energy,
+            "train_mean_energy_delta": mean_energy_delta,
         }
         for layer_index, layer in enumerate(model.layers, start=1):
             row[f"weight_norm_l{layer_index}"] = float(np.linalg.norm(layer.weight))
@@ -345,7 +396,7 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
         "run_id": run_id,
         "phase": "Phase 3",
         "math_version": "phase0-baseline",
-        "model_family": "mlp",
+        "model_family": "pc",
         "dataset_name": config.dataset_name,
         "task_name": config.task_name,
         "seed": config.run_seed,
@@ -385,6 +436,14 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
         "batch_size": config.batch_size,
         "batches_per_epoch": batches_per_epoch,
         "epochs": config.epochs,
+        "eta_x": config.eta_x,
+        "eta_w": config.eta_w,
+        "eta_b": model.eta_b,
+        "train_steps": config.train_steps,
+        "eval_steps": model.eval_steps,
+        "state_init": config.state_init,
+        "hidden_activation": config.hidden_activation,
+        "output_activation": config.output_activation,
     }
 
     _write_epoch_metrics(run_dir / "epoch_metrics.csv", epoch_rows, num_layers=len(model.layers))
@@ -393,7 +452,7 @@ def run_digits_mlp_experiment(config: RealMLPConfig) -> RealMLPRunResult:
     if config.plot_curves:
         _plot_learning_curves(run_dir, epoch_rows)
 
-    return RealMLPRunResult(
+    return RealPCRunResult(
         run_dir=run_dir,
         config=config_payload,
         epoch_metrics=epoch_rows,

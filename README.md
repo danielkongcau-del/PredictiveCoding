@@ -19,8 +19,10 @@ Current status split:
 - Stable infrastructure phases: Phase 0, Phase 1, and Phase 1.5
 - Experimental findings phases: Phase 2a through Phase 2g.1
 - Phase 2 is now considered sufficiently stable to close as a toy-benchmark methodology phase
-- Phase 3 is completed as a **small real-data MLP baseline** on `sklearn.datasets.load_digits`
-- This does not mean a real-data predictive-coding baseline or real-data PC-vs-MLP comparison is already done
+- Phase 3 is complete as a **standalone real-data baseline phase** on `sklearn.datasets.load_digits`
+- the current canonical `digits_pc` baseline reflects a narrow stabilization sweep chosen by `val_metric`
+- This does not mean a real-data PC-vs-MLP comparison is already done
+- the next active phase is a controlled real-data comparison protocol on `digits`, not a large immediate comparison push
 - The current Phase 2 freeze summary lives in `RESULTS.md`
 - Earlier train-only and train/eval-style Phase 2 conclusions are now treated as methodology-limited historical results
 - Current strongest Phase 2 conclusion comes from the best-known Phase 2 evidence chain:
@@ -37,7 +39,11 @@ Current status split:
 - Local output-retention note:
   - the scientific Phase 2 conclusions are preserved in `RESULTS.md` and `validation.md`
   - local output cleanup is allowed; older Phase 2 generated outputs may need to be regenerated if you want to inspect them again
-  - the currently retained Phase 3 artifact set is the local `outputs/digits_mlp/` baseline run
+- the current canonical Phase 3 artifact set is:
+  - `outputs/digits_mlp/`
+  - `outputs/digits_pc/`
+  - `outputs/digits_baselines/`
+  - optional retained reference: `outputs/digits_pc_stabilization/`
 
 Current scope:
 
@@ -52,13 +58,12 @@ Current scope:
 - Phase 2f train/val/test-aware protocol hardening and PC joint search
 - Phase 2g matched small-scope PC/MLP search plus refreshed downstream multiseed and budget-tradeoff studies
 - Phase 2g.1 local boundary-check study for search-space truncation risk plus refined downstream refreshes
-- Phase 3 real-data MLP baseline on `digits`
+- Phase 3 standalone real-data baselines on `digits`
 
 Not included yet:
 
 - CNN/RNN/temporal PC
 - MNIST-scale experiments
-- real-data predictive-coding baseline
 - real-data matched PC-vs-MLP comparison
 - generic hyperparameter tuning frameworks or large search grids
 
@@ -266,13 +271,15 @@ Phase 2d adds a narrow diagnostic script for understanding the tuned-PC vs MLP g
 & 'D:\Anaconda\envs\pc\python.exe' experiments/pc_diagnostics.py toy_regression
 ```
 
-Phase 3 currently adds a **digits MLP baseline only**:
+Phase 3 currently adds two **standalone digits baselines** with aligned protocol semantics:
 
 ```powershell
 & 'D:\Anaconda\envs\pc\python.exe' experiments/digits_mlp.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/digits_pc.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/summarize_digits_baselines.py
 ```
 
-This writes:
+These write:
 
 ```text
 outputs/
@@ -281,27 +288,67 @@ outputs/
     epoch_metrics.csv
     summary.json
     plots/                 # only when plot_curves=True and matplotlib is available
+  digits_pc/
+    config.json
+    epoch_metrics.csv
+    summary.json
+    plots/                 # only when plot_curves=True and matplotlib is available
+  digits_baselines/
+    summary.json          # first-pass side-by-side summary of existing digits_mlp and digits_pc runs
 ```
 
-By default, rerunning this script writes back into the same stable directory:
+The local tree may also retain:
+
+- `outputs/digits_pc_stabilization/`
+  This is a narrow baseline-hardening artifact from the standalone PC stabilization sweep, not a formal comparison artifact.
+
+By default, rerunning either script writes back into the same stable directory:
 
 - `outputs/digits_mlp/`
-- that means a new default run overwrites the previous `config.json`, `epoch_metrics.csv`, `summary.json`, and optional plots in that directory
+- `outputs/digits_pc/`
+- `outputs/digits_baselines/`
+- that means a new default run overwrites the previous `config.json`, `epoch_metrics.csv`, `summary.json`, and optional plots in the corresponding directory
 - use a custom `run_id` or a copied output directory yourself if you want to preserve multiple local snapshots
 
 Meaning of the current Phase 3 output:
 
-- it is a small real-data baseline on `sklearn.datasets.load_digits`
+- it is a small real-data baseline setup on `sklearn.datasets.load_digits`
 - it uses explicit `train / val / test` splits
 - it uses deterministic mini-batch ordering with explicit seed roles
 - it selects the reported checkpoint by `val_metric`
 - it reports the headline result on held-out `test_metric`
+- the `digits_mlp` and `digits_pc` runs now share those protocol rules
+- the canonical `digits_pc` baseline now reflects the best single-run candidate from a small stabilization sweep selected by `val_metric`
+- `experiments/summarize_digits_baselines.py` can produce a small side-by-side digest from the two existing `summary.json` files
+- the current Phase 3 checkpoint should therefore be read from:
+  - `outputs/digits_mlp/`
+  - `outputs/digits_pc/`
+  - `outputs/digits_baselines/`
 
 What it does not mean:
 
-- it is not a real-data predictive-coding baseline
 - it is not a real-data PC-vs-MLP comparison
 - it is not an MNIST result
+- it does not mean matched tuning or real-data comparison artifacts are already implemented
+- the side-by-side summary is only a first-pass human-facing digest, not a formal comparison pipeline
+- the current Phase 3 evidence chain is still a pair of standalone baselines plus a digest, not a real-data matched-comparison workflow
+
+What Phase 3 has completed:
+
+- a deterministic real-data `digits` entry point
+- deterministic mini-batch ordering with explicit seed roles
+- a standalone canonical `digits_mlp` baseline
+- a standalone canonical `digits_pc` baseline
+- protocol-alignment checks between those two baselines
+- a first-pass side-by-side digest for human inspection
+
+What Phase 3 has not completed:
+
+- formal real-data comparison artifacts
+- matched tuning
+- multi-seed real-data aggregation
+- a second real dataset
+- MNIST
 
 Phase 2e adds a narrow tuned-PC budget tradeoff script:
 

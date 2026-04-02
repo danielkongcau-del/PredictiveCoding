@@ -8,6 +8,7 @@ from .layers import PCLayerParams, init_mlp_layers
 from .mlp_baseline import MLPNetwork, MLPLayerParams, init_mlp_baseline_layers
 from .minibatch import iter_minibatches
 from .real_mlp import RealMLPConfig, RealMLPRunResult, run_digits_mlp_experiment
+from .real_pc import RealPCConfig, RealPCRunResult, run_digits_pc_experiment
 from .phase2g1_boundary_check import (
     Phase2G1BoundaryCheckRunResult,
     run_phase2g1_boundary_check,
@@ -34,12 +35,15 @@ __all__ = [
     "PCNetwork",
     "RealMLPConfig",
     "RealMLPRunResult",
+    "RealPCConfig",
+    "RealPCRunResult",
     "init_mlp_layers",
     "init_mlp_baseline_layers",
     "iter_minibatches",
     "load_digits_split",
     "run_benchmark_comparison",
     "run_digits_mlp_experiment",
+    "run_digits_pc_experiment",
     "run_phase2g1_boundary_check",
     "run_pc_budget_tradeoff_study",
     "run_pc_joint_search",

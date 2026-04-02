@@ -4,21 +4,47 @@ This note freezes the repository's current Phase 2 state after the fairness-hard
 
 It is an internal research-engineering summary, not a paper-style claim set.
 
-Phase 3 follow-on status:
+Phase 3 checkpoint status:
 
-- the repository has now completed a narrow Phase 3a step:
+- the repository has now completed narrow Phase 3a and 3b standalone real-data baseline steps:
   - a small real-data MLP baseline on `sklearn.datasets.load_digits`
+  - a first real-data predictive-coding baseline on the same `digits` split protocol
+  - a refreshed canonical `digits_pc` default selected from a narrow stabilization sweep by `val_metric`
   - explicit `train / val / test` reporting
   - deterministic mini-batch ordering
-  - reproducible artifacts under `outputs/digits_mlp/`
+  - reproducible artifacts under `outputs/digits_mlp/` and `outputs/digits_pc/`
+  - an optional first-pass side-by-side digest under `outputs/digits_baselines/`
 - this file still remains a Phase 2 summary
-- it should not be read as evidence that a real-data predictive-coding baseline or real-data PC-vs-MLP comparison is already complete
+- it should not be read as evidence that a real-data PC-vs-MLP comparison is already complete
+- the current canonical Phase 3 artifact set is:
+  - `outputs/digits_mlp/`
+  - `outputs/digits_pc/`
+  - `outputs/digits_baselines/`
+  - optional retained reference: `outputs/digits_pc_stabilization/`
 
 Local artifact-retention note:
 
 - the scientific conclusions in this file reflect the full Phase 2 history
-- the locally retained `outputs/` tree may be lighter than the full Phase 2 history after cleanup and may keep only the current `digits_mlp` Phase 3 baseline run plus `.gitkeep`
+- the locally retained `outputs/` tree may be lighter than the full Phase 2 history after cleanup and may keep only the current Phase 3 baseline runs and side-by-side digest plus `.gitkeep`
 - older generated outputs are treated as reproducible artifacts that can be regenerated when needed
+
+## Real-Data Baseline Status
+
+The current real-data status is intentionally modest:
+
+- `digits_mlp` and `digits_pc` now both exist as standalone baselines on the same `digits` dataset entry
+- both use the same explicit `train / val / test` split discipline
+- both select their reported checkpoint by validation accuracy and report the headline metric on held-out test accuracy
+- `experiments/summarize_digits_baselines.py` provides a small side-by-side digest of the two existing baseline summaries
+- the current canonical baseline summaries are:
+  - `digits_mlp`: `best_epoch = 99`, `val_accuracy = 0.9111111111111111`, `test_accuracy = 0.9481481481481482`
+  - `digits_pc`: `best_epoch = 55`, `val_accuracy = 0.8444444444444444`, `test_accuracy = 0.9185185185185185`
+
+This should be read as a **first-pass real-data baseline status check**, not as a completed fair comparison:
+
+- there is no matched tuning yet
+- there is no unified real-data comparison pipeline yet
+- the side-by-side summary is meant to help decide whether matched tuning or a more formal comparison step is worth doing next
 
 ## Project State
 
@@ -363,23 +389,26 @@ Interpretation:
 - the matched searches are still single-seed model-selection procedures rather than nested multi-seed selection protocols
 - the boundary-check closure pass and refined downstream refreshes improve confidence, but they still do not saturate the finite search spaces
 - Phase 2e-style budget studies are about inference-step budget, not wall-clock or FLOP efficiency
-- a real-data predictive-coding baseline is still pending
-- a real-data matched PC-vs-MLP evaluation is still pending
+- the current real-data work is still only a pair of standalone baselines plus a digest, not a formal comparison workflow
+- real-data matched tuning is not yet implemented
+- real-data multi-seed aggregation is not yet implemented
+- a second real dataset is not yet implemented
 
 ## Recommended Next Step
 
-Proceed from the completed Phase 3a `digits` MLP baseline to the first real-data predictive-coding baseline, while carrying forward the Phase 2g / 2g.1 protocol discipline:
+Proceed into a cautious Phase 4 start on `digits`, framed as a **controlled real-data comparison protocol** rather than a large immediate comparison push, while carrying forward the Phase 2g / 2g.1 protocol discipline and the current Phase 3 standalone-baseline protocol:
 
 - keep explicit train/val/test separation
 - keep deterministic seed roles and explicit checkpoint selection by validation
 - keep held-out test as the final headline metric
+- define a narrow real-data comparison protocol before attempting matched tuning or broader search
 
 Why this is justified now:
 
 - the repository has already hardened the toy-benchmark comparison protocol substantially
-- the strongest current conclusion is no longer a simple "PC always trails MLP" story
+- the repository now has both standalone real-data baselines under a shared protocol
 - the Phase 2g.1 closure pass did not reverse the benchmark-level winners
-- the Phase 2g.1 downstream refresh did not reverse those winners either
+- the canonical `digits_pc` baseline is no longer stuck at an obviously conservative first-pass default
 - the most informative unresolved questions are now:
-  - does a real-data predictive-coding baseline train stably on `digits` under the same protocol?
-  - after that, do the benchmark-dependent Phase 2 conclusions survive in a real-data PC-vs-MLP comparison?
+  - can the repository define a narrow real-data comparison contract without drifting into a broad search framework?
+  - after that, do the benchmark-dependent Phase 2 conclusions survive in a formal real-data PC-vs-MLP comparison on `digits`?
