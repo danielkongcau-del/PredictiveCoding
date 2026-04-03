@@ -5,7 +5,13 @@ from pathlib import Path
 
 import numpy as np
 
-from pc.fmpc_protocol import FMPCPreparationConfig, run_fmpc_v0_preparation
+from pc.fmpc_protocol import (
+    FMPCPreparationConfig,
+    FMPC_PREPARATION_SCHEMA_VERSION,
+    load_prepared_teacher_runtime,
+    run_fmpc_v0_preparation,
+)
+from pc.minibatch import iter_minibatches
 from pc.layers import init_mlp_layers
 from pc.models import PCNetwork
 from pc.real_pc import RealPCConfig, RealPCRunResult
@@ -44,6 +50,7 @@ def test_fmpc_teacher_only_smoke_writes_expected_artifacts(tmp_path: Path) -> No
     assert (run_dir / "teacher_model" / "config.json").exists()
     assert (run_dir / "teacher_model" / "epoch_metrics.csv").exists()
     assert (run_dir / "teacher_model" / "summary.json").exists()
+    assert (run_dir / "teacher_model" / "checkpoint.npz").exists()
     assert (run_dir / "teacher_targets" / "manifest.json").exists()
     assert (run_dir / "teacher_targets" / "train.npz").exists()
     assert (run_dir / "teacher_targets" / "val.npz").exists()
@@ -61,11 +68,17 @@ def test_fmpc_teacher_only_smoke_writes_expected_artifacts(tmp_path: Path) -> No
     assert summary["teacher"]["export_backend"] == "pc_euler"
     assert summary["teacher"]["export_steps"] == 2
 
+    assert manifest["schema_version"] == FMPC_PREPARATION_SCHEMA_VERSION
     assert manifest["teacher_mode"] == "train"
     assert manifest["teacher_target_semantics"] == "target-clamped supervised teacher"
     assert manifest["teacher_backend"] == "pc_euler"
     assert manifest["teacher_steps"] == 2
     assert manifest["export_trajectory"] is False
+    assert manifest["teacher_checkpoint"]["relative_path"] == "../teacher_model/checkpoint.npz"
+    assert not Path(manifest["teacher_checkpoint"]["relative_path"]).is_absolute()
+    assert manifest["splits"]["train"]["relative_path"] == "train.npz"
+    assert not Path(manifest["splits"]["train"]["relative_path"]).is_absolute()
+    assert manifest["splits"]["train"]["delta_z_rms"] > 0.0
 
     train_npz = np.load(run_dir / "teacher_targets" / "train.npz")
     assert train_npz["sample_indices"].ndim == 1
@@ -75,6 +88,55 @@ def test_fmpc_teacher_only_smoke_writes_expected_artifacts(tmp_path: Path) -> No
     assert train_npz["targets"].shape[1] == 10
     assert train_npz["z0"].shape == train_npz["z_star"].shape
     assert train_npz["z0"].dtype == np.float64
+
+
+def test_fmpc_preparation_checkpoint_roundtrip_reproduces_saved_teacher_targets(tmp_path: Path) -> None:
+    result = run_fmpc_v0_preparation(
+        FMPCPreparationConfig(
+            dataset_name="digits",
+            output_root=tmp_path,
+            run_id="teacher_checkpoint_roundtrip",
+            teacher_pc_config=RealPCConfig(
+                dataset_name="digits",
+                layer_dims=(64, 16, 10),
+                epochs=1,
+                batch_size=256,
+                train_steps=2,
+                eval_steps=2,
+            ),
+            teacher_export_steps=2,
+            teacher_export_batch_size=256,
+            export_trajectory=False,
+        )
+    )
+
+    loaded_model, loaded_split = load_prepared_teacher_runtime(result.run_dir)
+    with np.load(result.run_dir / "teacher_targets" / "train.npz") as saved:
+        saved_z0 = np.asarray(saved["z0"], dtype=np.float64)
+        saved_z_star = np.asarray(saved["z_star"], dtype=np.float64)
+
+    z0_batches: list[np.ndarray] = []
+    z_star_batches: list[np.ndarray] = []
+    for x_batch, y_batch in iter_minibatches(
+        loaded_split.x_train,
+        loaded_split.y_train,
+        256,
+        shuffle=False,
+    ):
+        teacher_export = loaded_model.export_teacher_targets(
+            np.asarray(x_batch, dtype=np.float64),
+            np.asarray(y_batch, dtype=np.float64),
+            record_trace=True,
+            record_trajectory=False,
+        )
+        z0_batches.append(teacher_export.z0)
+        z_star_batches.append(teacher_export.z_star)
+
+    replay_z0 = np.concatenate(z0_batches, axis=0)
+    replay_z_star = np.concatenate(z_star_batches, axis=0)
+
+    np.testing.assert_allclose(replay_z0, saved_z0, atol=1e-12, rtol=1e-12)
+    np.testing.assert_allclose(replay_z_star, saved_z_star, atol=1e-12, rtol=1e-12)
 
 
 def test_fmpc_preparation_supports_fashion_mnist_dataset_name_without_network(

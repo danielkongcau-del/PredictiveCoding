@@ -616,30 +616,260 @@ Repository note:
 
 ---
 
-## Phase 5 — Variant extensions
+## Phase 5 — Offline FMPC-v0 student on digits
+
+Status:
+
+- Active as the current post-Phase-4 implementation slice
+- Restricted to an offline student transporter trained against Phase 4 teacher-target artifacts
+- This phase does not authorize any change to baseline predictive-coding energy, state updates, or weight updates
+- Current acceptance work is limited to a Phase 5 v0 seal-off repair:
+  - portable teacher artifacts
+  - exact teacher checkpoint loading
+  - explicit identity / zero-delta baseline metrics
+  - non-trivial canonical digits validation
+- This repair slice does not authorize:
+  - trajectory-aware supervision
+  - MeanFlow / JVP losses
+  - refinement-by-default
+  - any `backend="fmpc"` injection into the core iterative PC path
 
 ### Goal
 
-Add explicitly labeled predictive coding variants without breaking the baseline.
+Train a first-pass offline FMPC-v0 student on `digits` that learns endpoint hidden-state transport from `z0` to `z_star` while leaving the iterative PC teacher frozen.
 
-### Candidate variants
+### Scope
 
-- separate recognition / initialization network
-- bidirectional weights
-- convolutional PC
-- temporal / recurrent PC
-- alternative energies or output likelihoods
+- dataset:
+  - `digits` only
+- teacher:
+  - existing iterative PC teacher
+  - frozen
+  - supervision must come from the dedicated Phase 4 teacher-only preparation/export protocol
+- student input:
+  - `concat([z0, target_onehot])`
+- student target:
+  - `delta_z = z_star - z0`
+- student output:
+  - `delta_z_hat`
+- transporter output:
+  - `z_hat = z0 + delta_z_hat`
+- primary training objective:
+  - `MSE(delta_z_hat, delta_z)`
+- evaluation metrics:
+  - endpoint state error
+  - energy gap
+  - update-direction alignment
+  - optional timing / speedup summaries
+- optional refinement:
+  - placeholder only
+  - disabled by default
+- not part of Phase 5 v0:
+  - full MeanFlow identity training
+  - JVP-based objectives
+  - online joint training with the teacher
+  - formal PC-vs-student comparison claims
 
-### Rules for this phase
+### Deliverables
 
-- each variant must live behind an explicit name
-- baseline behavior must remain preserved
-- new math must be documented in `spec_math.md` or a variant-specific spec
+- a narrow offline student data-loader module that reads Phase 4 teacher-target artifacts and validates:
+  - `z0`
+  - `z_star`
+  - `target_onehot`
+  - `delta_z`
+  - `concat([z0, target_onehot])`
+- a NumPy-first student transporter module for `digits`
+- a narrow offline student training module that:
+  - trains on `delta_z`
+  - selects checkpoints on validation loss
+  - reports held-out test metrics separately
+- one experiment entry point for the `digits` offline student
+- artifact outputs such as:
+  - `config.json`
+  - `epoch_metrics.csv`
+  - `summary.json`
+- tests covering:
+  - teacher-target artifact loading
+  - batch-first float64 contracts
+  - deterministic initialization and batch order
+  - offline student smoke training
+  - artifact generation
+
+### Files likely to touch in the first slice
+
+- `PLANS.md`
+- `src/pc/fmpc_student_data.py`
+- `src/pc/fmpc_student.py`
+- `experiments/fmpc_v0_student.py`
+- focused tests under `tests/`
 
 ### Exit criteria
 
-- at least one non-baseline variant is implemented and validated
-- users can tell which formulation they are running
+- the repository can read a Phase 4 teacher-only preparation artifact and validate a stable offline student data contract
+- the offline student trains on `digits` without touching teacher weights or baseline PC math
+- training and evaluation artifacts clearly separate:
+  - training loss
+  - validation selection metric
+  - held-out test metric
+- optional refinement remains explicitly off by default
+- no code path silently routes `backend="fmpc"` into the baseline iterative inference stack
+
+### Risks
+
+- confusing teacher-export semantics with standalone predict-mode evaluation
+- silently widening scope into MeanFlow / JVP / CFG before the endpoint transporter works
+- coupling the student too tightly to the teacher runtime instead of the saved artifact contract
+- introducing hidden assumptions about output-layer inclusion in `z`
+
+### Current first patch target
+
+- lock down the offline student data contract first
+- do not start with a full trainer
+- consume Phase 4 teacher-target artifacts exactly as written and fail loudly on contract drift
+
+### Phase 5 v0 acceptance-repair slice
+
+Goal:
+
+- close the current Phase 5 v0 acceptance gaps without widening scope beyond offline endpoint transport on `digits`
+
+Files likely to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_protocol.py`
+- `src/pc/fmpc_student_data.py`
+- `src/pc/fmpc_student.py`
+- `experiments/fmpc_v0_prepare.py`
+- `experiments/fmpc_v0_student.py`
+- focused tests under `tests/`
+
+Required repairs:
+
+- teacher checkpoint serialization:
+  - save an exact NumPy-readable teacher checkpoint during Phase 4 preparation
+  - default student evaluation must load this checkpoint directly
+  - config-plus-seed teacher retraining may remain only as an explicit fallback mode
+- portable teacher artifact contract:
+  - new `teacher_targets/manifest.json` files must use relative paths
+  - loaders should remain backward-compatible with older absolute-path manifests when those files still exist locally
+- explicit identity baseline:
+  - student summaries must report the same endpoint / energy / direction / timing metrics for:
+    - the trained student
+    - the identity or zero-delta baseline `z_hat = z0`
+- non-trivial canonical digits validation:
+  - Phase 5 acceptance cannot rely only on the old 2-step smoke teacher
+  - the repository must expose a clearer digits validation recipe that uses a meaningfully larger teacher inference budget
+
+Acceptance checks:
+
+- portable artifact check:
+  - new teacher manifests are relocatable and do not depend on machine-specific absolute paths
+- exact teacher recovery check:
+  - loading the serialized teacher checkpoint reproduces exported `z_star` within a very small documented tolerance
+- baseline sanity check:
+  - student summary explicitly shows whether the student beats the identity baseline on validation and held-out test
+- non-triviality check:
+  - the canonical digits validation teacher produces visibly non-zero `delta_z` statistics rather than a near-identity transport task
+
+What this slice explicitly does not change:
+
+- baseline PC energy
+- baseline PC state updates
+- baseline PC local parameter updates
+- the standalone `digits_pc` / `digits_mlp` baselines
+- trajectory-aware or MeanFlow-style FMPC training
+
+### Phase 5A / student-signal rescue
+
+Goal:
+
+- determine whether the existing endpoint-only student input contract
+  - `concat([z0, target_onehot])`
+  supports any simple learned student that can beat the explicit identity / zero-delta baseline on the canonical non-trivial `digits` teacher
+
+Scope:
+
+- keep the teacher frozen
+- keep `digits` as the only dataset
+- keep endpoint-only supervision:
+  - input: `concat([z0, target_onehot])`
+  - target: `delta_z = z_star - z0`
+- keep all final metrics in the original hidden-state space after inverse-transform
+- do not introduce:
+  - trajectory-aware supervision
+  - MeanFlow / JVP objectives
+  - refinement
+  - any `backend="fmpc"` injection into the core iterative PC path
+
+Required families:
+
+- `identity`
+- `class_mean_delta`
+- `ridge`
+- `mlp_standardized`
+
+Required implementation constraints:
+
+- `class_mean_delta` may use only train-split statistics
+- `ridge` must be deterministic closed-form multi-output ridge regression
+- `mlp_standardized` must remain NumPy-first and use explicit train-stat normalization
+- all train-stat normalization must be estimated on the train split only
+
+Deliverables:
+
+- a narrow endpoint baseline-suite module covering the above families
+- explicit normalization helpers for:
+  - `z0`
+  - `delta_z`
+- a small compare/search runner that:
+  - evaluates the families under a tiny deterministic search space
+  - selects the winning learned candidate by `val_state_rms_gap`
+  - reports held-out test metrics once for the final validation-selected winner
+- clear saved artifacts showing:
+  - the identity baseline
+  - the class-mean baseline
+  - the best ridge candidate
+  - the best standardized-MLP candidate
+  - which family wins overall
+  - whether the winning learned family beats the identity baseline on validation and test
+
+Files likely to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_student_normalization.py`
+- `src/pc/fmpc_student_baselines.py`
+- `src/pc/fmpc_student_suite.py`
+- `src/pc/fmpc_student.py`
+- `experiments/fmpc_v0_student_suite.py`
+- focused tests under `tests/`
+
+Acceptance checks:
+
+- contract check:
+  - all families consume the same batch-first `float64` endpoint contract
+- normalization check:
+  - saved normalization statistics come only from the train split
+  - inverse-transform restores predictions to the original hidden-state space before metric computation
+- suite visibility check:
+  - `identity`, `class_mean_delta`, `ridge`, and `mlp_standardized` all appear explicitly in the saved comparison artifacts
+- Phase 5A pass condition:
+  - at least one learned family
+    - `ridge` or `mlp_standardized`
+  beats the identity baseline on both:
+    - validation `state_rms_gap`
+    - held-out test `state_rms_gap`
+
+Failure escalation rule:
+
+- if all learned families still fail against identity, the next allowed step is only:
+  - endpoint-only feature augmentation
+- this still does not authorize:
+  - trajectory-aware supervision
+  - MeanFlow / JVP objectives
+  - refinement
+  - core iterative `fmpc` backend integration
 
 ---
 

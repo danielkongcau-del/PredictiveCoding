@@ -482,6 +482,39 @@ Phase 4 is now sealed as an FMPC-v0 preparation checkpoint:
 - meaningful FMPC teacher targets should be read only from the dedicated teacher-only preparation/export protocol
 - the next phase may assume this preparation scaffold exists and begin the offline FMPC-v0 student stage
 
+### Phase 5 offline FMPC-v0 student v0
+
+The initial Phase 5 slice should be read narrowly:
+
+- the teacher remains the frozen iterative PC path
+- teacher supervision must come from the dedicated Phase 4 teacher-only preparation/export protocol
+- the student is an offline endpoint transporter on `digits`
+- the student input is `concat([z0, target_onehot])`
+- the student target is `delta_z = z_star - z0`
+- the primary training loss is MSE on `delta_z`
+- validation selects the best checkpoint by held-out `state_rms_gap`
+- final test reporting happens once, after restoring the best validation-selected checkpoint
+
+Phase 5 v0 acceptance now also requires:
+
+- teacher artifacts are portable:
+  - new manifests use relative paths
+  - loaders stay backward-compatible with older absolute-path manifests where possible
+- student evaluation loads an exact serialized teacher checkpoint by default
+  - config-plus-seed teacher retraining is only an explicit legacy fallback
+- summaries report an explicit identity / zero-delta baseline:
+  - `z_hat_identity = z0`
+  - the student must be compared against that baseline on the same endpoint metrics
+- final validation is not based only on the old trivial 2-step smoke teacher
+  - a more meaningful digits teacher recipe must be used for acceptance-oriented checks
+
+This does not yet mean:
+
+- a full MeanFlow identity objective exists
+- trajectory supervision is active
+- refinement is part of the default training path
+- a formal real-data PC-vs-student comparison has been completed
+
 What is still missing before any stronger real-data claim:
 
 - matched tuning
@@ -490,15 +523,57 @@ What is still missing before any stronger real-data claim:
 - a second real dataset
 - any claim that the current standalone baseline numbers are a fair winner/loser result
 
-### Recommended next engineering step
+### Recommended current engineering step
 
-The next natural step is now a cautious Phase 4 kickoff on `digits`, defined as a **controlled real-data comparison protocol**, not a large immediate comparison push:
+The current engineering priority is to close Phase 5 v0 acceptance on `digits` before attempting a stronger FMPC variant:
 
 - keep explicit train/val/test separation
-- keep deterministic seed roles, including `batch_order_seed`
-- keep held-out test for final reporting
-- first define a narrow comparison protocol and artifact contract
-- delay matched tuning and broader comparison machinery until that narrow protocol is stable
+- keep the teacher frozen and sourced from dedicated preparation/export artifacts
+- require portable manifests plus exact teacher checkpoint loading
+- require an explicit identity baseline in student summaries
+- validate on a non-trivial canonical digits teacher before considering interval-conditioned or trajectory-aware extensions
+
+### Phase 5A student-signal rescue
+
+Before any FMPC-v1-style extension is considered, the repository should answer a narrower question:
+
+- under the fixed endpoint contract
+  - input: `concat([z0, target_onehot])`
+  - target: `delta_z = z_star - z0`
+- does any simple learned student beat the explicit identity / zero-delta baseline on the canonical non-trivial `digits` teacher?
+
+The required Phase 5A comparison set is:
+
+- `identity`
+- `class_mean_delta`
+- `ridge`
+- `mlp_standardized`
+
+Phase 5A validation should require:
+
+- all families use the same batch-first `float64` endpoint contract
+- train-stat normalization is estimated only from the train split
+- final metrics are computed after inverse-transform in the original hidden-state space
+- the comparison artifacts make it obvious whether a learned family beats identity on:
+  - validation `state_rms_gap`
+  - held-out test `state_rms_gap`
+
+Phase 5A should be considered passed only if at least one learned family:
+
+- `ridge` or `mlp_standardized`
+
+beats the identity baseline on both validation and held-out test `state_rms_gap`.
+
+If every learned family still loses to identity, the next allowed escalation remains narrow:
+
+- endpoint-only feature augmentation
+
+This still does not authorize:
+
+- trajectory-aware supervision
+- MeanFlow / JVP objectives
+- refinement
+- core iterative `fmpc` backend integration
 
 Important caveats that should remain explicit:
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime
@@ -9,13 +10,20 @@ from typing import Any, Literal
 
 import numpy as np
 
+from .datasets import load_digits_split, load_fashion_mnist_split
+from .layers import PCLayerParams
 from .minibatch import iter_minibatches
+from .models import PCNetwork
 from .real_pc import OutputLayout, RealPCConfig, RealPCRunResult, run_real_pc_experiment
+from .toy_data import SupervisedDataSplit
 from .utils import set_seed
 
 TeacherBackend = Literal["pc_euler", "pc_rk2"]
 StudentPlaceholderBackend = Literal["fmpc"]
 RefinementPlaceholderBackend = Literal["none", "pc_euler", "pc_rk2"]
+
+FMPC_PREPARATION_SCHEMA_VERSION = "phase5_portable_v1"
+PC_TEACHER_CHECKPOINT_FORMAT = "pc_teacher_checkpoint_npz"
 
 
 @dataclass
@@ -66,6 +74,24 @@ class FMPCPreparationRunResult:
     teacher_targets_manifest: dict[str, Any]
 
 
+def resolve_fmpc_teacher_manifest_path(path: str | Path) -> Path:
+    """Resolve a teacher-target manifest path from a file, directory, or preparation run dir."""
+    path_obj = Path(path)
+    if path_obj.is_file():
+        if path_obj.name != "manifest.json":
+            raise ValueError("Expected a teacher-target manifest named 'manifest.json'.")
+        return path_obj
+    if path_obj.is_dir():
+        if (path_obj / "manifest.json").exists():
+            return path_obj / "manifest.json"
+        if (path_obj / "teacher_targets" / "manifest.json").exists():
+            return path_obj / "teacher_targets" / "manifest.json"
+    raise ValueError(
+        "Expected a teacher-target manifest path, a teacher_targets directory, "
+        "or an FMPC preparation run directory containing teacher_targets/manifest.json."
+    )
+
+
 def _resolve_run_dir(
     output_root: str | Path,
     experiment_name: str,
@@ -92,6 +118,11 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dump(payload, handle, indent=2)
 
 
+def _read_json(path: Path) -> dict[str, Any]:
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
 def _jsonable(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
@@ -100,6 +131,10 @@ def _jsonable(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return [_jsonable(item) for item in value]
     return value
+
+
+def _relative_artifact_path(from_dir: Path, target_path: Path) -> str:
+    return Path(os.path.relpath(target_path, start=from_dir)).as_posix()
 
 
 def _teacher_pc_run_config(config: FMPCPreparationConfig, run_dir: Path) -> RealPCConfig:
@@ -111,6 +146,137 @@ def _teacher_pc_run_config(config: FMPCPreparationConfig, run_dir: Path) -> Real
         run_id="teacher_model",
         output_layout="single_dir",
     )
+
+
+def _teacher_checkpoint_payload(model: PCNetwork) -> dict[str, np.ndarray]:
+    layer_dims = [int(model.layers[0].weight.shape[1])]
+    layer_dims.extend(int(layer.weight.shape[0]) for layer in model.layers)
+    activation_names = [str(layer.activation_name) for layer in model.layers]
+    sigma2_values = [float(layer.sigma2) for layer in model.layers]
+
+    payload: dict[str, np.ndarray] = {
+        "format": np.asarray(PC_TEACHER_CHECKPOINT_FORMAT),
+        "dtype": np.asarray("float64"),
+        "num_layers": np.asarray(len(model.layers), dtype=np.int64),
+        "layer_dims": np.asarray(layer_dims, dtype=np.int64),
+        "activation_names": np.asarray(activation_names),
+        "sigma2": np.asarray(sigma2_values, dtype=np.float64),
+        "eta_x": np.asarray(model.eta_x, dtype=np.float64),
+        "eta_w": np.asarray(model.eta_w, dtype=np.float64),
+        "eta_b": np.asarray(model.eta_b, dtype=np.float64),
+        "train_steps": np.asarray(model.train_steps, dtype=np.int64),
+        "eval_steps": np.asarray(model.eval_steps, dtype=np.int64),
+        "inference_backend": np.asarray(str(model.inference_backend)),
+        "inference_method": np.asarray("" if model.inference_method is None else str(model.inference_method)),
+        "state_init": np.asarray(str(model.state_init)),
+    }
+    for layer_index, layer in enumerate(model.layers):
+        payload[f"layer_{layer_index}_weight"] = np.asarray(layer.weight, dtype=np.float64)
+        payload[f"layer_{layer_index}_bias"] = np.asarray(layer.bias, dtype=np.float64)
+    return payload
+
+
+def save_pc_teacher_checkpoint(
+    model: PCNetwork,
+    path: str | Path,
+) -> dict[str, Any]:
+    """Serialize an exact predictive-coding teacher checkpoint to a portable `.npz` file."""
+    checkpoint_path = Path(path)
+    checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = _teacher_checkpoint_payload(model)
+    np.savez_compressed(checkpoint_path, **payload)
+    return {
+        "format": PC_TEACHER_CHECKPOINT_FORMAT,
+        "dtype": "float64",
+        "num_layers": int(len(model.layers)),
+        "layer_dims": [int(payload["layer_dims"][index]) for index in range(payload["layer_dims"].shape[0])],
+        "activation_names": [str(value) for value in payload["activation_names"].tolist()],
+        "train_steps": int(model.train_steps),
+        "eval_steps": int(model.eval_steps),
+        "inference_backend": str(model.inference_backend),
+        "inference_method": None if model.inference_method is None else str(model.inference_method),
+        "state_init": str(model.state_init),
+        "path": str(checkpoint_path),
+    }
+
+
+def load_pc_teacher_checkpoint(path: str | Path) -> PCNetwork:
+    """Load an exact predictive-coding teacher checkpoint written by `save_pc_teacher_checkpoint`."""
+    checkpoint_path = Path(path)
+    with np.load(checkpoint_path, allow_pickle=False) as payload:
+        checkpoint_format = str(payload["format"].item())
+        if checkpoint_format != PC_TEACHER_CHECKPOINT_FORMAT:
+            raise ValueError(
+                f"Unsupported teacher checkpoint format '{checkpoint_format}'."
+            )
+        num_layers = int(payload["num_layers"])
+        activation_names = [str(value) for value in payload["activation_names"].tolist()]
+        sigma2_values = [float(value) for value in payload["sigma2"].tolist()]
+        layers: list[PCLayerParams] = []
+        for layer_index in range(num_layers):
+            layers.append(
+                PCLayerParams(
+                    weight=np.asarray(payload[f"layer_{layer_index}_weight"], dtype=np.float64),
+                    bias=np.asarray(payload[f"layer_{layer_index}_bias"], dtype=np.float64),
+                    sigma2=float(sigma2_values[layer_index]),
+                    activation_name=str(activation_names[layer_index]),
+                )
+            )
+        inference_method_raw = str(payload["inference_method"].item())
+        inference_method = None if inference_method_raw == "" else inference_method_raw
+        return PCNetwork(
+            layers=layers,
+            eta_x=float(payload["eta_x"]),
+            eta_w=float(payload["eta_w"]),
+            eta_b=float(payload["eta_b"]),
+            train_steps=int(payload["train_steps"]),
+            eval_steps=int(payload["eval_steps"]),
+            inference_backend=str(payload["inference_backend"].item()),
+            inference_method=inference_method,  # type: ignore[arg-type]
+            state_init=str(payload["state_init"].item()),
+        )
+
+
+def _load_split_from_teacher_config_payload(payload: dict[str, Any]) -> SupervisedDataSplit:
+    data_payload = payload["data"]
+    dataset_name = str(data_payload["dataset_name"])
+    split_fractions = data_payload["split_fractions"]
+    kwargs = {
+        "split_seed": int(data_payload["split_seed"]),
+        "train_fraction": float(split_fractions["train"]),
+        "val_fraction": float(split_fractions["val"]),
+        "test_fraction": float(split_fractions["test"]),
+    }
+    if dataset_name == "digits":
+        return load_digits_split(**kwargs)
+    if dataset_name == "fashion_mnist":
+        return load_fashion_mnist_split(**kwargs)
+    raise ValueError(f"Unsupported dataset_name '{dataset_name}' in teacher config payload.")
+
+
+def load_prepared_teacher_runtime(path: str | Path) -> tuple[PCNetwork, SupervisedDataSplit]:
+    """Load a prepared FMPC teacher exactly from its serialized checkpoint and split config."""
+    manifest_path = resolve_fmpc_teacher_manifest_path(path)
+    manifest = _read_json(manifest_path)
+    checkpoint_payload = manifest.get("teacher_checkpoint")
+    if not isinstance(checkpoint_payload, dict):
+        raise ValueError("Teacher manifest is missing required teacher_checkpoint metadata.")
+    checkpoint_reference = checkpoint_payload.get("relative_path") or checkpoint_payload.get("path")
+    if checkpoint_reference is None:
+        raise ValueError("Teacher checkpoint metadata must contain relative_path or path.")
+    checkpoint_path = manifest_path.parent / Path(str(checkpoint_reference))
+    checkpoint_path = checkpoint_path.resolve()
+    if not checkpoint_path.exists():
+        raise FileNotFoundError(f"Teacher checkpoint not found at '{checkpoint_path}'.")
+
+    teacher_model_dir = checkpoint_path.parent
+    config_path = teacher_model_dir / "config.json"
+    if not config_path.exists():
+        raise FileNotFoundError(f"Teacher config.json not found at '{config_path}'.")
+
+    model = load_pc_teacher_checkpoint(checkpoint_path)
+    split = _load_split_from_teacher_config_payload(_read_json(config_path))
+    return model, split
 
 
 def _teacher_export_steps(config: FMPCPreparationConfig, teacher_model_result: RealPCRunResult) -> int:
@@ -130,6 +296,16 @@ def _teacher_export_batch_size(config: FMPCPreparationConfig, teacher_model_resu
             raise ValueError("teacher_export_batch_size must be positive when provided.")
         return batch_size
     return int(teacher_model_result.summary["batch_size"])
+
+
+def _delta_z_stats(z0: np.ndarray, z_star: np.ndarray) -> dict[str, float]:
+    delta_z = np.asarray(z_star - z0, dtype=np.float64)
+    sample_l2 = np.linalg.norm(delta_z, axis=1)
+    return {
+        "delta_z_l2_mean": float(np.mean(sample_l2)),
+        "delta_z_rms": float(np.sqrt(np.mean(delta_z**2))),
+        "delta_z_max_abs": float(np.max(np.abs(delta_z))),
+    }
 
 
 def _split_arrays(split: Any, split_name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -222,6 +398,7 @@ def _export_teacher_targets_for_split(
     targets = np.concatenate(targets_batches, axis=0)
     z0 = np.concatenate(z0_batches, axis=0)
     z_star = np.concatenate(z_star_batches, axis=0)
+    delta_z_stats = _delta_z_stats(z0, z_star)
 
     payload: dict[str, np.ndarray] = {
         "sample_indices": sample_indices.astype(np.int64, copy=False),
@@ -237,7 +414,8 @@ def _export_teacher_targets_for_split(
 
     return {
         "split_name": split_name,
-        "path": str(split_path),
+        "relative_path": split_path.name,
+        "path": split_path.name,
         "num_samples": int(sample_indices.shape[0]),
         "sample_indices_shape": list(sample_indices.shape),
         "targets_shape": list(targets.shape),
@@ -249,6 +427,7 @@ def _export_teacher_targets_for_split(
         "teacher_target_semantics": "target-clamped supervised teacher",
         "teacher_backend": teacher_backend,
         "teacher_steps": int(teacher_steps),
+        **delta_z_stats,
     }
 
 
@@ -315,6 +494,10 @@ def run_fmpc_v0_preparation(config: FMPCPreparationConfig) -> FMPCPreparationRun
         teacher_pc_config,
         return_runtime_objects=True,
     )
+    if teacher_model_result.model is None:
+        raise RuntimeError("Teacher preparation requires runtime model objects for checkpoint export.")
+    checkpoint_path = teacher_model_result.run_dir / "checkpoint.npz"
+    checkpoint_metadata = save_pc_teacher_checkpoint(teacher_model_result.model, checkpoint_path)
     teacher_steps = _teacher_export_steps(config, teacher_model_result)
     export_batch_size = _teacher_export_batch_size(config, teacher_model_result)
 
@@ -334,6 +517,7 @@ def run_fmpc_v0_preparation(config: FMPCPreparationConfig) -> FMPCPreparationRun
     }
 
     teacher_targets_manifest = {
+        "schema_version": FMPC_PREPARATION_SCHEMA_VERSION,
         "phase": "Phase 4",
         "protocol_name": "fmpc_v0_preparation",
         "dataset_name": config.dataset_name,
@@ -343,6 +527,17 @@ def run_fmpc_v0_preparation(config: FMPCPreparationConfig) -> FMPCPreparationRun
         "teacher_mode": "train",
         "teacher_target_semantics": "target-clamped supervised teacher",
         "export_trajectory": bool(config.export_trajectory),
+        "teacher_checkpoint": {
+            "format": checkpoint_metadata["format"],
+            "dtype": checkpoint_metadata["dtype"],
+            "relative_path": _relative_artifact_path(teacher_targets_dir, checkpoint_path),
+            "layer_dims": checkpoint_metadata["layer_dims"],
+            "train_steps": checkpoint_metadata["train_steps"],
+            "eval_steps": checkpoint_metadata["eval_steps"],
+            "inference_backend": checkpoint_metadata["inference_backend"],
+            "inference_method": checkpoint_metadata["inference_method"],
+            "state_init": checkpoint_metadata["state_init"],
+        },
         "splits": split_manifests,
     }
     _write_json(teacher_targets_dir / "manifest.json", teacher_targets_manifest)
@@ -352,9 +547,10 @@ def run_fmpc_v0_preparation(config: FMPCPreparationConfig) -> FMPCPreparationRun
         "protocol_name": "fmpc_v0_preparation",
         "mode": "teacher_only_preparation",
         "dataset_name": config.dataset_name,
-        "teacher_model_artifact_dir": str(teacher_model_result.run_dir),
-        "teacher_summary_path": str(teacher_model_result.run_dir / "summary.json"),
-        "teacher_targets_manifest_path": str(teacher_targets_dir / "manifest.json"),
+        "teacher_model_artifact_dir": "teacher_model",
+        "teacher_summary_path": "teacher_model/summary.json",
+        "teacher_checkpoint_path": "teacher_model/checkpoint.npz",
+        "teacher_targets_manifest_path": "teacher_targets/manifest.json",
         "teacher": {
             "training_backend": teacher_model_result.summary["inference_backend"],
             "training_eval_steps": teacher_model_result.summary["eval_steps"],
@@ -371,10 +567,10 @@ def run_fmpc_v0_preparation(config: FMPCPreparationConfig) -> FMPCPreparationRun
             "optional_refinement_steps": config.optional_refinement_steps_placeholder,
         },
         "artifacts": {
-            "config_path": str(run_dir / "config.json"),
-            "summary_path": str(run_dir / "summary.json"),
-            "teacher_model_dir": str(teacher_model_result.run_dir),
-            "teacher_targets_dir": str(teacher_targets_dir),
+            "config_path": "config.json",
+            "summary_path": "summary.json",
+            "teacher_model_dir": "teacher_model",
+            "teacher_targets_dir": "teacher_targets",
         },
         "notes": [
             "Teacher-only preparation scaffold for future FMPC-v0 runs.",
