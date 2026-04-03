@@ -78,6 +78,146 @@ def test_deterministic_inference_trace_under_fixed_seed() -> None:
     np.testing.assert_allclose(result_a.energy_trace, result_b.energy_trace)
 
 
+def test_explicit_euler_method_matches_legacy_default_path() -> None:
+    layers = make_stable_layers()
+    x = np.array([[1.0], [-0.5], [0.25]], dtype=np.float64)
+    y = np.array([[0.3], [-0.2], [0.15]], dtype=np.float64)
+    initial_states = initialize_states(layers, x, y=y, init="forward", mode="train")
+    clamped_mask = build_clamped_mask(len(layers) + 1, mode="train")
+
+    default_result = run_inference(
+        initial_states,
+        layers,
+        clamped_mask,
+        eta_x=0.2,
+        steps=15,
+        record_trace=True,
+    )
+    explicit_result = run_inference(
+        initial_states,
+        layers,
+        clamped_mask,
+        eta_x=0.2,
+        steps=15,
+        method="euler",
+        record_trace=True,
+    )
+
+    np.testing.assert_allclose(default_result.energy_trace, explicit_result.energy_trace)
+    for default_state, explicit_state in zip(default_result.states, explicit_result.states, strict=True):
+        np.testing.assert_allclose(default_state, explicit_state)
+    assert default_result.inference_backend == "pc_euler"
+    assert explicit_result.inference_backend == "pc_euler"
+
+
+def test_explicit_pc_rk2_backend_matches_legacy_rk2_alias() -> None:
+    layers = make_stable_layers()
+    x = np.array([[1.0], [-0.5], [0.25]], dtype=np.float64)
+    y = np.array([[0.3], [-0.2], [0.15]], dtype=np.float64)
+    initial_states = initialize_states(layers, x, y=y, init="forward", mode="train")
+    clamped_mask = build_clamped_mask(len(layers) + 1, mode="train")
+
+    backend_result = run_inference(
+        initial_states,
+        layers,
+        clamped_mask,
+        eta_x=0.2,
+        steps=10,
+        backend="pc_rk2",
+        record_trace=True,
+    )
+    alias_result = run_inference(
+        initial_states,
+        layers,
+        clamped_mask,
+        eta_x=0.2,
+        steps=10,
+        method="rk2",
+        record_trace=True,
+    )
+
+    np.testing.assert_allclose(backend_result.energy_trace, alias_result.energy_trace)
+    for backend_state, alias_state in zip(backend_result.states, alias_result.states, strict=True):
+        np.testing.assert_allclose(backend_state, alias_state)
+    assert backend_result.inference_backend == "pc_rk2"
+
+
+def test_reserved_fmpc_backend_raises_not_implemented() -> None:
+    layers = make_stable_layers()
+    x = np.array([[1.0], [-0.5]], dtype=np.float64)
+    y = np.array([[0.3], [-0.2]], dtype=np.float64)
+    initial_states = initialize_states(layers, x, y=y, init="forward", mode="train")
+    clamped_mask = build_clamped_mask(len(layers) + 1, mode="train")
+
+    try:
+        run_inference(
+            initial_states,
+            layers,
+            clamped_mask,
+            eta_x=0.2,
+            steps=1,
+            backend="fmpc",
+            record_trace=False,
+        )
+    except NotImplementedError:
+        pass
+    else:
+        raise AssertionError("Expected the reserved fmpc backend to raise NotImplementedError.")
+
+
+def test_rk2_inference_preserves_shapes_and_finite_values() -> None:
+    layers = make_stable_layers()
+    x = np.array([[1.0], [-0.5], [0.25]], dtype=np.float64)
+    y = np.array([[0.3], [-0.2], [0.15]], dtype=np.float64)
+    initial_states = initialize_states(layers, x, y=y, init="forward", mode="train")
+    clamped_mask = build_clamped_mask(len(layers) + 1, mode="train")
+
+    result = run_inference(
+        initial_states,
+        layers,
+        clamped_mask,
+        eta_x=0.2,
+        steps=10,
+        method="rk2",
+        record_trace=True,
+    )
+
+    assert len(result.states) == len(initial_states)
+    for state, initial_state in zip(result.states, initial_states, strict=True):
+        assert state.shape == initial_state.shape
+        assert np.isfinite(state).all()
+    assert np.isfinite(np.asarray(result.energy_trace, dtype=np.float64)).all()
+    assert np.isfinite(result.final_energy)
+
+
+def test_rk2_inference_trace_is_deterministic_under_fixed_seed() -> None:
+    x = np.linspace(-1.0, 1.0, 6, dtype=np.float64).reshape(-1, 1)
+    y = 0.5 * x
+    layers_a = init_mlp_layers([1, 3, 1], seed=13)
+    layers_b = init_mlp_layers([1, 3, 1], seed=13)
+    model_a = PCNetwork(
+        layers=layers_a,
+        eta_x=0.2,
+        eta_w=0.05,
+        train_steps=12,
+        eval_steps=12,
+        inference_method="rk2",
+    )
+    model_b = PCNetwork(
+        layers=layers_b,
+        eta_x=0.2,
+        eta_w=0.05,
+        train_steps=12,
+        eval_steps=12,
+        inference_method="rk2",
+    )
+
+    result_a = model_a.infer(x, y=y, mode="train", record_trace=True)
+    result_b = model_b.infer(x, y=y, mode="train", record_trace=True)
+
+    np.testing.assert_allclose(result_a.energy_trace, result_b.energy_trace)
+
+
 def test_predict_omits_trace_computation() -> None:
     layers = init_mlp_layers([1, 3, 1], seed=17)
     model = PCNetwork(layers=layers, eta_x=0.2, eta_w=0.05, train_steps=5, eval_steps=5)

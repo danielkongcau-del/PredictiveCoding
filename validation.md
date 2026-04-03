@@ -449,6 +449,39 @@ The repository now has the minimum prerequisites for a cautious real-data compar
   - `outputs/digits_pc/`
   - `outputs/digits_baselines/`
 
+### Phase 4 preparation inference-baseline hardening
+
+Before any FMPC work, stronger standalone predictive-coding inference baselines should now be read under these rules:
+
+- `pc_euler` remains the authoritative default inference backend
+- `pc_rk2` is allowed only as an explicit stronger baseline variant, not a silent replacement
+- `fmpc` may exist only as a reserved backend label until its semantics are actually implemented
+- the predictive-coding energy and parameter-update math stay unchanged
+- validation should confirm:
+  - explicit `backend="pc_euler"` is backward-compatible with the prior default path
+  - `pc_rk2` preserves batch-first shapes and finite values
+  - real-data artifact summaries record the chosen inference backend explicitly
+  - standalone real-data PC summaries keep teacher-reference handling explicit:
+    - by default, teacher-reference metrics are disabled in standalone predict-mode evaluation summaries
+    - the disable reason should be written explicitly rather than inferred from trivial all-zero metrics
+    - meaningful FMPC teacher targets should come from dedicated train-mode teacher export paths instead
+
+Teacher-reference metric scope should remain explicit:
+
+- the current teacher is the slow iterative PC path under the current parameters
+- standalone predict-mode summaries should not pretend they provide a meaningful FMPC teacher comparison by default
+- where teacher-reference metrics are enabled in future dedicated protocols, the current update-direction cosine is the cosine between flattened terminal displacements from `z0`
+- it is not yet a per-step transport-path cosine and should not be described that way
+- if either terminal displacement has zero norm, the cosine should stay `null` rather than being fabricated
+
+### Phase 4 seal-off note
+
+Phase 4 is now sealed as an FMPC-v0 preparation checkpoint:
+
+- standalone predict-mode real-data summaries should keep `teacher_reference` disabled by default
+- meaningful FMPC teacher targets should be read only from the dedicated teacher-only preparation/export protocol
+- the next phase may assume this preparation scaffold exists and begin the offline FMPC-v0 student stage
+
 What is still missing before any stronger real-data claim:
 
 - matched tuning

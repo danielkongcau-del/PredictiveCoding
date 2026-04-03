@@ -156,6 +156,16 @@ def test_real_data_mlp_and_pc_share_protocol_contract(
     assert pc_summary["primary_metric_name"] == "accuracy"
     assert mlp_summary["primary_metric_higher_is_better"] is True
     assert pc_summary["primary_metric_higher_is_better"] is True
+    assert pc_config["training"]["inference_backend"] == "pc_euler"
+    assert pc_config["training"]["inference_method"] == "euler"
+    assert pc_config["evaluation"]["teacher_reference_backend"] is None
+    assert pc_config["evaluation"]["teacher_reference_eval_steps"] is None
+    assert pc_config["evaluation"]["teacher_reference_metrics_enabled"] is False
+    assert "predict-mode" in pc_config["evaluation"]["teacher_reference_disable_reason"]
+    assert pc_summary["inference_backend"] == "pc_euler"
+    assert pc_summary["inference_method"] == "euler"
+    assert pc_summary["teacher_reference"]["enabled"] is False
+    assert "predict-mode" in pc_summary["teacher_reference"]["reason"]
 
     for summary in (mlp_summary, pc_summary):
         assert summary["seeds"]["run_seed"] == summary["run_seed"]

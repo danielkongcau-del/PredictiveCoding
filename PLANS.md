@@ -449,11 +449,23 @@ Move from toy data to first-pass real-data baselines while keeping the codebase 
 
 ---
 
-## Phase 4 - Controlled real-data comparison protocol
+## Phase 4 - FMPC-v0 preparation infrastructure
+
+Status:
+
+- Sealed as the current FMPC-v0 preparation checkpoint
+- Standalone predict-mode `teacher_reference` metrics are disabled by default in real-data summaries
+- Meaningful FMPC teacher targets must come from the dedicated teacher-only preparation/export protocol
+- The next phase is the offline FMPC-v0 student stage
+
+Repository note:
+
+- the earlier controlled real-data comparison framing did not become the Phase 4 deliverable
+- Phase 4 closed as infrastructure preparation for offline FMPC-v0 student work instead
 
 ### Goal
 
-Define and validate a narrow, explicit real-data comparison protocol on `digits` before any matched tuning or broader real-data claim set.
+Prepare the real-data predictive-coding stack for offline FMPC-v0 student work without changing the baseline predictive-coding math or claiming a completed real-data comparison.
 
 ### Scope
 
@@ -493,6 +505,114 @@ Define and validate a narrow, explicit real-data comparison protocol on `digits`
 - letting a narrow real-data comparison step sprawl immediately into matched tuning or large search
 - silently drifting away from the current standalone-baseline protocol
 - overstating first-pass comparison outputs as a stronger claim than the protocol supports
+
+### FMPC-v0 preparation
+
+Status:
+
+- Implemented as the sealed Phase 4 preparation slice
+- This subsection does not authorize any predictive-coding math change or any flow module implementation
+- Preparation checkpoints implemented so far include:
+  - one harder standalone real-data benchmark option
+  - explicit pluggable inference backend labels:
+    - `pc_euler` as the default slow iterative backend
+    - `pc_rk2` as a stronger numerical-baseline variant
+    - reserved placeholder `fmpc` without implementation yet
+  - hidden-state flatten / unflatten helpers
+  - teacher-target extraction hooks from the current slow iterative teacher
+  - FMPC-oriented evaluation helpers and logging for:
+    - hidden-state gap to teacher
+    - energy gap to teacher
+    - terminal update-direction alignment
+    - explicit inference backend / step-count metadata
+    - lightweight wall-clock timing in the standalone real-data PC artifact
+
+Goal:
+
+- prepare the real-data predictive-coding stack for a future FMPC-v0 transporter without changing the current iterative predictive-coding baseline
+
+Scope:
+
+- add one harder real-data benchmark in addition to `digits`
+- add stronger standalone inference-budget baselines for real-data PC
+  - keep `euler` as the authoritative default
+  - add an explicit higher-order integrator baseline such as `rk2`
+- expose hidden-state flatten / unflatten helpers for batch-first `float64` state lists
+- expose teacher-target extraction hooks from the current iterative PC path
+- make the inference backend pluggable while keeping the current iterative backend as the default
+- keep this as infrastructure preparation only:
+  - no flow module
+  - no matched tuning
+  - no formal comparison pipeline
+
+Deliverables:
+
+- one additional deterministic real-data dataset entry in `src/pc/datasets.py`
+  - current planned first choice: `fashion_mnist`
+- a small backend-selection seam around the current iterative inference path in:
+  - `src/pc/inference.py`
+  - `src/pc/training.py`
+  - `src/pc/real_pc.py`
+  - `experiments/digits_pc.py`
+- a narrow standalone real-data inference-baseline study that compares explicit integrator/step choices without becoming a formal comparison pipeline
+- hidden-state flatten / unflatten helpers, likely in a new narrow helper module such as:
+  - `src/pc/state_io.py`
+  - or a similarly explicit helper module
+- teacher-target extraction hooks that can materialize reproducible transport targets from the current iterative teacher path without changing the teacher itself
+- stronger standalone real-data inference-budget artifacts that remain outside the Phase 2 comparison pipeline
+- standalone real-data PC summaries that keep teacher-reference fields explicit but disable them by default until a dedicated, semantically meaningful FMPC comparison protocol exists
+- a teacher-only FMPC-v0 preparation scaffold that can:
+  - select `digits` or `fashion_mnist`
+  - train a standard PC teacher
+  - export `z0` / `z_star` supervision targets
+  - reserve student transport/refinement settings as explicit placeholders
+- documentation updates in:
+  - `PLANS.md`
+  - `README.md`
+  - `validation.md`
+
+Files likely to touch when this work starts:
+
+- `src/pc/datasets.py`
+- `src/pc/inference.py`
+- `src/pc/training.py`
+- `src/pc/real_pc.py`
+- `src/pc/models.py`
+- `experiments/digits_pc.py`
+- one new narrow helper module for state packing / target extraction
+- tests for digits, inference, and real-data protocol alignment
+
+Tests to add or update:
+
+- update `tests/test_digits_data.py` or add a new real-data dataset-loader test for the harder benchmark
+- add a round-trip test for hidden-state flatten / unflatten helpers
+- add a teacher-target extraction test that checks determinism, shape contracts, and batch-first ordering
+- update `tests/test_inference.py` to confirm the default iterative backend remains the authoritative path
+- update `tests/test_digits_pc_smoke.py` to confirm the default backend and artifact contract remain stable
+- update `tests/test_real_data_protocol_alignment.py` so backend-related protocol fields stay explicit and aligned
+
+Exit criteria:
+
+- the repository can load `digits` plus one harder deterministic real-data benchmark under the same explicit split discipline
+- the current iterative PC path can expose hidden-state tensors in a flatten / unflatten form without semantic drift
+- teacher-target extraction hooks exist and are deterministic under fixed seeds
+- the inference backend can be selected explicitly, with the iterative backend remaining the default and producing the current baseline behavior
+- stronger standalone inference-budget baselines exist for real-data PC without being misread as a matched comparison
+- a teacher-only preparation run can materialize explicit FMPC-ready target artifacts without claiming a transporter already exists
+
+Risks:
+
+- hidden-state packing helpers accidentally changing shape conventions or dtype
+- backend abstraction silently changing the current iterative semantics
+- teacher-target definitions becoming ambiguous:
+  - final inferred states only
+  - or trajectory-based supervision
+- the harder real-data benchmark choice conflicting with the current documentation that Phase 3 only covers `digits`
+
+Repository note:
+
+- Phase 4 now closes on FMPC-v0 preparation infrastructure rather than a formal comparison protocol
+- the next phase should start from the existing teacher/export/backend scaffold and add the offline FMPC-v0 student conservatively
 
 ---
 

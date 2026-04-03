@@ -7,7 +7,13 @@ import numpy as np
 
 from .activations import get_activation
 from .energy import PCCache
-from .inference import build_clamped_mask, initialize_states, run_inference
+from .inference import (
+    TeacherInferenceExport,
+    build_clamped_mask,
+    build_teacher_inference_export,
+    initialize_states,
+    run_inference,
+)
 from .layers import PCLayerParams
 from .utils import ensure_finite_array, set_seed
 
@@ -21,6 +27,7 @@ class TrainBatchResult:
     pre_update_energy: float
     post_update_energy: float | None
     parameter_norms: dict[str, list[float]]
+    teacher_export: TeacherInferenceExport | None = None
 
 
 def parameter_gradients(
@@ -82,6 +89,8 @@ def train_batch(
     x: np.ndarray,
     y: np.ndarray,
     compute_post_update_energy: bool = False,
+    return_teacher_export: bool = False,
+    record_teacher_trajectory: bool = False,
 ) -> TrainBatchResult:
     """Run one Phase 0 training batch with x shaped (B, d_0) and y shaped (B, d_L)."""
     x_array = np.asarray(x, dtype=np.float64)
@@ -101,7 +110,9 @@ def train_batch(
         clamped_mask,
         eta_x=model.eta_x,
         steps=model.train_steps,
+        backend=model.inference_backend,
         record_trace=True,
+        record_state_trajectory=return_teacher_export and record_teacher_trajectory,
     )
     weight_gradients, bias_gradients = parameter_gradients(
         inference_result.states,
@@ -131,9 +142,22 @@ def train_batch(
             clamped_mask,
             eta_x=model.eta_x,
             steps=model.train_steps,
+            backend=model.inference_backend,
             record_trace=True,
         )
         post_update_energy = post_result.final_energy
+
+    teacher_export: TeacherInferenceExport | None = None
+    if return_teacher_export:
+        teacher_export = build_teacher_inference_export(
+            states,
+            inference_result,
+            clamped_mask,
+            mode="train",
+            steps=model.train_steps,
+            inference_backend=model.inference_backend,
+            inference_method=model.inference_method,
+        )
 
     return TrainBatchResult(
         train_steps=model.train_steps,
@@ -141,6 +165,7 @@ def train_batch(
         pre_update_energy=inference_result.final_energy,
         post_update_energy=post_update_energy,
         parameter_norms=_parameter_norms(model.layers),
+        teacher_export=teacher_export,
     )
 
 

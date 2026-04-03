@@ -4,6 +4,7 @@ import csv
 import json
 import runpy
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -30,6 +31,24 @@ def _read_summary(path: Path) -> dict[str, object]:
         return json.load(handle)
 
 
+def _summary_without_timing(summary: dict[str, object]) -> dict[str, object]:
+    sanitized = json.loads(json.dumps(summary))
+    timing = sanitized.get("timing")
+    if isinstance(timing, dict):
+        timing["train_wall_time_seconds"] = "__timing__"
+        timing["final_evaluation_wall_time_seconds"] = "__timing__"
+        timing["teacher_reference_wall_time_seconds"] = "__timing__"
+
+    teacher_reference = sanitized.get("teacher_reference")
+    if isinstance(teacher_reference, dict):
+        for split_name in ("train", "val", "test"):
+            split_metrics = teacher_reference.get(split_name)
+            if isinstance(split_metrics, dict):
+                split_metrics["candidate_inference_wall_time_seconds"] = "__timing__"
+                split_metrics["teacher_inference_wall_time_seconds"] = "__timing__"
+    return sanitized
+
+
 def test_digits_pc_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(output_root=tmp_path, run_id="digits_pc_smoke", plot_curves=False)
 
@@ -48,12 +67,23 @@ def test_digits_pc_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert summary["primary_metric_higher_is_better"] is True
     assert summary["selection_metric_source"] == "val_metric"
     assert summary["report_metric_source"] == "test_metric"
+    assert summary["inference_backend"] == "pc_euler"
+    assert summary["inference_method"] == "euler"
     assert summary["batch_size"] == 64
     assert summary["best_epoch"] >= 1
     assert summary["best_epoch"] <= summary["epochs"]
     assert summary["val_metric"] == summary["best_val_metric"]
     assert summary["test_metric"] > summary["test_baseline_metric"]
     assert summary["best_val_metric"] > summary["val_baseline_metric"]
+    assert "timing" in summary
+    assert summary["timing"]["train_wall_time_seconds"] >= 0.0
+    assert summary["timing"]["final_evaluation_wall_time_seconds"] >= 0.0
+    assert summary["timing"]["teacher_reference_wall_time_seconds"] is None
+    assert "teacher_reference" in summary
+    assert summary["teacher_reference"]["enabled"] is False
+    assert "predict-mode" in summary["teacher_reference"]["reason"]
+    assert summary["teacher_reference"]["requested_teacher_backend"] is None
+    assert summary["teacher_reference"]["requested_teacher_eval_steps"] is None
 
     epoch_rows = _read_epoch_rows(run_dir / "epoch_metrics.csv")
     assert len(epoch_rows) == summary["epochs"]
@@ -63,6 +93,10 @@ def test_digits_pc_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert "val_accuracy" in epoch_rows[0]
     assert "train_mean_pre_update_energy" in epoch_rows[0]
     assert "train_mean_post_update_energy" in epoch_rows[0]
+    assert "inference_backend" in epoch_rows[0]
+    assert "inference_method" in epoch_rows[0]
+    assert epoch_rows[0]["inference_backend"] == "pc_euler"
+    assert epoch_rows[0]["inference_method"] == "euler"
     assert "weight_norm_l1" in epoch_rows[0]
     assert "bias_norm_l1" in epoch_rows[0]
 
@@ -75,11 +109,63 @@ def test_digits_pc_smoke_run_is_reproducible_under_fixed_seeds(tmp_path: Path) -
 
     first_summary = _read_summary(first.run_dir / "summary.json")
     second_summary = _read_summary(second.run_dir / "summary.json")
-    assert first_summary == second_summary
+    assert _summary_without_timing(first_summary) == _summary_without_timing(second_summary)
 
     first_epoch_rows = _read_epoch_rows(first.run_dir / "epoch_metrics.csv")
     second_epoch_rows = _read_epoch_rows(second.run_dir / "epoch_metrics.csv")
     assert first_epoch_rows == second_epoch_rows
+
+
+def test_digits_pc_config_allows_explicit_rk2_backend(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="digits_pc_rk2",
+        plot_curves=False,
+        inference_backend="pc_rk2",
+    )
+
+    summary = _read_summary(result.run_dir / "summary.json")
+    epoch_rows = _read_epoch_rows(result.run_dir / "epoch_metrics.csv")
+    with (result.run_dir / "config.json").open("r", encoding="utf-8") as handle:
+        config = json.load(handle)
+
+    assert summary["inference_backend"] == "pc_rk2"
+    assert summary["inference_method"] == "rk2"
+    assert summary["teacher_reference"]["enabled"] is False
+    assert summary["teacher_reference"]["requested_teacher_backend"] is None
+    assert epoch_rows[0]["inference_backend"] == "pc_rk2"
+    assert epoch_rows[0]["inference_method"] == "rk2"
+    assert config["training"]["inference_backend"] == "pc_rk2"
+    assert config["training"]["inference_method"] == "rk2"
+    assert config["evaluation"]["teacher_reference_backend"] is None
+    assert config["evaluation"]["teacher_reference_eval_steps"] is None
+    assert config["evaluation"]["teacher_reference_metrics_enabled"] is False
+    assert "predict-mode" in config["evaluation"]["teacher_reference_disable_reason"]
+
+
+def test_digits_pc_summary_disables_requested_teacher_reference_in_standalone_evaluation(
+    tmp_path: Path,
+) -> None:
+    result = run_digits_pc_experiment(
+        RealPCConfig(
+            output_root=tmp_path,
+            run_id="digits_pc_teacher_reference_disabled",
+            plot_curves=False,
+            teacher_reference_backend="pc_euler",
+            teacher_reference_eval_steps=7,
+        )
+    )
+
+    summary = _read_summary(result.run_dir / "summary.json")
+    with (result.run_dir / "config.json").open("r", encoding="utf-8") as handle:
+        config = json.load(handle)
+
+    assert summary["teacher_reference"]["enabled"] is False
+    assert "predict-mode" in summary["teacher_reference"]["reason"]
+    assert summary["teacher_reference"]["requested_teacher_backend"] == "pc_euler"
+    assert summary["teacher_reference"]["requested_teacher_eval_steps"] == 7
+    assert config["evaluation"]["teacher_reference_metrics_enabled"] is False
+    assert config["evaluation"]["teacher_reference_backend"] == "pc_euler"
 
 
 def test_digits_pc_restores_best_checkpoint_before_final_report(
@@ -128,19 +214,41 @@ def test_digits_pc_restores_best_checkpoint_before_final_report(
             parameter_norms=parameter_norms,
         )
 
-    def fake_evaluate_model(model, x, y):
-        _ = (x, y)
+    def fake_evaluate_pc_split(model, x, y, **kwargs):
+        _ = (x, y, kwargs)
         marker = float(model.layers[0].weight[0, 0])
         lookup = {
             1.0: (0.1, 0.9),
             2.0: (0.2, 0.6),
             3.0: (0.3, 0.4),
         }
-        return lookup[marker]
+        loss, accuracy = lookup[marker]
+        return SimpleNamespace(
+            loss=loss,
+            accuracy=accuracy,
+            final_energy=marker,
+            candidate_wall_time_seconds=0.0,
+            teacher_reference={
+                "candidate_backend": "pc_euler",
+                "candidate_inference_method": "euler",
+                "candidate_steps": 10,
+                "candidate_inference_wall_time_seconds": 0.0,
+                "teacher_backend": "pc_euler",
+                "teacher_inference_method": "euler",
+                "teacher_steps": 10,
+                "teacher_inference_wall_time_seconds": 0.0,
+                "terminal_state_l2_gap": 0.0,
+                "terminal_state_rms_gap": 0.0,
+                "candidate_final_energy": marker,
+                "teacher_final_energy": marker,
+                "energy_gap_to_teacher": 0.0,
+                "update_direction_cosine": None,
+            },
+        )
 
     monkeypatch.setattr("pc.real_pc.load_digits_split", fake_load_digits_split)
     monkeypatch.setattr("pc.real_pc.PCNetwork.train_batch", fake_train_batch)
-    monkeypatch.setattr("pc.real_pc._evaluate_model", fake_evaluate_model)
+    monkeypatch.setattr("pc.real_pc._evaluate_pc_split", fake_evaluate_pc_split)
 
     result = run_digits_pc_experiment(
         RealPCConfig(
