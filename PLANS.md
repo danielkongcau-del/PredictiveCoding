@@ -871,6 +871,277 @@ Failure escalation rule:
   - refinement
   - core iterative `fmpc` backend integration
 
+### Phase 5B / offline interval-conditioned transporter
+
+Goal:
+
+- determine whether a teacher-supervised interval-conditioned student, trained only on frozen `digits` teacher trajectories, can beat the carried-forward Phase 5A endpoint ridge baseline under explicit 1-step / 2-step / 3-step rollout schedules
+
+Scope:
+
+- keep the teacher frozen
+- keep `digits` as the only dataset
+- require trajectory-enabled teacher artifacts from the dedicated preparation/export path
+- keep the default student input:
+  - `concat([z_s, target_onehot, tau_s, tau_t])`
+- keep the default target:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- keep rollout transport explicit:
+  - `z_hat_t = z_hat_s + (tau_t - tau_s) * u_hat`
+- evaluate only explicit teacher-step-aligned rollout schedules:
+  - `1-step`
+  - `2-step`
+  - `3-step`
+- do not introduce:
+  - trajectory-consistency losses
+  - MeanFlow identity losses
+  - JVP objectives
+  - refinement
+  - online joint training with PC weights
+  - any `backend="fmpc"` injection into the core iterative PC path
+
+Required implementation constraints:
+
+- trajectory artifacts must remain portable and exact-teacher-backed
+- the trajectory contract must make explicit:
+  - teacher inference steps `K`
+  - trajectory tensor shape
+  - split metadata
+  - normalized time rule `tau_k = k / K`
+- interval training-pair generation must avoid naive short-interval dominance
+- the default training policy should be interval-length-balanced, or an equally explicit alternative
+- all arrays remain batch-first `float64`
+
+Required learned families:
+
+- `interval_ridge`
+- `interval_mlp_standardized`
+
+Required fixed baselines:
+
+- `identity`
+- carried-forward Phase 5A endpoint ridge baseline
+
+Deliverables:
+
+- an interval trajectory data-loader / sampler module
+- interval normalization helpers for:
+  - `z_s`
+  - `u_star`
+- interval-conditioned student families:
+  - `interval_ridge`
+  - `interval_mlp_standardized`
+- a narrow compare/search runner that:
+  - searches a small deterministic candidate set
+  - evaluates explicit rollout schedules
+  - selects a winner by validation `final_state_rms_gap`
+  - reports held-out test once for the final validation-selected winner
+- saved artifacts such as:
+  - `config.json`
+  - `candidates.csv`
+  - `summary.json`
+
+Files likely to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_protocol.py`
+- `src/pc/fmpc_interval_data.py`
+- `src/pc/fmpc_interval_normalization.py`
+- `src/pc/fmpc_interval_student.py`
+- `experiments/fmpc_interval_suite.py`
+- `experiments/fmpc_v0_prepare.py`
+- focused tests under `tests/`
+
+Acceptance checks:
+
+- trajectory contract check:
+  - trajectory-enabled teacher artifacts load exactly from the serialized checkpoint path
+  - `z_trajectory` shape and endpoint semantics are explicit and stable
+- sampling check:
+  - the default interval-pair training policy is not dominated by short spans
+- rollout check:
+  - `1-step`, `2-step`, and `3-step` schedules use explicit teacher-step-aligned knot indices
+  - rollout is self-fed rather than teacher-forced between knots
+- Phase 5B pass condition:
+  - at least one learned interval family
+    - `interval_ridge` or `interval_mlp_standardized`
+  beats the carried-forward Phase 5A endpoint ridge baseline on both:
+    - validation `final_state_rms_gap`
+    - held-out test `final_state_rms_gap`
+  under an explicit rollout schedule
+
+Failure escalation rule:
+
+- if every learned interval family still loses to the carried-forward Phase 5A endpoint ridge baseline, the next allowed rescue remains below MeanFlow / JVP:
+  - endpoint-free interval feature augmentation only
+- this still does not authorize:
+  - trajectory-aware supervision
+  - MeanFlow identity objectives
+  - JVP objectives
+  - refinement
+  - core iterative `fmpc` backend integration
+
+### Phase 5B rollout-aware rescue
+
+Goal:
+
+- keep the existing interval-conditioned student contract, but reduce rollout distribution shift in true multi-step evaluation by adding a small amount of self-fed, teacher-supervised auxiliary training below the MeanFlow / JVP boundary
+
+Scope:
+
+- still `digits` only
+- still frozen iterative PC teacher only
+- still teacher-supervised only
+- still no:
+  - MeanFlow identity objectives
+  - JVP objectives
+  - refinement
+  - online joint PC-weight training
+  - any `backend="fmpc"` injection into the core iterative inference path
+
+Required rescue constraint:
+
+- the original interval target remains the primary target:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- any rollout-aware term must remain auxiliary and explicit
+
+Rescue design:
+
+- apply rollout-aware auxiliary supervision only to the interval standardized-MLP family
+- use fixed teacher-step-aligned rollout schedules:
+  - `2-step`
+  - `3-step`
+- start rollouts from teacher `z_0`
+- then self-feed the student's predicted states between knots
+- build auxiliary corrective targets from those predicted states to the corresponding teacher knot states
+- keep intermediate-knot and final-endpoint auxiliary losses explicit in code and saved summaries
+
+Acceptance gate after the rescue:
+
+- keep the original Phase 5B gate unchanged
+- the rescue only counts as successful if a learned interval family with a true multi-step schedule:
+  - `2-step` or `3-step`
+  beats the carried-forward Phase 5A endpoint ridge baseline on both:
+  - validation `final_state_rms_gap`
+  - held-out test `final_state_rms_gap`
+- the winning candidate's test `energy_gap_to_teacher` must remain within the previously stated tolerance relative to the carried-forward endpoint ridge baseline
+
+What this rescue still does not authorize:
+
+- trajectory-consistency losses beyond the fixed auxiliary rollout schedules
+- MeanFlow identity training
+- JVP-style objectives
+- alpha curricula
+- refinement
+
+### Phase 5B.2 gradient-augmented interval rescue
+
+Goal:
+
+- keep Phase 5B fully teacher-supervised and endpoint-free, but reduce multi-step rollout drift by conditioning interval students on frozen-teacher local dynamical features computed only at the current state `z_s`
+
+Scope:
+
+- still `digits` only
+- still frozen iterative PC teacher only
+- still exact teacher checkpoint loading only
+- still no:
+  - MeanFlow identity objectives
+  - JVP objectives
+  - refinement
+  - online joint PC-weight training
+  - any `backend="fmpc"` injection into the core iterative inference path
+
+Required current-state feature contract:
+
+- features are computed only from:
+  - current hidden state `z_s`
+  - frozen teacher parameters
+  - current sample input / target
+- features must not leak:
+  - `z_t`
+  - `z_star`
+  - future teacher states
+- the first rescue feature pack should stay narrow and explicit:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- where:
+  - `g_s` is the frozen teacher's one-step hidden-state inference field at `z_s`, expressed in the same normalized-time units as `u_star`
+  - `e_out_s = target_onehot - y_hat_s`
+  - `F_s` is a per-sample scalar teacher energy at `z_s`
+
+Required learned families:
+
+- `interval_ridge_aug`
+- `interval_ridge_residual`
+- optional `interval_mlp_aug`
+
+Required target semantics:
+
+- keep the original direct target available:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- add a residual target family:
+  - `u_res = u_star - g_s`
+- residual-family summaries must reconstruct and report:
+  - `u_hat = g_s + u_res_hat`
+
+Required training-distribution rescue:
+
+- keep the existing span-balanced interval sampler available
+- add an explicit knot-focused training option that upweights the exact interval spans used by the acceptance schedules:
+  - `2-step`
+  - `3-step`
+- this rescue must remain explicit in:
+  - config
+  - candidate rows
+  - summary
+
+Deliverables:
+
+- a narrow teacher-state feature module for interval students
+- augmented interval input helpers that keep the original non-augmented contract intact
+- at least the two new learned ridge families above
+- a small compare/search extension that carries forward:
+  - `identity`
+  - carried-forward Phase 5A endpoint ridge
+  - existing `interval_ridge`
+  - the new augmented ridge families
+- clear saved artifacts exposing:
+  - which feature contract each candidate used
+  - whether knot-focused sampling was used
+  - whether the winner is a true multi-step learned interval family
+
+Files likely to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_interval_features.py`
+- `src/pc/fmpc_interval_data.py`
+- `src/pc/fmpc_interval_normalization.py`
+- `src/pc/fmpc_interval_student.py`
+- `experiments/fmpc_interval_suite.py`
+- focused tests under `tests/`
+
+Acceptance gate:
+
+- keep the original Phase 5B gate unchanged
+- Phase 5B.2 only counts as successful if a learned interval family under a true multi-step schedule:
+  - `2-step`
+  - or `3-step`
+  beats the carried-forward Phase 5A endpoint ridge baseline on both:
+  - validation `final_state_rms_gap`
+  - held-out test `final_state_rms_gap`
+- the winner's test `energy_gap_to_teacher` must still remain within the existing tolerance relative to the carried-forward endpoint ridge baseline
+
+What this rescue still does not authorize:
+
+- MeanFlow identity training
+- JVP-style objectives
+- refinement
+- alpha curricula
+
 ---
 
 ## Phase 6 — Benchmarking and paper-oriented experiments
@@ -931,3 +1202,38 @@ For any new task, specify:
 - experiment registry
 - profiling hooks
 - optional Numba or Cython acceleration after the baseline is stable
+
+---
+
+## Phase 5B Seal-Off
+
+- Phase 5B is now considered passed and sealed.
+- Fresh final validation established:
+  - portable exact-checkpoint-backed teacher trajectory artifacts
+  - a true multi-step learned interval winner
+  - `interval_ridge_residual` under `3-step` rollout beating the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+  - no energy-gate regression relative to the carried-forward endpoint ridge baseline
+
+## Phase 6A — MeanFlow-Style Teacher-Supervised Average-Velocity
+
+### Goal
+
+Open the next FMPC stage conservatively by moving from interval-conditioned transport to MeanFlow-style, teacher-supervised average-velocity modeling.
+
+### Scope
+
+- keep `digits` as the first target
+- keep the iterative PC teacher frozen
+- stay offline and teacher-supervised
+- continue to avoid:
+  - online joint PC-weight training
+  - refinement
+  - any `backend="fmpc"` injection into the core iterative inference path
+- the intended new ingredients are:
+  - MeanFlow-style average-velocity supervision
+  - and, if justified later in this phase, JVP-style objectives
+
+### Entry condition
+
+- Phase 5B is passed and sealed
+- new work should start from the Phase 5B sealed checkpoint rather than re-opening endpoint or interval rescue scope unless a new regression is found

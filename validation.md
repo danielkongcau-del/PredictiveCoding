@@ -575,6 +575,148 @@ This still does not authorize:
 - refinement
 - core iterative `fmpc` backend integration
 
+### Phase 5B offline interval-conditioned transporter
+
+Phase 5B should also be read narrowly:
+
+- the teacher remains the frozen iterative PC path
+- supervision must come from trajectory-enabled teacher artifacts produced by the dedicated preparation/export protocol
+- the default interval student input is `concat([z_s, target_onehot, tau_s, tau_t])`
+- the default interval target is `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- rollout transport remains explicit:
+  - `z_hat_t = z_hat_s + (tau_t - tau_s) * u_hat`
+- no MeanFlow identity objective, JVP objective, refinement, or online joint training is introduced in this phase
+
+The required Phase 5B comparison set is:
+
+- `identity`
+- carried-forward Phase 5A endpoint ridge baseline
+- `interval_ridge`
+- `interval_mlp_standardized`
+
+Phase 5B validation should require:
+
+- trajectory artifacts make `K`, trajectory tensor shape, exact checkpoint reference, and `tau_k = k / K` explicit
+- the default interval-pair training policy is not dominated by short intervals
+- final rollout evaluation is performed on explicit teacher-step-aligned schedules:
+  - `1-step`
+  - `2-step`
+  - `3-step`
+- rollout is self-fed between knots rather than teacher-forced
+
+Phase 5B should be considered passed only if at least one learned interval family:
+
+- `interval_ridge` or `interval_mlp_standardized`
+
+beats the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap` under an explicit rollout schedule.
+
+If every learned interval family still loses to the carried-forward endpoint ridge baseline, the next allowed rescue remains below MeanFlow / JVP:
+
+- endpoint-free interval feature augmentation only
+
+This still does not authorize:
+
+- trajectory-aware supervision
+- MeanFlow identity objectives
+- JVP objectives
+- refinement
+- core iterative `fmpc` backend integration
+
+### Phase 5B rollout-aware rescue
+
+The first rescue step for a failing Phase 5B run should remain conservative:
+
+- keep the original interval target as the primary objective
+- add only a small rollout-aware auxiliary term
+- keep that auxiliary term teacher-supervised and explicit
+- stay below MeanFlow / JVP / refinement
+
+The intended rescue semantics are:
+
+- train interval students primarily on:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- for the standardized MLP family only, optionally add auxiliary supervision on fixed self-fed rollout schedules:
+  - `2-step`
+  - `3-step`
+- start from teacher `z_0`
+- feed each next knot with the student-predicted state, not the teacher state
+- penalize:
+  - intermediate knot state gaps versus teacher knot states
+  - final endpoint gap versus teacher `z_K`
+
+Validation should keep the rescue explicit:
+
+- primary interval loss and rollout-aware auxiliary losses must be reported separately
+- the final Phase 5B decision must still use the unchanged gate:
+  - a learned interval family
+  - under a true multi-step rollout schedule
+  - must beat the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+- passing the rescue does not by itself authorize MeanFlow / JVP; it only justifies opening that next exploration stage
+
+### Phase 5B.2 gradient-augmented interval rescue
+
+If the rollout-aware rescue still fails narrowly, the next allowed Phase 5B rescue remains below MeanFlow / JVP:
+
+- add frozen-teacher current-state dynamical features at `z_s`
+- keep the interval target teacher-supervised
+- keep rollout evaluation on the same explicit `1-step / 2-step / 3-step` teacher-aligned schedules
+
+The intended semantics are:
+
+- compute features only from the current state `z_s` plus the frozen teacher and current sample input/target
+- do not leak:
+  - `z_t`
+  - `z_star`
+  - future teacher states
+- the first narrow feature pack should be:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- where:
+  - `g_s` is the frozen teacher's one-step hidden-state inference field at `z_s`, expressed in normalized-time units compatible with `u_star`
+  - `e_out_s = target_onehot - y_hat_s`
+  - `F_s` is a per-sample scalar teacher energy at `z_s`
+
+The first learned rescue families should be:
+
+- `interval_ridge_aug`
+- `interval_ridge_residual`
+- optional `interval_mlp_aug`
+
+Residual-target semantics must remain explicit:
+
+- direct target:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- residual target:
+  - `u_res = u_star - g_s`
+- reconstructed prediction:
+  - `u_hat = g_s + u_res_hat`
+
+Training-distribution rescue must also stay explicit:
+
+- keep the original span-balanced interval sampler available
+- add a knot-focused training option that upweights the exact spans used by the acceptance schedules:
+  - `2-step`
+  - `3-step`
+- summaries must make it obvious whether a candidate used:
+  - the baseline span-balanced distribution
+  - or the knot-focused rescue mix
+
+The Phase 5B pass/fail gate remains unchanged:
+
+- portable exact-checkpoint-backed teacher artifacts
+- a learned interval family under a true multi-step schedule
+  - `2-step` or `3-step`
+  must beat the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+- the winner's test `energy_gap_to_teacher` must remain within the existing tolerance relative to the carried-forward endpoint ridge baseline
+
+Passing Phase 5B.2 still does not imply:
+
+- MeanFlow identity training has been validated
+- JVP objectives have been validated
+- refinement is required
+- online PC-weight training has been justified
+
 Important caveats that should remain explicit:
 
 - the current toy benchmarks are still simple
@@ -630,3 +772,30 @@ Phase 0 is complete only when all of the following are true:
 - a toy experiment runs end-to-end
 - inference energy is observable and behaves sanely
 - the codebase is ready for cleanup and expansion in Phase 1
+
+---
+
+## Phase 5B seal-off note
+
+Phase 5B is now considered passed and sealed.
+
+The fresh final validation established all of the following at once:
+
+- portable, relative-path trajectory artifacts
+- exact checkpoint reload with numerically negligible teacher-state reproduction error
+- a learned interval family under a true multi-step rollout schedule
+- `interval_ridge_residual` under `3-step` rollout beating the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+- no disqualifying energy-gap regression relative to the carried-forward endpoint ridge baseline
+
+This seal-off does not imply that MeanFlow identity or JVP objectives have already been validated; it only justifies opening that next stage.
+
+## Phase 6A validation entry
+
+The next stage should be read narrowly as:
+
+- MeanFlow-style
+- teacher-supervised
+- average-velocity
+- still offline at first
+
+Before Phase 6A is considered passed, it should outperform the sealed Phase 5B interval baseline under a fresh validation protocol rather than by reusing older endpoint-only gates.

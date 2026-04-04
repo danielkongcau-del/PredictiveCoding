@@ -527,6 +527,9 @@ def run_fmpc_v0_preparation(config: FMPCPreparationConfig) -> FMPCPreparationRun
         "teacher_mode": "train",
         "teacher_target_semantics": "target-clamped supervised teacher",
         "export_trajectory": bool(config.export_trajectory),
+        "trajectory_includes_endpoints": bool(config.export_trajectory),
+        "trajectory_axis_semantics": None if not config.export_trajectory else "(batch, step, z_dim)",
+        "tau_definition": None if not config.export_trajectory else "tau_k = k / teacher_steps",
         "teacher_checkpoint": {
             "format": checkpoint_metadata["format"],
             "dtype": checkpoint_metadata["dtype"],

@@ -67,6 +67,36 @@ def run_phase5_digits_validation_teacher(
     )
 
 
+def run_phase5b_digits_validation_teacher(
+    output_root: str | Path = "outputs/phase5b_validation",
+    run_id: str | None = None,
+) -> FMPCPreparationRunResult:
+    """Run the canonical digits trajectory teacher recipe used for Phase 5B validation."""
+
+    teacher_pc_config = RealPCConfig(
+        dataset_name="digits",
+        layer_dims=(64, 64, 10),
+        epochs=60,
+        batch_size=64,
+        train_steps=30,
+        eval_steps=30,
+        inference_backend="pc_euler",
+        state_init="forward",
+    )
+    return run_fmpc_v0_preparation(
+        FMPCPreparationConfig(
+            dataset_name="digits",
+            output_root=output_root,
+            experiment_name="fmpc_v0_prepare_digits_interval_validation",
+            run_id=run_id,
+            teacher_pc_config=teacher_pc_config,
+            teacher_export_backend="pc_euler",
+            teacher_export_steps=None,
+            export_trajectory=True,
+        )
+    )
+
+
 def main() -> None:
     result = run()
     print("FMPC-v0 preparation completed.")

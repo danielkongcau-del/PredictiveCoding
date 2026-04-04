@@ -267,3 +267,66 @@ def test_fmpc_preparation_defaults_teacher_export_steps_to_train_steps(
     assert manifest["teacher_steps"] == 3
     assert manifest["splits"]["train"]["teacher_steps"] == 3
     assert summary["teacher"]["export_steps"] == 3
+
+
+def test_fmpc_preparation_trajectory_artifact_roundtrip_is_exact(tmp_path: Path) -> None:
+    result = run_fmpc_v0_preparation(
+        FMPCPreparationConfig(
+            dataset_name="digits",
+            output_root=tmp_path,
+            run_id="teacher_trajectory_roundtrip",
+            teacher_pc_config=RealPCConfig(
+                dataset_name="digits",
+                layer_dims=(64, 16, 10),
+                epochs=1,
+                batch_size=256,
+                train_steps=3,
+                eval_steps=3,
+            ),
+            teacher_export_steps=3,
+            teacher_export_batch_size=256,
+            export_trajectory=True,
+        )
+    )
+
+    manifest = _read_json(result.run_dir / "teacher_targets" / "manifest.json")
+    assert manifest["export_trajectory"] is True
+    assert manifest["trajectory_includes_endpoints"] is True
+    assert manifest["trajectory_axis_semantics"] == "(batch, step, z_dim)"
+    assert manifest["tau_definition"] == "tau_k = k / teacher_steps"
+    assert manifest["splits"]["train"]["z_trajectory_shape"][1] == 4
+
+    loaded_model, loaded_split = load_prepared_teacher_runtime(result.run_dir)
+    with np.load(result.run_dir / "teacher_targets" / "train.npz") as saved:
+        saved_z0 = np.asarray(saved["z0"], dtype=np.float64)
+        saved_z_star = np.asarray(saved["z_star"], dtype=np.float64)
+        saved_trajectory = np.asarray(saved["z_trajectory"], dtype=np.float64)
+
+    z0_batches: list[np.ndarray] = []
+    z_star_batches: list[np.ndarray] = []
+    trajectory_batches: list[np.ndarray] = []
+    for x_batch, y_batch in iter_minibatches(
+        loaded_split.x_train,
+        loaded_split.y_train,
+        256,
+        shuffle=False,
+    ):
+        teacher_export = loaded_model.export_teacher_targets(
+            np.asarray(x_batch, dtype=np.float64),
+            np.asarray(y_batch, dtype=np.float64),
+            record_trace=True,
+            record_trajectory=True,
+        )
+        z0_batches.append(teacher_export.z0)
+        z_star_batches.append(teacher_export.z_star)
+        trajectory_batches.append(
+            np.stack(teacher_export.z_trajectory, axis=0).transpose(1, 0, 2)
+        )
+
+    replay_z0 = np.concatenate(z0_batches, axis=0)
+    replay_z_star = np.concatenate(z_star_batches, axis=0)
+    replay_trajectory = np.concatenate(trajectory_batches, axis=0)
+
+    np.testing.assert_allclose(replay_z0, saved_z0, atol=1e-12, rtol=1e-12)
+    np.testing.assert_allclose(replay_z_star, saved_z_star, atol=1e-12, rtol=1e-12)
+    np.testing.assert_allclose(replay_trajectory, saved_trajectory, atol=1e-12, rtol=1e-12)
