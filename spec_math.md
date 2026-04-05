@@ -375,3 +375,119 @@ Likely future extensions include:
 - alternative inference integrators
 
 Those are not part of the baseline unless they are explicitly added in later versions of the spec.
+
+---
+
+## 16. Teacher-free FMPC v1 addendum
+
+This addendum defines the first teacher-free FMPC transport contract without changing
+the baseline predictive-coding energy, hidden-state gradient, or local parameter-update
+mathematics.
+
+### 16.1 Scope
+
+Teacher-free FMPC v1 applies only to the existing layered predictive-coding substrate.
+
+- it does not define a general PCG substrate
+- it does not redefine predict-mode inference
+- it does not replace the baseline iterative PC algorithm outside the explicit
+  teacher-free transport experiment path
+
+### 16.2 Training context and hidden latent
+
+Teacher-free FMPC v1 uses the supervised training context:
+
+- `c = (x, y)`
+- `x^0 = x` remains clamped
+- `x^L = y` remains clamped
+
+The flattened hidden latent is:
+
+- `z = flatten(x^1, ..., x^(L-1))`
+
+This uses the repository's existing hidden-state flattening contract:
+
+- `x^0` is never included in `z`
+- `x^L` is never included in `z`
+- only free hidden layers `x^1 .. x^(L-1)` are concatenated
+
+### 16.3 Local energy substrate and instantaneous flow
+
+Teacher-free FMPC v1 reuses the baseline predictive-coding energy:
+
+- `E_theta(z; c) := F(states(z; x, y), theta)`
+
+where:
+
+- `states(z; x, y)` reconstructs the full state list from the flattened hidden state
+  and the clamped training context
+- `F` is exactly the baseline squared-error predictive-coding energy already defined
+  in this spec
+
+The instantaneous hidden-state flow is:
+
+- `g_theta(z; c) = -∇_z E_theta(z; c)`
+
+No teacher approximation is assumed in this definition.
+
+### 16.4 Average-velocity model and time contract
+
+Teacher-free FMPC v1 introduces an average-velocity model:
+
+- `u_psi(z_t, r, t; c)`
+
+with:
+
+- `t = current time`
+- `r = remaining horizon`
+- `0 <= t < 1`
+- `0 < r <= 1 - t`
+
+At rollout knot `k`, we write:
+
+- `t_k` for the current time
+- `r_k = 1 - t_k` for the remaining horizon
+- `Δt_k = t_{k+1} - t_k`
+
+`u_psi(z_k, r_k, t_k; c) is interpreted as an estimate of the average velocity over the remaining horizon [t_k, 1], and the update z_{k+1} = z_k + Δt_k * u_psi(...) is a piecewise-constant coarse transport approximation, not a redefinition of the instantaneous flow.`
+
+The coarse transport update is:
+
+- `z_{k+1} = z_k + Δt_k * u_psi(z_k, r_k, t_k; c)`
+
+### 16.5 Fixed-terminal-time MeanFlow identity direction
+
+Teacher-free FMPC v1 uses the fixed-terminal-time direction:
+
+- `(dt, dr) = (+1, -1)`
+
+This means the total derivative is taken along trajectories that keep:
+
+- `t + r = const`
+
+equivalently, along a direction that advances the current time while preserving the
+same terminal time.
+
+The MeanFlow-style identity target is therefore based on:
+
+- `u(z_t, r, t; c) ≈ g_theta(z_t; c) + r * D_T u(z_t, r, t; c)`
+
+where `D_T` denotes the total derivative in the fixed-terminal-time direction.
+
+### 16.6 Parameter updates after transport
+
+Teacher-free FMPC v1 changes only the hidden-state transport path used during training.
+
+After transport produces a terminal hidden state `z_hat`, the repository still applies
+the same local parameter-update rule already defined for the baseline:
+
+1. reconstruct the full state list from `z_hat` and the clamped training context
+2. recompute cache terms
+3. compute baseline local parameter gradients
+4. apply the same explicit parameter descent update
+
+This addendum therefore does **not** redefine:
+
+- the baseline energy
+- the baseline hidden-state gradient
+- the baseline local parameter-update equations

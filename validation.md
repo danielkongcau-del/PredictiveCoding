@@ -920,3 +920,59 @@ This opening should be interpreted conservatively:
   - the carried-forward Phase 5A endpoint ridge baseline
   - the sealed Phase 5B.2 winner
   - and, where relevant, the best diagnostic families from Phase 6A
+
+## Phase TF1 validation contract
+
+This section defines the first teacher-free FMPC validation rule set.
+
+Baseline positioning:
+
+- teacher-based FMPC remains frozen baseline / diagnostic reference
+- Phase TF1 is the new main line
+- TF1 validation must not depend on teacher trajectories, teacher fixed points,
+  or teacher-generated regression targets
+
+Checkpoint selection:
+
+- selection uses validation only
+- the concrete selection field is:
+  - `selection_metric = "val_transported_final_energy"`
+- TF1 summaries should also expose:
+  - `selection_metric_source = "val_metric"`
+  - `report_metric_source = "test_metric"`
+- test is report-only and must not participate in checkpoint selection or
+  pass/fail gating
+
+Apples-to-apples transport baselines:
+
+- every TF1 validation run must report:
+  - `identity/no-transport`
+  - `local_field_only`
+- these comparisons must use:
+  - identical rollout knots
+  - identical `transport_steps`
+  - identical `theta` snapshot
+  - identical split / batch
+  - identical energy metric
+
+First-pass TF1 gate:
+
+- the run is fully teacher-free:
+  - no teacher manifests
+  - no teacher checkpoints
+  - no teacher trajectories
+  - no teacher-generated regression targets
+- focused tests and regressions must pass
+- the canonical digits TF1 run must produce complete artifacts with no NaN / Inf
+- the selected TF1 checkpoint must satisfy on **validation**:
+  - `val_transported_final_energy < val_identity_final_energy`
+  - `val_transported_final_energy <= val_local_field_only_final_energy`
+  - `val_accuracy > majority baseline`
+
+Report-only expectations:
+
+- final test metrics are still required in `summary.json`
+- test results are interpretive and diagnostic only for the first TF1 stage
+- canonical TF1 experiment labels should distinguish:
+  - `mechanism_smoke`
+  - `baseline_comparable`

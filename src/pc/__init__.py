@@ -118,6 +118,26 @@ from .fmpc_meanflow_student import (
     reconstruct_meanflow_velocity,
     run_fmpc_meanflow_suite,
 )
+from .fmpc_tf1 import (
+    FMPCTF1Config,
+    FMPCTF1EpochSnapshot,
+    FMPCTF1RunResult,
+    build_tf1_baseline_comparable_config,
+    build_tf1_epoch_selection_diagnostics,
+    build_tf1_mechanism_smoke_config,
+    build_tf1_preset_config,
+    run_fmpc_tf1_experiment,
+)
+from .fmpc_tf1_suite import (
+    FMPCTF1SuiteConfig,
+    FMPCTF1SuiteRunResult,
+    run_fmpc_tf1_suite,
+)
+from .fmpc_tf1_selection_suite import (
+    FMPCTF1SelectionSuiteConfig,
+    FMPCTF1SelectionSuiteRunResult,
+    run_fmpc_tf1_selection_suite,
+)
 from .inference import TeacherInferenceExport, run_teacher_inference_export
 from .layers import PCLayerParams, init_mlp_layers
 from .metrics import (
@@ -166,6 +186,13 @@ __all__ = [
     "FMPCIntervalSuiteRunResult",
     "FMPCMeanFlowSuiteConfig",
     "FMPCMeanFlowSuiteRunResult",
+    "FMPCTF1Config",
+    "FMPCTF1EpochSnapshot",
+    "FMPCTF1RunResult",
+    "FMPCTF1SelectionSuiteConfig",
+    "FMPCTF1SelectionSuiteRunResult",
+    "FMPCTF1SuiteConfig",
+    "FMPCTF1SuiteRunResult",
     "FMPCIntervalTeacherFeatureBundle",
     "FMPCIntervalTeacherFeatureSplitContext",
     "FMPCIntervalTeacherStateFeatures",
@@ -215,6 +242,10 @@ __all__ = [
     "build_fmpc_interval_inputs",
     "build_meanflow_identity_target",
     "build_meanflow_input_tangent",
+    "build_tf1_baseline_comparable_config",
+    "build_tf1_epoch_selection_diagnostics",
+    "build_tf1_mechanism_smoke_config",
+    "build_tf1_preset_config",
     "build_interval_residual_target",
     "build_fmpc_student_inputs",
     "build_meanflow_full_identity_target_raw",
@@ -260,6 +291,9 @@ __all__ = [
     "run_fmpc_v0_preparation",
     "run_fmpc_interval_suite",
     "run_fmpc_meanflow_suite",
+    "run_fmpc_tf1_experiment",
+    "run_fmpc_tf1_selection_suite",
+    "run_fmpc_tf1_suite",
     "build_rollout_auxiliary_batches",
     "run_fmpc_student_experiment",
     "run_fmpc_student_suite",

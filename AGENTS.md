@@ -50,6 +50,17 @@ Do not assume the current code is authoritative if it conflicts with the spec.
 7. **Keep randomness controlled.**
    - Experiments and tests should use explicit seeds.
 
+## FMPC strategy status
+
+- Teacher-based FMPC work from Phase 4 through Phase 6A is now a **frozen baseline /
+  diagnostic reference**.
+- Teacher-free FMPC work starting at Phase TF1 is the **main algorithmic line**.
+- Unless a plan explicitly labels something as baseline or diagnostic, new FMPC work
+  must not depend on:
+  - teacher trajectories
+  - teacher fixed points
+  - teacher-generated regression targets
+
 ## When to make a plan first
 
 Create or update a written plan before coding if the task involves any of the following:

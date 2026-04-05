@@ -1541,3 +1541,133 @@ This stage starts from a repo state where:
 
 Phase TF1 should be treated as a new stage entry rather than a retroactive claim that
 Phase 6A succeeded.
+
+## Phase TF1 — Teacher-free FMPC v1
+
+Objective:
+
+- start the new main FMPC line without teacher artifacts
+- keep the existing layered predictive-coding substrate intact
+- replace only the **training-time** hidden-state inference path with a minimal
+  teacher-free FMPC transporter
+- preserve baseline parameter-update math after transport
+
+Core contract:
+
+- context remains supervised training context `c = (x, y)` with:
+  - `x^0 = x` clamped
+  - `x^L = y` clamped
+- free latent state is:
+  - `z = flatten(x^1, ..., x^(L-1))`
+- local energy substrate is the existing baseline PC energy:
+  - `E_theta(z; c) := F(states(z; x, y), theta)`
+- exact local hidden-state flow is:
+  - `g_theta(z; c) = -∇_z E_theta(z; c)`
+- the teacher-free average-velocity model is:
+  - `u_psi(z_t, r, t; c)`
+- first-pass transport uses one-step or few-step coarse rollout only
+- after transport, `theta` is updated with the same baseline local parameter
+  updates already used by the slow PC implementation
+
+Non-goals:
+
+- no teacher trajectories
+- no teacher fixed points
+- no teacher-generated regression targets
+- no modification of the slow predict/eval path
+- no integration through `backend="fmpc"`
+- no general PCG support in v1
+
+Files to add / modify:
+
+- add:
+  - `src/pc/fmpc_tf1_flow.py`
+  - `src/pc/fmpc_tf1_jvp.py`
+  - `src/pc/fmpc_tf1.py`
+  - `experiments/fmpc_tf1.py`
+  - `tests/test_fmpc_tf1_flow.py`
+  - `tests/test_fmpc_tf1_jvp.py`
+  - `tests/test_fmpc_tf1_targets.py`
+  - `tests/test_fmpc_tf1_smoke.py`
+- modify:
+  - `PLANS.md`
+  - `AGENTS.md`
+  - `validation.md`
+  - `spec_math.md`
+  - `src/pc/__init__.py`
+
+Minimal implementation:
+
+- implement `tf1_mlp_core` first
+- input contract:
+  - `concat([z_t, target_onehot, t, r])`
+- fallback input tangent:
+  - `concat([g_t, 0_target, 1_t, -1_r])`
+- direct anchor target:
+  - self-bootstrap average velocity from the current exact local flow
+- MeanFlow identity:
+  - `u_hat ≈ g_t + r * JVP_T(u_hat)`
+- `psi` optimization uses a single weighted loss:
+  - `L = L_boot + lambda_id * L_id`
+
+Optional enhancement path after core is green:
+
+- `tf1_mlp_aug`
+- input contract:
+  - `concat([z_t, target_onehot, t, r, g_t, e_out_t, F_t])`
+- feature-aware tangents remain optional, not mandatory
+
+Training schedule:
+
+- Stage A: bootstrap warmup
+  - canonical default: `warmup_epochs = 5`
+  - `theta` does not freeze
+  - `lambda_id = 0`
+  - `psi` trains on `L_boot`
+  - `theta` updates use `local_field_only` transport
+- Stage B: hybrid
+  - learned `u_psi` transport becomes active for `theta`
+  - `theta` and `psi` are updated jointly
+  - `lambda_id` ramps from `0` to a small nonzero value
+
+Experiment entrypoint:
+
+- `experiments/fmpc_tf1.py`
+- named presets:
+  - `mechanism_smoke` = small TF1 substrate `(64, 16, 10)`
+  - `baseline_comparable` = baseline-sized digits substrate `(64, 64, 10)`
+
+Acceptance criteria for the first TF1 mechanism-validating pass:
+
+- the run is fully teacher-free:
+  - no teacher manifests
+  - no teacher checkpoints
+  - no teacher trajectories
+  - no teacher-generated regression targets
+- checkpoint selection uses:
+  - `selection_metric = "val_transported_final_energy"`
+- pass/fail gating uses **validation only**
+- the same run must report strict apples-to-apples baselines against:
+  - `identity/no-transport`
+  - `local_field_only`
+- these baselines must share:
+  - identical rollout knots
+  - identical `transport_steps`
+  - identical `theta` snapshot
+  - identical batch split
+  - identical energy metric
+- the best TF1 candidate must satisfy on validation:
+  - `val_transported_final_energy < val_identity_final_energy`
+  - `val_transported_final_energy <= val_local_field_only_final_energy`
+  - `val_accuracy > majority baseline`
+- test remains report-only
+
+Risks / open questions:
+
+- a self-bootstrap target may collapse toward `local_field_only` and provide only
+  a weak learning signal
+- few-step coarse transport may improve validation energy while leaving slow-PC
+  accuracy gains modest
+- feature-aware tangents may help later, but they should not be required for the
+  first viable TF1 core
+- the current `backend="fmpc"` placeholder remains intentionally unused in TF1 v1
