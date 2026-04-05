@@ -89,6 +89,35 @@ def _validate_feature_names(selected_feature_names: tuple[str, ...]) -> tuple[st
     return tuple(selected_feature_names)
 
 
+def _validate_fd_epsilon(fd_epsilon: float) -> float:
+    epsilon = float(fd_epsilon)
+    if epsilon <= 0.0:
+        raise ValueError("fd_epsilon must be positive.")
+    return epsilon
+
+
+def _feature_chunks(
+    *,
+    selected_feature_names: tuple[str, ...],
+    y_hat_s: np.ndarray,
+    e_out_s: np.ndarray,
+    g_s: np.ndarray,
+    F_s: np.ndarray,
+) -> list[np.ndarray]:
+    feature_names = _validate_feature_names(selected_feature_names)
+    chunks: list[np.ndarray] = []
+    for name in feature_names:
+        if name == "y_hat_s":
+            chunks.append(y_hat_s)
+        elif name == "e_out_s":
+            chunks.append(e_out_s)
+        elif name == "g_s":
+            chunks.append(g_s)
+        elif name == "F_s":
+            chunks.append(F_s)
+    return chunks
+
+
 @dataclass(frozen=True)
 class FMPCIntervalTeacherStateFeatures:
     """Frozen-teacher local dynamical features at a current hidden state `z_s`.
@@ -135,19 +164,66 @@ class FMPCIntervalTeacherStateFeatures:
         - returns `(batch, total_selected_feature_dim)`
         """
 
-        feature_names = _validate_feature_names(selected_feature_names)
-        if len(feature_names) == 0:
+        if len(selected_feature_names) == 0:
             return np.zeros((self.y_hat_s.shape[0], 0), dtype=np.float64)
-        chunks: list[np.ndarray] = []
-        for name in feature_names:
-            if name == "y_hat_s":
-                chunks.append(self.y_hat_s)
-            elif name == "e_out_s":
-                chunks.append(self.e_out_s)
-            elif name == "g_s":
-                chunks.append(self.g_s)
-            elif name == "F_s":
-                chunks.append(self.F_s)
+        chunks = _feature_chunks(
+            selected_feature_names=selected_feature_names,
+            y_hat_s=self.y_hat_s,
+            e_out_s=self.e_out_s,
+            g_s=self.g_s,
+            F_s=self.F_s,
+        )
+        return np.concatenate(chunks, axis=1).astype(np.float64, copy=False)
+
+
+@dataclass(frozen=True)
+class FMPCIntervalTeacherStateFeatureTangents:
+    """Directional derivatives of teacher-state features along the current field `g_s`.
+
+    Shape contract:
+    - `Dg_y_hat_s`: `(batch, output_dim)`
+    - `Dg_e_out_s`: `(batch, output_dim)`
+    - `Dg_g_s`: `(batch, z_dim)`
+    - `Dg_F_s`: `(batch, 1)`
+    """
+
+    Dg_y_hat_s: np.ndarray
+    Dg_e_out_s: np.ndarray
+    Dg_g_s: np.ndarray
+    Dg_F_s: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "Dg_y_hat_s", _as_batch_first("Dg_y_hat_s", self.Dg_y_hat_s))
+        object.__setattr__(self, "Dg_e_out_s", _as_batch_first("Dg_e_out_s", self.Dg_e_out_s))
+        object.__setattr__(self, "Dg_g_s", _as_batch_first("Dg_g_s", self.Dg_g_s))
+        object.__setattr__(self, "Dg_F_s", _as_batch_first("Dg_F_s", self.Dg_F_s))
+        batch_size = int(self.Dg_y_hat_s.shape[0])
+        if (
+            self.Dg_e_out_s.shape[0] != batch_size
+            or self.Dg_g_s.shape[0] != batch_size
+            or self.Dg_F_s.shape[0] != batch_size
+        ):
+            raise ValueError("All teacher-state feature tangents must share the same batch dimension.")
+        if self.Dg_y_hat_s.shape != self.Dg_e_out_s.shape:
+            raise ValueError("Dg_y_hat_s and Dg_e_out_s must share the same shape.")
+        if self.Dg_F_s.shape[1] != 1:
+            raise ValueError("Dg_F_s must be shaped (batch, 1).")
+
+    def feature_tangent_matrix(
+        self,
+        selected_feature_names: tuple[str, ...] = ("g_s", "e_out_s", "F_s"),
+    ) -> np.ndarray:
+        """Concatenate selected feature tangents in the same order as the feature block."""
+
+        if len(selected_feature_names) == 0:
+            return np.zeros((self.Dg_y_hat_s.shape[0], 0), dtype=np.float64)
+        chunks = _feature_chunks(
+            selected_feature_names=selected_feature_names,
+            y_hat_s=self.Dg_y_hat_s,
+            e_out_s=self.Dg_e_out_s,
+            g_s=self.Dg_g_s,
+            F_s=self.Dg_F_s,
+        )
         return np.concatenate(chunks, axis=1).astype(np.float64, copy=False)
 
 
@@ -230,6 +306,116 @@ class FMPCIntervalTeacherTrajectoryFeatures:
             F_s=self.F_trajectory[:, source_index, :],
         )
 
+    def gather_batch_features(
+        self,
+        sample_row_indices: np.ndarray,
+        source_step_indices: np.ndarray,
+        *,
+        selected_feature_names: tuple[str, ...] = ("g_s", "e_out_s", "F_s"),
+    ) -> FMPCIntervalTeacherStateFeatures:
+        """Gather teacher-state features for per-sample source knots.
+
+        Shape contract:
+        - `sample_row_indices`: `(batch,)`
+        - `source_step_indices`: `(batch,)`
+        - returns batch-first teacher-state features aligned to those indices
+        """
+
+        sample_rows = np.asarray(sample_row_indices, dtype=np.int64)
+        source_steps = np.asarray(source_step_indices, dtype=np.int64)
+        if sample_rows.ndim != 1 or source_steps.ndim != 1:
+            raise ValueError("sample_row_indices and source_step_indices must be rank-1 arrays.")
+        if sample_rows.shape != source_steps.shape:
+            raise ValueError("sample_row_indices and source_step_indices must share the same shape.")
+        if np.any(sample_rows < 0) or np.any(sample_rows >= self.y_hat_trajectory.shape[0]):
+            raise ValueError("sample_row_indices are out of range for this trajectory feature tensor.")
+        if np.any(source_steps < 0) or np.any(source_steps > self.teacher_steps):
+            raise ValueError(f"source_step_indices must lie in [0, {self.teacher_steps}].")
+        _validate_feature_names(selected_feature_names)
+        return FMPCIntervalTeacherStateFeatures(
+            y_hat_s=self.y_hat_trajectory[sample_rows, source_steps, :],
+            e_out_s=self.e_out_trajectory[sample_rows, source_steps, :],
+            g_s=self.g_trajectory[sample_rows, source_steps, :],
+            F_s=self.F_trajectory[sample_rows, source_steps, :],
+        )
+
+
+@dataclass(frozen=True)
+class FMPCIntervalTeacherTrajectoryFeatureTangents:
+    """Precomputed directional derivatives of teacher features along `g_s`.
+
+    Shape contract:
+    - `Dg_y_hat_trajectory`: `(batch, teacher_steps + 1, output_dim)`
+    - `Dg_e_out_trajectory`: `(batch, teacher_steps + 1, output_dim)`
+    - `Dg_g_trajectory`: `(batch, teacher_steps + 1, z_dim)`
+    - `Dg_F_trajectory`: `(batch, teacher_steps + 1, 1)`
+    """
+
+    split_name: str
+    teacher_steps: int
+    Dg_y_hat_trajectory: np.ndarray
+    Dg_e_out_trajectory: np.ndarray
+    Dg_g_trajectory: np.ndarray
+    Dg_F_trajectory: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "Dg_y_hat_trajectory", np.asarray(self.Dg_y_hat_trajectory, dtype=np.float64))
+        object.__setattr__(self, "Dg_e_out_trajectory", np.asarray(self.Dg_e_out_trajectory, dtype=np.float64))
+        object.__setattr__(self, "Dg_g_trajectory", np.asarray(self.Dg_g_trajectory, dtype=np.float64))
+        object.__setattr__(self, "Dg_F_trajectory", np.asarray(self.Dg_F_trajectory, dtype=np.float64))
+        expected_steps = int(self.teacher_steps) + 1
+        for name, array in (
+            ("Dg_y_hat_trajectory", self.Dg_y_hat_trajectory),
+            ("Dg_e_out_trajectory", self.Dg_e_out_trajectory),
+            ("Dg_g_trajectory", self.Dg_g_trajectory),
+            ("Dg_F_trajectory", self.Dg_F_trajectory),
+        ):
+            if array.ndim != 3:
+                raise ValueError(f"{name} must be shaped (batch, step, features).")
+            if array.shape[1] != expected_steps:
+                raise ValueError(f"{name} step axis must have length {expected_steps}.")
+        if self.Dg_y_hat_trajectory.shape != self.Dg_e_out_trajectory.shape:
+            raise ValueError("Dg_y_hat_trajectory and Dg_e_out_trajectory must share the same shape.")
+        if (
+            self.Dg_y_hat_trajectory.shape[0] != self.Dg_g_trajectory.shape[0]
+            or self.Dg_y_hat_trajectory.shape[0] != self.Dg_F_trajectory.shape[0]
+        ):
+            raise ValueError("All trajectory tangent tensors must share the same batch dimension.")
+        if self.Dg_F_trajectory.shape[2] != 1:
+            raise ValueError("Dg_F_trajectory must have trailing feature dimension 1.")
+
+    def step_feature_tangents(self, source_index: int) -> FMPCIntervalTeacherStateFeatureTangents:
+        if source_index < 0 or source_index > self.teacher_steps:
+            raise ValueError(f"source_index must lie in [0, {self.teacher_steps}].")
+        return FMPCIntervalTeacherStateFeatureTangents(
+            Dg_y_hat_s=self.Dg_y_hat_trajectory[:, source_index, :],
+            Dg_e_out_s=self.Dg_e_out_trajectory[:, source_index, :],
+            Dg_g_s=self.Dg_g_trajectory[:, source_index, :],
+            Dg_F_s=self.Dg_F_trajectory[:, source_index, :],
+        )
+
+    def gather_batch_feature_tangents(
+        self,
+        sample_row_indices: np.ndarray,
+        source_step_indices: np.ndarray,
+    ) -> FMPCIntervalTeacherStateFeatureTangents:
+        sample_rows = np.asarray(sample_row_indices, dtype=np.int64)
+        source_steps = np.asarray(source_step_indices, dtype=np.int64)
+        if sample_rows.ndim != 1 or source_steps.ndim != 1:
+            raise ValueError("sample_row_indices and source_step_indices must be rank-1 arrays.")
+        if sample_rows.shape != source_steps.shape:
+            raise ValueError("sample_row_indices and source_step_indices must share the same shape.")
+        if np.any(sample_rows < 0) or np.any(sample_rows >= self.Dg_y_hat_trajectory.shape[0]):
+            raise ValueError("sample_row_indices are out of range for this trajectory tangent tensor.")
+        if np.any(source_steps < 0) or np.any(source_steps > self.teacher_steps):
+            raise ValueError(f"source_step_indices must lie in [0, {self.teacher_steps}].")
+        return FMPCIntervalTeacherStateFeatureTangents(
+            Dg_y_hat_s=self.Dg_y_hat_trajectory[sample_rows, source_steps, :],
+            Dg_e_out_s=self.Dg_e_out_trajectory[sample_rows, source_steps, :],
+            Dg_g_s=self.Dg_g_trajectory[sample_rows, source_steps, :],
+            Dg_F_s=self.Dg_F_trajectory[sample_rows, source_steps, :],
+        )
+
 
 @dataclass(frozen=True)
 class FMPCIntervalTeacherFeatureBundle:
@@ -239,6 +425,9 @@ class FMPCIntervalTeacherFeatureBundle:
     train: FMPCIntervalTeacherTrajectoryFeatures
     val: FMPCIntervalTeacherTrajectoryFeatures
     test: FMPCIntervalTeacherTrajectoryFeatures
+    train_tangents: FMPCIntervalTeacherTrajectoryFeatureTangents
+    val_tangents: FMPCIntervalTeacherTrajectoryFeatureTangents
+    test_tangents: FMPCIntervalTeacherTrajectoryFeatureTangents
     split_contexts: dict[str, FMPCIntervalTeacherFeatureSplitContext]
     feature_names_supported: tuple[str, ...] = _SUPPORTED_TEACHER_FEATURE_NAMES
 
@@ -249,6 +438,15 @@ class FMPCIntervalTeacherFeatureBundle:
             return self.val
         if split_name == "test":
             return self.test
+        raise ValueError(f"Unsupported split_name '{split_name}'.")
+
+    def trajectory_feature_tangents(self, split_name: str) -> FMPCIntervalTeacherTrajectoryFeatureTangents:
+        if split_name == "train":
+            return self.train_tangents
+        if split_name == "val":
+            return self.val_tangents
+        if split_name == "test":
+            return self.test_tangents
         raise ValueError(f"Unsupported split_name '{split_name}'.")
 
     def current_state_feature_matrix(
@@ -277,6 +475,53 @@ class FMPCIntervalTeacherFeatureBundle:
             batch_size=context.teacher_export_batch_size,
         )
         return state_features.feature_matrix(selected_feature_names), state_features
+
+    def current_state_feature_matrix_and_tangents(
+        self,
+        teacher_model: PCNetwork,
+        *,
+        split_name: str,
+        z_s: np.ndarray,
+        target_onehot: np.ndarray,
+        tau_s: np.ndarray | float,
+        tau_t: np.ndarray | float,
+        selected_feature_names: tuple[str, ...],
+        fd_epsilon: float,
+    ) -> tuple[np.ndarray, FMPCIntervalTeacherStateFeatures, FMPCIntervalTeacherStateFeatureTangents]:
+        """Compute current-state teacher features and their directional derivatives.
+
+        Shape contract:
+        - returns `(feature_matrix, state_features, feature_tangents)`
+        - the feature tangent contract follows `D_g feat(z_s)` along the current field `g_s`
+        """
+
+        _ = target_onehot
+        _ = tau_s
+        _ = tau_t
+        context = self.split_contexts[split_name]
+        state_features = compute_interval_teacher_state_features(
+            teacher_model,
+            context.x,
+            context.y,
+            np.asarray(z_s, dtype=np.float64),
+            teacher_steps=context.teacher_steps,
+            batch_size=context.teacher_export_batch_size,
+        )
+        state_tangents = compute_interval_teacher_state_feature_tangents(
+            teacher_model,
+            context.x,
+            context.y,
+            np.asarray(z_s, dtype=np.float64),
+            teacher_steps=context.teacher_steps,
+            batch_size=context.teacher_export_batch_size,
+            fd_epsilon=fd_epsilon,
+            state_features=state_features,
+        )
+        return (
+            state_features.feature_matrix(selected_feature_names),
+            state_features,
+            state_tangents,
+        )
 
 
 def compute_interval_teacher_state_features(
@@ -349,6 +594,73 @@ def compute_interval_teacher_state_features(
     )
 
 
+def compute_interval_teacher_state_feature_tangents(
+    teacher_model: PCNetwork,
+    x: np.ndarray,
+    y: np.ndarray,
+    z_s: np.ndarray,
+    *,
+    teacher_steps: int,
+    batch_size: int | None = None,
+    fd_epsilon: float,
+    state_features: FMPCIntervalTeacherStateFeatures | None = None,
+) -> FMPCIntervalTeacherStateFeatureTangents:
+    """Compute directional derivatives of teacher features along the current field `g_s`.
+
+    Shape contract:
+    - `x`: `(batch, input_dim)`
+    - `y`: `(batch, output_dim)`
+    - `z_s`: `(batch, z_dim)`
+    - returns batch-first directional derivatives for `y_hat_s`, `e_out_s`, `g_s`, and `F_s`
+
+    Finite-difference contract:
+    - `D_g feat(z_s) ≈ [feat(z_s + eps * g_s) - feat(z_s - eps * g_s)] / (2 * eps)`
+    - `eps` is the explicit normalized-time probe size
+    """
+
+    epsilon = _validate_fd_epsilon(fd_epsilon)
+    z_array = _as_batch_first("z_s", z_s)
+    base_features = (
+        compute_interval_teacher_state_features(
+            teacher_model,
+            x,
+            y,
+            z_array,
+            teacher_steps=teacher_steps,
+            batch_size=batch_size,
+        )
+        if state_features is None
+        else state_features
+    )
+    if base_features.g_s.shape != z_array.shape:
+        raise ValueError("state_features.g_s must share the same shape as z_s.")
+    z_plus = (z_array + epsilon * base_features.g_s).astype(np.float64, copy=False)
+    z_minus = (z_array - epsilon * base_features.g_s).astype(np.float64, copy=False)
+    plus_features = compute_interval_teacher_state_features(
+        teacher_model,
+        x,
+        y,
+        z_plus,
+        teacher_steps=teacher_steps,
+        batch_size=batch_size,
+    )
+    minus_features = compute_interval_teacher_state_features(
+        teacher_model,
+        x,
+        y,
+        z_minus,
+        teacher_steps=teacher_steps,
+        batch_size=batch_size,
+    )
+    scale = 2.0 * epsilon
+    return FMPCIntervalTeacherStateFeatureTangents(
+        Dg_y_hat_s=((plus_features.y_hat_s - minus_features.y_hat_s) / scale).astype(np.float64, copy=False),
+        Dg_e_out_s=((plus_features.e_out_s - minus_features.e_out_s) / scale).astype(np.float64, copy=False),
+        Dg_g_s=((plus_features.g_s - minus_features.g_s) / scale).astype(np.float64, copy=False),
+        Dg_F_s=((plus_features.F_s - minus_features.F_s) / scale).astype(np.float64, copy=False),
+    )
+
+
 def prepare_interval_teacher_feature_context(
     interval_split: Any,
     teacher_split: SupervisedDataSplit,
@@ -407,4 +719,53 @@ def precompute_interval_teacher_trajectory_features(
         e_out_trajectory=np.stack(e_out_steps, axis=1),
         g_trajectory=np.stack(g_steps, axis=1),
         F_trajectory=np.stack(F_steps, axis=1),
+    )
+
+
+def precompute_interval_teacher_trajectory_feature_tangents(
+    teacher_model: PCNetwork,
+    interval_split: Any,
+    context: FMPCIntervalTeacherFeatureSplitContext,
+    *,
+    fd_epsilon: float,
+) -> FMPCIntervalTeacherTrajectoryFeatureTangents:
+    """Precompute `D_g` teacher feature tangents for every saved teacher knot in one split."""
+
+    if context.teacher_steps != int(interval_split.teacher_steps):
+        raise ValueError("context.teacher_steps must match interval_split.teacher_steps.")
+    Dg_y_hat_steps: list[np.ndarray] = []
+    Dg_e_out_steps: list[np.ndarray] = []
+    Dg_g_steps: list[np.ndarray] = []
+    Dg_F_steps: list[np.ndarray] = []
+    for source_index in range(context.teacher_steps + 1):
+        z_source = np.asarray(interval_split.z_trajectory[:, source_index, :], dtype=np.float64)
+        features = compute_interval_teacher_state_features(
+            teacher_model,
+            context.x,
+            context.y,
+            z_source,
+            teacher_steps=context.teacher_steps,
+            batch_size=context.teacher_export_batch_size,
+        )
+        tangents = compute_interval_teacher_state_feature_tangents(
+            teacher_model,
+            context.x,
+            context.y,
+            z_source,
+            teacher_steps=context.teacher_steps,
+            batch_size=context.teacher_export_batch_size,
+            fd_epsilon=fd_epsilon,
+            state_features=features,
+        )
+        Dg_y_hat_steps.append(tangents.Dg_y_hat_s)
+        Dg_e_out_steps.append(tangents.Dg_e_out_s)
+        Dg_g_steps.append(tangents.Dg_g_s)
+        Dg_F_steps.append(tangents.Dg_F_s)
+    return FMPCIntervalTeacherTrajectoryFeatureTangents(
+        split_name=context.split_name,
+        teacher_steps=context.teacher_steps,
+        Dg_y_hat_trajectory=np.stack(Dg_y_hat_steps, axis=1),
+        Dg_e_out_trajectory=np.stack(Dg_e_out_steps, axis=1),
+        Dg_g_trajectory=np.stack(Dg_g_steps, axis=1),
+        Dg_F_trajectory=np.stack(Dg_F_steps, axis=1),
     )

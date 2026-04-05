@@ -798,4 +798,125 @@ The next stage should be read narrowly as:
 - average-velocity
 - still offline at first
 
-Before Phase 6A is considered passed, it should outperform the sealed Phase 5B interval baseline under a fresh validation protocol rather than by reusing older endpoint-only gates.
+The Phase 6A contract should remain conservative:
+
+- keep the frozen iterative PC teacher from Phase 5B.2
+- keep portable relative-path teacher artifacts and exact checkpoint reload
+- keep the current-state feature machinery from Phase 5B.2
+- add a manual NumPy JVP for the explicit MLP family only
+- the initial Phase 6A version treated teacher-derived context features as frozen side information in the JVP path
+- the Phase 6A.1 rescue should instead make the teacher-derived current-state feature block feature-aware:
+  - compute directional derivatives of current-state teacher features along `g_s`
+  - inject those derivatives into the model input tangent
+  - explicitly include `d g_s / d tau_s` in the residual MeanFlow identity
+- if the feature-aware rescue still fails but the diagnostic linear residual family becomes
+  the fresh true multi-step winner, the next allowed rescue remains inside Phase 6A and becomes
+  an explicit two-branch residual decomposition:
+  - `u_hat = u_local + u_corr`
+  - `u_local` is a simple local-dynamics branch anchored to:
+    - `g_s`
+    - `e_out_s`
+    - `F_s`
+  - `u_corr` is a neural transport-correction branch using the richer augmented input
+  - the MeanFlow identity must still apply to the full reconstructed `u_hat`
+- if the two-branch neural family is still conceptually right but loses to the carried-forward
+  feature-aware linear winner, the next allowed rescue remains inside Phase 6A and becomes
+  warm-started two-branch residual training:
+  - warm-start `u_local` from the carried-forward Phase 6A.1 linear residual winner on the same
+    fresh exact-checkpoint-backed teacher artifact
+  - keep `u_corr` zero-initialized or near-zero-initialized
+  - train in explicit stages:
+    - Stage A: correction-only warmup with the local branch frozen
+    - Stage B: joint hybrid fine-tuning
+  - keep the full-`u_hat` teacher anchor
+  - keep the full-`u_hat` feature-aware MeanFlow identity
+  - keep `d g_s / d tau_s` active inside the residual identity
+- keep direct teacher average-velocity supervision as the anchor objective
+- when stabilizing MeanFlow training inside Phase 6A, only allow:
+  - a teacher-only warmup
+  - a simple ramp to nonzero identity weight
+  - a late fixed hybrid stage
+  - and, if needed, a reduced identity scope on the exact `2-step` / `3-step` acceptance segments
+
+The required comparison set should include:
+
+- `identity`
+- carried-forward Phase 5A endpoint ridge baseline
+- carried-forward Phase 5B.2 winner:
+  - `interval_ridge_residual`
+  - `3-step`
+- `teacher_only_mlp_aug`
+- `meanflow_mlp_aug`
+- `meanflow_mlp_residual`
+- `meanflow_linear_residual`
+- `meanflow_twobranch_residual`
+- `meanflow_twobranch_residual_warmstart`
+
+The required rollout schedules remain:
+
+- `1-step`
+- `2-step`
+- `3-step`
+
+Phase 6A should be considered passed only if all of the following hold under one fresh final validation run:
+
+- teacher artifacts remain portable and exact-checkpoint-backed
+- at least one MeanFlow neural family:
+  - `meanflow_mlp_aug`
+  - or `meanflow_mlp_residual`
+  wins under a true multi-step rollout:
+  - `2-step`
+  - or `3-step`
+- that winning candidate beats the sealed Phase 5B.2 winner on both:
+  - validation `final_state_rms_gap`
+  - held-out test `final_state_rms_gap`
+- the winner's held-out test `energy_gap_to_teacher` is not materially worse than the sealed Phase 5B.2 baseline
+
+Important boundary:
+
+- `teacher_only_mlp_aug` is diagnostic only
+- `meanflow_linear_residual` is also diagnostic only
+- even if it wins, that does not count as a Phase 6A pass
+- under Phase 6A.2, `meanflow_twobranch_residual` is the first neural rescue family that may
+  count as a passing candidate if it clears the same held-out competitiveness gate
+- under Phase 6A.3, `meanflow_twobranch_residual_warmstart` is the next allowed neural rescue
+  family; passing still requires a neural winner rather than a carried-forward linear diagnostic
+- a rescue inside Phase 6A may change the curriculum or identity scope, but it must remain:
+  - teacher-supervised
+  - MeanFlow/JVP-based
+  - below any teacher-reduction or teacher-free stage
+
+## Phase 6A seal-off note
+
+Phase 6A is now sealed as **not passed**.
+
+The final state of evidence is:
+
+- Phase 6A.1 showed that feature-aware MeanFlow identity is directionally correct
+- the carried-forward linear residual diagnostic became the fresh true multi-step winner
+- this implies the core identity repair was meaningful
+- but no neural MeanFlow family cleared the required competitiveness gate against the sealed
+  Phase 5B.2 winner
+- the warm-started Phase 6A.3 two-branch neural rescue remained unstable and failed the fresh
+  multi-step acceptance run
+
+Therefore:
+
+- Phase 6A artifacts remain readable and portable
+- Phase 6A findings remain diagnostically useful
+- but Phase 6A does **not** count as a passed stage
+
+## Phase TF1 validation entry
+
+The next stage is now opened as:
+
+- `Phase TF1 — Teacher-free FMPC v1`
+
+This opening should be interpreted conservatively:
+
+- it is a new project decision, not evidence that Phase 6A passed
+- the sealed Phase 5B.2 winner remains the strongest passed transport baseline
+- any Phase TF1 result should still be compared back to:
+  - the carried-forward Phase 5A endpoint ridge baseline
+  - the sealed Phase 5B.2 winner
+  - and, where relevant, the best diagnostic families from Phase 6A

@@ -1225,15 +1225,319 @@ Open the next FMPC stage conservatively by moving from interval-conditioned tran
 - keep `digits` as the first target
 - keep the iterative PC teacher frozen
 - stay offline and teacher-supervised
+- keep the successful Phase 5B.2 augmented interval pipeline intact and side-by-side
 - continue to avoid:
   - online joint PC-weight training
   - refinement
   - any `backend="fmpc"` injection into the core iterative inference path
 - the intended new ingredients are:
   - MeanFlow-style average-velocity supervision
-  - and, if justified later in this phase, JVP-style objectives
+  - a manual NumPy forward-mode JVP for the explicit MLP family
+- this phase still does not authorize:
+  - teacher removal
+  - online joint PC-weight training
+  - refinement
+  - any core iterative `fmpc` backend integration
 
 ### Entry condition
 
 - Phase 5B is passed and sealed
 - new work should start from the Phase 5B sealed checkpoint rather than re-opening endpoint or interval rescue scope unless a new regression is found
+
+### Core contract
+
+- keep the interval teacher parameterization:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- keep the current-state teacher local field from Phase 5B.2:
+  - `g_s`
+- define a current-state MeanFlow-style student:
+  - `u_theta(z_s, tau_s, tau_t, context)`
+- use the forward-time identity:
+  - `u = g_s + dt * d/dtau_s u`
+  - where `dt = tau_t - tau_s`
+- expand the total derivative as:
+  - `d/dtau_s u = J_z u * g_s + partial_tau_s u`
+- the initial Phase 6A formulation treated:
+  - `target_onehot`
+  - teacher-derived context features
+  as frozen side information in the JVP path
+- the Phase 6A.1 redesign keeps `target_onehot` frozen but makes the teacher-derived
+  current-state feature block feature-aware by injecting its directional derivatives
+  along `g_s` into the input tangent
+
+### Required families
+
+- `teacher_only_mlp_aug`
+  - direct regression to `u_star`
+  - diagnostic baseline only
+- `meanflow_mlp_aug`
+  - direct prediction of `u_hat`
+  - direct teacher supervision plus MeanFlow identity loss
+- `meanflow_mlp_residual`
+  - direct prediction of `r_hat`
+  - reconstruct `u_hat = g_s + r_hat`
+  - apply MeanFlow identity to the reconstructed `u_hat`
+
+### Default training recipe
+
+- reuse the Phase 5B.2 current-state feature pack:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- keep explicit train-stat normalization
+- keep rollout schedules:
+  - `1-step`
+  - `2-step`
+  - `3-step`
+- start with an explicit hybrid curriculum:
+  - early teacher-only warmup
+  - middle ramp from zero identity weight to a small nonzero identity weight
+  - late fixed hybrid stage
+- keep direct teacher supervision as the anchor objective throughout
+- allow a conservative reduced identity scope when needed:
+  - `all_intervals`
+  - or `acceptance_schedule_segments_only`
+  - where the latter only applies the identity term on the exact `2-step` / `3-step` teacher-step-aligned spans used by acceptance rollouts
+- any rollout-aware auxiliary term must remain:
+  - small
+  - explicit
+  - clearly separated from the MeanFlow identity term
+
+### Narrow rescue direction
+
+If the first Phase 6A pass fails narrowly, the next allowed rescue inside Phase 6A is:
+
+- keep the same MeanFlow-style neural family definitions
+- keep the same frozen-teacher feature pack
+- keep the same manual NumPy JVP
+- stabilize the hybrid optimization by:
+  - separating teacher and identity updates in code rather than collapsing them into one mixed target update
+  - making the identity curriculum explicit in config and summary
+  - optionally restricting identity application to acceptance-schedule segments only
+
+This rescue still does not authorize:
+
+- teacher-feature amortization / reduction
+- teacher-free training
+- online joint training
+- refinement
+
+### Phase 6A.1 feature-aware MeanFlow identity
+
+If the curriculum-only rescue still fails, the next allowed rescue remains inside Phase 6A and becomes:
+
+- keep the successful Phase 5B.2 feature contract intact:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- add directional derivatives of those teacher-derived current-state features along `g_s`
+- compute those tangents conservatively by symmetric finite differences in state space
+- keep direct teacher average-velocity supervision as the anchor objective
+- keep the MeanFlow identity and the manual NumPy JVP explicit and separate in code
+- add one diagnostic linear residual family to distinguish:
+  - identity-formula errors
+  - from MLP-family bottlenecks
+
+The Phase 6A.1 feature-aware input tangent should follow:
+
+- `dX_s = concat([g_s, 0_target, 1_tau_s, 0_tau_t, D_g teacher_features(z_s)])`
+
+with:
+
+- `D_g feat(z_s) ≈ [feat(z_s + eps * g_s) - feat(z_s - eps * g_s)] / (2 * eps)`
+
+For the residual family:
+
+- `u_hat = g_s + r_hat`
+- the MeanFlow identity must explicitly include `d g_s / d tau_s`
+- the identity therefore applies to the reconstructed `u_hat`, not only to the residual block
+
+Phase 6A.1 should compare at least:
+
+- `teacher_only_mlp_aug`
+- `meanflow_mlp_aug`
+- `meanflow_mlp_residual`
+- `meanflow_linear_residual`
+
+### Phase 6A.2 two-branch MeanFlow residual decomposition
+
+If the feature-aware Phase 6A.1 rescue still fails, but the diagnostic linear residual
+family becomes the fresh true multi-step winner, the next allowed rescue remains inside
+Phase 6A and becomes:
+
+- keep the successful Phase 5B.2 feature contract intact:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- keep the Phase 6A.1 feature-aware tangent contract intact:
+  - current-state teacher feature directional derivatives remain active
+  - residual MeanFlow identity must still include `d g_s / d tau_s`
+- replace the monolithic neural residual family with an explicit two-branch decomposition:
+  - `u_hat = u_local + u_corr`
+- keep direct teacher supervision on the full reconstructed `u_hat`
+- keep the MeanFlow identity on the full reconstructed `u_hat`
+- avoid broad hyperparameter expansion; the rescue should be structural and diagnostic
+
+The intended branch roles are:
+
+- local branch:
+  - dedicated to teacher-like local dynamics
+  - narrow input set:
+    - `g_s`
+    - `e_out_s`
+    - `F_s`
+  - simple structured family:
+    - linear / affine
+- correction branch:
+  - dedicated to transport correction beyond the local field
+  - uses the richer augmented Phase 6A.1 input:
+    - `concat([z_s, target_onehot, tau_s, tau_t, g_s, e_out_s, F_s])`
+  - small neural family
+  - output head should start near zero when feasible so the full model begins near the local solution
+
+The preferred direct-supervision design is:
+
+- anchor loss on the full prediction:
+  - `L_teacher_full = MSE(u_hat, u_star)`
+- optional small branch-separation helper:
+  - `u_corr_star = u_star - stopgrad(u_local)`
+  - `L_corr = MSE(u_corr, u_corr_star)`
+- local-branch anchor:
+  - `L_local = MSE(u_local, g_s)`
+
+The MeanFlow identity must still apply to the full combined transport law:
+
+- `u_hat = u_local + u_corr`
+- `u_hat 鈮?g_s + dt * d/dtau_s u_hat`
+- with:
+  - `d/dtau_s u_hat = d/dtau_s u_local + d/dtau_s u_corr`
+
+Phase 6A.2 should compare at least:
+
+- `teacher_only_mlp_aug`
+- `meanflow_mlp_aug`
+- `meanflow_mlp_residual`
+- `meanflow_linear_residual`
+- `meanflow_twobranch_residual`
+
+### Phase 6A.3 warm-started two-branch MeanFlow residual training
+
+If the Phase 6A.2 two-branch neural family remains weaker than the carried-forward
+Phase 6A.1 linear winner, the next allowed rescue remains inside Phase 6A and
+becomes:
+
+- keep the successful Phase 6A.2 decomposition intact:
+  - `u_hat = u_local + u_corr`
+- keep the Phase 6A.1 / 6A.2 feature-aware tangent machinery intact:
+  - teacher-derived current-state feature tangents remain active
+  - residual identity must still include `d g_s / d tau_s`
+  - identity still applies to the full reconstructed `u_hat`
+- fix the optimization path rather than redesigning the family again:
+  - warm-start the local branch from the carried-forward Phase 6A.1 linear residual winner
+  - keep the correction branch zero-initialized or near-zero-initialized
+  - add explicit staged training:
+    - Stage A: correction-only warmup with the local branch frozen
+    - Stage B: joint hybrid fine-tuning
+
+The preferred warm-start contract is:
+
+- reconstruct the carried-forward Phase 6A.1 linear residual winner on the same fresh
+  checkpoint-backed teacher artifact
+- extract the teacher-feature linear block corresponding to:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- map that block into the two-branch local branch so the new family starts near the
+  best known feature-aware linear solution without depending on machine-specific
+  historical run directories
+
+The preferred staged-training contract is:
+
+- Stage A:
+  - local branch frozen
+  - correction branch trainable
+  - direct teacher supervision and MeanFlow identity both remain active
+  - correction targets are defined relative to the frozen `u_local`
+- Stage B:
+  - local branch unfrozen
+  - both branches receive the same full-`u_hat` teacher anchor and full-`u_hat`
+    MeanFlow identity signal
+
+Phase 6A.3 should compare at least:
+
+- carried-forward Phase 5A endpoint ridge baseline
+- carried-forward Phase 5B.2 winner
+- carried-forward Phase 6A.1 linear residual winner
+- carried-forward Phase 6A.2 two-branch best candidate
+- `meanflow_twobranch_residual`
+- `meanflow_twobranch_residual_warmstart`
+
+### Files likely to touch
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_interval_features.py`
+- `src/pc/fmpc_meanflow_jvp.py`
+- `src/pc/fmpc_meanflow_student.py`
+- `experiments/fmpc_meanflow_suite.py`
+- minimal export updates in `src/pc/__init__.py`
+- focused tests under `tests/`
+
+### Acceptance direction
+
+- the comparison baseline to beat is the sealed Phase 5B.2 winner:
+  - `interval_ridge_residual`
+  - `3-step`
+- Phase 6A only counts as passed if a MeanFlow neural family:
+  - `meanflow_mlp_aug`
+  - or `meanflow_mlp_residual`
+  - or `meanflow_twobranch_residual`
+  - or `meanflow_twobranch_residual_warmstart`
+  wins under a true multi-step rollout:
+  - `2-step`
+  - or `3-step`
+  and beats the sealed Phase 5B.2 baseline on both validation and held-out test `final_state_rms_gap`
+
+## Phase 6A seal-off note
+
+Phase 6A is now sealed as **incomplete / not passed**.
+
+What the repo established during Phase 6A:
+
+- the original frozen-side-information MeanFlow identity was structurally insufficient
+- the Phase 6A.1 feature-aware MeanFlow identity fixed the main missing tangent terms:
+  - teacher-derived current-state feature tangents became active
+  - residual identity explicitly retained `d g_s / d tau_s`
+- the diagnostic feature-aware linear residual family became the fresh true multi-step winner
+  - this strongly suggests the corrected MeanFlow identity is directionally right
+
+What remained unresolved at seal-off:
+
+- no neural MeanFlow family became competitive enough with the sealed Phase 5B.2 winner
+- the Phase 6A.2 two-branch neural family remained weaker than the carried-forward
+  Phase 6A.1 linear winner
+- the Phase 6A.3 warm-started two-branch neural family was unstable under fresh final validation
+  and failed badly under true multi-step rollout
+
+Interpretation:
+
+- Phase 6A produced useful diagnostics and repaired part of the identity design
+- but it did **not** produce a passing neural MeanFlow stage
+- therefore Phase 6A should be treated as a sealed exploratory branch with known defects,
+  not as a passed stage
+
+## Phase TF1 — Teacher-free FMPC v1
+
+The next stage is now opened by project decision as:
+
+- `Phase TF1 — Teacher-free FMPC v1`
+
+This stage starts from a repo state where:
+
+- Phase 5B.2 remains the last clearly passed transport baseline
+- Phase 6A is sealed but incomplete
+- MeanFlow diagnostics from Phase 6A may still inform design choices,
+  but they do not constitute a passing prerequisite
+
+Phase TF1 should be treated as a new stage entry rather than a retroactive claim that
+Phase 6A succeeded.

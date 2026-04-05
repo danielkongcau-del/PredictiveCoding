@@ -27,6 +27,7 @@ from .fmpc_interval_data import (
 from .fmpc_interval_features import (
     FMPCIntervalTeacherFeatureBundle,
     prepare_interval_teacher_feature_context,
+    precompute_interval_teacher_trajectory_feature_tangents,
     precompute_interval_teacher_trajectory_features,
 )
 from .fmpc_interval_normalization import (
@@ -846,6 +847,24 @@ def _prepare_interval_teacher_feature_bundle(
             teacher_model,
             interval_dataset.test,
             test_context,
+        ),
+        train_tangents=precompute_interval_teacher_trajectory_feature_tangents(
+            teacher_model,
+            interval_dataset.train,
+            train_context,
+            fd_epsilon=1e-3,
+        ),
+        val_tangents=precompute_interval_teacher_trajectory_feature_tangents(
+            teacher_model,
+            interval_dataset.val,
+            val_context,
+            fd_epsilon=1e-3,
+        ),
+        test_tangents=precompute_interval_teacher_trajectory_feature_tangents(
+            teacher_model,
+            interval_dataset.test,
+            test_context,
+            fd_epsilon=1e-3,
         ),
         split_contexts={
             "train": train_context,

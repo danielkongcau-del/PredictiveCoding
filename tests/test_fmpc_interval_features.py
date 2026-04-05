@@ -87,3 +87,33 @@ def test_precomputed_teacher_field_matches_saved_one_step_trajectory_delta(tmp_p
     )
     np.testing.assert_allclose(step0_features.g_s, expected, atol=1e-12, rtol=1e-12)
     assert np.all(step0_features.F_s >= 0.0)
+
+
+def test_precomputed_teacher_features_can_be_gathered_for_mixed_source_steps(tmp_path: Path) -> None:
+    teacher_dir = _prepare_interval_teacher_artifact(tmp_path, "interval_teacher_features_gather")
+    interval_dataset = load_fmpc_interval_dataset(teacher_dir, expected_dataset_name="digits")
+    teacher_model, teacher_split = load_prepared_teacher_runtime(teacher_dir)
+    context = prepare_interval_teacher_feature_context(
+        interval_dataset.train,
+        teacher_split,
+        teacher_export_batch_size=int(interval_dataset.metadata["teacher_export_batch_size"]),
+    )
+    trajectory_features = precompute_interval_teacher_trajectory_features(
+        teacher_model,
+        interval_dataset.train,
+        context,
+    )
+
+    sample_rows = np.asarray([0, 3, 5], dtype=np.int64)
+    source_steps = np.asarray([0, 1, 2], dtype=np.int64)
+    gathered = trajectory_features.gather_batch_features(sample_rows, source_steps)
+
+    assert gathered.g_s.shape == (3, interval_dataset.z_dim)
+    assert gathered.e_out_s.shape == (3, interval_dataset.target_dim)
+    assert gathered.F_s.shape == (3, 1)
+    np.testing.assert_allclose(
+        gathered.g_s[0],
+        trajectory_features.g_trajectory[sample_rows[0], source_steps[0], :],
+        atol=1e-12,
+        rtol=1e-12,
+    )
