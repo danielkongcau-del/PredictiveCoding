@@ -54,7 +54,10 @@ Do not assume the current code is authoritative if it conflicts with the spec.
 
 - Teacher-based FMPC work from Phase 4 through Phase 6A is now a **frozen baseline /
   diagnostic reference**.
-- Teacher-free FMPC work starting at Phase TF1 is the **main algorithmic line**.
+- Teacher-free FMPC work from Phase TF1 onward is the **main algorithmic line**.
+- Phase TF1 is sealed as the first teacher-free transport stage.
+- The current active teacher-free stage is:
+  - `Phase TF2 — iFMPC bridge stage`
 - Unless a plan explicitly labels something as baseline or diagnostic, new FMPC work
   must not depend on:
   - teacher trajectories

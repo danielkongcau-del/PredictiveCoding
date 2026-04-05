@@ -9,6 +9,7 @@ from pc.fmpc_tf1 import (
     FMPCTF1Config,
     FMPCTF1RunResult,
     build_tf1_baseline_comparable_config,
+    build_tf1_baseline_working_default_config,
     build_tf1_mechanism_smoke_config,
 )
 from pc.fmpc_tf1_suite import FMPCTF1SuiteConfig, run_fmpc_tf1_suite
@@ -99,13 +100,26 @@ def _fake_tf1_run(config: FMPCTF1Config) -> FMPCTF1RunResult:
 def test_tf1_preset_builders_are_explicitly_labeled() -> None:
     smoke = build_tf1_mechanism_smoke_config()
     baseline = build_tf1_baseline_comparable_config()
+    working = build_tf1_baseline_working_default_config()
 
     assert smoke.preset_name == "mechanism_smoke"
     assert smoke.layer_dims == (64, 16, 10)
     assert smoke.warmup_epochs == 5
+    assert smoke.checkpoint_selector == "energy_only"
     assert baseline.preset_name == "baseline_comparable"
     assert baseline.layer_dims == (64, 64, 10)
     assert baseline.warmup_epochs == 5
+    assert baseline.model_variant == "tf1_mlp_core"
+    assert baseline.checkpoint_selector == "energy_only"
+    assert working.preset_name == "baseline_working_default"
+    assert working.layer_dims == (64, 64, 10)
+    assert working.model_variant == "tf1_mlp_aug"
+    assert working.use_teacher_free_features is True
+    assert working.transport_steps == 1
+    assert working.warmup_epochs == 5
+    assert working.feature_aware_tangents is False
+    assert working.identity_loss_weight == 0.2
+    assert working.checkpoint_selector == "gate_constrained_accuracy_then_val_accuracy"
 
 
 def test_fmpc_tf1_suite_smoke_writes_expected_artifacts(monkeypatch, tmp_path: Path) -> None:

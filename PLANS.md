@@ -1636,6 +1636,28 @@ Experiment entrypoint:
 - named presets:
   - `mechanism_smoke` = small TF1 substrate `(64, 16, 10)`
   - `baseline_comparable` = baseline-sized digits substrate `(64, 64, 10)`
+  - `baseline_working_default` = current evidence-driven but provisional
+    working TF1 preset:
+    - baseline-sized digits substrate `(64, 64, 10)`
+    - `tf1_mlp_aug`
+    - `transport_steps = 1`
+    - `warmup_epochs = 5`
+    - `feature_aware_tangents = false`
+    - `identity_loss_weight = 0.2`
+    - `checkpoint_selector = gate_constrained_accuracy_then_val_accuracy`
+
+Checkpoint-selection contract:
+
+- selector policy is now part of the explicit main TF1 experiment contract
+- supported checkpoint selectors are:
+  - `energy_only`
+  - `val_accuracy_only`
+  - `gate_constrained_accuracy_then_energy`
+  - `gate_constrained_accuracy_then_val_accuracy`
+- selector logic uses validation only
+- test remains report-only
+- old presets remain unchanged as historical/reference presets
+- the working-default preset is evidence-driven but still provisional
 
 Acceptance criteria for the first TF1 mechanism-validating pass:
 
@@ -1671,3 +1693,61 @@ Risks / open questions:
 - feature-aware tangents may help later, but they should not be required for the
   first viable TF1 core
 - the current `backend="fmpc"` placeholder remains intentionally unused in TF1 v1
+
+## Phase TF1 seal-off note
+
+Phase TF1 is now sealed as the first completed **teacher-free FMPC v1** stage.
+
+What TF1 established:
+
+- a fully teacher-free FMPC main path that does not depend on:
+  - teacher manifests
+  - teacher checkpoints
+  - teacher trajectories
+  - teacher-generated regression targets
+- explicit selector-integrated checkpoint selection in the main TF1 path
+- the evidence-driven working TF1 preset:
+  - `baseline_working_default`
+- small, reproducible supporting studies for:
+  - selector alignment
+  - gate coverage
+  - multiseed confirmation
+  - default adoption
+  - external comparison
+  - narrow accuracy tuning
+
+What remained unresolved at seal-off:
+
+- `baseline_working_default` clearly beats `baseline_comparable`, but the gap to the
+  canonical slow-PC digits baseline remains material
+- the narrow TF1 accuracy-improvement sweep did not materially reduce that gap
+- TF1 therefore does **not** yet justify replacing the canonical slow iterative PC
+  baseline as the strongest digits accuracy reference
+
+Interpretation:
+
+- TF1 succeeded as a teacher-free bridge-establishment stage
+- TF1 did **not** yet close the accuracy gap to the canonical slow-PC baseline
+- `baseline_working_default` should be treated as the sealed TF1 working default,
+  not as a claim that TF1 is already competitive enough to stop further bridge work
+
+## Phase TF2 — iFMPC bridge stage
+
+The next stage is now opened as:
+
+- `Phase TF2 — iFMPC bridge stage`
+
+Stage objective:
+
+- bridge from coarse teacher-free average-velocity transport toward a more iterative
+  FMPC-compatible hidden-state update path
+- keep the teacher-free line active without discarding the baseline slow-PC reference
+
+Initial constraints carried forward into TF2:
+
+- remain teacher-free
+- do not change baseline PC energy or local parameter-update math silently
+- do not route the new work through `backend="fmpc"` until the bridge design is
+  explicit and validated
+- do not replace the canonical slow predict/eval path without a separate validated
+  transition

@@ -937,9 +937,20 @@ Checkpoint selection:
 - selection uses validation only
 - the concrete selection field is:
   - `selection_metric = "val_transported_final_energy"`
+- selector policy is now an explicit part of the TF1 experiment contract
+- supported checkpoint selectors are:
+  - `energy_only`
+  - `val_accuracy_only`
+  - `gate_constrained_accuracy_then_energy`
+  - `gate_constrained_accuracy_then_val_accuracy`
 - TF1 summaries should also expose:
   - `selection_metric_source = "val_metric"`
   - `report_metric_source = "test_metric"`
+  - `checkpoint_selector`
+  - `selected_epoch_passes_gate`
+  - `gate_passing_epoch_count`
+  - `selector_fallback_used`
+  - `selected_epoch_selection_reason`
 - test is report-only and must not participate in checkpoint selection or
   pass/fail gating
 
@@ -976,3 +987,39 @@ Report-only expectations:
 - canonical TF1 experiment labels should distinguish:
   - `mechanism_smoke`
   - `baseline_comparable`
+  - `baseline_working_default`
+- `baseline_working_default` is the current evidence-driven but still
+  provisional working TF1 preset; it should not be read as a sealed stage pass
+
+## Phase TF1 seal-off note
+
+Phase TF1 is now sealed as the first completed teacher-free FMPC stage.
+
+Sealed TF1 conclusion:
+
+- `baseline_working_default` is the correct sealed TF1 working preset
+- it clearly improves over `baseline_comparable`
+- it remains the main TF1 preset after selector/default-adoption/external-comparison
+  validation
+- however, the gap to the canonical slow-PC digits baseline remains materially open
+- the narrow TF1 accuracy-tuning pass did not materially narrow that gap
+
+Therefore:
+
+- TF1 is sealed as a successful teacher-free mainline establishment stage
+- TF1 is **not** sealed as an accuracy-competitive replacement for the canonical
+  slow-PC digits baseline
+
+## Phase TF2 validation entry
+
+The next active stage is now opened as:
+
+- `Phase TF2 — iFMPC bridge stage`
+
+Interpretation:
+
+- TF2 should build on the sealed TF1 working preset and selector contract
+- TF2 remains inside the teacher-free FMPC line
+- TF2 should be judged against both:
+  - the sealed TF1 working default
+  - the canonical slow-PC digits baseline

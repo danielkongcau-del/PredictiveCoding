@@ -39,7 +39,13 @@ from .training import apply_parameter_updates, parameter_gradients
 from .utils import ensure_finite_array, set_seed
 
 TF1ModelVariant = Literal["tf1_mlp_core", "tf1_mlp_aug"]
-TF1PresetName = Literal["mechanism_smoke", "baseline_comparable"]
+TF1PresetName = Literal["mechanism_smoke", "baseline_comparable", "baseline_working_default"]
+TF1CheckpointSelector = Literal[
+    "energy_only",
+    "val_accuracy_only",
+    "gate_constrained_accuracy_then_energy",
+    "gate_constrained_accuracy_then_val_accuracy",
+]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 
@@ -89,6 +95,7 @@ class FMPCTF1Config:
     warmup_epochs: int = 5
     hybrid_ramp_epochs: int = 10
     selection_metric: Literal["val_transported_final_energy"] = "val_transported_final_energy"
+    checkpoint_selector: TF1CheckpointSelector = "energy_only"
 
     def __post_init__(self) -> None:
         if self.dataset_name != "digits":
@@ -113,8 +120,17 @@ class FMPCTF1Config:
             raise ValueError("tf1_mlp_core must keep use_teacher_free_features=False.")
         if self.model_variant == "tf1_mlp_aug" and not self.use_teacher_free_features:
             raise ValueError("tf1_mlp_aug requires use_teacher_free_features=True.")
-        if self.preset_name not in {None, "mechanism_smoke", "baseline_comparable"}:
-            raise ValueError("preset_name must be None, 'mechanism_smoke', or 'baseline_comparable'.")
+        if self.preset_name not in {None, "mechanism_smoke", "baseline_comparable", "baseline_working_default"}:
+            raise ValueError(
+                "preset_name must be None, 'mechanism_smoke', 'baseline_comparable', or 'baseline_working_default'."
+            )
+        if self.checkpoint_selector not in {
+            "energy_only",
+            "val_accuracy_only",
+            "gate_constrained_accuracy_then_energy",
+            "gate_constrained_accuracy_then_val_accuracy",
+        }:
+            raise ValueError(f"Unsupported checkpoint_selector '{self.checkpoint_selector}'.")
 
     def resolved_run_id(self) -> str:
         if self.run_id is not None:
@@ -200,6 +216,28 @@ def build_tf1_baseline_comparable_config(**overrides: Any) -> FMPCTF1Config:
     return FMPCTF1Config(**payload)
 
 
+def build_tf1_baseline_working_default_config(**overrides: Any) -> FMPCTF1Config:
+    """Return the current evidence-driven but provisional TF1 working default."""
+
+    payload: dict[str, Any] = {
+        "preset_name": "baseline_working_default",
+        "layer_dims": (64, 64, 10),
+        "model_variant": "tf1_mlp_aug",
+        "use_teacher_free_features": True,
+        "feature_aware_tangents": False,
+        "transport_steps": 1,
+        "warmup_epochs": 5,
+        "hybrid_ramp_epochs": 10,
+        "epochs": 60,
+        "eval_steps": 15,
+        "psi_hidden_dims": (128,),
+        "identity_loss_weight": 0.2,
+        "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    }
+    payload.update(overrides)
+    return FMPCTF1Config(**payload)
+
+
 def build_tf1_preset_config(
     preset_name: TF1PresetName,
     **overrides: Any,
@@ -210,6 +248,8 @@ def build_tf1_preset_config(
         return build_tf1_mechanism_smoke_config(**overrides)
     if preset_name == "baseline_comparable":
         return build_tf1_baseline_comparable_config(**overrides)
+    if preset_name == "baseline_working_default":
+        return build_tf1_baseline_working_default_config(**overrides)
     raise ValueError(f"Unsupported TF1 preset '{preset_name}'.")
 
 
@@ -245,6 +285,15 @@ def build_tf1_epoch_selection_diagnostics(
     if not epoch_metrics:
         raise ValueError("epoch_metrics must contain at least one row.")
 
+    gate_rows = [
+        row
+        for row in epoch_metrics
+        if (
+            float(row["val_transported_final_energy"]) < float(row["val_identity_final_energy"])
+            and float(row["val_transported_final_energy"]) <= float(row["val_local_field_only_final_energy"])
+            and float(row["val_accuracy"]) > float(row["val_baseline_accuracy"])
+        )
+    ]
     selection_specs = {
         "val_transported_final_energy": False,
         "val_accuracy": True,
@@ -272,6 +321,16 @@ def build_tf1_epoch_selection_diagnostics(
     accuracy_gap = float(best_accuracy["val_accuracy"] - best_energy["val_accuracy"])
     return {
         "selection_rules": selection_rules,
+        "gate_passing_epoch_count": int(len(gate_rows)),
+        "has_gate_passing_epoch": bool(gate_rows),
+        "best_gate_passing_epoch_by_val_accuracy": (
+            None
+            if not gate_rows
+            else {
+                "selected_epoch": int(max(gate_rows, key=lambda row: float(row["val_accuracy"]))["epoch"]),
+                "val_accuracy": float(max(float(row["val_accuracy"]) for row in gate_rows)),
+            }
+        ),
         "accuracy_gap_best_energy_vs_best_accuracy": accuracy_gap,
         "significant_accuracy_gap_threshold": float(significant_accuracy_gap_threshold),
         "significant_validation_accuracy_left_on_table": bool(
@@ -705,6 +764,7 @@ def _config_payload(config: FMPCTF1Config) -> dict[str, Any]:
             "warmup_epochs": int(config.warmup_epochs),
             "hybrid_ramp_epochs": int(config.hybrid_ramp_epochs),
             "selection_metric": config.selection_metric,
+            "checkpoint_selector": config.checkpoint_selector,
             "selection_metric_source": "val_metric",
             "report_metric_source": "test_metric",
         },
@@ -724,6 +784,73 @@ def _config_payload(config: FMPCTF1Config) -> dict[str, Any]:
             "shuffle_batches": bool(config.shuffle_batches),
             "output_layout": config.output_layout,
         },
+    }
+
+
+def _epoch_passes_validation_gate(row: dict[str, Any]) -> bool:
+    return bool(
+        float(row["val_transported_final_energy"]) < float(row["val_identity_final_energy"])
+        and float(row["val_transported_final_energy"]) <= float(row["val_local_field_only_final_energy"])
+        and float(row["val_accuracy"]) > float(row["val_baseline_accuracy"])
+    )
+
+
+def _snapshot_for_epoch(epoch_snapshots: list[FMPCTF1EpochSnapshot], epoch: int) -> FMPCTF1EpochSnapshot:
+    for snapshot in epoch_snapshots:
+        if int(snapshot.epoch) == int(epoch):
+            return snapshot
+    raise ValueError(f"No snapshot recorded for epoch {epoch}.")
+
+
+def _select_tf1_checkpoint_epoch(
+    epoch_metrics: list[dict[str, Any]],
+    checkpoint_selector: TF1CheckpointSelector,
+    *,
+    selection_diagnostics: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if not epoch_metrics:
+        raise ValueError("epoch_metrics must contain at least one row.")
+    diagnostics = selection_diagnostics or build_tf1_epoch_selection_diagnostics(epoch_metrics)
+    gate_rows = [row for row in epoch_metrics if _epoch_passes_validation_gate(row)]
+    energy_row = min(epoch_metrics, key=lambda row: float(row["val_transported_final_energy"]))
+    val_accuracy_row = max(epoch_metrics, key=lambda row: float(row["val_accuracy"]))
+    gate_best_row = None if not gate_rows else max(gate_rows, key=lambda row: float(row["val_accuracy"]))
+
+    fallback_used = False
+    selection_reason = ""
+    if checkpoint_selector == "energy_only":
+        selected_row = energy_row
+        selection_reason = "selected lowest validation transported energy"
+    elif checkpoint_selector == "val_accuracy_only":
+        selected_row = val_accuracy_row
+        selection_reason = "selected highest validation accuracy"
+    elif checkpoint_selector == "gate_constrained_accuracy_then_energy":
+        if gate_best_row is not None:
+            selected_row = gate_best_row
+            selection_reason = "selected highest validation accuracy among gate-passing epochs"
+        else:
+            selected_row = energy_row
+            fallback_used = True
+            selection_reason = "no gate-passing epoch; fell back to lowest validation transported energy"
+    elif checkpoint_selector == "gate_constrained_accuracy_then_val_accuracy":
+        if gate_best_row is not None:
+            selected_row = gate_best_row
+            selection_reason = "selected highest validation accuracy among gate-passing epochs"
+        else:
+            selected_row = val_accuracy_row
+            fallback_used = True
+            selection_reason = "no gate-passing epoch; fell back to highest validation accuracy"
+    else:
+        raise ValueError(f"Unsupported checkpoint_selector '{checkpoint_selector}'.")
+
+    return {
+        "selected_epoch": int(selected_row["epoch"]),
+        "selected_epoch_passes_gate": bool(_epoch_passes_validation_gate(selected_row)),
+        "gate_passing_epoch_count": int(diagnostics.get("gate_passing_epoch_count", len(gate_rows))),
+        "selector_fallback_used": bool(fallback_used),
+        "selected_epoch_selection_reason": str(selection_reason),
+        "selected_epoch_val_accuracy": float(selected_row["val_accuracy"]),
+        "selected_epoch_val_transported_final_energy": float(selected_row["val_transported_final_energy"]),
     }
 
 
@@ -752,10 +879,6 @@ def run_fmpc_tf1_experiment(config: FMPCTF1Config) -> FMPCTF1RunResult:
 
     epoch_rows: list[dict[str, Any]] = []
     epoch_snapshots: list[FMPCTF1EpochSnapshot] = []
-    best_metric = float("inf")
-    best_epoch = 1
-    best_model_snapshot = _snapshot_pc_parameters(model)
-    best_psi_snapshot = _snapshot_mlp_parameters(psi_network)
 
     train_start = perf_counter()
     for epoch_index in range(config.epochs):
@@ -830,16 +953,19 @@ def run_fmpc_tf1_experiment(config: FMPCTF1Config) -> FMPCTF1RunResult:
             )
         )
 
-        if row[config.selection_metric] < best_metric:
-            best_metric = float(row[config.selection_metric])
-            best_epoch = epoch_index + 1
-            best_model_snapshot = _snapshot_pc_parameters(model)
-            best_psi_snapshot = _snapshot_mlp_parameters(psi_network)
-
     train_wall_time_seconds = float(perf_counter() - train_start)
 
-    _restore_pc_parameters(model, best_model_snapshot)
-    _restore_mlp_parameters(psi_network, best_psi_snapshot)
+    selection_diagnostics = build_tf1_epoch_selection_diagnostics(epoch_rows)
+    checkpoint_selection = _select_tf1_checkpoint_epoch(
+        epoch_rows,
+        config.checkpoint_selector,
+        selection_diagnostics=selection_diagnostics,
+    )
+    selected_epoch = int(checkpoint_selection["selected_epoch"])
+    selected_snapshot = _snapshot_for_epoch(epoch_snapshots, selected_epoch)
+
+    _restore_pc_parameters(model, selected_snapshot.model_snapshot)
+    _restore_mlp_parameters(psi_network, selected_snapshot.psi_snapshot)
 
     evaluation_start = perf_counter()
     val_transport = _evaluate_transport_split(model, psi_network, config, split.x_val, split.y_val)
@@ -859,7 +985,6 @@ def run_fmpc_tf1_experiment(config: FMPCTF1Config) -> FMPCTF1RunResult:
     test_energy_delta_vs_local_field_only = (
         test_transport.transported_final_energy - test_transport.local_field_only_final_energy
     )
-    selection_diagnostics = build_tf1_epoch_selection_diagnostics(epoch_rows)
 
     summary = {
         "phase": "Phase TF1",
@@ -884,11 +1009,16 @@ def run_fmpc_tf1_experiment(config: FMPCTF1Config) -> FMPCTF1RunResult:
         "rollout_knots": val_transport.rollout_knots,
         "identity_loss_weight": float(config.identity_loss_weight),
         "selection_metric": config.selection_metric,
+        "checkpoint_selector": config.checkpoint_selector,
         "selection_metric_source": "val_metric",
         "report_metric_source": "test_metric",
         "selection_metric_value": float(val_transport.transported_final_energy),
         "selection_metric_higher_is_better": False,
-        "best_epoch": int(best_epoch),
+        "best_epoch": int(selected_epoch),
+        "selected_epoch_passes_gate": bool(checkpoint_selection["selected_epoch_passes_gate"]),
+        "gate_passing_epoch_count": int(checkpoint_selection["gate_passing_epoch_count"]),
+        "selector_fallback_used": bool(checkpoint_selection["selector_fallback_used"]),
+        "selected_epoch_selection_reason": str(checkpoint_selection["selected_epoch_selection_reason"]),
         "val_transported_final_energy": float(val_transport.transported_final_energy),
         "test_transported_final_energy": float(test_transport.transported_final_energy),
         "val_energy_delta_vs_identity": float(val_energy_delta_vs_identity),

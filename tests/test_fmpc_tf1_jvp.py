@@ -104,3 +104,38 @@ def test_tf1_augmented_input_and_tangent_include_feature_blocks() -> None:
     assert tangent.shape == (1, 13)
     np.testing.assert_allclose(inputs[:, -6:], np.array([[0.01, 0.02, 0.03, 0.4, -0.5, 0.6]]))
     np.testing.assert_allclose(tangent[:, -6:], np.array([[0.7, 0.8, 0.9, 1.0, 1.1, 1.2]]))
+
+
+def test_tf1_feature_aware_augmented_tangent_differs_from_zero_feature_tangent() -> None:
+    features = FMPCTF1StateFeatures(
+        g_t=np.array([[0.01, 0.02, 0.03]], dtype=np.float64),
+        e_out_t=np.array([[0.4, -0.5]], dtype=np.float64),
+        F_t=np.array([[0.6]], dtype=np.float64),
+        y_hat_t=np.array([[0.6, 0.4]], dtype=np.float64),
+    )
+    tangents = FMPCTF1StateFeatureTangents(
+        Dg_g_t=np.array([[0.7, 0.8, 0.9]], dtype=np.float64),
+        Dg_e_out_t=np.array([[1.0, 1.1]], dtype=np.float64),
+        Dg_F_t=np.array([[1.2]], dtype=np.float64),
+        Dg_y_hat_t=np.array([[-1.0, -1.1]], dtype=np.float64),
+    )
+
+    tangent_without_feature_awareness = build_tf1_input_tangent(
+        features.g_t,
+        target_dim=2,
+        use_teacher_free_features=True,
+        feature_aware_tangents=False,
+        feature_tangents=tangents,
+    )
+    tangent_with_feature_awareness = build_tf1_input_tangent(
+        features.g_t,
+        target_dim=2,
+        use_teacher_free_features=True,
+        feature_aware_tangents=True,
+        feature_tangents=tangents,
+    )
+
+    assert tangent_without_feature_awareness.shape == tangent_with_feature_awareness.shape
+    assert not np.allclose(tangent_without_feature_awareness, tangent_with_feature_awareness)
+    np.testing.assert_allclose(tangent_without_feature_awareness[:, -6:], 0.0)
+    np.testing.assert_allclose(tangent_with_feature_awareness[:, -6:], np.array([[0.7, 0.8, 0.9, 1.0, 1.1, 1.2]]))

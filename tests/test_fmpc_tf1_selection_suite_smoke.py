@@ -4,6 +4,7 @@ import csv
 import json
 import runpy
 from pathlib import Path
+from pathlib import PurePosixPath
 
 from pc.fmpc_tf1 import FMPCTF1RunResult
 from pc.fmpc_tf1_selection_suite import (
@@ -23,6 +24,10 @@ def _read_json(path: Path) -> dict[str, object]:
 def _read_csv(path: Path) -> list[dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def _resolve_posix_relative(base_dir: Path, relative_path: str) -> Path:
+    return base_dir.joinpath(*PurePosixPath(relative_path).parts)
 
 
 def _fake_tf1_run(config):
@@ -113,15 +118,14 @@ def test_fmpc_tf1_selection_suite_writes_expected_artifacts(monkeypatch, tmp_pat
     config = _read_json(run_dir / "config.json")
     summary = _read_json(run_dir / "aggregate_summary.json")
     rows = _read_csv(run_dir / "aggregate_runs.csv")
-    per_run_report = _read_json(
-        run_dir
-        / rows[0]["selection_policy_summary_path"].replace("/", "\\")
-    )
+    per_run_report = _read_json(_resolve_posix_relative(run_dir, rows[0]["selection_policy_summary_path"]))
 
     assert config["stage"] == "teacher_free_fmpc_v1_selection_suite"
     assert config["search_space"]["warmup_epochs"] == 5
     assert config["search_space"]["feature_aware_tangents"] is False
     assert len(rows) == 4
+    assert "/" in rows[0]["selection_policy_summary_path"]
+    assert "\\" not in rows[0]["selection_policy_summary_path"]
     assert "average_test_accuracy_by_selector" in summary
     assert "average_val_accuracy_by_selector" in summary
     assert "winner_by_selector" in summary

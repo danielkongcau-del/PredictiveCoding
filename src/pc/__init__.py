@@ -123,6 +123,7 @@ from .fmpc_tf1 import (
     FMPCTF1EpochSnapshot,
     FMPCTF1RunResult,
     build_tf1_baseline_comparable_config,
+    build_tf1_baseline_working_default_config,
     build_tf1_epoch_selection_diagnostics,
     build_tf1_mechanism_smoke_config,
     build_tf1_preset_config,
@@ -137,6 +138,36 @@ from .fmpc_tf1_selection_suite import (
     FMPCTF1SelectionSuiteConfig,
     FMPCTF1SelectionSuiteRunResult,
     run_fmpc_tf1_selection_suite,
+)
+from .fmpc_tf1_gate_coverage_suite import (
+    FMPCTF1GateCoverageSuiteConfig,
+    FMPCTF1GateCoverageSuiteRunResult,
+    run_fmpc_tf1_gate_coverage_suite,
+)
+from .fmpc_tf1_multiseed_suite import (
+    FMPCTF1MultiSeedSuiteConfig,
+    FMPCTF1MultiSeedSuiteRunResult,
+    run_fmpc_tf1_multiseed_suite,
+)
+from .fmpc_tf1_selector_policy_suite import (
+    FMPCTF1SelectorPolicySuiteConfig,
+    FMPCTF1SelectorPolicySuiteRunResult,
+    run_fmpc_tf1_selector_policy_suite,
+)
+from .fmpc_tf1_default_adoption_suite import (
+    FMPCTF1DefaultAdoptionSuiteConfig,
+    FMPCTF1DefaultAdoptionSuiteRunResult,
+    run_fmpc_tf1_default_adoption_suite,
+)
+from .fmpc_tf1_external_comparison_suite import (
+    FMPCTF1ExternalComparisonSuiteConfig,
+    FMPCTF1ExternalComparisonSuiteRunResult,
+    run_fmpc_tf1_external_comparison_suite,
+)
+from .fmpc_tf1_accuracy_tuning_suite import (
+    FMPCTF1AccuracyTuningSuiteConfig,
+    FMPCTF1AccuracyTuningSuiteRunResult,
+    run_fmpc_tf1_accuracy_tuning_suite,
 )
 from .inference import TeacherInferenceExport, run_teacher_inference_export
 from .layers import PCLayerParams, init_mlp_layers
@@ -188,7 +219,19 @@ __all__ = [
     "FMPCMeanFlowSuiteRunResult",
     "FMPCTF1Config",
     "FMPCTF1EpochSnapshot",
+    "FMPCTF1GateCoverageSuiteConfig",
+    "FMPCTF1GateCoverageSuiteRunResult",
+    "FMPCTF1DefaultAdoptionSuiteConfig",
+    "FMPCTF1DefaultAdoptionSuiteRunResult",
+    "FMPCTF1ExternalComparisonSuiteConfig",
+    "FMPCTF1ExternalComparisonSuiteRunResult",
+    "FMPCTF1AccuracyTuningSuiteConfig",
+    "FMPCTF1AccuracyTuningSuiteRunResult",
+    "FMPCTF1MultiSeedSuiteConfig",
+    "FMPCTF1MultiSeedSuiteRunResult",
     "FMPCTF1RunResult",
+    "FMPCTF1SelectorPolicySuiteConfig",
+    "FMPCTF1SelectorPolicySuiteRunResult",
     "FMPCTF1SelectionSuiteConfig",
     "FMPCTF1SelectionSuiteRunResult",
     "FMPCTF1SuiteConfig",
@@ -243,6 +286,7 @@ __all__ = [
     "build_meanflow_identity_target",
     "build_meanflow_input_tangent",
     "build_tf1_baseline_comparable_config",
+    "build_tf1_baseline_working_default_config",
     "build_tf1_epoch_selection_diagnostics",
     "build_tf1_mechanism_smoke_config",
     "build_tf1_preset_config",
@@ -292,6 +336,12 @@ __all__ = [
     "run_fmpc_interval_suite",
     "run_fmpc_meanflow_suite",
     "run_fmpc_tf1_experiment",
+    "run_fmpc_tf1_default_adoption_suite",
+    "run_fmpc_tf1_accuracy_tuning_suite",
+    "run_fmpc_tf1_external_comparison_suite",
+    "run_fmpc_tf1_gate_coverage_suite",
+    "run_fmpc_tf1_multiseed_suite",
+    "run_fmpc_tf1_selector_policy_suite",
     "run_fmpc_tf1_selection_suite",
     "run_fmpc_tf1_suite",
     "build_rollout_auxiliary_batches",

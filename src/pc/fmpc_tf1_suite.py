@@ -78,6 +78,10 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+def _relative_posix(base_dir: Path, target: Path) -> str:
+    return target.relative_to(base_dir).as_posix()
+
+
 def _preset_name_for_layer_dims(layer_dims: tuple[int, ...]) -> str:
     if layer_dims == (64, 16, 10):
         return "mechanism_smoke"
@@ -266,7 +270,7 @@ def run_fmpc_tf1_suite(config: FMPCTF1SuiteConfig) -> FMPCTF1SuiteRunResult:
                             "run_index": int(row_index),
                             "run_id": child_config.run_id,
                             "preset_name": preset_name,
-                            "run_summary_path": str((result.run_dir / "summary.json").relative_to(run_dir)),
+                            "run_summary_path": _relative_posix(run_dir, result.run_dir / "summary.json"),
                             "model_variant": model_variant,
                             "use_teacher_free_features": bool(use_teacher_free_features),
                             "feature_aware_tangents": False,

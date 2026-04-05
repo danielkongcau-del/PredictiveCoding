@@ -57,8 +57,13 @@ def test_fmpc_tf1_smoke_run_writes_expected_teacher_free_artifacts(tmp_path: Pat
     assert summary["feature_aware_tangents"] is False
     assert summary["transport_steps"] == 2
     assert summary["selection_metric"] == "val_transported_final_energy"
+    assert summary["checkpoint_selector"] == "energy_only"
     assert summary["selection_metric_source"] == "val_metric"
     assert summary["report_metric_source"] == "test_metric"
+    assert "selected_epoch_passes_gate" in summary
+    assert "gate_passing_epoch_count" in summary
+    assert "selector_fallback_used" in summary
+    assert "selected_epoch_selection_reason" in summary
     assert summary["validation_gate"]["validation_only_gating"] is True
     assert summary["validation_gate"]["test_is_report_only"] is True
     assert "identity_baseline" in summary
@@ -82,6 +87,7 @@ def test_fmpc_tf1_smoke_run_writes_expected_teacher_free_artifacts(tmp_path: Pat
     assert config["transport"]["feature_aware_tangents"] is False
     assert config["transport"]["transport_steps"] == 2
     assert config["transport"]["selection_metric"] == "val_transported_final_energy"
+    assert config["transport"]["checkpoint_selector"] == "energy_only"
     assert config["transport"]["selection_metric_source"] == "val_metric"
     assert config["transport"]["report_metric_source"] == "test_metric"
     assert len(epoch_rows) == config["run"]["epochs"]

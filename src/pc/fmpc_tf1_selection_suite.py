@@ -84,6 +84,10 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+def _relative_posix(base_dir: Path, target: Path) -> str:
+    return target.relative_to(base_dir).as_posix()
+
+
 def _run_id_from_variant(model_variant: str, transport_steps: int) -> str:
     return f"{model_variant}_baseline_comparable_w5_s{transport_steps}_id0p1"
 
@@ -208,9 +212,10 @@ def _aggregate_row_from_selection_report(
         "run_index": int(run_index),
         "run_id": str(config.run_id),
         "preset_name": "baseline_comparable",
-        "run_summary_path": str((result.run_dir / "summary.json").relative_to(run_dir)),
-        "selection_policy_summary_path": str(
-            (result.run_dir / "selection_policy_summary.json").relative_to(run_dir)
+        "run_summary_path": _relative_posix(run_dir, result.run_dir / "summary.json"),
+        "selection_policy_summary_path": _relative_posix(
+            run_dir,
+            result.run_dir / "selection_policy_summary.json",
         ),
         "model_variant": config.model_variant,
         "warmup_epochs": int(config.warmup_epochs),
