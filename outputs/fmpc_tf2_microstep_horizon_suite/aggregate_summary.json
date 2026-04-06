@@ -1,0 +1,360 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_microstep_horizon_suite",
+  "num_runs": 40,
+  "matching_rule": {
+    "reference_micro_steps": 4,
+    "base_epochs": 60,
+    "matched_inner_compute_epochs_rule": "round(base_epochs * reference_micro_steps / micro_steps)",
+    "effective_microstep_budget": "epochs * micro_steps"
+  },
+  "mean_std_val_accuracy_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": {
+        "mean": 0.8296296296296296,
+        "std": 0.02318885309999784
+      },
+      "6": {
+        "mean": 0.8414814814814815,
+        "std": 0.016463785756216934
+      },
+      "8": {
+        "mean": 0.8392592592592593,
+        "std": 0.015108205966200855
+      },
+      "10": {
+        "mean": 0.8414814814814815,
+        "std": 0.01629629629629628
+      }
+    },
+    "matched_inner_compute": {
+      "4": {
+        "mean": 0.8296296296296296,
+        "std": 0.02318885309999784
+      },
+      "6": {
+        "mean": 0.7859259259259259,
+        "std": 0.029574021892854997
+      },
+      "8": {
+        "mean": 0.7622222222222221,
+        "std": 0.032322109969291
+      },
+      "10": {
+        "mean": 0.7251851851851852,
+        "std": 0.05176712654712934
+      }
+    }
+  },
+  "mean_std_test_accuracy_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": {
+        "mean": 0.8192592592592594,
+        "std": 0.02113384091509203
+      },
+      "6": {
+        "mean": 0.8281481481481482,
+        "std": 0.023956980190809208
+      },
+      "8": {
+        "mean": 0.8362962962962962,
+        "std": 0.021646872883262912
+      },
+      "10": {
+        "mean": 0.8377777777777778,
+        "std": 0.02100362500556715
+      }
+    },
+    "matched_inner_compute": {
+      "4": {
+        "mean": 0.8192592592592594,
+        "std": 0.02113384091509203
+      },
+      "6": {
+        "mean": 0.774074074074074,
+        "std": 0.03296088216486961
+      },
+      "8": {
+        "mean": 0.7496296296296296,
+        "std": 0.036784323016104147
+      },
+      "10": {
+        "mean": 0.7185185185185186,
+        "std": 0.06067747382599229
+      }
+    }
+  },
+  "mean_gate_passing_epoch_count_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": 27.6,
+      "6": 25.0,
+      "8": 22.4,
+      "10": 21.0
+    },
+    "matched_inner_compute": {
+      "4": 27.6,
+      "6": 5.8,
+      "8": 0.0,
+      "10": 0.0
+    }
+  },
+  "mean_val_transported_final_energy_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": 0.30196696727335726,
+      "6": 0.2910102502075528,
+      "8": 0.2885988311663038,
+      "10": 0.28336726475171664
+    },
+    "matched_inner_compute": {
+      "4": 0.30196696727335726,
+      "6": 0.337415953797943,
+      "8": 0.3599697262930756,
+      "10": 0.3785932152856405
+    }
+  },
+  "mean_wall_clock_runtime_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": {
+        "mean_total_wall_time_seconds": 16.487197319994447,
+        "std_total_wall_time_seconds": 0.15276138877906192,
+        "mean_train_wall_time_seconds": 16.45867574000149,
+        "std_train_wall_time_seconds": 0.1540767078092184
+      },
+      "6": {
+        "mean_total_wall_time_seconds": 27.432338780001736,
+        "std_total_wall_time_seconds": 1.124170518962225,
+        "mean_train_wall_time_seconds": 27.39069540000055,
+        "std_train_wall_time_seconds": 1.1234004945665303
+      },
+      "8": {
+        "mean_total_wall_time_seconds": 36.918519740004555,
+        "std_total_wall_time_seconds": 0.14596764511996346,
+        "mean_train_wall_time_seconds": 36.86364464000799,
+        "std_train_wall_time_seconds": 0.14495252156648683
+      },
+      "10": {
+        "mean_total_wall_time_seconds": 45.73245800000732,
+        "std_total_wall_time_seconds": 0.18872835440937497,
+        "mean_train_wall_time_seconds": 45.671605340001406,
+        "std_train_wall_time_seconds": 0.19123089452634995
+      }
+    },
+    "matched_inner_compute": {
+      "4": {
+        "mean_total_wall_time_seconds": 18.840356059989425,
+        "std_total_wall_time_seconds": 0.11954020107279505,
+        "mean_train_wall_time_seconds": 18.80777689999086,
+        "std_train_wall_time_seconds": 0.11934817561376906
+      },
+      "6": {
+        "mean_total_wall_time_seconds": 18.76713991998695,
+        "std_total_wall_time_seconds": 0.21959992587026786,
+        "mean_train_wall_time_seconds": 18.725065639987587,
+        "std_train_wall_time_seconds": 0.2190794488892035
+      },
+      "8": {
+        "mean_total_wall_time_seconds": 18.71983167999424,
+        "std_total_wall_time_seconds": 0.1024031229612711,
+        "mean_train_wall_time_seconds": 18.66579629999469,
+        "std_train_wall_time_seconds": 0.10138752515587711
+      },
+      "10": {
+        "mean_total_wall_time_seconds": 18.501534899993565,
+        "std_total_wall_time_seconds": 0.13290348018721207,
+        "mean_train_wall_time_seconds": 18.43768601999036,
+        "std_train_wall_time_seconds": 0.13396017257809384
+      }
+    }
+  },
+  "effective_microstep_budget_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": {
+        "epochs_used": 60,
+        "effective_microstep_budget": 240
+      },
+      "6": {
+        "epochs_used": 60,
+        "effective_microstep_budget": 360
+      },
+      "8": {
+        "epochs_used": 60,
+        "effective_microstep_budget": 480
+      },
+      "10": {
+        "epochs_used": 60,
+        "effective_microstep_budget": 600
+      }
+    },
+    "matched_inner_compute": {
+      "4": {
+        "epochs_used": 60,
+        "effective_microstep_budget": 240
+      },
+      "6": {
+        "epochs_used": 40,
+        "effective_microstep_budget": 240
+      },
+      "8": {
+        "epochs_used": 30,
+        "effective_microstep_budget": 240
+      },
+      "10": {
+        "epochs_used": 24,
+        "effective_microstep_budget": 240
+      }
+    }
+  },
+  "gap_to_canonical_slow_pc_by_protocol_and_micro_steps": {
+    "fixed_outer_training": {
+      "4": {
+        "mean_test_accuracy_gap": -0.0762962962962962
+      },
+      "6": {
+        "mean_test_accuracy_gap": -0.06740740740740736
+      },
+      "8": {
+        "mean_test_accuracy_gap": -0.059259259259259345
+      },
+      "10": {
+        "mean_test_accuracy_gap": -0.057777777777777706
+      }
+    },
+    "matched_inner_compute": {
+      "4": {
+        "mean_test_accuracy_gap": -0.0762962962962962
+      },
+      "6": {
+        "mean_test_accuracy_gap": -0.12148148148148152
+      },
+      "8": {
+        "mean_test_accuracy_gap": -0.1459259259259259
+      },
+      "10": {
+        "mean_test_accuracy_gap": -0.177037037037037
+      }
+    }
+  },
+  "instability_start_micro_steps_by_protocol": {
+    "fixed_outer_training": null,
+    "matched_inner_compute": null
+  },
+  "pairwise_comparison_vs_micro_steps_4_by_protocol": {
+    "fixed_outer_training": {
+      "4": {
+        "mean_val_accuracy_delta": 0.0,
+        "mean_test_accuracy_delta": 0.0,
+        "mean_gate_passing_epoch_count_delta": 0.0,
+        "mean_val_transported_final_energy_delta": 0.0,
+        "mean_total_wall_time_seconds_delta": 0.0,
+        "mean_test_gap_to_slow_pc_delta": 0.0
+      },
+      "6": {
+        "mean_val_accuracy_delta": 0.011851851851851891,
+        "mean_test_accuracy_delta": 0.008888888888888835,
+        "mean_gate_passing_epoch_count_delta": -2.6000000000000014,
+        "mean_val_transported_final_energy_delta": -0.010956717065804478,
+        "mean_total_wall_time_seconds_delta": 10.945141460007289,
+        "mean_test_gap_to_slow_pc_delta": 0.008888888888888835
+      },
+      "8": {
+        "mean_val_accuracy_delta": 0.009629629629629655,
+        "mean_test_accuracy_delta": 0.01703703703703685,
+        "mean_gate_passing_epoch_count_delta": -5.200000000000003,
+        "mean_val_transported_final_energy_delta": -0.013368136107053452,
+        "mean_total_wall_time_seconds_delta": 20.43132242001011,
+        "mean_test_gap_to_slow_pc_delta": 0.01703703703703685
+      },
+      "10": {
+        "mean_val_accuracy_delta": 0.011851851851851891,
+        "mean_test_accuracy_delta": 0.01851851851851849,
+        "mean_gate_passing_epoch_count_delta": -6.600000000000001,
+        "mean_val_transported_final_energy_delta": -0.018599702521640615,
+        "mean_total_wall_time_seconds_delta": 29.245260680012873,
+        "mean_test_gap_to_slow_pc_delta": 0.01851851851851849
+      }
+    },
+    "matched_inner_compute": {
+      "4": {
+        "mean_val_accuracy_delta": 0.0,
+        "mean_test_accuracy_delta": 0.0,
+        "mean_gate_passing_epoch_count_delta": 0.0,
+        "mean_val_transported_final_energy_delta": 0.0,
+        "mean_total_wall_time_seconds_delta": 0.0,
+        "mean_test_gap_to_slow_pc_delta": 0.0
+      },
+      "6": {
+        "mean_val_accuracy_delta": -0.04370370370370369,
+        "mean_test_accuracy_delta": -0.04518518518518533,
+        "mean_gate_passing_epoch_count_delta": -21.8,
+        "mean_val_transported_final_energy_delta": 0.035448986524585724,
+        "mean_total_wall_time_seconds_delta": -0.07321614000247578,
+        "mean_test_gap_to_slow_pc_delta": -0.04518518518518533
+      },
+      "8": {
+        "mean_val_accuracy_delta": -0.06740740740740747,
+        "mean_test_accuracy_delta": -0.06962962962962971,
+        "mean_gate_passing_epoch_count_delta": -27.6,
+        "mean_val_transported_final_energy_delta": 0.05800275901971835,
+        "mean_total_wall_time_seconds_delta": -0.12052437999518517,
+        "mean_test_gap_to_slow_pc_delta": -0.06962962962962971
+      },
+      "10": {
+        "mean_val_accuracy_delta": -0.10444444444444445,
+        "mean_test_accuracy_delta": -0.1007407407407408,
+        "mean_gate_passing_epoch_count_delta": -27.6,
+        "mean_val_transported_final_energy_delta": 0.07662624801228324,
+        "mean_total_wall_time_seconds_delta": -0.3388211599958595,
+        "mean_test_gap_to_slow_pc_delta": -0.1007407407407408
+      }
+    }
+  },
+  "best_configuration_by_fixed_outer_training": {
+    "protocol": "fixed_outer_training",
+    "micro_steps": 10,
+    "epochs_used": 60,
+    "effective_microstep_budget": 600,
+    "num_runs": 5,
+    "num_completed_runs": 5,
+    "num_failures": 0,
+    "num_skipped_runs": 0,
+    "nan_or_inf_failure_count": 0,
+    "mean_val_accuracy": 0.8414814814814815,
+    "std_val_accuracy": 0.01629629629629628,
+    "mean_test_accuracy": 0.8377777777777778,
+    "std_test_accuracy": 0.02100362500556715,
+    "mean_gate_passing_epoch_count": 21.0,
+    "mean_val_transported_final_energy": 0.28336726475171664,
+    "mean_train_wall_time_seconds": 45.671605340001406,
+    "std_train_wall_time_seconds": 0.19123089452634995,
+    "mean_total_wall_time_seconds": 45.73245800000732,
+    "std_total_wall_time_seconds": 0.18872835440937497,
+    "mean_test_accuracy_gap_to_slow_pc": -0.057777777777777706
+  },
+  "best_configuration_by_matched_inner_compute": {
+    "protocol": "matched_inner_compute",
+    "micro_steps": 4,
+    "epochs_used": 60,
+    "effective_microstep_budget": 240,
+    "num_runs": 5,
+    "num_completed_runs": 5,
+    "num_failures": 0,
+    "num_skipped_runs": 0,
+    "nan_or_inf_failure_count": 0,
+    "mean_val_accuracy": 0.8296296296296296,
+    "std_val_accuracy": 0.02318885309999784,
+    "mean_test_accuracy": 0.8192592592592594,
+    "std_test_accuracy": 0.02113384091509203,
+    "mean_gate_passing_epoch_count": 27.6,
+    "mean_val_transported_final_energy": 0.30196696727335726,
+    "mean_train_wall_time_seconds": 18.80777689999086,
+    "std_train_wall_time_seconds": 0.11934817561376906,
+    "mean_total_wall_time_seconds": 18.840356059989425,
+    "std_total_wall_time_seconds": 0.11954020107279505,
+    "mean_test_accuracy_gap_to_slow_pc": -0.0762962962962962
+  },
+  "does_micro_steps_greater_than_4_win_under_matched_inner_compute": false,
+  "recommended_micro_steps_default": 4,
+  "transport_horizon_vs_compute_interpretation": "larger micro-step counts help under fixed outer training but do not survive matched inner compute, so the observed gain is mainly a compute-budget effect",
+  "next_single_narrow_research_move": "keep micro_steps = 4 and test one narrow transport-quality change inside the current corrective default, rather than adding more micro-step compute",
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

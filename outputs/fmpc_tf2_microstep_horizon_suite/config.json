@@ -1,0 +1,39 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_microstep_horizon_suite",
+  "protocols": [
+    "fixed_outer_training",
+    "matched_inner_compute"
+  ],
+  "micro_steps_options": [
+    4,
+    6,
+    8,
+    10
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "fixed": {
+    "preset_name": "tf2_corrective_transport_default",
+    "feature_aware_tangents": false,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "theta_update_budget": "matched",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "family_lineage": "tf1_mlp_aug"
+  },
+  "matching_rule": {
+    "reference_micro_steps": 4,
+    "base_epochs": 60,
+    "matched_inner_compute_epochs_rule": "round(base_epochs * reference_micro_steps / micro_steps)",
+    "effective_microstep_budget": "epochs * micro_steps"
+  },
+  "slow_pc_reference_runs_path": "outputs/fmpc_tf2_default_adoption_suite/aggregate_runs.csv",
+  "slow_pc_reference_name": "canonical_slow_pc_digits_baseline"
+}

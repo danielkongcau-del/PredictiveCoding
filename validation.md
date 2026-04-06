@@ -1126,6 +1126,21 @@ Current TF2 adoption interpretation:
   - keep `local_only`
   - keep `theta_update_budget = "matched"`
   - probe a slightly larger micro-step count before any broader semantic change
+- the completed corrective micro-step horizon suite now indicates:
+  - there is no instability through `micro_steps = 10` under the tested
+    corrective-family settings
+  - under fixed outer training, larger `micro_steps` improve mean validation and
+    test accuracy, but this comes with much larger runtime and inner-loop budget
+  - under matched inner compute, `micro_steps = 4` remains the best tested setting
+    and `6`, `8`, and `10` all degrade:
+    - validation-selected test accuracy
+    - gate-passing epoch coverage
+    - transported validation energy
+  - the current evidence therefore reads the `micro_steps > 4` gain as mainly a
+    compute-budget effect rather than a genuine transport-horizon gain
+  - `micro_steps = 4` should remain the corrective-transport default
+  - the next single narrow move should stay inside the current corrective default
+    and test transport quality rather than more micro-step compute
 
 Required reporting:
 

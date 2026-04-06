@@ -200,6 +200,11 @@ from .fmpc_tf2_attribution_suite import (
     FMPCTF2AttributionSuiteRunResult,
     run_fmpc_tf2_attribution_suite,
 )
+from .fmpc_tf2_microstep_horizon_suite import (
+    FMPCTF2MicrostepHorizonSuiteConfig,
+    FMPCTF2MicrostepHorizonSuiteRunResult,
+    run_fmpc_tf2_microstep_horizon_suite,
+)
 from .fmpc_tf2b_interleaving_suite import (
     FMPCTF2BInterleavingSuiteConfig,
     FMPCTF2BInterleavingSuiteRunResult,

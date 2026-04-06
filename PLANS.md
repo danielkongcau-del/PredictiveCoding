@@ -2227,3 +2227,87 @@ Attribution outcome:
   - keep `feature_aware_tangents = false`
   - keep `theta_update_budget = "matched"`
   - test a slightly larger micro-step count before reopening broader TF2 semantics
+
+### TF2 corrective micro-step horizon pass
+
+Goal:
+
+- determine whether increasing `micro_steps` beyond `4` inside the current
+  corrective-transport default produces a genuine transport-horizon gain
+  or merely increases inner-loop training compute
+
+Scope:
+
+- do not change TF2 core math
+- do not reopen identity semantics, cadence semantics, or supervision semantics
+- keep fixed:
+  - `feature_aware_tangents = false`
+  - `incremental_weight_updates = false`
+  - `supervision_policy = "local_only"`
+  - `theta_update_cadence = "terminal_only"`
+  - `theta_update_budget = "matched"`
+  - current selector policy
+- vary only:
+  - `micro_steps in {4, 6, 8, 10}`
+  - comparison protocol:
+    - fixed outer-training
+    - matched inner-compute
+
+Files to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/__init__.py`
+- `src/pc/fmpc_tf2_microstep_horizon_suite.py`
+- `experiments/fmpc_tf2_microstep_horizon_suite.py`
+- `tests/test_fmpc_tf2_microstep_horizon_suite_smoke.py`
+
+Matching rule:
+
+- use the current corrective default as the base:
+  - `base_micro_steps = 4`
+  - `base_epochs = 60`
+- fixed outer-training protocol:
+  - keep `epochs = 60`
+- matched inner-compute protocol:
+  - set `epochs = round(base_epochs * base_micro_steps / micro_steps)`
+  - with the active grid this becomes:
+    - `4 -> 60`
+    - `6 -> 40`
+    - `8 -> 30`
+    - `10 -> 24`
+- this keeps the coarse training budget
+  - `epochs * micro_steps`
+  exactly matched at `240`
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_microstep_horizon_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Expected deliverables:
+
+- one narrow suite artifact set under:
+  - `outputs/fmpc_tf2_microstep_horizon_suite/`
+- a decision on whether:
+  - `micro_steps > 4` remains better under matched inner compute
+  - or the current gain is mainly a compute-budget effect
+
+Outcome:
+
+- the completed micro-step horizon suite shows:
+  - no instability through `micro_steps = 10` under either protocol
+  - under fixed outer training, larger `micro_steps` continue to improve:
+    - best tested mean test accuracy: `micro_steps = 10`
+  - under matched inner compute, `micro_steps = 4` remains the clear winner and
+    larger values degrade:
+    - `6`, `8`, and `10` all lose validation-selected test accuracy
+    - gate-passing coverage also falls sharply as `micro_steps` grows
+- the current evidence therefore says:
+  - the apparent gain from `micro_steps > 4` is mainly a compute-budget effect,
+    not a genuine transport-horizon win
+  - `micro_steps = 4` should remain the corrective-transport default
+- the next narrow TF2 move should be:
+  - keep `micro_steps = 4`
+  - test one transport-quality change inside the current corrective default
+    rather than adding more inner-loop micro-step compute
