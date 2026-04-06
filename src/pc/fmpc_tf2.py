@@ -224,7 +224,13 @@ class _SplitTransportMetrics:
 
 
 def build_tf2_canonical_config(**overrides: Any) -> FMPCTF2Config:
-    """Return the hypothesis-driven canonical TF2 iFMPC candidate."""
+    """Return the hypothesis-driven canonical TF2 iFMPC candidate.
+
+    The current canonical default keeps `feature_aware_tangents=False`. The more
+    complete feature-aware identity approximation remains available by explicit
+    override, but it is not the default until it shows a clear matched empirical
+    gain.
+    """
 
     payload: dict[str, Any] = {
         "preset_name": "tf2_canonical",

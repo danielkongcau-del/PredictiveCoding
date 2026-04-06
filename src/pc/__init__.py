@@ -190,6 +190,11 @@ from .fmpc_tf2_default_adoption_suite import (
     FMPCTF2DefaultAdoptionSuiteRunResult,
     run_fmpc_tf2_default_adoption_suite,
 )
+from .fmpc_tf2_identity_semantics_suite import (
+    FMPCTF2IdentitySemanticsSuiteConfig,
+    FMPCTF2IdentitySemanticsSuiteRunResult,
+    run_fmpc_tf2_identity_semantics_suite,
+)
 from .fmpc_tf2b_interleaving_suite import (
     FMPCTF2BInterleavingSuiteConfig,
     FMPCTF2BInterleavingSuiteRunResult,

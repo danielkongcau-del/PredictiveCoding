@@ -1103,6 +1103,12 @@ Current TF2 adoption interpretation:
 - with `use_teacher_free_features = true` and `feature_aware_tangents = false`, the
   current mainline uses an explicit truncated identity approximation that freezes the
   appended feature block inside the JVP path
+- the completed matched identity-semantics suite found no material validation-selected
+  gain from `feature_aware_tangents = true` in either:
+  - `tf2_canonical`
+  - `tf2_corrective_transport_default`
+- the canonical TF2 default therefore remains:
+  - `feature_aware_tangents = false`
 
 Required reporting:
 

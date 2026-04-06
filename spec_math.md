@@ -498,6 +498,12 @@ The repository therefore distinguishes two identity-tangent semantics:
     identity approximation, not the full total derivative through the augmented
     feature-dependent input
 
+Current TF2 contract note:
+
+- the canonical TF2 default may keep the truncated feature-frozen identity
+  approximation when matched validation runs do not show a stable empirical gain from
+  feature-aware tangents
+
 ### 16.6 Parameter updates after transport
 
 Teacher-free FMPC v1 changes only the hidden-state transport path used during training.

@@ -1,0 +1,133 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_identity_semantics_suite",
+  "num_runs": 20,
+  "mean_std_val_accuracy_by_preset_and_identity_semantics": {
+    "tf2_canonical": {
+      "truncated": {
+        "mean": 0.8207407407407408,
+        "std": 0.0361827399757624
+      },
+      "feature_aware": {
+        "mean": 0.8207407407407408,
+        "std": 0.0361827399757624
+      }
+    },
+    "tf2_corrective_transport_default": {
+      "truncated": {
+        "mean": 0.8296296296296296,
+        "std": 0.02318885309999784
+      },
+      "feature_aware": {
+        "mean": 0.8296296296296296,
+        "std": 0.02318885309999784
+      }
+    }
+  },
+  "mean_std_test_accuracy_by_preset_and_identity_semantics": {
+    "tf2_canonical": {
+      "truncated": {
+        "mean": 0.8037037037037038,
+        "std": 0.02533723166886972
+      },
+      "feature_aware": {
+        "mean": 0.8037037037037038,
+        "std": 0.02533723166886972
+      }
+    },
+    "tf2_corrective_transport_default": {
+      "truncated": {
+        "mean": 0.8192592592592594,
+        "std": 0.02113384091509203
+      },
+      "feature_aware": {
+        "mean": 0.8192592592592594,
+        "std": 0.02113384091509203
+      }
+    }
+  },
+  "mean_val_transported_final_energy_by_preset_and_identity_semantics": {
+    "tf2_canonical": {
+      "truncated": 0.3130398830156948,
+      "feature_aware": 0.3130401636183792
+    },
+    "tf2_corrective_transport_default": {
+      "truncated": 0.30196696727335726,
+      "feature_aware": 0.3019693837748426
+    }
+  },
+  "mean_gate_passing_epoch_count_by_preset_and_identity_semantics": {
+    "tf2_canonical": {
+      "truncated": 3.0,
+      "feature_aware": 3.0
+    },
+    "tf2_corrective_transport_default": {
+      "truncated": 27.6,
+      "feature_aware": 27.6
+    }
+  },
+  "stability_by_preset_and_identity_semantics": {
+    "tf2_canonical": {
+      "truncated": {
+        "num_runs": 5,
+        "num_completed_runs": 5,
+        "num_failures": 0,
+        "nan_or_inf_failure_count": 0
+      },
+      "feature_aware": {
+        "num_runs": 5,
+        "num_completed_runs": 5,
+        "num_failures": 0,
+        "nan_or_inf_failure_count": 0
+      }
+    },
+    "tf2_corrective_transport_default": {
+      "truncated": {
+        "num_runs": 5,
+        "num_completed_runs": 5,
+        "num_failures": 0,
+        "nan_or_inf_failure_count": 0
+      },
+      "feature_aware": {
+        "num_runs": 5,
+        "num_completed_runs": 5,
+        "num_failures": 0,
+        "nan_or_inf_failure_count": 0
+      }
+    }
+  },
+  "pairwise_semantics_comparison_by_preset": {
+    "tf2_canonical": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_val_transported_final_energy_delta": 2.8060268442153813e-07,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "theta_update_cadence": "every_micro_step"
+    },
+    "tf2_corrective_transport_default": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_val_transported_final_energy_delta": 2.4165014853583244e-06,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "theta_update_cadence": "terminal_only"
+    }
+  },
+  "feature_aware_tangents_should_become_canonical_tf2_default": false,
+  "recommended_canonical_tf2_identity_semantics": "feature_frozen_truncated_identity_approx",
+  "whether_feature_aware_tangents_help_current_empirical_default": false,
+  "theta_update_cadence_sensitivity_context": {
+    "tf2_canonical": "every_micro_step",
+    "tf2_corrective_transport_default": "terminal_only"
+  },
+  "current_tf2_identity_evidence_interpretation": "truncated identity approximation remains preferred empirically for the canonical TF2 path",
+  "recommended_next_research_stage_after_identity_semantics_decision": "keep truncated identity default and continue corrective-transport TF2 bridge work",
+  "decision_rationale": {
+    "canonical_mean_val_accuracy_delta_feature_aware_minus_truncated": 0.0,
+    "canonical_mean_test_accuracy_delta_feature_aware_minus_truncated": 0.0,
+    "canonical_mean_val_transported_final_energy_delta_feature_aware_minus_truncated": 2.8060268442153813e-07,
+    "canonical_mean_gate_passing_epoch_count_delta_feature_aware_minus_truncated": 0.0,
+    "canonical_feature_aware_num_failures": 0,
+    "canonical_truncated_num_failures": 0
+  },
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

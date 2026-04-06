@@ -1,0 +1,22 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_identity_semantics_suite",
+  "tf2_preset_names": [
+    "tf2_canonical",
+    "tf2_corrective_transport_default"
+  ],
+  "feature_aware_tangent_options": [
+    false,
+    true
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "validation_only_checkpoint_selection": true,
+  "test_report_only": true,
+  "goal": "decide whether canonical TF2 should keep truncated identity semantics or switch to feature-aware tangents"
+}

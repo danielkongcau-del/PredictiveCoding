@@ -99,6 +99,7 @@ def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> N
     assert canonical.incremental_weight_updates is True
     assert canonical.supervision_policy == "mixed"
     assert canonical.micro_steps == 4
+    assert canonical.feature_aware_tangents is False
     assert canonical.theta_update_budget == "matched"
 
     assert corrective.preset_name == "tf2_corrective_transport_default"
@@ -106,4 +107,5 @@ def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> N
     assert corrective.incremental_weight_updates is False
     assert corrective.supervision_policy == "local_only"
     assert corrective.micro_steps == 4
+    assert corrective.feature_aware_tangents is False
     assert corrective.theta_update_budget == "matched"

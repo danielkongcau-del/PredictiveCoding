@@ -1919,6 +1919,7 @@ Current preset interpretation:
   - `incremental_weight_updates = true`
   - `supervision_policy = "mixed"`
   - `theta_update_budget = "matched"`
+  - `feature_aware_tangents = false`
 - add `tf2_corrective_transport_default` as the empirical bridge winner
   - `micro_steps = 4`
   - `incremental_weight_updates = false`
@@ -2057,3 +2058,84 @@ Assumptions:
   selector policy
 - if the current default `feature_aware_tangents = false` is kept, it must be
   documented as an explicit approximation rather than an unqualified `D_T`
+
+### TF2 identity semantics decision pass
+
+Goal:
+
+- decide whether the canonical TF2 identity semantics should remain:
+  - `feature_aware_tangents = false`
+  as the current truncated identity approximation
+- or switch to:
+  - `feature_aware_tangents = true`
+  as the augmented-input total-derivative approximation
+
+Scope:
+
+- do not change TF2 core math
+- do not change baseline PC math
+- do not introduce muPC-style scaling
+- do not start TF3
+- only compare the two identity semantics under otherwise matched TF2 settings
+
+Files to touch:
+
+- `PLANS.md`
+- `validation.md`
+- optionally `spec_math.md` if the default decision needs extra contract wording
+- `src/pc/__init__.py`
+- `src/pc/fmpc_tf2_identity_semantics_suite.py`
+- `experiments/fmpc_tf2_identity_semantics_suite.py`
+- `tests/test_fmpc_tf2_identity_semantics_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Planned suite:
+
+- compare `feature_aware_tangents in {false, true}`
+- evaluate at least:
+  - `tf2_canonical`
+  - `tf2_corrective_transport_default`
+- keep each preset's own:
+  - selector
+  - `micro_steps`
+  - supervision policy
+  - theta-update cadence
+  - theta-update budget
+- seeds:
+  - `{0, 1, 2, 3, 4}`
+
+Decision rule:
+
+- promote feature-aware tangents to the canonical TF2 default only if the
+  `tf2_canonical` runs show:
+  - stable completion with no NaN/Inf failures
+  - materially better validation-selected behavior
+  - and no meaningful regression in gate-passing coverage
+- otherwise keep the truncated identity approximation as the canonical default and
+  document that it remains preferred empirically
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_identity_semantics_suite_smoke.py`
+- `tests/test_fmpc_tf2_targets.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Deliverables:
+
+- `outputs/fmpc_tf2_identity_semantics_suite/config.json`
+- `outputs/fmpc_tf2_identity_semantics_suite/aggregate_runs.csv`
+- `outputs/fmpc_tf2_identity_semantics_suite/aggregate_summary.json`
+
+Decision outcome:
+
+- the completed matched identity-semantics suite showed:
+  - no validation accuracy gain
+  - no test accuracy gain
+  - no gate-coverage gain
+  from `feature_aware_tangents = true` under either:
+  - `tf2_canonical`
+  - `tf2_corrective_transport_default`
+- the canonical TF2 default therefore remains:
+  - `feature_aware_tangents = false`
+- feature-aware tangents remain available as a more complete augmented-input identity
+  approximation, but not as the current default
