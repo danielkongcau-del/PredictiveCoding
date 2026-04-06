@@ -1,0 +1,47 @@
+{
+  "claimed_files": [
+    "src/pc/fmpc_tf2.py",
+    "src/pc/fmpc_tf2_suite.py",
+    "experiments/fmpc_tf2.py",
+    "experiments/fmpc_tf2_suite.py",
+    "tests/test_fmpc_tf2_dynamics.py",
+    "tests/test_fmpc_tf2_targets.py",
+    "tests/test_fmpc_tf2_smoke.py",
+    "tests/test_fmpc_tf2_suite_smoke.py",
+    "outputs/fmpc_tf2/config.json",
+    "outputs/fmpc_tf2/summary.json",
+    "outputs/fmpc_tf2_suite/config.json",
+    "outputs/fmpc_tf2_suite/aggregate_runs.csv",
+    "outputs/fmpc_tf2_suite/aggregate_summary.json"
+  ],
+  "present_files": [
+    "src/pc/fmpc_tf2.py",
+    "src/pc/fmpc_tf2_suite.py",
+    "experiments/fmpc_tf2.py",
+    "experiments/fmpc_tf2_suite.py",
+    "tests/test_fmpc_tf2_dynamics.py",
+    "tests/test_fmpc_tf2_targets.py",
+    "tests/test_fmpc_tf2_smoke.py",
+    "tests/test_fmpc_tf2_suite_smoke.py",
+    "outputs/fmpc_tf2/config.json",
+    "outputs/fmpc_tf2/summary.json",
+    "outputs/fmpc_tf2_suite/config.json",
+    "outputs/fmpc_tf2_suite/aggregate_runs.csv",
+    "outputs/fmpc_tf2_suite/aggregate_summary.json"
+  ],
+  "missing_files_before_fix": [],
+  "outputs_present": [
+    "outputs/fmpc_tf2/config.json",
+    "outputs/fmpc_tf2/summary.json",
+    "outputs/fmpc_tf2_suite/config.json",
+    "outputs/fmpc_tf2_suite/aggregate_runs.csv",
+    "outputs/fmpc_tf2_suite/aggregate_summary.json"
+  ],
+  "tests_run": [
+    {
+      "command": "python -m pytest tests/test_fmpc_tf2_dynamics.py tests/test_fmpc_tf2_targets.py tests/test_fmpc_tf2_smoke.py tests/test_fmpc_tf2_suite_smoke.py -q",
+      "result": "7 passed in 2.87s"
+    }
+  ],
+  "final_status": "current_worktree_already_contained_tf2_implementation_and_outputs;_revalidated_and_reconciled"
+}

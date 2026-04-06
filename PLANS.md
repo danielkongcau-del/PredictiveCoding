@@ -310,9 +310,9 @@ Test whether the current Phase 2g headline conclusions are materially changed by
   - headline reporting by held-out test
 - the artifacts make it obvious whether the prior benchmark-level conclusion changed
 - the repository has an explicit answer to:
-  - did the prior Phase 2g headline survive the boundary check?
-  - which benchmark is still boundary-sensitive?
-  - is Phase 2 stable enough to move on?
+  - did the prior Phase 2g headline survive the boundary check-
+  - which benchmark is still boundary-sensitive-
+  - is Phase 2 stable enough to move on-
 
 ### Risks
 
@@ -1408,7 +1408,7 @@ The preferred direct-supervision design is:
 The MeanFlow identity must still apply to the full combined transport law:
 
 - `u_hat = u_local + u_corr`
-- `u_hat 鈮?g_s + dt * d/dtau_s u_hat`
+- `u_hat 鈮-g_s + dt * d/dtau_s u_hat`
 - with:
   - `d/dtau_s u_hat = d/dtau_s u_local + d/dtau_s u_corr`
 
@@ -1731,23 +1731,258 @@ Interpretation:
 - `baseline_working_default` should be treated as the sealed TF1 working default,
   not as a claim that TF1 is already competitive enough to stop further bridge work
 
-## Phase TF2 — iFMPC bridge stage
+## Phase TF2 - iFMPC bridge stage
 
-The next stage is now opened as:
+Objective:
 
-- `Phase TF2 — iFMPC bridge stage`
+- test whether **incremental scheduling** is the missing mechanism between the sealed
+  TF1 working default and a stronger teacher-free FMPC path
+- keep the current layered predictive-coding energy substrate intact
+- keep the baseline local parameter-update rule intact
+- add only:
+  - learned transport micro-steps for `z`
+  - optional immediate local `theta` updates at each micro-step
+  - mixed-policy teacher-free supervision for `psi`
+  - explicit forward-init stability diagnostics
 
-Stage objective:
+Why TF2 is a bridge stage rather than the final paradigm:
 
-- bridge from coarse teacher-free average-velocity transport toward a more iterative
-  FMPC-compatible hidden-state update path
-- keep the teacher-free line active without discarding the baseline slow-PC reference
+- it still uses the existing layered PC substrate and the same local energy
+- it keeps the baseline local parameter-update rule rather than introducing a new
+  parameter-learning rule
+- it leaves slow iterative PC predict/eval untouched
+- it borrows:
+  - iPC-inspired scheduling ideas
+  - -PC-inspired stability/conditioning concerns
+  but does not yet adopt:
+  - a new scaling mechanism
+  - a new substrate class
+  - a generalized iterative FMPC paradigm
 
-Initial constraints carried forward into TF2:
+Formal algorithm contract:
 
-- remain teacher-free
-- do not change baseline PC energy or local parameter-update math silently
-- do not route the new work through `backend="fmpc"` until the bridge design is
-  explicit and validated
-- do not replace the canonical slow predict/eval path without a separate validated
-  transition
+- hidden latent:
+  - `z = flatten(x^1, ..., x^(L-1))`
+- train-time context:
+  - `c = (x, y)` with `x^0 = x` and `x^L = y` clamped
+- energy substrate:
+  - `F_theta(z; c)` is the current target-clamped layered-PC batch energy
+- local field:
+  - `g_theta(z; c) = --_z F_theta(z; c)`
+- slow predict/eval remains the current canonical slow-PC path
+
+Micro-step schedule:
+
+- let `H = micro_steps`
+- use uniform knots:
+  - `t_k = k / H`
+  - `-t = 1 / H`
+  - `r_k = 1 - t_k`
+- maintain two train-time hidden-state streams:
+  - `z_on_k`: learned on-policy state
+  - `z_lf_k`: detached local-field-only shadow state
+
+Frozen-within-micro-step semantics:
+
+- within one micro-step `k`, all supervision targets and state advances must be
+  computed under one frozen parameter snapshot `(theta_k, psi_k)`
+- this includes:
+  - `u_boot`
+  - `u_id`
+  - learned transport outputs
+  - `z_on_{k+1}`
+  - `z_lf_{k+1}`
+- only after these quantities are computed may parameter updates be applied
+
+Required micro-step order:
+
+1. compute supervision targets and learned transport under frozen `(theta_k, psi_k)`
+2. advance `z_on` and `z_lf`
+3. apply one immediate local `theta` update when enabled
+4. apply one `psi` update
+
+State updates:
+
+- learned on-policy transport:
+  - `z_on_{k+1} = z_on_k + -t * u_psi(z_on_k, r_k, t_k; c)`
+- local-field shadow transport:
+  - `z_lf_{k+1} = z_lf_k + -t * g_theta(z_lf_k; c)`
+
+Mixed-policy supervision:
+
+- `supervision_policy in {"local_only", "mixed"}`
+- `local_only`:
+  - supervise `psi` only on detached `z_lf_k`
+- `mixed`:
+  - supervise `psi` on the concatenation of:
+    - detached `z_lf_k`
+    - detached `z_on_k`
+  - use simple batch concatenation for equal source weighting
+
+TF2 supervision targets remain exactly TF1-style teacher-free targets:
+
+- `u_boot` from `bootstrap_average_velocity_target(...)`
+- `u_id = g_t + r_k * D_T u_psi(...)`
+- loss remains:
+  - `L = L_boot + lambda_id * L_id`
+
+Matched theta-update budget:
+
+- `theta_update_budget in {"matched", "unmatched"}`
+- canonical default:
+  - `theta_update_budget = "matched"`
+- if `incremental_weight_updates = true` and budget is `matched`:
+  - `theta_micro_lr = base_theta_lr / micro_steps`
+  - `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+- if `incremental_weight_updates = true` and budget is `unmatched`:
+  - `theta_micro_lr = base_theta_lr`
+  - `theta_micro_bias_lr = base_theta_bias_lr`
+- if `incremental_weight_updates = false`:
+  - no theta updates happen inside the rollout
+  - one terminal theta update is applied after the final micro-step using the
+    existing base learning rates
+  - `theta_micro_lr` and `theta_micro_bias_lr` are still recorded for transparency
+
+What remains PC:
+
+- the layered energy substrate
+- the definition of the local hidden-state field `g_theta`
+- the baseline local parameter-update rule
+- target-clamped train-time semantics
+- slow iterative predict/eval
+
+What has moved beyond baseline PC:
+
+- learned average-velocity transport `u_psi`
+- micro-step interleaving of state transport and parameter updates
+- mixed-policy teacher-free supervision for `psi`
+- selector-governed checkpoint choice carried forward from TF1
+
+Files to add / modify:
+
+- modify:
+  - `PLANS.md`
+  - `validation.md`
+  - `spec_math.md`
+  - `src/pc/__init__.py`
+- add:
+  - `src/pc/fmpc_tf2.py`
+  - `src/pc/fmpc_tf2_suite.py`
+  - `experiments/fmpc_tf2.py`
+  - `experiments/fmpc_tf2_suite.py`
+  - `tests/test_fmpc_tf2_dynamics.py`
+  - `tests/test_fmpc_tf2_targets.py`
+  - `tests/test_fmpc_tf2_smoke.py`
+  - `tests/test_fmpc_tf2_suite_smoke.py`
+
+Reuse without changing TF1 behavior:
+
+- `src/pc/fmpc_tf1_flow.py`
+- `src/pc/fmpc_tf1_jvp.py`
+
+Experiment entrypoints:
+
+- `experiments/fmpc_tf2.py`
+  - canonical single-run TF2 bridge experiment
+- `experiments/fmpc_tf2_suite.py`
+  - narrow multiseed bridge-validation suite
+
+Canonical TF2A defaults:
+
+- family lineage:
+  - `tf1_mlp_aug`
+- `use_teacher_free_features = true`
+- `feature_aware_tangents = false`
+- `micro_steps = 4`
+- `incremental_weight_updates = true`
+- `supervision_policy = "mixed"`
+- `theta_update_budget = "matched"`
+- `identity_loss_weight = 0.2`
+- `hybrid_ramp_epochs = 10`
+- `bootstrap_substeps = 4`
+- `checkpoint_selector = "gate_constrained_accuracy_then_val_accuracy"`
+
+Current preset interpretation:
+
+- keep `tf2_canonical` as the hypothesis-driven iFMPC candidate
+  - `micro_steps = 4`
+  - `incremental_weight_updates = true`
+  - `supervision_policy = "mixed"`
+  - `theta_update_budget = "matched"`
+- add `tf2_corrective_transport_default` as the empirical bridge winner
+  - `micro_steps = 4`
+  - `incremental_weight_updates = false`
+  - `supervision_policy = "local_only"`
+  - `theta_update_budget = "matched"`
+- do not silently replace the hypothesis-driven preset with the empirical preset
+
+JPC status after the completed probe:
+
+- JPC remains reference-only in TF2
+- TF2 must not depend on JPC runtime
+- the completed JPC probe supports prioritizing incremental scheduling over
+  substrate scaling in the current phase
+- the probe does not provide strong evidence that muPC-style scaling should now
+  replace incremental scheduling as the main TF2 focus
+- muPC-style scaling remains a future candidate mechanism, not the present TF2
+  mainline
+
+TF2A suite grid:
+
+- `incremental_weight_updates in {false, true}`
+- `supervision_policy in {"local_only", "mixed"}`
+- `micro_steps in {2, 4}`
+- `seeds in {0, 1, 2}`
+
+Keep fixed across the suite:
+
+- `family_lineage = tf1_mlp_aug`
+- `feature_aware_tangents = false`
+- `identity_loss_weight = 0.2`
+- `hybrid_ramp_epochs = 10`
+- `bootstrap_substeps = 4`
+- `checkpoint_selector = "gate_constrained_accuracy_then_val_accuracy"`
+- `theta_update_budget = "matched"`
+
+Forward-init stability diagnostics required in TF2:
+
+- per-layer hidden forward-init RMS
+- per-layer hidden forward-init mean L2 norm
+- initial target-clamped energy
+- initial hidden-gradient RMS
+- initial hidden-gradient mean L2 norm
+
+Acceptance criteria:
+
+- must-have acceptance:
+  - fully teacher-free
+  - no JPC runtime dependency
+  - forward-init diagnostics present
+  - immediate theta updates happen each micro-step when enabled
+  - mixed-policy supervision works when enabled
+  - validation-only selector semantics are preserved
+  - no NaN / Inf
+- target acceptance:
+  - improve mean validation accuracy over the sealed TF1 working default
+  - improve mean test accuracy over the sealed TF1 working default
+  - reduce the gap to the canonical slow-PC digits baseline
+
+Risks / open questions:
+
+- immediate theta drift may destabilize on-policy supervision
+- mixed-policy supervision may improve gate coverage more than final slow-PC accuracy
+- matched-budget micro-updates may still be too weak if the true bottleneck is substrate
+  scaling rather than scheduling
+- -PC-inspired conditioning concerns may matter, but TF2A treats them as diagnostics only
+  and does not add a new scaling mechanism yet
+
+Interpretation:
+
+- current TF2 evidence supports corrective transport strongly
+- current TF2 evidence does not yet support full incremental iFMPC /
+  interleaved parameter-learning as the empirical winner
+- if TF2 improves over sealed TF1 but still trails slow-PC materially, the next stage
+  should remain inside `continue TF2 bridge`
+- if TF2 improves weakly and the diagnostics continue to point to poor conditioning,
+  the next stage should become `strengthen substrate scaling later`
+- only a clearly stronger bridge result should justify `move toward generalized TF3 later`

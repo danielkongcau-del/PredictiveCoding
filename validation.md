@@ -540,7 +540,7 @@ Before any FMPC-v1-style extension is considered, the repository should answer a
 - under the fixed endpoint contract
   - input: `concat([z0, target_onehot])`
   - target: `delta_z = z_star - z0`
-- does any simple learned student beat the explicit identity / zero-delta baseline on the canonical non-trivial `digits` teacher?
+- does any simple learned student beat the explicit identity / zero-delta baseline on the canonical non-trivial `digits` teacher-
 
 The required Phase 5A comparison set is:
 
@@ -1012,14 +1012,115 @@ Therefore:
 
 ## Phase TF2 validation entry
 
-The next active stage is now opened as:
+The next active stage is now:
 
-- `Phase TF2 — iFMPC bridge stage`
+- `Phase TF2 - iFMPC bridge stage`
 
 Interpretation:
 
-- TF2 should build on the sealed TF1 working preset and selector contract
-- TF2 remains inside the teacher-free FMPC line
-- TF2 should be judged against both:
+- TF2 builds on the sealed TF1 working preset and selector contract
+- TF2 remains fully teacher-free
+- TF2 must not depend on JPC runtime availability
+- TF2 must be judged against both:
   - the sealed TF1 working default
   - the canonical slow-PC digits baseline
+
+## Phase TF2 validation contract
+
+Bridge-stage scope:
+
+- keep the current layered PC energy substrate
+- keep the baseline local parameter-update rule
+- add micro-step interleaving during training only
+- keep slow-PC predict/eval unchanged
+- treat -PC ideas as diagnostics/substrate desiderata only in TF2A
+
+Selector semantics carried forward:
+
+- validation remains the only source of checkpoint selection
+- test remains report-only
+- TF2 keeps the selector policy logic already established in TF1
+- the canonical selector remains:
+  - `gate_constrained_accuracy_then_val_accuracy`
+
+Matched-budget requirement:
+
+- TF2 must make `theta_update_budget` explicit in config and summary
+- the canonical default is:
+  - `theta_update_budget = "matched"`
+- under matched-budget incremental updates:
+  - `theta_micro_lr = base_theta_lr / micro_steps`
+  - `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+
+Must-have acceptance:
+
+- fully teacher-free
+- no JPC runtime dependency
+- forward-init diagnostics are present in TF2 artifacts
+- immediate theta updates happen each micro-step when enabled
+- mixed-policy supervision works when enabled
+- validation-only selector semantics are preserved
+- no NaN / Inf appear in the canonical run or narrow suite
+
+Target acceptance:
+
+- improve mean validation accuracy over the sealed TF1 working default
+- improve mean test accuracy over the sealed TF1 working default
+- reduce the gap to the canonical slow-PC digits baseline
+
+Required TF2A suite grid:
+
+- `incremental_weight_updates in {false, true}`
+- `supervision_policy in {"local_only", "mixed"}`
+- `micro_steps in {2, 4}`
+- `seeds in {0, 1, 2}`
+
+Keep fixed in the suite:
+
+- `family_lineage = tf1_mlp_aug`
+- `feature_aware_tangents = false`
+- `identity_loss_weight = 0.2`
+- `hybrid_ramp_epochs = 10`
+- `bootstrap_substeps = 4`
+- `checkpoint_selector = "gate_constrained_accuracy_then_val_accuracy"`
+- `theta_update_budget = "matched"`
+
+Current TF2 adoption interpretation:
+
+- `tf2_canonical` remains the hypothesis-driven iFMPC candidate
+- `tf2_corrective_transport_default` is the current empirical working default
+- JPC remains reference-only and must not be a runtime dependency for TF2
+- the completed JPC probe currently supports prioritizing incremental scheduling
+  over substrate scaling
+- muPC-style scaling remains a future candidate mechanism, not the current TF2
+  mainline
+- current TF2 evidence supports corrective transport more strongly than full
+  incremental iFMPC / interleaved parameter-learning
+
+Required reporting:
+
+- per-run outputs must include:
+  - `incremental_weight_updates`
+  - `supervision_policy`
+  - `micro_steps`
+  - `theta_update_budget`
+  - `theta_micro_lr`
+  - `theta_micro_bias_lr`
+  - `val_accuracy`
+  - `test_accuracy`
+  - `gate_passing_epoch_count`
+  - `val_transported_final_energy`
+  - `selected_epoch`
+  - `selected_epoch_passes_gate`
+  - `selector_fallback_used`
+  - `forward_init_stability_metrics`
+- aggregate summary must include:
+  - mean/std validation accuracy by config
+  - mean/std test accuracy by config
+  - mean gate-passing epoch count by config
+  - pairwise comparison against the sealed TF1 working default
+  - pairwise gap to the canonical slow-PC digits baseline
+  - whether mixed-policy supervision helps
+  - whether incremental theta updates help
+  - whether matched-budget TF2 narrows the slow-PC gap materially
+  - recommended next stage

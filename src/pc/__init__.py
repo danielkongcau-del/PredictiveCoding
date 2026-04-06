@@ -169,6 +169,32 @@ from .fmpc_tf1_accuracy_tuning_suite import (
     FMPCTF1AccuracyTuningSuiteRunResult,
     run_fmpc_tf1_accuracy_tuning_suite,
 )
+from .fmpc_tf2 import (
+    FMPCTF2Config,
+    FMPCTF2EpochSnapshot,
+    FMPCTF2RunResult,
+    TF2PresetName,
+    TF2MicroStepPlan,
+    build_tf2_canonical_config,
+    build_tf2_corrective_transport_default_config,
+    build_tf2_preset_config,
+    run_fmpc_tf2_experiment,
+)
+from .fmpc_tf2_suite import (
+    FMPCTF2SuiteConfig,
+    FMPCTF2SuiteRunResult,
+    run_fmpc_tf2_suite,
+)
+from .fmpc_tf2_default_adoption_suite import (
+    FMPCTF2DefaultAdoptionSuiteConfig,
+    FMPCTF2DefaultAdoptionSuiteRunResult,
+    run_fmpc_tf2_default_adoption_suite,
+)
+from .fmpc_tf2b_interleaving_suite import (
+    FMPCTF2BInterleavingSuiteConfig,
+    FMPCTF2BInterleavingSuiteRunResult,
+    run_fmpc_tf2b_interleaving_suite,
+)
 from .inference import TeacherInferenceExport, run_teacher_inference_export
 from .layers import PCLayerParams, init_mlp_layers
 from .metrics import (
@@ -227,6 +253,15 @@ __all__ = [
     "FMPCTF1ExternalComparisonSuiteRunResult",
     "FMPCTF1AccuracyTuningSuiteConfig",
     "FMPCTF1AccuracyTuningSuiteRunResult",
+    "FMPCTF2Config",
+    "FMPCTF2BInterleavingSuiteConfig",
+    "FMPCTF2BInterleavingSuiteRunResult",
+    "FMPCTF2DefaultAdoptionSuiteConfig",
+    "FMPCTF2DefaultAdoptionSuiteRunResult",
+    "FMPCTF2EpochSnapshot",
+    "FMPCTF2RunResult",
+    "FMPCTF2SuiteConfig",
+    "FMPCTF2SuiteRunResult",
     "FMPCTF1MultiSeedSuiteConfig",
     "FMPCTF1MultiSeedSuiteRunResult",
     "FMPCTF1RunResult",
@@ -281,6 +316,8 @@ __all__ = [
     "RealPCConfig",
     "RealPCRunResult",
     "TeacherInferenceExport",
+    "TF2PresetName",
+    "TF2MicroStepPlan",
     "acceptance_schedule_focus_pairs",
     "build_fmpc_interval_inputs",
     "build_meanflow_identity_target",
@@ -290,6 +327,9 @@ __all__ = [
     "build_tf1_epoch_selection_diagnostics",
     "build_tf1_mechanism_smoke_config",
     "build_tf1_preset_config",
+    "build_tf2_canonical_config",
+    "build_tf2_corrective_transport_default_config",
+    "build_tf2_preset_config",
     "build_interval_residual_target",
     "build_fmpc_student_inputs",
     "build_meanflow_full_identity_target_raw",
@@ -344,6 +384,10 @@ __all__ = [
     "run_fmpc_tf1_selector_policy_suite",
     "run_fmpc_tf1_selection_suite",
     "run_fmpc_tf1_suite",
+    "run_fmpc_tf2_experiment",
+    "run_fmpc_tf2_default_adoption_suite",
+    "run_fmpc_tf2b_interleaving_suite",
+    "run_fmpc_tf2_suite",
     "build_rollout_auxiliary_batches",
     "run_fmpc_student_experiment",
     "run_fmpc_student_suite",
