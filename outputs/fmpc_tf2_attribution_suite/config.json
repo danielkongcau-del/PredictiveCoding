@@ -1,0 +1,30 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_transport_attribution_suite",
+  "candidate_keys": [
+    "canonical_base",
+    "canonical_local_only",
+    "canonical_every_2",
+    "canonical_terminal_mixed",
+    "canonical_after_warmup",
+    "canonical_micro_2",
+    "corrective_base",
+    "corrective_every_2_local",
+    "corrective_every_micro_local",
+    "corrective_micro_2"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "fixed": {
+    "feature_aware_tangents": false,
+    "theta_update_budget": "matched",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "family_lineage": "tf1_mlp_aug",
+    "dataset_name": "digits"
+  },
+  "slow_pc_reference_runs_path": "outputs/fmpc_tf2_default_adoption_suite/aggregate_runs.csv",
+  "slow_pc_reference_name": "canonical_slow_pc_digits_baseline"
+}

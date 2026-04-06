@@ -1109,6 +1109,23 @@ Current TF2 adoption interpretation:
   - `tf2_corrective_transport_default`
 - the canonical TF2 default therefore remains:
   - `feature_aware_tangents = false`
+- the completed corrective-transport attribution suite now indicates:
+  - the current empirical advantage of `tf2_corrective_transport_default` is
+    explained primarily by avoiding frequent in-loop theta updates under the
+    matched budget
+  - `local_only` supervision adds a smaller secondary gain once cadence is already
+    `terminal_only`
+  - `every_2_micro_steps` and `after_warmup` both partially rescue the canonical
+    hypothesis preset, but neither beats the current corrective default
+  - `micro_steps = 4` is preferred over `micro_steps = 2` in both the canonical and
+    corrective families
+  - no tested attribution config narrows the slow-PC test gap below the current
+    corrective transport default
+- the next narrow TF2 move should therefore remain inside the corrective family:
+  - keep `terminal_only`
+  - keep `local_only`
+  - keep `theta_update_budget = "matched"`
+  - probe a slightly larger micro-step count before any broader semantic change
 
 Required reporting:
 

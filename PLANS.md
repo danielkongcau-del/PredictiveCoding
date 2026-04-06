@@ -2139,3 +2139,91 @@ Decision outcome:
   - `feature_aware_tangents = false`
 - feature-aware tangents remain available as a more complete augmented-input identity
   approximation, but not as the current default
+
+### TF2 corrective-transport attribution pass
+
+Goal:
+
+- explain, with the smallest factor-isolating ablations, why
+  `tf2_corrective_transport_default` currently beats or is preferred over
+  `tf2_canonical`
+- narrow the next post-identity-semantics research move to one concrete direction
+
+Scope:
+
+- do not change TF2 core math
+- do not reopen the TF2 identity-semantics decision
+- keep:
+  - `feature_aware_tangents = false`
+  - `theta_update_budget = "matched"`
+  - the current selector policy
+- compare only the existing TF2 bridge family on `digits`
+
+Files to touch:
+
+- `README.md`
+- `PLANS.md`
+- `src/pc/__init__.py`
+- `src/pc/fmpc_tf2_attribution_suite.py`
+- `experiments/fmpc_tf2_attribution_suite.py`
+- `tests/test_fmpc_tf2_attribution_suite_smoke.py`
+
+Planned suite:
+
+- use a small hand-built attribution grid around:
+  - `tf2_canonical`
+  - `tf2_corrective_transport_default`
+- isolate the current candidate factors:
+  - theta-update cadence:
+    - `terminal_only`
+    - `every_2_micro_steps`
+    - `every_micro_step`
+  - supervision policy:
+    - `local_only`
+    - `mixed`
+  - interleaving start:
+    - `epoch_0`
+    - `after_warmup`
+  - micro-step count:
+    - `2`
+    - `4`
+- keep:
+  - family lineage
+  - identity semantics
+  - selector policy
+  - dataset
+  fixed
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_attribution_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Expected deliverables:
+
+- one attribution suite artifact set under:
+  - `outputs/fmpc_tf2_attribution_suite/`
+- an evidence-backed explanation for:
+  - why the corrective transport default is currently preferred
+  - which factor should remain default
+  - what single next change is most promising to narrow the slow-PC gap
+
+Attribution outcome:
+
+- the completed attribution suite shows that the current empirical TF2 advantage is
+  explained primarily by cadence:
+  - moving away from `every_micro_step` toward `terminal_only` under matched budget
+    produces the largest stable gain
+- `local_only` supervision adds a smaller secondary gain once cadence is already
+  `terminal_only`
+- `every_2_micro_steps` and `after_warmup` each partially rescue the canonical
+  hypothesis preset, but neither beats `tf2_corrective_transport_default`
+- `micro_steps = 4` is preferred over `micro_steps = 2` in both the canonical and
+  corrective families
+- no tested attribution configuration narrows the slow-PC test gap below the current
+  corrective default
+- the narrow next move after attribution should therefore be:
+  - keep `tf2_corrective_transport_default`
+  - keep `feature_aware_tangents = false`
+  - keep `theta_update_budget = "matched"`
+  - test a slightly larger micro-step count before reopening broader TF2 semantics

@@ -1,0 +1,469 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_transport_attribution_suite",
+  "num_runs": 30,
+  "mean_std_val_accuracy_by_configuration": {
+    "canonical_base": {
+      "mean": 0.7975308641975308,
+      "std": 0.027439642927028204
+    },
+    "canonical_local_only": {
+      "mean": 0.7975308641975308,
+      "std": 0.029834681416282885
+    },
+    "canonical_every_2": {
+      "mean": 0.8123456790123457,
+      "std": 0.024255410746158675
+    },
+    "canonical_terminal_mixed": {
+      "mean": 0.8283950617283949,
+      "std": 0.029371301860173647
+    },
+    "canonical_after_warmup": {
+      "mean": 0.8061728395061728,
+      "std": 0.026420906863003336
+    },
+    "canonical_micro_2": {
+      "mean": 0.7716049382716049,
+      "std": 0.029834681416282885
+    },
+    "corrective_base": {
+      "mean": 0.8246913580246913,
+      "std": 0.028741843769932898
+    },
+    "corrective_every_2_local": {
+      "mean": 0.8123456790123457,
+      "std": 0.024255410746158675
+    },
+    "corrective_every_micro_local": {
+      "mean": 0.7975308641975308,
+      "std": 0.029834681416282885
+    },
+    "corrective_micro_2": {
+      "mean": 0.7753086419753087,
+      "std": 0.012221598687174868
+    }
+  },
+  "mean_std_test_accuracy_by_configuration": {
+    "canonical_base": {
+      "mean": 0.7950617283950617,
+      "std": 0.026420906863003298
+    },
+    "canonical_local_only": {
+      "mean": 0.8049382716049384,
+      "std": 0.016655231559545732
+    },
+    "canonical_every_2": {
+      "mean": 0.8111111111111112,
+      "std": 0.02180681695389595
+    },
+    "canonical_terminal_mixed": {
+      "mean": 0.8135802469135802,
+      "std": 0.035823748465547936
+    },
+    "canonical_after_warmup": {
+      "mean": 0.8012345679012345,
+      "std": 0.022290703808972568
+    },
+    "canonical_micro_2": {
+      "mean": 0.7777777777777778,
+      "std": 0.018885257457751038
+    },
+    "corrective_base": {
+      "mean": 0.8197530864197531,
+      "std": 0.027104319012469347
+    },
+    "corrective_every_2_local": {
+      "mean": 0.8098765432098766,
+      "std": 0.023489256284494386
+    },
+    "corrective_every_micro_local": {
+      "mean": 0.8049382716049384,
+      "std": 0.016655231559545732
+    },
+    "corrective_micro_2": {
+      "mean": 0.7592592592592592,
+      "std": 0.03271022543084386
+    }
+  },
+  "mean_gate_passing_epoch_count_by_configuration": {
+    "canonical_base": 2.6666666666666665,
+    "canonical_local_only": 3.0,
+    "canonical_every_2": 15.0,
+    "canonical_terminal_mixed": 27.666666666666668,
+    "canonical_after_warmup": 11.666666666666666,
+    "canonical_micro_2": 15.0,
+    "corrective_base": 27.666666666666668,
+    "corrective_every_2_local": 15.0,
+    "corrective_every_micro_local": 3.0,
+    "corrective_micro_2": 23.333333333333332
+  },
+  "pairwise_comparison_against_current_tf2_default": {
+    "canonical_base": {
+      "mean_val_accuracy_delta": -0.02716049382716046,
+      "mean_test_accuracy_delta": -0.024691358024691357,
+      "mean_gate_passing_epoch_count_delta": -25.0,
+      "mean_test_gap_to_slow_pc_delta": -0.024691358024691357
+    },
+    "canonical_local_only": {
+      "mean_val_accuracy_delta": -0.02716049382716046,
+      "mean_test_accuracy_delta": -0.014814814814814725,
+      "mean_gate_passing_epoch_count_delta": -24.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.014814814814814725
+    },
+    "canonical_every_2": {
+      "mean_val_accuracy_delta": -0.012345679012345623,
+      "mean_test_accuracy_delta": -0.008641975308641858,
+      "mean_gate_passing_epoch_count_delta": -12.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.008641975308641858
+    },
+    "canonical_terminal_mixed": {
+      "mean_val_accuracy_delta": 0.0037037037037036535,
+      "mean_test_accuracy_delta": -0.006172839506172867,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": -0.006172839506172867
+    },
+    "canonical_after_warmup": {
+      "mean_val_accuracy_delta": -0.01851851851851849,
+      "mean_test_accuracy_delta": -0.0185185185185186,
+      "mean_gate_passing_epoch_count_delta": -16.0,
+      "mean_test_gap_to_slow_pc_delta": -0.0185185185185186
+    },
+    "canonical_micro_2": {
+      "mean_val_accuracy_delta": -0.05308641975308637,
+      "mean_test_accuracy_delta": -0.041975308641975295,
+      "mean_gate_passing_epoch_count_delta": -12.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.041975308641975295
+    },
+    "corrective_base": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "corrective_every_2_local": {
+      "mean_val_accuracy_delta": -0.012345679012345623,
+      "mean_test_accuracy_delta": -0.00987654320987652,
+      "mean_gate_passing_epoch_count_delta": -12.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.00987654320987652
+    },
+    "corrective_every_micro_local": {
+      "mean_val_accuracy_delta": -0.02716049382716046,
+      "mean_test_accuracy_delta": -0.014814814814814725,
+      "mean_gate_passing_epoch_count_delta": -24.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.014814814814814725
+    },
+    "corrective_micro_2": {
+      "mean_val_accuracy_delta": -0.0493827160493826,
+      "mean_test_accuracy_delta": -0.060493827160493896,
+      "mean_gate_passing_epoch_count_delta": -4.333333333333336,
+      "mean_test_gap_to_slow_pc_delta": -0.060493827160493896
+    }
+  },
+  "gap_to_canonical_slow_pc_by_configuration": {
+    "canonical_base": {
+      "mean_test_accuracy_gap": -0.10123456790123464
+    },
+    "canonical_local_only": {
+      "mean_test_accuracy_gap": -0.09135802469135801
+    },
+    "canonical_every_2": {
+      "mean_test_accuracy_gap": -0.08518518518518514
+    },
+    "canonical_terminal_mixed": {
+      "mean_test_accuracy_gap": -0.08271604938271615
+    },
+    "canonical_after_warmup": {
+      "mean_test_accuracy_gap": -0.09506172839506188
+    },
+    "canonical_micro_2": {
+      "mean_test_accuracy_gap": -0.11851851851851858
+    },
+    "corrective_base": {
+      "mean_test_accuracy_gap": -0.07654320987654328
+    },
+    "corrective_every_2_local": {
+      "mean_test_accuracy_gap": -0.0864197530864198
+    },
+    "corrective_every_micro_local": {
+      "mean_test_accuracy_gap": -0.09135802469135801
+    },
+    "corrective_micro_2": {
+      "mean_test_accuracy_gap": -0.13703703703703718
+    }
+  },
+  "factor_deltas": {
+    "cadence_effect_mixed_micro_steps_4": {
+      "terminal_only_minus_every_micro_step_test_accuracy": 0.01851851851851849,
+      "every_2_micro_steps_minus_every_micro_step_test_accuracy": 0.0160493827160495
+    },
+    "cadence_effect_local_only_micro_steps_4": {
+      "terminal_only_minus_every_micro_step_test_accuracy": 0.014814814814814725,
+      "every_2_micro_steps_minus_every_micro_step_test_accuracy": 0.004938271604938205
+    },
+    "supervision_effect_terminal_only_micro_steps_4": {
+      "local_only_minus_mixed_test_accuracy": 0.006172839506172867
+    },
+    "supervision_effect_every_micro_step_micro_steps_4": {
+      "local_only_minus_mixed_test_accuracy": 0.009876543209876631
+    },
+    "interleaving_start_effect_every_micro_mixed_micro_steps_4": {
+      "after_warmup_minus_epoch_0_test_accuracy": 0.006172839506172756
+    },
+    "micro_steps_effect_every_micro_mixed": {
+      "micro_steps_4_minus_micro_steps_2_test_accuracy": 0.01728395061728394
+    },
+    "micro_steps_effect_terminal_only_local_only": {
+      "micro_steps_4_minus_micro_steps_2_test_accuracy": 0.060493827160493896
+    }
+  },
+  "candidate_summaries": {
+    "canonical_base": {
+      "candidate_key": "canonical_base",
+      "preset_name": "tf2_canonical",
+      "description": "tf2_canonical baseline",
+      "micro_steps": 4,
+      "incremental_weight_updates": true,
+      "supervision_policy": "mixed",
+      "theta_update_cadence": "every_micro_step",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.7975308641975308,
+      "std_val_accuracy": 0.027439642927028204,
+      "mean_test_accuracy": 0.7950617283950617,
+      "std_test_accuracy": 0.026420906863003298,
+      "mean_gate_passing_epoch_count": 2.6666666666666665,
+      "mean_val_transported_final_energy": 0.3171270310206769,
+      "mean_test_accuracy_gap_to_slow_pc": -0.10123456790123464
+    },
+    "canonical_local_only": {
+      "candidate_key": "canonical_local_only",
+      "preset_name": "tf2_canonical",
+      "description": "canonical with local_only supervision",
+      "micro_steps": 4,
+      "incremental_weight_updates": true,
+      "supervision_policy": "local_only",
+      "theta_update_cadence": "every_micro_step",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.7975308641975308,
+      "std_val_accuracy": 0.029834681416282885,
+      "mean_test_accuracy": 0.8049382716049384,
+      "std_test_accuracy": 0.016655231559545732,
+      "mean_gate_passing_epoch_count": 3.0,
+      "mean_val_transported_final_energy": 0.31859982738927667,
+      "mean_test_accuracy_gap_to_slow_pc": -0.09135802469135801
+    },
+    "canonical_every_2": {
+      "candidate_key": "canonical_every_2",
+      "preset_name": "tf2_canonical",
+      "description": "canonical with every_2_micro_steps cadence",
+      "micro_steps": 4,
+      "incremental_weight_updates": true,
+      "supervision_policy": "mixed",
+      "theta_update_cadence": "every_2_micro_steps",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.8123456790123457,
+      "std_val_accuracy": 0.024255410746158675,
+      "mean_test_accuracy": 0.8111111111111112,
+      "std_test_accuracy": 0.02180681695389595,
+      "mean_gate_passing_epoch_count": 15.0,
+      "mean_val_transported_final_energy": 0.3137412389597132,
+      "mean_test_accuracy_gap_to_slow_pc": -0.08518518518518514
+    },
+    "canonical_terminal_mixed": {
+      "candidate_key": "canonical_terminal_mixed",
+      "preset_name": "tf2_canonical",
+      "description": "canonical with terminal_only theta updates",
+      "micro_steps": 4,
+      "incremental_weight_updates": false,
+      "supervision_policy": "mixed",
+      "theta_update_cadence": "terminal_only",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.8283950617283949,
+      "std_val_accuracy": 0.029371301860173647,
+      "mean_test_accuracy": 0.8135802469135802,
+      "std_test_accuracy": 0.035823748465547936,
+      "mean_gate_passing_epoch_count": 27.666666666666668,
+      "mean_val_transported_final_energy": 0.3067142951193565,
+      "mean_test_accuracy_gap_to_slow_pc": -0.08271604938271615
+    },
+    "canonical_after_warmup": {
+      "candidate_key": "canonical_after_warmup",
+      "preset_name": "tf2_canonical",
+      "description": "canonical with delayed interleaving start",
+      "micro_steps": 4,
+      "incremental_weight_updates": true,
+      "supervision_policy": "mixed",
+      "theta_update_cadence": "every_micro_step",
+      "interleaving_start": "after_warmup",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.8061728395061728,
+      "std_val_accuracy": 0.026420906863003336,
+      "mean_test_accuracy": 0.8012345679012345,
+      "std_test_accuracy": 0.022290703808972568,
+      "mean_gate_passing_epoch_count": 11.666666666666666,
+      "mean_val_transported_final_energy": 0.3229526367619065,
+      "mean_test_accuracy_gap_to_slow_pc": -0.09506172839506188
+    },
+    "canonical_micro_2": {
+      "candidate_key": "canonical_micro_2",
+      "preset_name": "tf2_canonical",
+      "description": "canonical with micro_steps=2",
+      "micro_steps": 2,
+      "incremental_weight_updates": true,
+      "supervision_policy": "mixed",
+      "theta_update_cadence": "every_micro_step",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.7716049382716049,
+      "std_val_accuracy": 0.029834681416282885,
+      "mean_test_accuracy": 0.7777777777777778,
+      "std_test_accuracy": 0.018885257457751038,
+      "mean_gate_passing_epoch_count": 15.0,
+      "mean_val_transported_final_energy": 0.3349845799700199,
+      "mean_test_accuracy_gap_to_slow_pc": -0.11851851851851858
+    },
+    "corrective_base": {
+      "candidate_key": "corrective_base",
+      "preset_name": "tf2_corrective_transport_default",
+      "description": "tf2_corrective_transport_default baseline",
+      "micro_steps": 4,
+      "incremental_weight_updates": false,
+      "supervision_policy": "local_only",
+      "theta_update_cadence": "terminal_only",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.8246913580246913,
+      "std_val_accuracy": 0.028741843769932898,
+      "mean_test_accuracy": 0.8197530864197531,
+      "std_test_accuracy": 0.027104319012469347,
+      "mean_gate_passing_epoch_count": 27.666666666666668,
+      "mean_val_transported_final_energy": 0.3070547870776022,
+      "mean_test_accuracy_gap_to_slow_pc": -0.07654320987654328
+    },
+    "corrective_every_2_local": {
+      "candidate_key": "corrective_every_2_local",
+      "preset_name": "tf2_corrective_transport_default",
+      "description": "corrective family with every_2_micro_steps cadence",
+      "micro_steps": 4,
+      "incremental_weight_updates": true,
+      "supervision_policy": "local_only",
+      "theta_update_cadence": "every_2_micro_steps",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.8123456790123457,
+      "std_val_accuracy": 0.024255410746158675,
+      "mean_test_accuracy": 0.8098765432098766,
+      "std_test_accuracy": 0.023489256284494386,
+      "mean_gate_passing_epoch_count": 15.0,
+      "mean_val_transported_final_energy": 0.3143870655296836,
+      "mean_test_accuracy_gap_to_slow_pc": -0.0864197530864198
+    },
+    "corrective_every_micro_local": {
+      "candidate_key": "corrective_every_micro_local",
+      "preset_name": "tf2_corrective_transport_default",
+      "description": "corrective family with every_micro_step cadence",
+      "micro_steps": 4,
+      "incremental_weight_updates": true,
+      "supervision_policy": "local_only",
+      "theta_update_cadence": "every_micro_step",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.7975308641975308,
+      "std_val_accuracy": 0.029834681416282885,
+      "mean_test_accuracy": 0.8049382716049384,
+      "std_test_accuracy": 0.016655231559545732,
+      "mean_gate_passing_epoch_count": 3.0,
+      "mean_val_transported_final_energy": 0.31859982738927667,
+      "mean_test_accuracy_gap_to_slow_pc": -0.09135802469135801
+    },
+    "corrective_micro_2": {
+      "candidate_key": "corrective_micro_2",
+      "preset_name": "tf2_corrective_transport_default",
+      "description": "corrective family with micro_steps=2",
+      "micro_steps": 2,
+      "incremental_weight_updates": false,
+      "supervision_policy": "local_only",
+      "theta_update_cadence": "terminal_only",
+      "interleaving_start": "epoch_0",
+      "theta_update_budget": "matched",
+      "num_runs": 3,
+      "num_completed_runs": 3,
+      "num_failures": 0,
+      "nan_or_inf_failure_count": 0,
+      "mean_val_accuracy": 0.7753086419753087,
+      "std_val_accuracy": 0.012221598687174868,
+      "mean_test_accuracy": 0.7592592592592592,
+      "std_test_accuracy": 0.03271022543084386,
+      "mean_gate_passing_epoch_count": 23.333333333333332,
+      "mean_val_transported_final_energy": 0.33510810980048494,
+      "mean_test_accuracy_gap_to_slow_pc": -0.13703703703703718
+    }
+  },
+  "best_configuration_by_mean_test_accuracy": {
+    "candidate_key": "corrective_base",
+    "preset_name": "tf2_corrective_transport_default",
+    "description": "tf2_corrective_transport_default baseline",
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "interleaving_start": "epoch_0",
+    "theta_update_budget": "matched",
+    "num_runs": 3,
+    "num_completed_runs": 3,
+    "num_failures": 0,
+    "nan_or_inf_failure_count": 0,
+    "mean_val_accuracy": 0.8246913580246913,
+    "std_val_accuracy": 0.028741843769932898,
+    "mean_test_accuracy": 0.8197530864197531,
+    "std_test_accuracy": 0.027104319012469347,
+    "mean_gate_passing_epoch_count": 27.666666666666668,
+    "mean_val_transported_final_energy": 0.3070547870776022,
+    "mean_test_accuracy_gap_to_slow_pc": -0.07654320987654328
+  },
+  "what_explains_the_current_empirical_default": "current TF2 advantage is primarily explained by removing frequent in-loop theta updates and keeping terminal-only theta updates under matched budget; local_only supervision adds a smaller secondary gain once cadence is already terminal-only",
+  "what_should_remain_default": "keep tf2_corrective_transport_default as the empirical TF2 preset and keep tf2_canonical as a hypothesis-driven iFMPC candidate",
+  "smallest_promising_next_research_step": "increase micro_steps inside the current corrective-transport default while keeping terminal_only, local_only, matched budget, and the current selector fixed",
+  "whether_any_tested_configuration_narrows_the_slow_pc_gap_below_current_default": false,
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

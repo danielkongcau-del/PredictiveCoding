@@ -195,6 +195,11 @@ from .fmpc_tf2_identity_semantics_suite import (
     FMPCTF2IdentitySemanticsSuiteRunResult,
     run_fmpc_tf2_identity_semantics_suite,
 )
+from .fmpc_tf2_attribution_suite import (
+    FMPCTF2AttributionSuiteConfig,
+    FMPCTF2AttributionSuiteRunResult,
+    run_fmpc_tf2_attribution_suite,
+)
 from .fmpc_tf2b_interleaving_suite import (
     FMPCTF2BInterleavingSuiteConfig,
     FMPCTF2BInterleavingSuiteRunResult,
@@ -261,6 +266,8 @@ __all__ = [
     "FMPCTF2Config",
     "FMPCTF2BInterleavingSuiteConfig",
     "FMPCTF2BInterleavingSuiteRunResult",
+    "FMPCTF2AttributionSuiteConfig",
+    "FMPCTF2AttributionSuiteRunResult",
     "FMPCTF2DefaultAdoptionSuiteConfig",
     "FMPCTF2DefaultAdoptionSuiteRunResult",
     "FMPCTF2EpochSnapshot",
@@ -391,6 +398,7 @@ __all__ = [
     "run_fmpc_tf1_suite",
     "run_fmpc_tf2_experiment",
     "run_fmpc_tf2_default_adoption_suite",
+    "run_fmpc_tf2_attribution_suite",
     "run_fmpc_tf2b_interleaving_suite",
     "run_fmpc_tf2_suite",
     "build_rollout_auxiliary_batches",

@@ -23,7 +23,13 @@ Current status split:
 - the current canonical `digits_pc` baseline reflects a narrow stabilization sweep chosen by `val_metric`
 - This does not mean a real-data PC-vs-MLP comparison is already done
 - Phase 4 is sealed as the FMPC-v0 preparation checkpoint
-- the next active phase is the offline FMPC-v0 student stage, not a large immediate comparison or search push
+- teacher-based FMPC is now frozen as baseline / diagnostic reference
+- the current active FMPC line is the teacher-free:
+  - `Phase TF2 - iFMPC bridge stage`
+- the current empirical TF2 working default is:
+  - `tf2_corrective_transport_default`
+- current TF2 work should be read through `AGENTS.md`, `PLANS.md`, and `validation.md`;
+  this README status block may stay lighter than the active bridge-stage contract
 - The current Phase 2 freeze summary lives in `RESULTS.md`
 - Earlier train-only and train/eval-style Phase 2 conclusions are now treated as methodology-limited historical results
 - Current strongest Phase 2 conclusion comes from the best-known Phase 2 evidence chain:
