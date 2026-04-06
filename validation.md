@@ -449,6 +449,72 @@ The repository now has the minimum prerequisites for a cautious real-data compar
   - `outputs/digits_pc/`
   - `outputs/digits_baselines/`
 
+### Phase 4 preparation inference-baseline hardening
+
+Before any FMPC work, stronger standalone predictive-coding inference baselines should now be read under these rules:
+
+- `pc_euler` remains the authoritative default inference backend
+- `pc_rk2` is allowed only as an explicit stronger baseline variant, not a silent replacement
+- `fmpc` may exist only as a reserved backend label until its semantics are actually implemented
+- the predictive-coding energy and parameter-update math stay unchanged
+- validation should confirm:
+  - explicit `backend="pc_euler"` is backward-compatible with the prior default path
+  - `pc_rk2` preserves batch-first shapes and finite values
+  - real-data artifact summaries record the chosen inference backend explicitly
+  - standalone real-data PC summaries keep teacher-reference handling explicit:
+    - by default, teacher-reference metrics are disabled in standalone predict-mode evaluation summaries
+    - the disable reason should be written explicitly rather than inferred from trivial all-zero metrics
+    - meaningful FMPC teacher targets should come from dedicated train-mode teacher export paths instead
+
+Teacher-reference metric scope should remain explicit:
+
+- the current teacher is the slow iterative PC path under the current parameters
+- standalone predict-mode summaries should not pretend they provide a meaningful FMPC teacher comparison by default
+- where teacher-reference metrics are enabled in future dedicated protocols, the current update-direction cosine is the cosine between flattened terminal displacements from `z0`
+- it is not yet a per-step transport-path cosine and should not be described that way
+- if either terminal displacement has zero norm, the cosine should stay `null` rather than being fabricated
+
+### Phase 4 seal-off note
+
+Phase 4 is now sealed as an FMPC-v0 preparation checkpoint:
+
+- standalone predict-mode real-data summaries should keep `teacher_reference` disabled by default
+- meaningful FMPC teacher targets should be read only from the dedicated teacher-only preparation/export protocol
+- the next phase may assume this preparation scaffold exists and begin the offline FMPC-v0 student stage
+
+### Phase 5 offline FMPC-v0 student v0
+
+The initial Phase 5 slice should be read narrowly:
+
+- the teacher remains the frozen iterative PC path
+- teacher supervision must come from the dedicated Phase 4 teacher-only preparation/export protocol
+- the student is an offline endpoint transporter on `digits`
+- the student input is `concat([z0, target_onehot])`
+- the student target is `delta_z = z_star - z0`
+- the primary training loss is MSE on `delta_z`
+- validation selects the best checkpoint by held-out `state_rms_gap`
+- final test reporting happens once, after restoring the best validation-selected checkpoint
+
+Phase 5 v0 acceptance now also requires:
+
+- teacher artifacts are portable:
+  - new manifests use relative paths
+  - loaders stay backward-compatible with older absolute-path manifests where possible
+- student evaluation loads an exact serialized teacher checkpoint by default
+  - config-plus-seed teacher retraining is only an explicit legacy fallback
+- summaries report an explicit identity / zero-delta baseline:
+  - `z_hat_identity = z0`
+  - the student must be compared against that baseline on the same endpoint metrics
+- final validation is not based only on the old trivial 2-step smoke teacher
+  - a more meaningful digits teacher recipe must be used for acceptance-oriented checks
+
+This does not yet mean:
+
+- a full MeanFlow identity objective exists
+- trajectory supervision is active
+- refinement is part of the default training path
+- a formal real-data PC-vs-student comparison has been completed
+
 What is still missing before any stronger real-data claim:
 
 - matched tuning
@@ -457,15 +523,199 @@ What is still missing before any stronger real-data claim:
 - a second real dataset
 - any claim that the current standalone baseline numbers are a fair winner/loser result
 
-### Recommended next engineering step
+### Recommended current engineering step
 
-The next natural step is now a cautious Phase 4 kickoff on `digits`, defined as a **controlled real-data comparison protocol**, not a large immediate comparison push:
+The current engineering priority is to close Phase 5 v0 acceptance on `digits` before attempting a stronger FMPC variant:
 
 - keep explicit train/val/test separation
-- keep deterministic seed roles, including `batch_order_seed`
-- keep held-out test for final reporting
-- first define a narrow comparison protocol and artifact contract
-- delay matched tuning and broader comparison machinery until that narrow protocol is stable
+- keep the teacher frozen and sourced from dedicated preparation/export artifacts
+- require portable manifests plus exact teacher checkpoint loading
+- require an explicit identity baseline in student summaries
+- validate on a non-trivial canonical digits teacher before considering interval-conditioned or trajectory-aware extensions
+
+### Phase 5A student-signal rescue
+
+Before any FMPC-v1-style extension is considered, the repository should answer a narrower question:
+
+- under the fixed endpoint contract
+  - input: `concat([z0, target_onehot])`
+  - target: `delta_z = z_star - z0`
+- does any simple learned student beat the explicit identity / zero-delta baseline on the canonical non-trivial `digits` teacher-
+
+The required Phase 5A comparison set is:
+
+- `identity`
+- `class_mean_delta`
+- `ridge`
+- `mlp_standardized`
+
+Phase 5A validation should require:
+
+- all families use the same batch-first `float64` endpoint contract
+- train-stat normalization is estimated only from the train split
+- final metrics are computed after inverse-transform in the original hidden-state space
+- the comparison artifacts make it obvious whether a learned family beats identity on:
+  - validation `state_rms_gap`
+  - held-out test `state_rms_gap`
+
+Phase 5A should be considered passed only if at least one learned family:
+
+- `ridge` or `mlp_standardized`
+
+beats the identity baseline on both validation and held-out test `state_rms_gap`.
+
+If every learned family still loses to identity, the next allowed escalation remains narrow:
+
+- endpoint-only feature augmentation
+
+This still does not authorize:
+
+- trajectory-aware supervision
+- MeanFlow / JVP objectives
+- refinement
+- core iterative `fmpc` backend integration
+
+### Phase 5B offline interval-conditioned transporter
+
+Phase 5B should also be read narrowly:
+
+- the teacher remains the frozen iterative PC path
+- supervision must come from trajectory-enabled teacher artifacts produced by the dedicated preparation/export protocol
+- the default interval student input is `concat([z_s, target_onehot, tau_s, tau_t])`
+- the default interval target is `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- rollout transport remains explicit:
+  - `z_hat_t = z_hat_s + (tau_t - tau_s) * u_hat`
+- no MeanFlow identity objective, JVP objective, refinement, or online joint training is introduced in this phase
+
+The required Phase 5B comparison set is:
+
+- `identity`
+- carried-forward Phase 5A endpoint ridge baseline
+- `interval_ridge`
+- `interval_mlp_standardized`
+
+Phase 5B validation should require:
+
+- trajectory artifacts make `K`, trajectory tensor shape, exact checkpoint reference, and `tau_k = k / K` explicit
+- the default interval-pair training policy is not dominated by short intervals
+- final rollout evaluation is performed on explicit teacher-step-aligned schedules:
+  - `1-step`
+  - `2-step`
+  - `3-step`
+- rollout is self-fed between knots rather than teacher-forced
+
+Phase 5B should be considered passed only if at least one learned interval family:
+
+- `interval_ridge` or `interval_mlp_standardized`
+
+beats the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap` under an explicit rollout schedule.
+
+If every learned interval family still loses to the carried-forward endpoint ridge baseline, the next allowed rescue remains below MeanFlow / JVP:
+
+- endpoint-free interval feature augmentation only
+
+This still does not authorize:
+
+- trajectory-aware supervision
+- MeanFlow identity objectives
+- JVP objectives
+- refinement
+- core iterative `fmpc` backend integration
+
+### Phase 5B rollout-aware rescue
+
+The first rescue step for a failing Phase 5B run should remain conservative:
+
+- keep the original interval target as the primary objective
+- add only a small rollout-aware auxiliary term
+- keep that auxiliary term teacher-supervised and explicit
+- stay below MeanFlow / JVP / refinement
+
+The intended rescue semantics are:
+
+- train interval students primarily on:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- for the standardized MLP family only, optionally add auxiliary supervision on fixed self-fed rollout schedules:
+  - `2-step`
+  - `3-step`
+- start from teacher `z_0`
+- feed each next knot with the student-predicted state, not the teacher state
+- penalize:
+  - intermediate knot state gaps versus teacher knot states
+  - final endpoint gap versus teacher `z_K`
+
+Validation should keep the rescue explicit:
+
+- primary interval loss and rollout-aware auxiliary losses must be reported separately
+- the final Phase 5B decision must still use the unchanged gate:
+  - a learned interval family
+  - under a true multi-step rollout schedule
+  - must beat the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+- passing the rescue does not by itself authorize MeanFlow / JVP; it only justifies opening that next exploration stage
+
+### Phase 5B.2 gradient-augmented interval rescue
+
+If the rollout-aware rescue still fails narrowly, the next allowed Phase 5B rescue remains below MeanFlow / JVP:
+
+- add frozen-teacher current-state dynamical features at `z_s`
+- keep the interval target teacher-supervised
+- keep rollout evaluation on the same explicit `1-step / 2-step / 3-step` teacher-aligned schedules
+
+The intended semantics are:
+
+- compute features only from the current state `z_s` plus the frozen teacher and current sample input/target
+- do not leak:
+  - `z_t`
+  - `z_star`
+  - future teacher states
+- the first narrow feature pack should be:
+  - `g_s`
+  - `e_out_s`
+  - `F_s`
+- where:
+  - `g_s` is the frozen teacher's one-step hidden-state inference field at `z_s`, expressed in normalized-time units compatible with `u_star`
+  - `e_out_s = target_onehot - y_hat_s`
+  - `F_s` is a per-sample scalar teacher energy at `z_s`
+
+The first learned rescue families should be:
+
+- `interval_ridge_aug`
+- `interval_ridge_residual`
+- optional `interval_mlp_aug`
+
+Residual-target semantics must remain explicit:
+
+- direct target:
+  - `u_star = (z_t - z_s) / (tau_t - tau_s)`
+- residual target:
+  - `u_res = u_star - g_s`
+- reconstructed prediction:
+  - `u_hat = g_s + u_res_hat`
+
+Training-distribution rescue must also stay explicit:
+
+- keep the original span-balanced interval sampler available
+- add a knot-focused training option that upweights the exact spans used by the acceptance schedules:
+  - `2-step`
+  - `3-step`
+- summaries must make it obvious whether a candidate used:
+  - the baseline span-balanced distribution
+  - or the knot-focused rescue mix
+
+The Phase 5B pass/fail gate remains unchanged:
+
+- portable exact-checkpoint-backed teacher artifacts
+- a learned interval family under a true multi-step schedule
+  - `2-step` or `3-step`
+  must beat the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+- the winner's test `energy_gap_to_teacher` must remain within the existing tolerance relative to the carried-forward endpoint ridge baseline
+
+Passing Phase 5B.2 still does not imply:
+
+- MeanFlow identity training has been validated
+- JVP objectives have been validated
+- refinement is required
+- online PC-weight training has been justified
 
 Important caveats that should remain explicit:
 
@@ -522,3 +772,355 @@ Phase 0 is complete only when all of the following are true:
 - a toy experiment runs end-to-end
 - inference energy is observable and behaves sanely
 - the codebase is ready for cleanup and expansion in Phase 1
+
+---
+
+## Phase 5B seal-off note
+
+Phase 5B is now considered passed and sealed.
+
+The fresh final validation established all of the following at once:
+
+- portable, relative-path trajectory artifacts
+- exact checkpoint reload with numerically negligible teacher-state reproduction error
+- a learned interval family under a true multi-step rollout schedule
+- `interval_ridge_residual` under `3-step` rollout beating the carried-forward Phase 5A endpoint ridge baseline on both validation and held-out test `final_state_rms_gap`
+- no disqualifying energy-gap regression relative to the carried-forward endpoint ridge baseline
+
+This seal-off does not imply that MeanFlow identity or JVP objectives have already been validated; it only justifies opening that next stage.
+
+## Phase 6A validation entry
+
+The next stage should be read narrowly as:
+
+- MeanFlow-style
+- teacher-supervised
+- average-velocity
+- still offline at first
+
+The Phase 6A contract should remain conservative:
+
+- keep the frozen iterative PC teacher from Phase 5B.2
+- keep portable relative-path teacher artifacts and exact checkpoint reload
+- keep the current-state feature machinery from Phase 5B.2
+- add a manual NumPy JVP for the explicit MLP family only
+- the initial Phase 6A version treated teacher-derived context features as frozen side information in the JVP path
+- the Phase 6A.1 rescue should instead make the teacher-derived current-state feature block feature-aware:
+  - compute directional derivatives of current-state teacher features along `g_s`
+  - inject those derivatives into the model input tangent
+  - explicitly include `d g_s / d tau_s` in the residual MeanFlow identity
+- if the feature-aware rescue still fails but the diagnostic linear residual family becomes
+  the fresh true multi-step winner, the next allowed rescue remains inside Phase 6A and becomes
+  an explicit two-branch residual decomposition:
+  - `u_hat = u_local + u_corr`
+  - `u_local` is a simple local-dynamics branch anchored to:
+    - `g_s`
+    - `e_out_s`
+    - `F_s`
+  - `u_corr` is a neural transport-correction branch using the richer augmented input
+  - the MeanFlow identity must still apply to the full reconstructed `u_hat`
+- if the two-branch neural family is still conceptually right but loses to the carried-forward
+  feature-aware linear winner, the next allowed rescue remains inside Phase 6A and becomes
+  warm-started two-branch residual training:
+  - warm-start `u_local` from the carried-forward Phase 6A.1 linear residual winner on the same
+    fresh exact-checkpoint-backed teacher artifact
+  - keep `u_corr` zero-initialized or near-zero-initialized
+  - train in explicit stages:
+    - Stage A: correction-only warmup with the local branch frozen
+    - Stage B: joint hybrid fine-tuning
+  - keep the full-`u_hat` teacher anchor
+  - keep the full-`u_hat` feature-aware MeanFlow identity
+  - keep `d g_s / d tau_s` active inside the residual identity
+- keep direct teacher average-velocity supervision as the anchor objective
+- when stabilizing MeanFlow training inside Phase 6A, only allow:
+  - a teacher-only warmup
+  - a simple ramp to nonzero identity weight
+  - a late fixed hybrid stage
+  - and, if needed, a reduced identity scope on the exact `2-step` / `3-step` acceptance segments
+
+The required comparison set should include:
+
+- `identity`
+- carried-forward Phase 5A endpoint ridge baseline
+- carried-forward Phase 5B.2 winner:
+  - `interval_ridge_residual`
+  - `3-step`
+- `teacher_only_mlp_aug`
+- `meanflow_mlp_aug`
+- `meanflow_mlp_residual`
+- `meanflow_linear_residual`
+- `meanflow_twobranch_residual`
+- `meanflow_twobranch_residual_warmstart`
+
+The required rollout schedules remain:
+
+- `1-step`
+- `2-step`
+- `3-step`
+
+Phase 6A should be considered passed only if all of the following hold under one fresh final validation run:
+
+- teacher artifacts remain portable and exact-checkpoint-backed
+- at least one MeanFlow neural family:
+  - `meanflow_mlp_aug`
+  - or `meanflow_mlp_residual`
+  wins under a true multi-step rollout:
+  - `2-step`
+  - or `3-step`
+- that winning candidate beats the sealed Phase 5B.2 winner on both:
+  - validation `final_state_rms_gap`
+  - held-out test `final_state_rms_gap`
+- the winner's held-out test `energy_gap_to_teacher` is not materially worse than the sealed Phase 5B.2 baseline
+
+Important boundary:
+
+- `teacher_only_mlp_aug` is diagnostic only
+- `meanflow_linear_residual` is also diagnostic only
+- even if it wins, that does not count as a Phase 6A pass
+- under Phase 6A.2, `meanflow_twobranch_residual` is the first neural rescue family that may
+  count as a passing candidate if it clears the same held-out competitiveness gate
+- under Phase 6A.3, `meanflow_twobranch_residual_warmstart` is the next allowed neural rescue
+  family; passing still requires a neural winner rather than a carried-forward linear diagnostic
+- a rescue inside Phase 6A may change the curriculum or identity scope, but it must remain:
+  - teacher-supervised
+  - MeanFlow/JVP-based
+  - below any teacher-reduction or teacher-free stage
+
+## Phase 6A seal-off note
+
+Phase 6A is now sealed as **not passed**.
+
+The final state of evidence is:
+
+- Phase 6A.1 showed that feature-aware MeanFlow identity is directionally correct
+- the carried-forward linear residual diagnostic became the fresh true multi-step winner
+- this implies the core identity repair was meaningful
+- but no neural MeanFlow family cleared the required competitiveness gate against the sealed
+  Phase 5B.2 winner
+- the warm-started Phase 6A.3 two-branch neural rescue remained unstable and failed the fresh
+  multi-step acceptance run
+
+Therefore:
+
+- Phase 6A artifacts remain readable and portable
+- Phase 6A findings remain diagnostically useful
+- but Phase 6A does **not** count as a passed stage
+
+## Phase TF1 validation entry
+
+The next stage is now opened as:
+
+- `Phase TF1 — Teacher-free FMPC v1`
+
+This opening should be interpreted conservatively:
+
+- it is a new project decision, not evidence that Phase 6A passed
+- the sealed Phase 5B.2 winner remains the strongest passed transport baseline
+- any Phase TF1 result should still be compared back to:
+  - the carried-forward Phase 5A endpoint ridge baseline
+  - the sealed Phase 5B.2 winner
+  - and, where relevant, the best diagnostic families from Phase 6A
+
+## Phase TF1 validation contract
+
+This section defines the first teacher-free FMPC validation rule set.
+
+Baseline positioning:
+
+- teacher-based FMPC remains frozen baseline / diagnostic reference
+- Phase TF1 is the new main line
+- TF1 validation must not depend on teacher trajectories, teacher fixed points,
+  or teacher-generated regression targets
+
+Checkpoint selection:
+
+- selection uses validation only
+- the concrete selection field is:
+  - `selection_metric = "val_transported_final_energy"`
+- selector policy is now an explicit part of the TF1 experiment contract
+- supported checkpoint selectors are:
+  - `energy_only`
+  - `val_accuracy_only`
+  - `gate_constrained_accuracy_then_energy`
+  - `gate_constrained_accuracy_then_val_accuracy`
+- TF1 summaries should also expose:
+  - `selection_metric_source = "val_metric"`
+  - `report_metric_source = "test_metric"`
+  - `checkpoint_selector`
+  - `selected_epoch_passes_gate`
+  - `gate_passing_epoch_count`
+  - `selector_fallback_used`
+  - `selected_epoch_selection_reason`
+- test is report-only and must not participate in checkpoint selection or
+  pass/fail gating
+
+Apples-to-apples transport baselines:
+
+- every TF1 validation run must report:
+  - `identity/no-transport`
+  - `local_field_only`
+- these comparisons must use:
+  - identical rollout knots
+  - identical `transport_steps`
+  - identical `theta` snapshot
+  - identical split / batch
+  - identical energy metric
+
+First-pass TF1 gate:
+
+- the run is fully teacher-free:
+  - no teacher manifests
+  - no teacher checkpoints
+  - no teacher trajectories
+  - no teacher-generated regression targets
+- focused tests and regressions must pass
+- the canonical digits TF1 run must produce complete artifacts with no NaN / Inf
+- the selected TF1 checkpoint must satisfy on **validation**:
+  - `val_transported_final_energy < val_identity_final_energy`
+  - `val_transported_final_energy <= val_local_field_only_final_energy`
+  - `val_accuracy > majority baseline`
+
+Report-only expectations:
+
+- final test metrics are still required in `summary.json`
+- test results are interpretive and diagnostic only for the first TF1 stage
+- canonical TF1 experiment labels should distinguish:
+  - `mechanism_smoke`
+  - `baseline_comparable`
+  - `baseline_working_default`
+- `baseline_working_default` is the current evidence-driven but still
+  provisional working TF1 preset; it should not be read as a sealed stage pass
+
+## Phase TF1 seal-off note
+
+Phase TF1 is now sealed as the first completed teacher-free FMPC stage.
+
+Sealed TF1 conclusion:
+
+- `baseline_working_default` is the correct sealed TF1 working preset
+- it clearly improves over `baseline_comparable`
+- it remains the main TF1 preset after selector/default-adoption/external-comparison
+  validation
+- however, the gap to the canonical slow-PC digits baseline remains materially open
+- the narrow TF1 accuracy-tuning pass did not materially narrow that gap
+
+Therefore:
+
+- TF1 is sealed as a successful teacher-free mainline establishment stage
+- TF1 is **not** sealed as an accuracy-competitive replacement for the canonical
+  slow-PC digits baseline
+
+## Phase TF2 validation entry
+
+The next active stage is now:
+
+- `Phase TF2 - iFMPC bridge stage`
+
+Interpretation:
+
+- TF2 builds on the sealed TF1 working preset and selector contract
+- TF2 remains fully teacher-free
+- TF2 must not depend on JPC runtime availability
+- TF2 must be judged against both:
+  - the sealed TF1 working default
+  - the canonical slow-PC digits baseline
+
+## Phase TF2 validation contract
+
+Bridge-stage scope:
+
+- keep the current layered PC energy substrate
+- keep the baseline local parameter-update rule
+- add micro-step interleaving during training only
+- keep slow-PC predict/eval unchanged
+- treat -PC ideas as diagnostics/substrate desiderata only in TF2A
+
+Selector semantics carried forward:
+
+- validation remains the only source of checkpoint selection
+- test remains report-only
+- TF2 keeps the selector policy logic already established in TF1
+- the canonical selector remains:
+  - `gate_constrained_accuracy_then_val_accuracy`
+
+Matched-budget requirement:
+
+- TF2 must make `theta_update_budget` explicit in config and summary
+- the canonical default is:
+  - `theta_update_budget = "matched"`
+- under matched-budget incremental updates:
+  - `theta_micro_lr = base_theta_lr / micro_steps`
+  - `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+
+Must-have acceptance:
+
+- fully teacher-free
+- no JPC runtime dependency
+- forward-init diagnostics are present in TF2 artifacts
+- immediate theta updates happen each micro-step when enabled
+- mixed-policy supervision works when enabled
+- validation-only selector semantics are preserved
+- no NaN / Inf appear in the canonical run or narrow suite
+
+Target acceptance:
+
+- improve mean validation accuracy over the sealed TF1 working default
+- improve mean test accuracy over the sealed TF1 working default
+- reduce the gap to the canonical slow-PC digits baseline
+
+Required TF2A suite grid:
+
+- `incremental_weight_updates in {false, true}`
+- `supervision_policy in {"local_only", "mixed"}`
+- `micro_steps in {2, 4}`
+- `seeds in {0, 1, 2}`
+
+Keep fixed in the suite:
+
+- `family_lineage = tf1_mlp_aug`
+- `feature_aware_tangents = false`
+- `identity_loss_weight = 0.2`
+- `hybrid_ramp_epochs = 10`
+- `bootstrap_substeps = 4`
+- `checkpoint_selector = "gate_constrained_accuracy_then_val_accuracy"`
+- `theta_update_budget = "matched"`
+
+Current TF2 adoption interpretation:
+
+- `tf2_canonical` remains the hypothesis-driven iFMPC candidate
+- `tf2_corrective_transport_default` is the current empirical working default
+- JPC remains reference-only and must not be a runtime dependency for TF2
+- the completed JPC probe currently supports prioritizing incremental scheduling
+  over substrate scaling
+- muPC-style scaling remains a future candidate mechanism, not the current TF2
+  mainline
+- current TF2 evidence supports corrective transport more strongly than full
+  incremental iFMPC / interleaved parameter-learning
+
+Required reporting:
+
+- per-run outputs must include:
+  - `incremental_weight_updates`
+  - `supervision_policy`
+  - `micro_steps`
+  - `theta_update_budget`
+  - `theta_micro_lr`
+  - `theta_micro_bias_lr`
+  - `val_accuracy`
+  - `test_accuracy`
+  - `gate_passing_epoch_count`
+  - `val_transported_final_energy`
+  - `selected_epoch`
+  - `selected_epoch_passes_gate`
+  - `selector_fallback_used`
+  - `forward_init_stability_metrics`
+- aggregate summary must include:
+  - mean/std validation accuracy by config
+  - mean/std test accuracy by config
+  - mean gate-passing epoch count by config
+  - pairwise comparison against the sealed TF1 working default
+  - pairwise gap to the canonical slow-PC digits baseline
+  - whether mixed-policy supervision helps
+  - whether incremental theta updates help
+  - whether matched-budget TF2 narrows the slow-PC gap materially
+  - recommended next stage

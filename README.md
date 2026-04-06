@@ -22,7 +22,8 @@ Current status split:
 - Phase 3 is complete as a **standalone real-data baseline phase** on `sklearn.datasets.load_digits`
 - the current canonical `digits_pc` baseline reflects a narrow stabilization sweep chosen by `val_metric`
 - This does not mean a real-data PC-vs-MLP comparison is already done
-- the next active phase is a controlled real-data comparison protocol on `digits`, not a large immediate comparison push
+- Phase 4 is sealed as the FMPC-v0 preparation checkpoint
+- the next active phase is the offline FMPC-v0 student stage, not a large immediate comparison or search push
 - The current Phase 2 freeze summary lives in `RESULTS.md`
 - Earlier train-only and train/eval-style Phase 2 conclusions are now treated as methodology-limited historical results
 - Current strongest Phase 2 conclusion comes from the best-known Phase 2 evidence chain:
@@ -278,6 +279,31 @@ Phase 3 currently adds two **standalone digits baselines** with aligned protocol
 & 'D:\Anaconda\envs\pc\python.exe' experiments/digits_pc.py
 & 'D:\Anaconda\envs\pc\python.exe' experiments/summarize_digits_baselines.py
 ```
+
+Phase 4 preparation also adds one harder standalone real-data PC benchmark option:
+
+```powershell
+& 'D:\Anaconda\envs\pc\python.exe' experiments/fashion_mnist_pc.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/digits_pc_inference_baselines.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/fmpc_v0_prepare.py
+```
+
+Notes:
+
+- this uses `sklearn.datasets.fetch_openml("Fashion-MNIST")` through the repository dataset loader
+- it is a standalone benchmark option for infrastructure preparation, not a formal comparison pipeline
+- `experiments/digits_pc_inference_baselines.py` is a standalone inference-baseline hardening study:
+  - it compares explicit `euler` and `rk2` predictive-coding inference methods under small fixed step budgets
+  - it does not change the predictive-coding learning rule
+  - it is not a formal real-data PC-vs-MLP comparison
+- `experiments/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
+  - it trains a standard real-data PC teacher under the current baseline path
+  - it exports `z0` / `z_star` teacher targets plus optional trajectories
+  - it records future student transport/refinement settings only as placeholders
+  - it does not implement a transporter and does not write any FMPC result
+- standalone `digits_pc` summaries keep `teacher_reference` explicit but disable it by default:
+  - predict-mode candidate-vs-teacher gaps are often trivial under forward initialization
+  - meaningful FMPC teacher targets should instead come from `experiments/fmpc_v0_prepare.py`
 
 These write:
 

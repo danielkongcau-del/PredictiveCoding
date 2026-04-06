@@ -375,3 +375,228 @@ Likely future extensions include:
 - alternative inference integrators
 
 Those are not part of the baseline unless they are explicitly added in later versions of the spec.
+
+---
+
+## 16. Teacher-free FMPC v1 addendum
+
+This addendum defines the first teacher-free FMPC transport contract without changing
+the baseline predictive-coding energy, hidden-state gradient, or local parameter-update
+mathematics.
+
+### 16.1 Scope
+
+Teacher-free FMPC v1 applies only to the existing layered predictive-coding substrate.
+
+- it does not define a general PCG substrate
+- it does not redefine predict-mode inference
+- it does not replace the baseline iterative PC algorithm outside the explicit
+  teacher-free transport experiment path
+
+### 16.2 Training context and hidden latent
+
+Teacher-free FMPC v1 uses the supervised training context:
+
+- `c = (x, y)`
+- `x^0 = x` remains clamped
+- `x^L = y` remains clamped
+
+The flattened hidden latent is:
+
+- `z = flatten(x^1, ..., x^(L-1))`
+
+This uses the repository's existing hidden-state flattening contract:
+
+- `x^0` is never included in `z`
+- `x^L` is never included in `z`
+- only free hidden layers `x^1 .. x^(L-1)` are concatenated
+
+### 16.3 Local energy substrate and instantaneous flow
+
+Teacher-free FMPC v1 reuses the baseline predictive-coding energy:
+
+- `E_theta(z; c) := F(states(z; x, y), theta)`
+
+where:
+
+- `states(z; x, y)` reconstructs the full state list from the flattened hidden state
+  and the clamped training context
+- `F` is exactly the baseline squared-error predictive-coding energy already defined
+  in this spec
+
+The instantaneous hidden-state flow is:
+
+- `g_theta(z; c) = -∇_z E_theta(z; c)`
+
+No teacher approximation is assumed in this definition.
+
+### 16.4 Average-velocity model and time contract
+
+Teacher-free FMPC v1 introduces an average-velocity model:
+
+- `u_psi(z_t, r, t; c)`
+
+with:
+
+- `t = current time`
+- `r = remaining horizon`
+- `0 <= t < 1`
+- `0 < r <= 1 - t`
+
+At rollout knot `k`, we write:
+
+- `t_k` for the current time
+- `r_k = 1 - t_k` for the remaining horizon
+- `Δt_k = t_{k+1} - t_k`
+
+`u_psi(z_k, r_k, t_k; c) is interpreted as an estimate of the average velocity over the remaining horizon [t_k, 1], and the update z_{k+1} = z_k + Δt_k * u_psi(...) is a piecewise-constant coarse transport approximation, not a redefinition of the instantaneous flow.`
+
+The coarse transport update is:
+
+- `z_{k+1} = z_k + Δt_k * u_psi(z_k, r_k, t_k; c)`
+
+### 16.5 Fixed-terminal-time MeanFlow identity direction
+
+Teacher-free FMPC v1 uses the fixed-terminal-time direction:
+
+- `(dt, dr) = (+1, -1)`
+
+This means the total derivative is taken along trajectories that keep:
+
+- `t + r = const`
+
+equivalently, along a direction that advances the current time while preserving the
+same terminal time.
+
+The MeanFlow-style identity target is therefore based on:
+
+- `u(z_t, r, t; c) ≈ g_theta(z_t; c) + r * D_T u(z_t, r, t; c)`
+
+where `D_T` denotes the total derivative in the fixed-terminal-time direction.
+
+### 16.6 Parameter updates after transport
+
+Teacher-free FMPC v1 changes only the hidden-state transport path used during training.
+
+After transport produces a terminal hidden state `z_hat`, the repository still applies
+the same local parameter-update rule already defined for the baseline:
+
+1. reconstruct the full state list from `z_hat` and the clamped training context
+2. recompute cache terms
+3. compute baseline local parameter gradients
+4. apply the same explicit parameter descent update
+
+This addendum therefore does **not** redefine:
+
+- the baseline energy
+- the baseline hidden-state gradient
+- the baseline local parameter-update equations
+
+
+## 17. TF2 iFMPC bridge-stage addendum
+
+This addendum defines an experimental **training-time scheduling extension** on top of
+Phase TF1 without changing:
+
+- the baseline predictive-coding energy
+- the baseline hidden-state gradient definition
+- the baseline local parameter-update equations
+- the slow iterative predict/eval path
+
+### 17.1 Scope
+
+TF2 remains teacher-free and layered-PC-specific.
+
+- it does not introduce a new substrate class
+- it does not depend on JPC runtime
+- it does not redefine predict-mode inference
+- it does not add a new scaling mechanism in this first bridge pass
+
+### 17.2 Micro-step schedule
+
+Let `H = micro_steps` and define uniform rollout knots:
+
+- `t_k = k / H`
+- `-t = 1 / H`
+- `r_k = 1 - t_k`
+
+TF2 maintains two training-time hidden-state streams:
+
+- `z_on_k`: learned on-policy hidden state
+- `z_lf_k`: detached local-field-only shadow state
+
+The state advances remain:
+
+- `z_on_{k+1} = z_on_k + -t * u_psi(z_on_k, r_k, t_k; c)`
+- `z_lf_{k+1} = z_lf_k + -t * g_theta(z_lf_k; c)`
+
+where:
+
+- `u_psi` is the same teacher-free average-velocity model from the TF1 addendum
+- `g_theta(z; c) = --_z E_theta(z; c)` is unchanged
+
+### 17.3 Frozen-within-micro-step semantics
+
+Within a single micro-step `k`, all supervision targets and state advances must be
+computed under one frozen parameter snapshot `(theta_k, psi_k)`.
+
+This includes:
+
+- `u_boot`
+- `u_id`
+- learned transport outputs
+- `z_on_{k+1}`
+- `z_lf_{k+1}`
+
+Only after these quantities have been computed may parameter updates be applied.
+
+The required order is:
+
+1. compute supervision targets and learned transport under frozen `(theta_k, psi_k)`
+2. advance `z_on` and `z_lf`
+3. apply one immediate local `theta` update when enabled
+4. apply one `psi` update
+
+### 17.4 Mixed-policy teacher-free supervision
+
+TF2 uses one of:
+
+- `supervision_policy = "local_only"`
+- `supervision_policy = "mixed"`
+
+For `local_only`, `psi` is supervised only on detached `z_lf_k`.
+
+For `mixed`, `psi` is supervised on the concatenation of detached:
+
+- `z_lf_k`
+- `z_on_k`
+
+Targets remain the same TF1 teacher-free targets:
+
+- `u_boot` from local self-bootstrap
+- `u_id = g_t + r_k * D_T u_psi(...)`
+- `L = L_boot + lambda_id * L_id`
+
+### 17.5 Matched theta-update budget
+
+TF2 introduces an explicit scheduling control:
+
+- `theta_update_budget in {"matched", "unmatched"}`
+
+If `incremental_weight_updates = true` and the budget is `matched`, the per-micro-step
+parameter learning rates are:
+
+- `theta_micro_lr = base_theta_lr / micro_steps`
+- `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+
+If `incremental_weight_updates = true` and the budget is `unmatched`, then:
+
+- `theta_micro_lr = base_theta_lr`
+- `theta_micro_bias_lr = base_theta_bias_lr`
+
+If `incremental_weight_updates = false`, no theta updates occur inside the micro-step
+loop and one terminal theta update is applied after the final micro-step using the
+existing base learning rates.
+
+This addendum changes only the **training-time schedule**. It does not redefine the
+baseline local parameter-update rule itself.

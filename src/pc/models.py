@@ -1,10 +1,20 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 import numpy as np
 
-from .inference import InferenceResult, build_clamped_mask, initialize_states, run_inference
+from .inference import (
+    InferenceBackendName,
+    InferenceResult,
+    TeacherInferenceExport,
+    build_clamped_mask,
+    initialize_states,
+    resolve_inference_backend_name,
+    run_inference,
+    run_teacher_inference_export,
+)
 from .layers import PCLayerParams
 from .training import TrainBatchResult, fit as fit_model, train_batch as train_single_batch
 
@@ -19,6 +29,8 @@ class PCNetwork:
     eta_b: float | None = None
     train_steps: int = 20
     eval_steps: int | None = None
+    inference_backend: InferenceBackendName | str = "pc_euler"
+    inference_method: Literal["euler", "rk2"] | None = None
     state_init: str = "forward"
 
     def __post_init__(self) -> None:
@@ -32,6 +44,20 @@ class PCNetwork:
             self.eval_steps = self.train_steps
         if self.eval_steps < 0:
             raise ValueError("eval_steps must be non-negative.")
+        if self.inference_method is not None and self.inference_backend == "pc_euler":
+            resolved_backend = resolve_inference_backend_name(method=self.inference_method)
+        else:
+            resolved_backend = resolve_inference_backend_name(
+                self.inference_backend,
+                method=self.inference_method,
+            )
+        self.inference_backend = resolved_backend
+        if resolved_backend == "pc_euler":
+            self.inference_method = "euler"
+        elif resolved_backend == "pc_rk2":
+            self.inference_method = "rk2"
+        else:
+            self.inference_method = None
         if self.eta_b is None:
             self.eta_b = self.eta_w
         if self.eta_b <= 0.0:
@@ -62,6 +88,7 @@ class PCNetwork:
             clamped_mask,
             eta_x=self.eta_x,
             steps=steps,
+            backend=self.inference_backend,
             record_trace=record_trace,
         )
 
@@ -75,9 +102,40 @@ class PCNetwork:
         x: np.ndarray,
         y: np.ndarray,
         compute_post_update_energy: bool = False,
+        return_teacher_export: bool = False,
+        record_teacher_trajectory: bool = False,
     ) -> TrainBatchResult:
         """Train on one batch with x shaped (B, d_0) and y shaped (B, d_L)."""
-        return train_single_batch(self, x, y, compute_post_update_energy=compute_post_update_energy)
+        return train_single_batch(
+            self,
+            x,
+            y,
+            compute_post_update_energy=compute_post_update_energy,
+            return_teacher_export=return_teacher_export,
+            record_teacher_trajectory=record_teacher_trajectory,
+        )
+
+    def export_teacher_targets(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        *,
+        record_trace: bool = True,
+        record_trajectory: bool = False,
+    ) -> TeacherInferenceExport:
+        """Run the current slow teacher on a training batch and export hidden-state targets."""
+        return run_teacher_inference_export(
+            self.layers,
+            np.asarray(x, dtype=np.float64),
+            y=np.asarray(y, dtype=np.float64),
+            init=self.state_init,
+            mode="train",
+            eta_x=self.eta_x,
+            steps=self.train_steps,
+            backend=self.inference_backend,
+            record_trace=record_trace,
+            record_trajectory=record_trajectory,
+        )
 
     def fit(
         self,
