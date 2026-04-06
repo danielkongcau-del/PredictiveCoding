@@ -205,6 +205,11 @@ from .fmpc_tf2_microstep_horizon_suite import (
     FMPCTF2MicrostepHorizonSuiteRunResult,
     run_fmpc_tf2_microstep_horizon_suite,
 )
+from .fmpc_tf2_curriculum_suite import (
+    FMPCTF2CurriculumSuiteConfig,
+    FMPCTF2CurriculumSuiteRunResult,
+    run_fmpc_tf2_curriculum_suite,
+)
 from .fmpc_tf2b_interleaving_suite import (
     FMPCTF2BInterleavingSuiteConfig,
     FMPCTF2BInterleavingSuiteRunResult,

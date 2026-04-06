@@ -1141,6 +1141,23 @@ Current TF2 adoption interpretation:
   - `micro_steps = 4` should remain the corrective-transport default
   - the next single narrow move should stay inside the current corrective default
     and test transport quality rather than more micro-step compute
+- the completed corrective curriculum suite now indicates:
+  - no tested bootstrap↔identity curriculum materially improves the current
+    fixed-4-step corrective default
+  - the best non-default setting is:
+    - `identity_loss_weight = 0.1`
+    - `warmup_epochs = 5`
+    - `hybrid_ramp_epochs = 10`
+  - but its mean validation-selected test gain is only about `+0.0015`, with no
+    mean validation gain
+  - no stage-1 axis winner clears the materiality threshold for opening the
+    staged combined-candidate pass
+  - `tf2_corrective_transport_default` should therefore keep:
+    - `identity_loss_weight = 0.2`
+    - `warmup_epochs = 5`
+    - `hybrid_ramp_epochs = 10`
+  - the next single narrow move should now target bootstrap-target fidelity
+    rather than more curriculum tuning
 
 Required reporting:
 

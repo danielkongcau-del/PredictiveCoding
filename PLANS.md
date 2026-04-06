@@ -2311,3 +2311,111 @@ Outcome:
   - keep `micro_steps = 4`
   - test one transport-quality change inside the current corrective default
     rather than adding more inner-loop micro-step compute
+
+### TF2 bootstrap-identity curriculum pass
+
+Goal:
+
+- determine whether a better curriculum between the existing bootstrap target and
+  the existing identity target improves the current fixed-4-step corrective
+  default without adding extra micro-step compute
+
+Scope:
+
+- do not change TF2 core math
+- do not reopen:
+  - identity semantics
+  - cadence semantics
+  - supervision semantics
+  - micro-step count
+- keep fixed:
+  - `preset = tf2_corrective_transport_default`
+  - `use_teacher_free_features = true`
+  - `feature_aware_tangents = false`
+  - `micro_steps = 4`
+  - `incremental_weight_updates = false`
+  - `supervision_policy = "local_only"`
+  - `theta_update_cadence = "terminal_only"`
+  - `theta_update_budget = "matched"`
+  - `bootstrap_integrator = "rk2"`
+  - `bootstrap_substeps = 4`
+  - current selector policy
+- vary only:
+  - `identity_loss_weight`
+  - `warmup_epochs`
+  - `hybrid_ramp_epochs`
+
+Files to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/__init__.py`
+- `src/pc/fmpc_tf2_curriculum_suite.py`
+- `experiments/fmpc_tf2_curriculum_suite.py`
+- `tests/test_fmpc_tf2_curriculum_suite_smoke.py`
+
+Staged / pruned search rule:
+
+- Stage 1: run only the single-axis sweeps around the current default:
+  - identity sweep:
+    - `(0.1, 5, 10)`
+    - `(0.2, 5, 10)`  current default
+    - `(0.4, 5, 10)`
+  - warmup sweep:
+    - `(0.2, 0, 10)`
+    - `(0.2, 5, 10)`  current default
+    - `(0.2, 10, 10)`
+  - ramp sweep:
+    - `(0.2, 5, 0)`
+    - `(0.2, 5, 10)`  current default
+    - `(0.2, 5, 20)`
+    - `(0.2, 5, 40)`
+- Stage 2:
+  - identify the single best non-default setting on each axis
+  - only if one or more axis winners beats the current default by a material
+    margin in mean validation-selected test accuracy, run exactly one combined
+    candidate that merges those winning axis values
+  - otherwise stop after Stage 1
+
+Materiality threshold for opening Stage 2:
+
+- mean test-accuracy delta vs the current default `>= 0.005`
+- mean validation-accuracy delta vs the current default `>= 0.0`
+- no increase in failure / NaN incidence
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_curriculum_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Expected deliverables:
+
+- one narrow suite artifact set under:
+  - `outputs/fmpc_tf2_curriculum_suite/`
+- a decision on whether:
+  - better bootstrap↔identity curriculum improves fixed-4-step transport quality
+  - the corrective default should change
+  - or the next move should narrow to bootstrap-target fidelity rather than
+    curriculum
+
+Outcome:
+
+- the completed curriculum suite shows:
+  - no instability or NaN/Inf incidence across the tested settings
+  - no stage-1 axis winner clears the materiality threshold for opening stage 2
+  - the best non-default setting is:
+    - `identity_loss_weight = 0.1`
+    - `warmup_epochs = 5`
+    - `hybrid_ramp_epochs = 10`
+  - but its mean test gain over the current default is only about `+0.0015`,
+    with no mean validation gain
+- the current evidence therefore says:
+  - no tested bootstrap↔identity curriculum materially improves the current
+    fixed-4-step corrective default
+  - `tf2_corrective_transport_default` should keep:
+    - `identity_loss_weight = 0.2`
+    - `warmup_epochs = 5`
+    - `hybrid_ramp_epochs = 10`
+- the next narrow TF2 move should now be:
+  - keep the current curriculum
+  - test bootstrap-target fidelity rather than more curriculum tuning
