@@ -99,7 +99,6 @@ predictive-coding/
   PLANS.md
   spec_math.md
   validation.md
-  pyproject.toml          # or requirements.txt + setup.cfg later
   src/
     pc/
       __init__.py
