@@ -474,6 +474,30 @@ The MeanFlow-style identity target is therefore based on:
 
 where `D_T` denotes the total derivative in the fixed-terminal-time direction.
 
+### 16.5.1 Feature-dependent psi inputs and truncated identity semantics
+
+When `u_psi` consumes appended current-state teacher-free features such as:
+
+- `g_t`
+- `e_out_t`
+- `F_t`
+
+the full fixed-terminal-time identity requires chain-rule directional-derivative
+terms through those appended feature blocks.
+
+The repository therefore distinguishes two identity-tangent semantics:
+
+- `feature_aware_tangents = true`
+  - inject finite-difference directional derivatives of the appended feature block
+    along `g_t`
+  - this is the repository's explicit approximation to the full total derivative of
+    the augmented input contract
+- `feature_aware_tangents = false`
+  - treat the appended feature block as frozen side information inside the JVP path
+  - the resulting identity target is an explicit **truncated** fixed-terminal-time
+    identity approximation, not the full total derivative through the augmented
+    feature-dependent input
+
 ### 16.6 Parameter updates after transport
 
 Teacher-free FMPC v1 changes only the hidden-state transport path used during training.
@@ -577,6 +601,16 @@ Targets remain the same TF1 teacher-free targets:
 - `u_id = g_t + r_k * D_T u_psi(...)`
 - `L = L_boot + lambda_id * L_id`
 
+If TF2 uses appended teacher-free current-state features in the psi input, then the
+same two identity-tangent semantics from Section 16.5.1 apply:
+
+- `feature_aware_tangents = true`
+  - approximate the full augmented-input total derivative by injecting the feature
+    directional-derivative block
+- `feature_aware_tangents = false`
+  - use the explicit truncated identity approximation that freezes the appended
+    feature block inside the JVP path
+
 ### 17.5 Matched theta-update budget
 
 TF2 introduces an explicit scheduling control:
@@ -584,10 +618,18 @@ TF2 introduces an explicit scheduling control:
 - `theta_update_budget in {"matched", "unmatched"}`
 
 If `incremental_weight_updates = true` and the budget is `matched`, the per-micro-step
-parameter learning rates are:
+parameter learning rates are normalized by the number of theta updates that are
+actually applied under the active cadence for that batch:
 
-- `theta_micro_lr = base_theta_lr / micro_steps`
-- `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+- `theta_micro_lr = base_theta_lr / N_theta`
+- `theta_micro_bias_lr = base_theta_bias_lr / N_theta`
+
+where `N_theta` is:
+
+- `1` for `terminal_only`
+- `micro_steps` for `every_micro_step`
+- the number of due theta-update events inside the micro-step loop for
+  `every_2_micro_steps`
 
 If `incremental_weight_updates = true` and the budget is `unmatched`, then:
 

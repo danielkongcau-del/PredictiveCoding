@@ -1,10 +1,18 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import numpy as np
 
 from .fmpc_meanflow_jvp import MeanFlowMLPJVPResult, forward_mlp_with_jvp
 from .fmpc_tf1_flow import FMPCTF1StateFeatures, FMPCTF1StateFeatureTangents
 from .mlp_baseline import MLPNetwork
+
+TF1IdentityTangentMode = Literal[
+    "base_total_derivative",
+    "feature_aware_total_derivative_approx",
+    "feature_frozen_truncated_identity_approx",
+]
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -12,6 +20,20 @@ def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
     if array_float.ndim != 2:
         raise ValueError(f"{name} must be shaped (batch, features).")
     return array_float
+
+
+def resolve_tf1_identity_tangent_mode(
+    *,
+    use_teacher_free_features: bool,
+    feature_aware_tangents: bool,
+) -> TF1IdentityTangentMode:
+    """Return the repository's explicit TF1/TF2 identity-tangent semantics label."""
+
+    if not use_teacher_free_features:
+        return "base_total_derivative"
+    if feature_aware_tangents:
+        return "feature_aware_total_derivative_approx"
+    return "feature_frozen_truncated_identity_approx"
 
 
 def build_tf1_input(
@@ -55,7 +77,14 @@ def build_tf1_input_tangent(
     d_t: float = 1.0,
     d_r: float = -1.0,
 ) -> np.ndarray:
-    """Build the TF1 fixed-terminal-time input tangent."""
+    """Build the TF1 fixed-terminal-time input tangent.
+
+    When `use_teacher_free_features=True` and `feature_aware_tangents=False`, the
+    appended feature block is treated as frozen side information and receives a zero
+    tangent. The resulting JVP therefore corresponds to the repository's explicit
+    truncated identity approximation rather than the full augmented-input total
+    derivative.
+    """
 
     g_array = _as_batch_first("g_t", g_t)
     batch_size = int(g_array.shape[0])

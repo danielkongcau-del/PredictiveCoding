@@ -65,6 +65,7 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert summary["supervision_policy"] == "mixed"
     assert summary["micro_steps"] == 2
     assert summary["theta_update_budget"] == "matched"
+    assert summary["identity_tangent_mode"] == "feature_frozen_truncated_identity_approx"
     assert summary["checkpoint_selector"] == "gate_constrained_accuracy_then_val_accuracy"
     assert summary["selection_metric_source"] == "val_metric"
     assert summary["report_metric_source"] == "test_metric"
@@ -82,6 +83,7 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert summary["validation_gate"]["test_is_report_only"] is True
     assert len(epoch_rows) == config["run"]["epochs"]
     assert config["preset_name"] == "tf2_canonical"
+    assert config["transport"]["identity_tangent_mode"] == "feature_frozen_truncated_identity_approx"
     assert "val_transported_final_energy" in epoch_rows[0]
     assert "val_local_field_only_final_energy" in epoch_rows[0]
 

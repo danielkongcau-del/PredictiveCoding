@@ -70,9 +70,9 @@ def test_tf2_micro_step_order_respects_frozen_snapshot_sequence() -> None:
     assert _any_psi_weight_changed(psi_before, psi)
 
 
-def test_tf2_matched_budget_scales_micro_lr_and_terminal_theta_update_still_happens() -> None:
+def test_tf2_matched_budget_scales_by_applied_theta_updates_and_terminal_theta_update_still_happens() -> None:
     split = load_digits_split(split_seed=1)
-    config = build_tf2_canonical_config(
+    terminal_config = build_tf2_canonical_config(
         layer_dims=(64, 16, 10),
         batch_size=8,
         micro_steps=4,
@@ -81,21 +81,61 @@ def test_tf2_matched_budget_scales_micro_lr_and_terminal_theta_update_still_happ
         model_init_seed=1,
         psi_init_seed=1,
     )
-    model = _make_pc_model(config)
-    psi = _make_psi_network(config)
+    model = _make_pc_model(terminal_config)
+    psi = _make_psi_network(terminal_config)
     theta_before = _weights_snapshot(model)
-    micro_eta_w, micro_eta_b = _theta_micro_learning_rates(config)
+    micro_eta_w, micro_eta_b = _theta_micro_learning_rates(terminal_config, "terminal_only")
 
-    assert micro_eta_w == config.eta_w / config.micro_steps
-    assert micro_eta_b == (config.eta_b if config.eta_b is not None else config.eta_w) / config.micro_steps
+    assert micro_eta_w == terminal_config.eta_w
+    assert micro_eta_b == (terminal_config.eta_b if terminal_config.eta_b is not None else terminal_config.eta_w)
 
     _train_one_batch_tf2(
         model,
         psi,
-        config,
+        terminal_config,
         split.x_train[:8],
         split.y_train[:8],
         lambda_id=0.0,
     )
 
     assert _any_weight_changed(theta_before, model)
+
+    every_two_config = build_tf2_canonical_config(
+        layer_dims=(64, 16, 10),
+        batch_size=8,
+        micro_steps=4,
+        incremental_weight_updates=True,
+        theta_update_budget="matched",
+        theta_update_cadence="every_2_micro_steps",
+        model_init_seed=1,
+        psi_init_seed=1,
+    )
+    every_two_eta_w, every_two_eta_b = _theta_micro_learning_rates(
+        every_two_config,
+        "every_2_micro_steps",
+    )
+    assert every_two_eta_w == every_two_config.eta_w / 2.0
+    assert every_two_eta_b == (
+        (every_two_config.eta_b if every_two_config.eta_b is not None else every_two_config.eta_w)
+        / 2.0
+    )
+
+    every_step_config = build_tf2_canonical_config(
+        layer_dims=(64, 16, 10),
+        batch_size=8,
+        micro_steps=4,
+        incremental_weight_updates=True,
+        theta_update_budget="matched",
+        theta_update_cadence="every_micro_step",
+        model_init_seed=1,
+        psi_init_seed=1,
+    )
+    every_step_eta_w, every_step_eta_b = _theta_micro_learning_rates(
+        every_step_config,
+        "every_micro_step",
+    )
+    assert every_step_eta_w == every_step_config.eta_w / every_step_config.micro_steps
+    assert every_step_eta_b == (
+        (every_step_config.eta_b if every_step_config.eta_b is not None else every_step_config.eta_w)
+        / every_step_config.micro_steps
+    )

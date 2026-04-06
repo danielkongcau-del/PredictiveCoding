@@ -1049,8 +1049,12 @@ Matched-budget requirement:
 - the canonical default is:
   - `theta_update_budget = "matched"`
 - under matched-budget incremental updates:
-  - `theta_micro_lr = base_theta_lr / micro_steps`
-  - `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+  - normalize by the number of theta updates actually applied under the active
+    cadence for that batch
+  - `terminal_only` therefore keeps the terminal theta update at the base learning
+    rate
+  - `every_micro_step` divides by `micro_steps`
+  - `every_2_micro_steps` divides by the number of due in-loop theta updates
 
 Must-have acceptance:
 
@@ -1096,6 +1100,9 @@ Current TF2 adoption interpretation:
   mainline
 - current TF2 evidence supports corrective transport more strongly than full
   incremental iFMPC / interleaved parameter-learning
+- with `use_teacher_free_features = true` and `feature_aware_tangents = false`, the
+  current mainline uses an explicit truncated identity approximation that freezes the
+  appended feature block inside the JVP path
 
 Required reporting:
 

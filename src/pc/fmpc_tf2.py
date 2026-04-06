@@ -36,6 +36,7 @@ from .fmpc_tf1_jvp import (
     build_tf1_input,
     build_tf1_input_tangent,
     forward_tf1_mlp_with_jvp,
+    resolve_tf1_identity_tangent_mode,
 )
 from .inference import build_clamped_mask, compute_state_gradients, initialize_states
 from .layers import init_mlp_layers
@@ -335,10 +336,24 @@ def _resolved_eta_b(config: FMPCTF2Config) -> float:
     return float(config.eta_b if config.eta_b is not None else config.eta_w)
 
 
-def _theta_micro_learning_rates(config: FMPCTF2Config) -> tuple[float, float]:
+def _theta_update_count_for_cadence(
+    micro_steps: int,
+    cadence: TF2ThetaUpdateCadence,
+) -> int:
+    if cadence == "terminal_only":
+        return 1
+    return int(sum(_theta_update_due_for_step(cadence, step_index) for step_index in range(micro_steps)))
+
+
+def _theta_micro_learning_rates(
+    config: FMPCTF2Config,
+    cadence: TF2ThetaUpdateCadence | None = None,
+) -> tuple[float, float]:
     base_eta_b = _resolved_eta_b(config)
+    resolved_cadence = _resolved_theta_update_cadence(config) if cadence is None else cadence
     if config.theta_update_budget == "matched":
-        scale = float(config.micro_steps)
+        update_count = _theta_update_count_for_cadence(int(config.micro_steps), resolved_cadence)
+        scale = float(update_count) if update_count > 0 else 1.0
         return float(config.eta_w / scale), float(base_eta_b / scale)
     return float(config.eta_w), float(base_eta_b)
 
@@ -353,6 +368,13 @@ def _resolved_onpolicy_mix_ratio(config: FMPCTF2Config) -> float:
     if config.onpolicy_mix_ratio is not None:
         return float(config.onpolicy_mix_ratio)
     return 0.0 if config.supervision_policy == "local_only" else 0.5
+
+
+def _identity_tangent_mode(config: FMPCTF2Config) -> str:
+    return resolve_tf1_identity_tangent_mode(
+        use_teacher_free_features=config.use_teacher_free_features,
+        feature_aware_tangents=config.feature_aware_tangents,
+    )
 
 
 def _active_theta_update_cadence(
@@ -809,8 +831,8 @@ def _train_one_batch_tf2(
     knots = np.linspace(0.0, 1.0, int(config.micro_steps) + 1, dtype=np.float64)
     z_on = context.z0.copy()
     z_lf = context.z0.copy()
-    micro_eta_w, micro_eta_b = _theta_micro_learning_rates(config)
     active_cadence = _active_theta_update_cadence(config, epoch_index)
+    micro_eta_w, micro_eta_b = _theta_micro_learning_rates(config, active_cadence)
     active_mix_ratio = _active_onpolicy_mix_ratio(config, epoch_index)
     total_losses: list[float] = []
     boot_losses: list[float] = []
@@ -933,7 +955,11 @@ def _evaluate_slow_pc_accuracy(
 
 
 def _config_payload(config: FMPCTF2Config) -> dict[str, Any]:
-    theta_micro_lr, theta_micro_bias_lr = _theta_micro_learning_rates(config)
+    resolved_theta_update_cadence = _resolved_theta_update_cadence(config)
+    theta_micro_lr, theta_micro_bias_lr = _theta_micro_learning_rates(
+        config,
+        resolved_theta_update_cadence,
+    )
     return {
         "phase": "Phase TF2",
         "stage": "ifmpc_bridge_stage",
@@ -961,12 +987,13 @@ def _config_payload(config: FMPCTF2Config) -> dict[str, Any]:
             "family_lineage": config.family_lineage,
             "use_teacher_free_features": bool(config.use_teacher_free_features),
             "feature_aware_tangents": bool(config.feature_aware_tangents),
+            "identity_tangent_mode": _identity_tangent_mode(config),
             "tangent_epsilon": float(config.tangent_epsilon),
             "micro_steps": int(config.micro_steps),
             "incremental_weight_updates": bool(config.incremental_weight_updates),
             "supervision_policy": config.supervision_policy,
             "theta_update_budget": config.theta_update_budget,
-            "theta_update_cadence": _resolved_theta_update_cadence(config),
+            "theta_update_cadence": resolved_theta_update_cadence,
             "onpolicy_mix_ratio": float(_resolved_onpolicy_mix_ratio(config)),
             "interleaving_start": config.interleaving_start,
             "theta_micro_lr": float(theta_micro_lr),
@@ -1133,8 +1160,11 @@ def run_fmpc_tf2_experiment(config: FMPCTF2Config) -> FMPCTF2RunResult:
     test_energy_delta_vs_local_field_only = (
         test_transport.transported_final_energy - test_transport.local_field_only_final_energy
     )
-    theta_micro_lr, theta_micro_bias_lr = _theta_micro_learning_rates(config)
     resolved_theta_update_cadence = _resolved_theta_update_cadence(config)
+    theta_micro_lr, theta_micro_bias_lr = _theta_micro_learning_rates(
+        config,
+        resolved_theta_update_cadence,
+    )
     resolved_onpolicy_mix_ratio = _resolved_onpolicy_mix_ratio(config)
 
     summary = {
@@ -1147,6 +1177,7 @@ def run_fmpc_tf2_experiment(config: FMPCTF2Config) -> FMPCTF2RunResult:
         "family_lineage": config.family_lineage,
         "use_teacher_free_features": bool(config.use_teacher_free_features),
         "feature_aware_tangents": bool(config.feature_aware_tangents),
+        "identity_tangent_mode": _identity_tangent_mode(config),
         "tangent_epsilon": float(config.tangent_epsilon),
         "incremental_weight_updates": bool(config.incremental_weight_updates),
         "supervision_policy": config.supervision_policy,

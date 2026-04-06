@@ -1825,6 +1825,12 @@ TF2 supervision targets remain exactly TF1-style teacher-free targets:
 - `u_id = g_t + r_k * D_T u_psi(...)`
 - loss remains:
   - `L = L_boot + lambda_id * L_id`
+- when `use_teacher_free_features = true`:
+  - `feature_aware_tangents = true` means the identity JVP includes chain-rule
+    directional-derivative terms through the appended feature block
+  - `feature_aware_tangents = false` remains allowed, but it must be interpreted as
+    a truncated feature-frozen identity approximation rather than the full augmented
+    total derivative
 
 Matched theta-update budget:
 
@@ -1832,8 +1838,12 @@ Matched theta-update budget:
 - canonical default:
   - `theta_update_budget = "matched"`
 - if `incremental_weight_updates = true` and budget is `matched`:
-  - `theta_micro_lr = base_theta_lr / micro_steps`
-  - `theta_micro_bias_lr = base_theta_bias_lr / micro_steps`
+  - normalize by the number of theta updates that are actually applied under the
+    active cadence for that batch
+  - `terminal_only` therefore uses the base learning rate on the one terminal theta
+    update
+  - `every_micro_step` divides by `micro_steps`
+  - `every_2_micro_steps` divides by the number of due in-loop theta updates
 - if `incremental_weight_updates = true` and budget is `unmatched`:
   - `theta_micro_lr = base_theta_lr`
   - `theta_micro_bias_lr = base_theta_bias_lr`
@@ -1986,3 +1996,64 @@ Interpretation:
 - if TF2 improves weakly and the diagnostics continue to point to poor conditioning,
   the next stage should become `strengthen substrate scaling later`
 - only a clearly stronger bridge result should justify `move toward generalized TF3 later`
+
+### TF2 audit patch — EF alignment
+
+Goal:
+
+- audit the active TF2 bridge code against the current repository spec before making
+  any further EF-style transport changes
+- keep the patch minimal, explicit, and reversible
+
+Audit targets:
+
+1. verify the MeanFlow-style identity / JVP semantics when
+   `use_teacher_free_features = true`
+   - determine whether appended feature-dependent psi inputs require chain-rule
+     directional-derivative terms in the identity target
+   - if `feature_aware_tangents = false` remains allowed, fence that path explicitly
+     as a truncated identity approximation rather than silently treating it as the
+     full total derivative
+2. verify the semantics of `theta_update_budget = "matched"` under:
+   - `terminal_only`
+   - `every_2_micro_steps`
+   - `every_micro_step`
+   so that matched budget is defined against the actual number of theta updates that
+   are applied under the active cadence
+3. strengthen the focused TF2 tests so the intended semantics are enforced
+
+Files to touch:
+
+- `PLANS.md`
+- `spec_math.md`
+- `validation.md`
+- `src/pc/fmpc_tf1_jvp.py`
+- `src/pc/fmpc_tf2.py`
+- `tests/test_fmpc_tf2_dynamics.py`
+- `tests/test_fmpc_tf2_targets.py`
+- optionally `tests/test_fmpc_tf2_smoke.py` if new provenance/reporting fields are
+  added
+
+Planned minimal changes:
+
+- make the TF2/spec wording explicit about the difference between:
+  - feature-aware total-derivative identity semantics
+  - truncated feature-frozen identity semantics
+- correct matched-budget theta micro learning rates so they normalize by the number
+  of theta updates implied by the active cadence rather than always by
+  `micro_steps`
+- add focused tests that would have failed before the patch
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_dynamics.py`
+- `tests/test_fmpc_tf2_targets.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Assumptions:
+
+- TF2 remains teacher-free and NumPy-only
+- this patch does not introduce muPC-style scaling, JPC runtime dependence, or a new
+  selector policy
+- if the current default `feature_aware_tangents = false` is kept, it must be
+  documented as an explicit approximation rather than an unqualified `D_T`
