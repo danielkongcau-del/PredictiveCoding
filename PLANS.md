@@ -2654,4 +2654,5 @@ Outcome:
 - latest local diagnostic chain has since advanced beyond that point through:
   psi-expressivity -> downstream coupling -> lag1 target snapshot -> batch-frozen
   target/state cache -> open-vs-closed-loop trajectory coupling -> partial-open-loop
-  handoff localization -> mirrored handoff asymmetry
+  handoff localization -> mirrored handoff asymmetry -> terminal-step
+  supervision-bundle split
