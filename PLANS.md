@@ -1920,11 +1920,16 @@ Current preset interpretation:
   - `supervision_policy = "mixed"`
   - `theta_update_budget = "matched"`
   - `feature_aware_tangents = false`
-- add `tf2_corrective_transport_default` as the empirical bridge winner
+- keep `tf2_corrective_transport_default` as the historical plain corrective working reference
   - `micro_steps = 4`
   - `incremental_weight_updates = false`
   - `supervision_policy = "local_only"`
   - `theta_update_budget = "matched"`
+- adopt `tf2_corrective_transport_terminal_angleclip_default` as the current TF2 experimental default on `main`
+  - `psi_family = "residualized_local_field"`
+  - `time_encoding_variant = "poly_rt2"`
+  - `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm"`
+  - `terminal_local_field_angle_clip_degrees = 30`
 - do not silently replace the hypothesis-driven preset with the empirical preset
 
 JPC status after the completed probe:
@@ -2662,4 +2667,7 @@ Outcome:
   terminal local-field stabilizer adoption/selection in the true closed-loop regime
 - package-level mainline confirmation has now concluded:
   - `tf2_corrective_transport_default` remains the historical corrective working reference
-  - `tf2_corrective_transport_terminal_angleclip_default` is the next TF2 experimental default on `main`
+  - `tf2_corrective_transport_terminal_angleclip_default` is the currently adopted TF2 experimental default on `main`
+  - closure path:
+    terminal-step direction anchoring -> true closed-loop trust-region rescue ->
+    adoption/selection -> mainline confirmation

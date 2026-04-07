@@ -702,3 +702,19 @@ The transported terminal state used for the immediate terminal theta update is t
 This is a **training-time stabilization option** only. It preserves the TF2 teacher-free
 target construction and keeps the historical corrective preset available as an
 unstabilized reference.
+
+Repository-level preset note:
+
+- the named preset `tf2_corrective_transport_default` remains the historical plain
+  corrective-family reference
+- the named preset `tf2_corrective_transport_terminal_angleclip_default` denotes the
+  corrective-family package:
+  - `psi_family = "residualized_local_field"`
+  - `time_encoding_variant = "poly_rt2"`
+  - `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm"`
+  - `terminal_local_field_angle_clip_degrees = 30`
+
+This preset naming is an **implementation / validation contract**, not a new
+mathematical family. The normative mathematical change in this section is only the
+availability of the optional terminal local-field direction intervention during
+training.

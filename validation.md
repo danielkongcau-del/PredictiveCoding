@@ -1092,7 +1092,8 @@ Keep fixed in the suite:
 Current TF2 adoption interpretation:
 
 - `tf2_canonical` remains the hypothesis-driven iFMPC candidate
-- `tf2_corrective_transport_default` is the current empirical working default
+- `tf2_corrective_transport_default` remains the historical plain corrective working reference
+- `tf2_corrective_transport_terminal_angleclip_default` is the currently adopted TF2 experimental default on `main`
 - JPC remains reference-only and must not be a runtime dependency for TF2
 - the completed JPC probe currently supports prioritizing incremental scheduling
   over substrate scaling
@@ -1215,7 +1216,10 @@ Current TF2 adoption interpretation:
   terminal local-field stabilizer adoption/selection in the true closed-loop regime
 - package-level mainline confirmation has now concluded:
   - `tf2_corrective_transport_default` remains the historical corrective working reference
-  - `tf2_corrective_transport_terminal_angleclip_default` is the next TF2 experimental default on `main`
+  - `tf2_corrective_transport_terminal_angleclip_default` is the currently adopted TF2 experimental default on `main`
+  - closure path:
+    terminal-step direction anchoring -> true closed-loop trust-region rescue ->
+    adoption/selection -> mainline confirmation
 
 Required reporting:
 

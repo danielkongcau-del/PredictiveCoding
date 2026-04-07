@@ -28,7 +28,7 @@ Current status split:
   - `Phase TF2 - iFMPC bridge stage`
 - the historical corrective TF2 working reference remains:
   - `tf2_corrective_transport_default`
-- the next TF2 experimental default on `main` is:
+- the currently adopted TF2 experimental default on `main` is:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current TF2 work should be read through `AGENTS.md`, `PLANS.md`, and `validation.md`;
   this README status block may stay lighter than the active bridge-stage contract
