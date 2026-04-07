@@ -47,13 +47,22 @@ from .training import apply_parameter_updates, parameter_gradients
 from .utils import ensure_finite_array, set_seed
 
 TF2FamilyLineage = Literal["tf1_mlp_aug"]
-TF2PresetName = Literal["tf2_canonical", "tf2_corrective_transport_default"]
+TF2PresetName = Literal[
+    "tf2_canonical",
+    "tf2_corrective_transport_default",
+    "tf2_corrective_transport_terminal_angleclip_default",
+]
 TF2SupervisionPolicy = Literal["local_only", "mixed"]
 TF2ThetaUpdateBudget = Literal["matched", "unmatched"]
 TF2ThetaUpdateCadence = Literal["terminal_only", "every_2_micro_steps", "every_micro_step"]
 TF2InterleavingStart = Literal["epoch_0", "after_warmup"]
 TF2PsiFamily = Literal["baseline_plain", "residualized_local_field"]
 TF2TimeEncodingVariant = Literal["raw", "poly_rt2"]
+TF2TerminalLocalFieldDirectionIntervention = Literal[
+    "none",
+    "local_field_direction_angle_clip_keep_live_norm",
+    "local_field_direction_hard_replace_keep_live_norm",
+]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 
@@ -102,6 +111,8 @@ class FMPCTF2Config:
     psi_family: TF2PsiFamily = "baseline_plain"
     psi_hidden_dims: tuple[int, ...] = (128,)
     time_encoding_variant: TF2TimeEncodingVariant = "raw"
+    terminal_local_field_direction_intervention: TF2TerminalLocalFieldDirectionIntervention = "none"
+    terminal_local_field_angle_clip_degrees: float = 30.0
     psi_weight_scale: float = 0.05
     psi_eta_w: float = 0.01
     psi_eta_b: float | None = 0.01
@@ -122,9 +133,15 @@ class FMPCTF2Config:
             raise ValueError("TF2A currently supports only the tf1_mlp_aug lineage.")
         if not self.use_teacher_free_features:
             raise ValueError("TF2A requires use_teacher_free_features=True.")
-        if self.preset_name not in {None, "tf2_canonical", "tf2_corrective_transport_default"}:
+        if self.preset_name not in {
+            None,
+            "tf2_canonical",
+            "tf2_corrective_transport_default",
+            "tf2_corrective_transport_terminal_angleclip_default",
+        }:
             raise ValueError(
-                "preset_name must be None, 'tf2_canonical', or 'tf2_corrective_transport_default'."
+                "preset_name must be None, 'tf2_canonical', 'tf2_corrective_transport_default', "
+                "or 'tf2_corrective_transport_terminal_angleclip_default'."
             )
         if self.micro_steps <= 0:
             raise ValueError("micro_steps must be positive.")
@@ -158,6 +175,21 @@ class FMPCTF2Config:
             raise ValueError("Unsupported psi_family.")
         if self.time_encoding_variant not in {"raw", "poly_rt2"}:
             raise ValueError("Unsupported time_encoding_variant.")
+        if self.terminal_local_field_direction_intervention not in {
+            "none",
+            "local_field_direction_angle_clip_keep_live_norm",
+            "local_field_direction_hard_replace_keep_live_norm",
+        }:
+            raise ValueError("Unsupported terminal_local_field_direction_intervention.")
+        if not (0.0 < float(self.terminal_local_field_angle_clip_degrees) <= 180.0):
+            raise ValueError("terminal_local_field_angle_clip_degrees must lie in (0.0, 180.0].")
+        if (
+            self.terminal_local_field_direction_intervention != "none"
+            and self.supervision_policy != "local_only"
+        ):
+            raise ValueError(
+                "terminal_local_field_direction_intervention currently requires supervision_policy='local_only'."
+            )
         if self.checkpoint_selector not in {
             "energy_only",
             "val_accuracy_only",
@@ -293,6 +325,44 @@ def build_tf2_corrective_transport_default_config(**overrides: Any) -> FMPCTF2Co
     return FMPCTF2Config(**payload)
 
 
+def build_tf2_corrective_transport_terminal_angleclip_default_config(**overrides: Any) -> FMPCTF2Config:
+    """Return the adopted TF2 package with terminal local-field angle clipping.
+
+    This preset keeps the historical corrective transport working reference intact
+    while exposing the confirmed package:
+
+    - `psi_family = "residualized_local_field"`
+    - `time_encoding_variant = "poly_rt2"`
+    - terminal local-field direction angle clip at 30 degrees on the final
+      training micro-step only
+    """
+
+    payload: dict[str, Any] = {
+        "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+        "layer_dims": (64, 64, 10),
+        "family_lineage": "tf1_mlp_aug",
+        "use_teacher_free_features": True,
+        "feature_aware_tangents": False,
+        "micro_steps": 4,
+        "incremental_weight_updates": False,
+        "supervision_policy": "local_only",
+        "theta_update_budget": "matched",
+        "identity_loss_weight": 0.2,
+        "warmup_epochs": 5,
+        "hybrid_ramp_epochs": 10,
+        "bootstrap_substeps": 4,
+        "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+        "epochs": 60,
+        "eval_steps": 15,
+        "psi_family": "residualized_local_field",
+        "time_encoding_variant": "poly_rt2",
+        "terminal_local_field_direction_intervention": "local_field_direction_angle_clip_keep_live_norm",
+        "terminal_local_field_angle_clip_degrees": 30.0,
+    }
+    payload.update(overrides)
+    return FMPCTF2Config(**payload)
+
+
 def build_tf2_preset_config(
     preset_name: TF2PresetName,
     **overrides: Any,
@@ -303,6 +373,8 @@ def build_tf2_preset_config(
         return build_tf2_canonical_config(**overrides)
     if preset_name == "tf2_corrective_transport_default":
         return build_tf2_corrective_transport_default_config(**overrides)
+    if preset_name == "tf2_corrective_transport_terminal_angleclip_default":
+        return build_tf2_corrective_transport_terminal_angleclip_default_config(**overrides)
     raise ValueError(f"Unsupported TF2 preset '{preset_name}'.")
 
 
@@ -689,6 +761,85 @@ def _extract_detached_local_flow_anchor(
     return anchor.astype(np.float64, copy=False)
 
 
+def _action_from_step(z_k: np.ndarray, z_next: np.ndarray, dt: float) -> np.ndarray:
+    return (np.asarray(z_next, dtype=np.float64) - np.asarray(z_k, dtype=np.float64)) / float(dt)
+
+
+def _vector_norms(x: np.ndarray) -> np.ndarray:
+    return np.linalg.norm(np.asarray(x, dtype=np.float64), axis=1)
+
+
+def _safe_direction(x: np.ndarray) -> np.ndarray:
+    array = np.asarray(x, dtype=np.float64)
+    norms = _vector_norms(array)[:, None]
+    return np.divide(array, np.maximum(norms, 1e-12), out=np.zeros_like(array), where=norms > 1e-12)
+
+
+def _clip_direction_to_anchor_cone(
+    raw_direction: np.ndarray,
+    anchor_direction: np.ndarray,
+    *,
+    max_angle_degrees: float,
+) -> np.ndarray:
+    raw = np.asarray(raw_direction, dtype=np.float64)
+    anchor = np.asarray(anchor_direction, dtype=np.float64)
+    if raw.shape != anchor.shape:
+        raise ValueError("raw_direction and anchor_direction must share the same shape.")
+    clipped = np.zeros_like(raw)
+    cos_threshold = float(np.cos(np.deg2rad(float(max_angle_degrees))))
+    sin_threshold = float(np.sin(np.deg2rad(float(max_angle_degrees))))
+    for row_index in range(int(raw.shape[0])):
+        raw_row = raw[row_index]
+        anchor_row = anchor[row_index]
+        raw_norm = float(np.linalg.norm(raw_row))
+        anchor_norm = float(np.linalg.norm(anchor_row))
+        if raw_norm <= 1e-12 or anchor_norm <= 1e-12:
+            clipped[row_index] = raw_row
+            continue
+        raw_unit = raw_row / raw_norm
+        anchor_unit = anchor_row / anchor_norm
+        cosine = float(np.clip(np.dot(raw_unit, anchor_unit), -1.0, 1.0))
+        if cosine >= cos_threshold:
+            clipped[row_index] = raw_unit
+            continue
+        tangent = raw_unit - (cosine * anchor_unit)
+        tangent_norm = float(np.linalg.norm(tangent))
+        if tangent_norm <= 1e-12:
+            clipped[row_index] = anchor_unit
+            continue
+        tangent_unit = tangent / tangent_norm
+        clipped[row_index] = (cos_threshold * anchor_unit) + (sin_threshold * tangent_unit)
+    return _safe_direction(clipped)
+
+
+def _apply_terminal_local_field_direction_intervention(
+    z_on_k: np.ndarray,
+    dt: float,
+    plan: TF2MicroStepPlan,
+    config: FMPCTF2Config,
+) -> tuple[np.ndarray, np.ndarray]:
+    intervention = config.terminal_local_field_direction_intervention
+    raw_action = _action_from_step(z_on_k, plan.z_on_next, dt)
+    if intervention == "none":
+        return raw_action, plan.z_on_next.copy()
+    local_field_direction = _safe_direction(_extract_detached_local_flow_anchor(plan.psi_inputs, config))
+    live_norm = _vector_norms(raw_action)[:, None]
+    if intervention == "local_field_direction_hard_replace_keep_live_norm":
+        stabilized_action = local_field_direction * live_norm
+    elif intervention == "local_field_direction_angle_clip_keep_live_norm":
+        stabilized_action = _clip_direction_to_anchor_cone(
+            _safe_direction(raw_action),
+            local_field_direction,
+            max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),
+        ) * live_norm
+    else:
+        raise ValueError(f"Unsupported terminal_local_field_direction_intervention '{intervention}'.")
+    stabilized_next = np.asarray(z_on_k, dtype=np.float64) + float(dt) * stabilized_action
+    ensure_finite_array(stabilized_action, "tf2_terminal_stabilized_action")
+    ensure_finite_array(stabilized_next, "tf2_terminal_stabilized_z_on_next")
+    return stabilized_action, stabilized_next
+
+
 def _psi_predict(
     psi_network: MLPNetwork,
     inputs: np.ndarray,
@@ -975,6 +1126,7 @@ def _run_tf2_micro_step(
     apply_theta_update: bool,
     theta_eta_w: float,
     theta_eta_b: float,
+    is_terminal_step: bool = False,
     onpolicy_mix_ratio: float | None = None,
     event_log: list[str] | None = None,
     sample_collector: TF2SampleCollector | None = None,
@@ -995,6 +1147,14 @@ def _run_tf2_micro_step(
     )
     z_on_next = plan.z_on_next.copy()
     z_lf_next = plan.z_lf_next.copy()
+    effective_prediction = _psi_predict(psi_network, plan.psi_inputs, config)
+    if is_terminal_step and config.terminal_local_field_direction_intervention != "none":
+        effective_prediction, z_on_next = _apply_terminal_local_field_direction_intervention(
+            z_on_k,
+            dt,
+            plan,
+            config,
+        )
     if sample_collector is not None:
         payload: dict[str, Any] = {
             "psi_inputs": plan.psi_inputs.copy(),
@@ -1024,9 +1184,8 @@ def _run_tf2_micro_step(
             event_log.append("theta_update")
     else:
         theta_energy = hidden_energy_from_state(context, z_on_next)
-    psi_predictions = _psi_predict(psi_network, plan.psi_inputs, config)
-    boot_loss = float(np.mean((psi_predictions - plan.boot_targets) ** 2))
-    identity_loss = float(np.mean((psi_predictions - plan.identity_targets) ** 2))
+    boot_loss = float(np.mean((effective_prediction - plan.boot_targets) ** 2))
+    identity_loss = float(np.mean((effective_prediction - plan.identity_targets) ** 2))
     if lambda_id > 0.0:
         combined_target = (plan.boot_targets + (lambda_id * plan.identity_targets)) / (1.0 + lambda_id)
         loss_scale = 1.0 + lambda_id
@@ -1078,6 +1237,7 @@ def _train_one_batch_tf2(
             dt=dt,
             r_k=r_k,
             lambda_id=lambda_id,
+            is_terminal_step=bool(step_index == (int(config.micro_steps) - 1)),
             apply_theta_update=_theta_update_due_for_step(active_cadence, step_index),
             theta_eta_w=micro_eta_w,
             theta_eta_b=micro_eta_b,
@@ -1234,6 +1394,10 @@ def _config_payload(config: FMPCTF2Config) -> dict[str, Any]:
             "theta_micro_bias_lr": float(theta_micro_bias_lr),
             "bootstrap_integrator": config.bootstrap_integrator,
             "bootstrap_substeps": int(config.bootstrap_substeps),
+            "psi_family": config.psi_family,
+            "time_encoding_variant": config.time_encoding_variant,
+            "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
+            "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
             "identity_loss_weight": float(config.identity_loss_weight),
             "warmup_epochs": int(config.warmup_epochs),
             "hybrid_ramp_epochs": int(config.hybrid_ramp_epochs),
@@ -1420,6 +1584,10 @@ def run_fmpc_tf2_experiment(config: FMPCTF2Config) -> FMPCTF2RunResult:
         "theta_update_cadence": resolved_theta_update_cadence,
         "onpolicy_mix_ratio": float(resolved_onpolicy_mix_ratio),
         "interleaving_start": config.interleaving_start,
+        "psi_family": config.psi_family,
+        "time_encoding_variant": config.time_encoding_variant,
+        "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
+        "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
         "theta_micro_lr": float(theta_micro_lr),
         "theta_micro_bias_lr": float(theta_micro_bias_lr),
         "bootstrap_integrator": config.bootstrap_integrator,

@@ -1213,8 +1213,9 @@ Current TF2 adoption interpretation:
   terminal local-field direction trust-region in the true closed-loop regime
 - active narrow local adoption question has now moved to:
   terminal local-field stabilizer adoption/selection in the true closed-loop regime
-- active narrow package-level confirmation question has now moved to:
-  package-level mainline confirmation for terminal local-field stabilization
+- package-level mainline confirmation has now concluded:
+  - `tf2_corrective_transport_default` remains the historical corrective working reference
+  - `tf2_corrective_transport_terminal_angleclip_default` is the next TF2 experimental default on `main`
 
 Required reporting:
 

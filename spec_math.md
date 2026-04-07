@@ -648,3 +648,57 @@ existing base learning rates.
 
 This addendum changes only the **training-time schedule**. It does not redefine the
 baseline local parameter-update rule itself.
+
+### 17.6 Terminal local-field direction intervention
+
+TF2 may optionally apply a **terminal-step teacher-free direction intervention**
+during training:
+
+- `terminal_local_field_direction_intervention in {`
+  - `"none"`
+  - `"local_field_direction_angle_clip_keep_live_norm"`
+  - `"local_field_direction_hard_replace_keep_live_norm"`
+  - `}`
+
+This intervention is defined only for the **final micro-step** of the true closed-loop
+training rollout. It does **not** change:
+
+- the remaining-horizon contract for `u_psi(z_t, r, t; c)`
+- the bootstrap target formula
+- the identity target formula
+- the evaluation-time transport operator
+
+Let the raw learned terminal action be:
+
+- `u_live = (z_{k+1}^{live} - z_k) / Δt`
+
+and let the teacher-free local-field anchor direction be extracted from the current
+terminal psi input:
+
+- `d_lf = normalize(g_t)`
+
+where `g_t` is the existing detached teacher-free local-flow block already present in
+the TF2 input features.
+
+If `terminal_local_field_direction_intervention = "none"`, TF2 uses:
+
+- `u_term = u_live`
+
+If `terminal_local_field_direction_intervention = "local_field_direction_hard_replace_keep_live_norm"`,
+TF2 keeps the learned terminal norm but replaces the direction:
+
+- `u_term = ||u_live|| * d_lf`
+
+If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm"`,
+TF2 keeps the learned terminal norm but clips the learned terminal direction into a
+cone around `d_lf` with half-angle `terminal_local_field_angle_clip_degrees`:
+
+- `u_term = ||u_live|| * clip_dir(normalize(u_live), d_lf; theta_clip)`
+
+The transported terminal state used for the immediate terminal theta update is then:
+
+- `z_{k+1} = z_k + Δt * u_term`
+
+This is a **training-time stabilization option** only. It preserves the TF2 teacher-free
+target construction and keeps the historical corrective preset available as an
+unstabilized reference.

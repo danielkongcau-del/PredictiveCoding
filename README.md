@@ -26,8 +26,10 @@ Current status split:
 - teacher-based FMPC is now frozen as baseline / diagnostic reference
 - the current active FMPC line is the teacher-free:
   - `Phase TF2 - iFMPC bridge stage`
-- the current empirical TF2 working default is:
+- the historical corrective TF2 working reference remains:
   - `tf2_corrective_transport_default`
+- the next TF2 experimental default on `main` is:
+  - `tf2_corrective_transport_terminal_angleclip_default`
 - current TF2 work should be read through `AGENTS.md`, `PLANS.md`, and `validation.md`;
   this README status block may stay lighter than the active bridge-stage contract
 - The current Phase 2 freeze summary lives in `RESULTS.md`

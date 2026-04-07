@@ -8,6 +8,7 @@ from pathlib import Path
 from pc.fmpc_tf2 import (
     build_tf2_canonical_config,
     build_tf2_corrective_transport_default_config,
+    build_tf2_corrective_transport_terminal_angleclip_default_config,
     build_tf2_preset_config,
 )
 
@@ -66,6 +67,10 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert summary["micro_steps"] == 2
     assert summary["theta_update_budget"] == "matched"
     assert summary["identity_tangent_mode"] == "feature_frozen_truncated_identity_approx"
+    assert summary["psi_family"] == "baseline_plain"
+    assert summary["time_encoding_variant"] == "raw"
+    assert summary["terminal_local_field_direction_intervention"] == "none"
+    assert summary["terminal_local_field_angle_clip_degrees"] == 30.0
     assert summary["checkpoint_selector"] == "gate_constrained_accuracy_then_val_accuracy"
     assert summary["selection_metric_source"] == "val_metric"
     assert summary["report_metric_source"] == "test_metric"
@@ -84,6 +89,10 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert len(epoch_rows) == config["run"]["epochs"]
     assert config["preset_name"] == "tf2_canonical"
     assert config["transport"]["identity_tangent_mode"] == "feature_frozen_truncated_identity_approx"
+    assert config["transport"]["psi_family"] == "baseline_plain"
+    assert config["transport"]["time_encoding_variant"] == "raw"
+    assert config["transport"]["terminal_local_field_direction_intervention"] == "none"
+    assert config["transport"]["terminal_local_field_angle_clip_degrees"] == 30.0
     assert "val_transported_final_energy" in epoch_rows[0]
     assert "val_local_field_only_final_energy" in epoch_rows[0]
 
@@ -93,6 +102,10 @@ def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> N
     canonical_via_dispatch = build_tf2_preset_config("tf2_canonical")
     corrective = build_tf2_corrective_transport_default_config()
     corrective_via_dispatch = build_tf2_preset_config("tf2_corrective_transport_default")
+    corrective_angleclip = build_tf2_corrective_transport_terminal_angleclip_default_config()
+    corrective_angleclip_via_dispatch = build_tf2_preset_config(
+        "tf2_corrective_transport_terminal_angleclip_default"
+    )
 
     assert canonical.preset_name == "tf2_canonical"
     assert canonical_via_dispatch.preset_name == "tf2_canonical"
@@ -109,3 +122,22 @@ def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> N
     assert corrective.micro_steps == 4
     assert corrective.feature_aware_tangents is False
     assert corrective.theta_update_budget == "matched"
+    assert corrective.terminal_local_field_direction_intervention == "none"
+
+    assert corrective_angleclip.preset_name == "tf2_corrective_transport_terminal_angleclip_default"
+    assert (
+        corrective_angleclip_via_dispatch.preset_name
+        == "tf2_corrective_transport_terminal_angleclip_default"
+    )
+    assert corrective_angleclip.incremental_weight_updates is False
+    assert corrective_angleclip.supervision_policy == "local_only"
+    assert corrective_angleclip.micro_steps == 4
+    assert corrective_angleclip.feature_aware_tangents is False
+    assert corrective_angleclip.theta_update_budget == "matched"
+    assert corrective_angleclip.psi_family == "residualized_local_field"
+    assert corrective_angleclip.time_encoding_variant == "poly_rt2"
+    assert (
+        corrective_angleclip.terminal_local_field_direction_intervention
+        == "local_field_direction_angle_clip_keep_live_norm"
+    )
+    assert corrective_angleclip.terminal_local_field_angle_clip_degrees == 30.0

@@ -177,6 +177,7 @@ from .fmpc_tf2 import (
     TF2MicroStepPlan,
     build_tf2_canonical_config,
     build_tf2_corrective_transport_default_config,
+    build_tf2_corrective_transport_terminal_angleclip_default_config,
     build_tf2_preset_config,
     run_fmpc_tf2_experiment,
 )
@@ -189,6 +190,11 @@ from .fmpc_tf2_default_adoption_suite import (
     FMPCTF2DefaultAdoptionSuiteConfig,
     FMPCTF2DefaultAdoptionSuiteRunResult,
     run_fmpc_tf2_default_adoption_suite,
+)
+from .fmpc_tf2_mainline_adoption_suite import (
+    FMPCTF2MainlineAdoptionSuiteConfig,
+    FMPCTF2MainlineAdoptionSuiteRunResult,
+    run_fmpc_tf2_mainline_adoption_suite,
 )
 from .fmpc_tf2_identity_semantics_suite import (
     FMPCTF2IdentitySemanticsSuiteConfig,
@@ -290,6 +296,8 @@ __all__ = [
     "FMPCTF2AttributionSuiteRunResult",
     "FMPCTF2DefaultAdoptionSuiteConfig",
     "FMPCTF2DefaultAdoptionSuiteRunResult",
+    "FMPCTF2MainlineAdoptionSuiteConfig",
+    "FMPCTF2MainlineAdoptionSuiteRunResult",
     "FMPCTF2EpochSnapshot",
     "FMPCTF2RunResult",
     "FMPCTF2SuiteConfig",
@@ -361,6 +369,7 @@ __all__ = [
     "build_tf1_preset_config",
     "build_tf2_canonical_config",
     "build_tf2_corrective_transport_default_config",
+    "build_tf2_corrective_transport_terminal_angleclip_default_config",
     "build_tf2_preset_config",
     "build_interval_residual_target",
     "build_fmpc_student_inputs",
@@ -410,6 +419,7 @@ __all__ = [
     "run_fmpc_tf1_experiment",
     "run_fmpc_tf1_default_adoption_suite",
     "run_fmpc_tf1_accuracy_tuning_suite",
+    "run_fmpc_tf2_mainline_adoption_suite",
     "run_fmpc_tf1_external_comparison_suite",
     "run_fmpc_tf1_gate_coverage_suite",
     "run_fmpc_tf1_multiseed_suite",
