@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Literal
+from typing import Any, Callable, Literal
 
 import numpy as np
 
@@ -33,11 +33,10 @@ from .fmpc_tf1_flow import (
     teacher_free_state_features,
 )
 from .fmpc_tf1_jvp import (
-    build_tf1_input,
-    build_tf1_input_tangent,
     forward_tf1_mlp_with_jvp,
     resolve_tf1_identity_tangent_mode,
 )
+from .fmpc_meanflow_jvp import MeanFlowMLPJVPResult
 from .inference import build_clamped_mask, compute_state_gradients, initialize_states
 from .layers import init_mlp_layers
 from .metrics import classification_accuracy, majority_class_baseline_accuracy
@@ -53,6 +52,8 @@ TF2SupervisionPolicy = Literal["local_only", "mixed"]
 TF2ThetaUpdateBudget = Literal["matched", "unmatched"]
 TF2ThetaUpdateCadence = Literal["terminal_only", "every_2_micro_steps", "every_micro_step"]
 TF2InterleavingStart = Literal["epoch_0", "after_warmup"]
+TF2PsiFamily = Literal["baseline_plain", "residualized_local_field"]
+TF2TimeEncodingVariant = Literal["raw", "poly_rt2"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 
@@ -98,7 +99,9 @@ class FMPCTF2Config:
     theta_update_cadence: TF2ThetaUpdateCadence | None = None
     onpolicy_mix_ratio: float | None = None
     interleaving_start: TF2InterleavingStart = "epoch_0"
+    psi_family: TF2PsiFamily = "baseline_plain"
     psi_hidden_dims: tuple[int, ...] = (128,)
+    time_encoding_variant: TF2TimeEncodingVariant = "raw"
     psi_weight_scale: float = 0.05
     psi_eta_w: float = 0.01
     psi_eta_b: float | None = 0.01
@@ -151,6 +154,10 @@ class FMPCTF2Config:
             raise ValueError("onpolicy_mix_ratio must lie in [0.0, 0.5].")
         if self.interleaving_start not in {"epoch_0", "after_warmup"}:
             raise ValueError("Unsupported interleaving_start.")
+        if self.psi_family not in {"baseline_plain", "residualized_local_field"}:
+            raise ValueError("Unsupported psi_family.")
+        if self.time_encoding_variant not in {"raw", "poly_rt2"}:
+            raise ValueError("Unsupported time_encoding_variant.")
         if self.checkpoint_selector not in {
             "energy_only",
             "val_accuracy_only",
@@ -221,6 +228,9 @@ class _SplitTransportMetrics:
     identity_final_energy: float
     local_field_only_final_energy: float
     rollout_knots: list[float]
+
+
+TF2SampleCollector = Callable[[dict[str, Any]], None]
 
 
 def build_tf2_canonical_config(**overrides: Any) -> FMPCTF2Config:
@@ -516,10 +526,199 @@ def _weighted_mse_step(
             delta = next_delta
 
 
+def _hidden_dim(config: FMPCTF2Config) -> int:
+    return int(sum(config.layer_dims[1:-1]))
+
+
+def _target_dim(config: FMPCTF2Config) -> int:
+    return int(config.layer_dims[-1])
+
+
+def _time_encoding_dim(variant: TF2TimeEncodingVariant) -> int:
+    if variant == "raw":
+        return 2
+    if variant == "poly_rt2":
+        return 5
+    raise ValueError(f"Unsupported time_encoding_variant '{variant}'.")
+
+
+def _teacher_free_feature_dim(config: FMPCTF2Config) -> int:
+    if not config.use_teacher_free_features:
+        return 0
+    return _hidden_dim(config) + _target_dim(config) + 1
+
+
+def _build_time_encoding(
+    batch_size: int,
+    *,
+    t: float,
+    r: float,
+    variant: TF2TimeEncodingVariant,
+) -> np.ndarray:
+    t_block = np.full((batch_size, 1), float(t), dtype=np.float64)
+    r_block = np.full((batch_size, 1), float(r), dtype=np.float64)
+    if variant == "raw":
+        return np.concatenate([t_block, r_block], axis=1).astype(np.float64, copy=False)
+    if variant == "poly_rt2":
+        return np.concatenate(
+            [
+                t_block,
+                r_block,
+                t_block * r_block,
+                t_block * t_block,
+                r_block * r_block,
+            ],
+            axis=1,
+        ).astype(np.float64, copy=False)
+    raise ValueError(f"Unsupported time_encoding_variant '{variant}'.")
+
+
+def _build_time_encoding_tangent(
+    batch_size: int,
+    *,
+    d_t: float,
+    d_r: float,
+    t: float,
+    r: float,
+    variant: TF2TimeEncodingVariant,
+) -> np.ndarray:
+    t_tangent = np.full((batch_size, 1), float(d_t), dtype=np.float64)
+    r_tangent = np.full((batch_size, 1), float(d_r), dtype=np.float64)
+    if variant == "raw":
+        return np.concatenate([t_tangent, r_tangent], axis=1).astype(np.float64, copy=False)
+    if variant == "poly_rt2":
+        tr_tangent = np.full((batch_size, 1), float(r * d_t + t * d_r), dtype=np.float64)
+        t2_tangent = np.full((batch_size, 1), float(2.0 * t * d_t), dtype=np.float64)
+        r2_tangent = np.full((batch_size, 1), float(2.0 * r * d_r), dtype=np.float64)
+        return np.concatenate(
+            [t_tangent, r_tangent, tr_tangent, t2_tangent, r2_tangent],
+            axis=1,
+        ).astype(np.float64, copy=False)
+    raise ValueError(f"Unsupported time_encoding_variant '{variant}'.")
+
+
+def _build_psi_input(
+    config: FMPCTF2Config,
+    z_t: np.ndarray,
+    target_onehot: np.ndarray,
+    *,
+    t: float,
+    r: float,
+    features: Any | None = None,
+) -> np.ndarray:
+    z_array = np.asarray(z_t, dtype=np.float64)
+    target_array = np.asarray(target_onehot, dtype=np.float64)
+    if z_array.ndim != 2 or target_array.ndim != 2:
+        raise ValueError("z_t and target_onehot must be shaped (batch, features).")
+    if z_array.shape[0] != target_array.shape[0]:
+        raise ValueError("z_t and target_onehot must share the same batch size.")
+    batch_size = int(z_array.shape[0])
+    time_block = _build_time_encoding(
+        batch_size,
+        t=float(t),
+        r=float(r),
+        variant=config.time_encoding_variant,
+    )
+    blocks = [z_array, target_array, time_block]
+    if config.use_teacher_free_features:
+        if features is None:
+            raise ValueError("features must be provided when use_teacher_free_features=True.")
+        blocks.extend([features.g_t, features.e_out_t, features.F_t])
+    return np.concatenate(blocks, axis=1).astype(np.float64, copy=False)
+
+
+def _build_psi_input_tangent(
+    config: FMPCTF2Config,
+    g_t: np.ndarray,
+    *,
+    target_dim: int,
+    t: float,
+    r: float,
+    feature_tangents: FMPCTF1StateFeatureTangents | None = None,
+    d_t: float = 1.0,
+    d_r: float = -1.0,
+) -> np.ndarray:
+    g_array = np.asarray(g_t, dtype=np.float64)
+    if g_array.ndim != 2:
+        raise ValueError("g_t must be shaped (batch, hidden_dim).")
+    batch_size = int(g_array.shape[0])
+    target_tangent = np.zeros((batch_size, int(target_dim)), dtype=np.float64)
+    time_tangent = _build_time_encoding_tangent(
+        batch_size,
+        d_t=float(d_t),
+        d_r=float(d_r),
+        t=float(t),
+        r=float(r),
+        variant=config.time_encoding_variant,
+    )
+    blocks = [g_array, target_tangent, time_tangent]
+    if config.use_teacher_free_features:
+        if config.feature_aware_tangents:
+            if feature_tangents is None:
+                raise ValueError(
+                    "feature_tangents must be provided when feature_aware_tangents=True."
+                )
+            feature_tangent_block = np.concatenate(
+                [
+                    feature_tangents.Dg_g_t,
+                    feature_tangents.Dg_e_out_t,
+                    feature_tangents.Dg_F_t,
+                ],
+                axis=1,
+            ).astype(np.float64, copy=False)
+        else:
+            feature_dim = _teacher_free_feature_dim(config)
+            feature_tangent_block = np.zeros((batch_size, feature_dim), dtype=np.float64)
+        blocks.append(feature_tangent_block)
+    return np.concatenate(blocks, axis=1).astype(np.float64, copy=False)
+
+
+def _extract_detached_local_flow_anchor(
+    inputs: np.ndarray,
+    config: FMPCTF2Config,
+) -> np.ndarray:
+    if not config.use_teacher_free_features:
+        raise ValueError("residualized_local_field requires use_teacher_free_features=True.")
+    input_array = np.asarray(inputs, dtype=np.float64)
+    if input_array.ndim != 2:
+        raise ValueError("inputs must be shaped (batch, features).")
+    feature_offset = _hidden_dim(config) + _target_dim(config) + _time_encoding_dim(config.time_encoding_variant)
+    anchor = input_array[:, feature_offset : feature_offset + _hidden_dim(config)]
+    if anchor.shape[1] != _hidden_dim(config):
+        raise ValueError("Failed to extract detached local-flow anchor from psi inputs.")
+    return anchor.astype(np.float64, copy=False)
+
+
+def _psi_predict(
+    psi_network: MLPNetwork,
+    inputs: np.ndarray,
+    config: FMPCTF2Config,
+) -> np.ndarray:
+    base_output = psi_network.predict(inputs)
+    if config.psi_family == "baseline_plain":
+        return base_output
+    if config.psi_family == "residualized_local_field":
+        return _extract_detached_local_flow_anchor(inputs, config) + base_output
+    raise ValueError(f"Unsupported psi_family '{config.psi_family}'.")
+
+
+def _psi_forward_with_jvp(
+    psi_network: MLPNetwork,
+    inputs: np.ndarray,
+    input_tangent: np.ndarray,
+    config: FMPCTF2Config,
+) -> MeanFlowMLPJVPResult:
+    base_result = forward_tf1_mlp_with_jvp(psi_network, inputs, input_tangent)
+    if config.psi_family == "baseline_plain":
+        return base_result
+    if config.psi_family == "residualized_local_field":
+        anchor = _extract_detached_local_flow_anchor(inputs, config)
+        return MeanFlowMLPJVPResult(output=anchor + base_result.output, jvp=base_result.jvp)
+    raise ValueError(f"Unsupported psi_family '{config.psi_family}'.")
+
+
 def _psi_input_dim(config: FMPCTF2Config) -> int:
-    hidden_dim = int(sum(config.layer_dims[1:-1]))
-    target_dim = int(config.layer_dims[-1])
-    return hidden_dim + target_dim + 2 + hidden_dim + target_dim + 1
+    return _hidden_dim(config) + _target_dim(config) + _time_encoding_dim(config.time_encoding_variant) + _teacher_free_feature_dim(config)
 
 
 def _make_pc_model(config: FMPCTF2Config) -> PCNetwork:
@@ -544,7 +743,7 @@ def _make_pc_model(config: FMPCTF2Config) -> PCNetwork:
 
 
 def _make_psi_network(config: FMPCTF2Config) -> MLPNetwork:
-    hidden_dim = int(sum(config.layer_dims[1:-1]))
+    hidden_dim = _hidden_dim(config)
     layer_dims = [_psi_input_dim(config), *config.psi_hidden_dims, hidden_dim]
     return MLPNetwork(
         layers=init_mlp_baseline_layers(
@@ -645,22 +844,23 @@ def _single_source_supervision(
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     features = teacher_free_state_features(context, z_t)
     feature_tangents = _feature_tangents_for_state(context, z_t, config)
-    inputs = build_tf1_input(
+    inputs = _build_psi_input(
+        config,
         z_t,
         context.targets,
         t=t_k,
         r=r_k,
-        use_teacher_free_features=config.use_teacher_free_features,
         features=features,
     )
-    input_tangent = build_tf1_input_tangent(
+    input_tangent = _build_psi_input_tangent(
+        config,
         features.g_t,
         target_dim=context.target_dim,
-        use_teacher_free_features=config.use_teacher_free_features,
-        feature_aware_tangents=config.feature_aware_tangents,
+        t=t_k,
+        r=r_k,
         feature_tangents=feature_tangents,
     )
-    jvp_result = forward_tf1_mlp_with_jvp(psi_network, inputs, input_tangent)
+    jvp_result = _psi_forward_with_jvp(psi_network, inputs, input_tangent, config)
     u_boot = bootstrap_average_velocity_target(
         context,
         z_t,
@@ -777,6 +977,8 @@ def _run_tf2_micro_step(
     theta_eta_b: float,
     onpolicy_mix_ratio: float | None = None,
     event_log: list[str] | None = None,
+    sample_collector: TF2SampleCollector | None = None,
+    sample_metadata: dict[str, Any] | None = None,
 ) -> tuple[np.ndarray, np.ndarray, float, float, float, float, TF2MicroStepPlan]:
     if event_log is not None:
         event_log.append("plan")
@@ -793,6 +995,21 @@ def _run_tf2_micro_step(
     )
     z_on_next = plan.z_on_next.copy()
     z_lf_next = plan.z_lf_next.copy()
+    if sample_collector is not None:
+        payload: dict[str, Any] = {
+            "psi_inputs": plan.psi_inputs.copy(),
+            "boot_targets": plan.boot_targets.copy(),
+            "identity_targets": plan.identity_targets.copy(),
+            "lambda_id": float(lambda_id),
+            "identity_tangent_mode": _identity_tangent_mode(config),
+            "source_counts": dict(plan.source_counts),
+            "t_k": float(t_k),
+            "r_k": float(r_k),
+            "dt": float(dt),
+        }
+        if sample_metadata is not None:
+            payload.update(sample_metadata)
+        sample_collector(payload)
     if event_log is not None:
         event_log.append("advance")
     if apply_theta_update:
@@ -807,7 +1024,7 @@ def _run_tf2_micro_step(
             event_log.append("theta_update")
     else:
         theta_energy = hidden_energy_from_state(context, z_on_next)
-    psi_predictions = psi_network.predict(plan.psi_inputs)
+    psi_predictions = _psi_predict(psi_network, plan.psi_inputs, config)
     boot_loss = float(np.mean((psi_predictions - plan.boot_targets) ** 2))
     identity_loss = float(np.mean((psi_predictions - plan.identity_targets) ** 2))
     if lambda_id > 0.0:
@@ -832,6 +1049,8 @@ def _train_one_batch_tf2(
     *,
     lambda_id: float,
     epoch_index: int | None = None,
+    sample_collector: TF2SampleCollector | None = None,
+    sample_metadata: dict[str, Any] | None = None,
 ) -> tuple[float, float, float, float]:
     context = build_tf1_context(model, x_batch, y_batch)
     knots = np.linspace(0.0, 1.0, int(config.micro_steps) + 1, dtype=np.float64)
@@ -863,6 +1082,14 @@ def _train_one_batch_tf2(
             theta_eta_w=micro_eta_w,
             theta_eta_b=micro_eta_b,
             onpolicy_mix_ratio=active_mix_ratio,
+            sample_collector=sample_collector,
+            sample_metadata=(
+                {
+                    **({} if sample_metadata is None else sample_metadata),
+                    "epoch_index": None if epoch_index is None else int(epoch_index),
+                    "step_index": int(step_index),
+                }
+            ),
         )
         total_losses.append(total_loss)
         boot_losses.append(boot_loss)
@@ -894,22 +1121,23 @@ def _learned_velocity_fn(
     def _velocity(z_t: np.ndarray, t_k: float, r_k: float) -> np.ndarray:
         features = teacher_free_state_features(context, z_t)
         feature_tangents = _feature_tangents_for_state(context, z_t, config)
-        inputs = build_tf1_input(
+        inputs = _build_psi_input(
+            config,
             z_t,
             context.targets,
             t=t_k,
             r=r_k,
-            use_teacher_free_features=config.use_teacher_free_features,
             features=features,
         )
-        input_tangent = build_tf1_input_tangent(
+        input_tangent = _build_psi_input_tangent(
+            config,
             features.g_t,
             target_dim=context.target_dim,
-            use_teacher_free_features=config.use_teacher_free_features,
-            feature_aware_tangents=config.feature_aware_tangents,
+            t=t_k,
+            r=r_k,
             feature_tangents=feature_tangents,
         )
-        return forward_tf1_mlp_with_jvp(psi_network, inputs, input_tangent).output
+        return _psi_forward_with_jvp(psi_network, inputs, input_tangent, config).output
 
     return _velocity
 
