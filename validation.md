@@ -1201,9 +1201,12 @@ Current TF2 adoption interpretation:
     - diagnostic-only
     - baseline-only
     - not admissible as the TF2 mainline target source
-  - the next single narrow move should now target:
-    - psi-side transport expressivity under the fixed teacher-free local-field
-      source
+- the next single narrow move should now target:
+- psi-side transport expressivity under the fixed teacher-free local-field
+  source
+- latest local diagnostic chain has since advanced beyond that point through:
+  psi-expressivity -> downstream coupling -> lag1 target snapshot -> batch-frozen
+  target/state cache -> open-vs-closed-loop trajectory coupling
 
 Required reporting:
 
