@@ -215,6 +215,11 @@ from .fmpc_tf2_bootstrap_fidelity_suite import (
     FMPCTF2BootstrapFidelitySuiteRunResult,
     run_fmpc_tf2_bootstrap_fidelity_suite,
 )
+from .fmpc_tf2_bootstrap_source_bias_suite import (
+    FMPCTF2BootstrapSourceBiasSuiteConfig,
+    FMPCTF2BootstrapSourceBiasSuiteRunResult,
+    run_fmpc_tf2_bootstrap_source_bias_suite,
+)
 from .fmpc_tf2b_interleaving_suite import (
     FMPCTF2BInterleavingSuiteConfig,
     FMPCTF2BInterleavingSuiteRunResult,
@@ -415,9 +420,12 @@ __all__ = [
     "run_fmpc_tf2_default_adoption_suite",
     "run_fmpc_tf2_attribution_suite",
     "run_fmpc_tf2_bootstrap_fidelity_suite",
+    "run_fmpc_tf2_bootstrap_source_bias_suite",
     "run_fmpc_tf2b_interleaving_suite",
     "FMPCTF2BootstrapFidelitySuiteConfig",
     "FMPCTF2BootstrapFidelitySuiteRunResult",
+    "FMPCTF2BootstrapSourceBiasSuiteConfig",
+    "FMPCTF2BootstrapSourceBiasSuiteRunResult",
     "run_fmpc_tf2_suite",
     "build_rollout_auxiliary_batches",
     "run_fmpc_student_experiment",

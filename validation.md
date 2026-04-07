@@ -1180,6 +1180,30 @@ Current TF2 adoption interpretation:
   - the next single narrow move should therefore go beyond
     curriculum/bootstrap-fidelity tuning and target a different transport-quality
     bottleneck
+- the completed bootstrap-target source-bias suite now indicates:
+  - detached slow-PC endpoints can look slightly stronger than the current
+    local-field endpoint in the offline diagnostic:
+    - lower endpoint hidden energy
+    - lower output MSE
+    - slightly higher endpoint accuracy
+  - the best offline detached challenger in the current tiny family is:
+    - `diagnostic_slow_pc_k16`
+  - however, the end-to-end comparison between:
+    - current local-field source
+    - detached slow-PC `K = 16`
+    shows no validation-selected accuracy gain and no test-accuracy gain
+  - the detached challenger only increases runtime while slightly reducing
+    transported validation energy
+  - current evidence therefore says:
+    - bootstrap-target terminal-source bias is not the current limiter for the
+      fixed-4-step corrective default
+  - detached slow-PC sources remain:
+    - diagnostic-only
+    - baseline-only
+    - not admissible as the TF2 mainline target source
+  - the next single narrow move should now target:
+    - psi-side transport expressivity under the fixed teacher-free local-field
+      source
 
 Required reporting:
 

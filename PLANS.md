@@ -2529,6 +2529,125 @@ Outcome:
   - current evidence says:
     - `u_boot` fidelity is not the current limiter for the fixed-4-step
       corrective default
-  - the next single narrow TF2 move should now go beyond
-    curriculum/bootstrap-fidelity tuning and target a different transport-quality
-    bottleneck
+- the next single narrow TF2 move should now go beyond
+  curriculum/bootstrap-fidelity tuning and target a different transport-quality
+  bottleneck
+
+### TF2 bootstrap-target source-bias pass
+
+Goal:
+
+- determine whether the current fixed-4-step corrective default is bottlenecked by
+  bootstrap-target source bias rather than by bootstrap-target numerical fidelity
+
+Scope:
+
+- do not change TF2 core math
+- do not reopen:
+  - identity semantics
+  - supervision semantics
+  - cadence semantics
+  - micro-step count
+  - curriculum knobs
+  - bootstrap integrator / substeps
+- keep fixed:
+  - `preset = tf2_corrective_transport_default`
+  - `use_teacher_free_features = true`
+  - `feature_aware_tangents = false`
+  - `micro_steps = 4`
+  - `incremental_weight_updates = false`
+  - `supervision_policy = "local_only"`
+  - `theta_update_cadence = "terminal_only"`
+  - `theta_update_budget = "matched"`
+  - `identity_loss_weight = 0.2`
+  - `warmup_epochs = 5`
+  - `hybrid_ramp_epochs = 10`
+  - `bootstrap_integrator = "rk2"`
+  - `bootstrap_substeps = 4`
+  - current selector policy
+- vary only the bootstrap terminal-source family:
+  - current local-field endpoint `z_T^lf`
+  - diagnostic-only detached slow-PC endpoints `z_T^pc[K]` for a tiny
+    `K in {4, 8, 16}` family
+  - optional single blended diagnostic source only if the offline probe clearly
+    justifies it
+
+Files to touch:
+
+- `PLANS.md`
+- `validation.md` only if the conclusion changes the next narrow move
+- `src/pc/__init__.py`
+- `src/pc/fmpc_tf2_bootstrap_source_bias_suite.py`
+- `experiments/fmpc_tf2_bootstrap_source_bias_suite.py`
+- `tests/test_fmpc_tf2_bootstrap_source_bias_suite_smoke.py`
+
+Offline-first evaluation rule:
+
+- do not begin with a training grid
+- first build a source-bias diagnostic on shared sampled corrective-default
+  states `(z_t, t_k, r_k)`
+- compare:
+  - `u_lf = (z_T^lf - z_t) / r_k`
+  - `u_pc[K] = (z_T^pc[K] - z_t) / r_k`
+- all `z_T^pc[K]` endpoints must be:
+  - detached
+  - `theta`-frozen
+  - produced by baseline PC hidden-state inference only
+  - labeled diagnostic-only / baseline-only
+
+Offline metrics to report:
+
+- MSE and cosine similarity between `u_lf` and `u_pc[K]`
+- endpoint hidden energy for each source
+- endpoint output-error quantity for each source
+- endpoint classification accuracy for each source
+- wall-clock cost per target evaluation
+
+Pruning rule:
+
+- always keep the current local-field source
+- select at most one detached slow-PC challenger for end-to-end comparison
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_bootstrap_source_bias_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Expected deliverables:
+
+- one narrow artifact set under:
+  - `outputs/fmpc_tf2_bootstrap_source_bias_suite/`
+- a decision on whether:
+  - the current `u_boot` is bottlenecked by terminal-source bias
+  - a detached slow-PC source materially beats the current local-field source
+  - or the next narrow bottleneck lies elsewhere
+
+Outcome:
+
+- the completed bootstrap-target source-bias suite now indicates:
+  - detached slow-PC endpoints do look slightly stronger than the current
+    local-field endpoint in the offline diagnostic:
+    - lower endpoint hidden energy
+    - lower output MSE
+    - slightly higher endpoint accuracy
+  - the best offline challenger in the current tiny family is:
+    - `diagnostic_slow_pc_k16`
+  - however, the end-to-end comparison between:
+    - current local-field source
+    - detached slow-PC `K = 16`
+    shows no validation-selected accuracy gain and no test-accuracy gain
+  - the detached slow-PC challenger only trades extra runtime for:
+    - a small gate-count increase
+    - a small reduction in transported validation energy
+    - with no held-out accuracy benefit
+  - current evidence therefore says:
+    - the fixed-4-step corrective default is not bottlenecked by terminal-source
+      bias
+    - the mainline-safe result remains:
+      - `tf2_corrective_transport_default`
+      - local-field bootstrap source
+  - detached slow-PC sources remain diagnostic-only / baseline-only and should
+    not be promoted directly into the TF2 mainline
+  - the next single narrow TF2 move should now target:
+    - psi-side transport expressivity under the fixed teacher-free local-field
+      source
