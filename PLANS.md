@@ -2655,4 +2655,4 @@ Outcome:
   psi-expressivity -> downstream coupling -> lag1 target snapshot -> batch-frozen
   target/state cache -> open-vs-closed-loop trajectory coupling -> partial-open-loop
   handoff localization -> mirrored handoff asymmetry -> terminal-step
-  supervision-bundle split
+  supervision-bundle split -> terminal-step action-output stabilization
