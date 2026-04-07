@@ -1208,7 +1208,7 @@ Current TF2 adoption interpretation:
   psi-expressivity -> downstream coupling -> lag1 target snapshot -> batch-frozen
   target/state cache -> open-vs-closed-loop trajectory coupling -> partial-open-loop
   handoff localization -> mirrored handoff asymmetry -> terminal-step
-  supervision-bundle split -> terminal-step action-output stabilization
+  supervision-bundle split -> terminal-step action-output stabilization -> terminal-step direction anchoring
 
 Required reporting:
 
