@@ -2648,9 +2648,10 @@ Outcome:
       - local-field bootstrap source
   - detached slow-PC sources remain diagnostic-only / baseline-only and should
     not be promoted directly into the TF2 mainline
-- the next single narrow TF2 move should now target:
+- the originally logged next single narrow TF2 move at that point was:
 - psi-side transport expressivity under the fixed teacher-free local-field
   source
 - latest local diagnostic chain has since advanced beyond that point through:
   psi-expressivity -> downstream coupling -> lag1 target snapshot -> batch-frozen
-  target/state cache -> open-vs-closed-loop trajectory coupling
+  target/state cache -> open-vs-closed-loop trajectory coupling -> partial-open-loop
+  handoff localization
