@@ -1158,6 +1158,28 @@ Current TF2 adoption interpretation:
     - `hybrid_ramp_epochs = 10`
   - the next single narrow move should now target bootstrap-target fidelity
     rather than more curriculum tuning
+- the completed bootstrap-target fidelity suite now indicates:
+  - under a shared local-field / shared-horizon offline probe, higher-fidelity
+    `u_boot` candidates do reduce direct target error relative to the
+    `rk2_s64` reference
+  - however, the current default `rk2_s4` is already close enough that the
+    pruned end-to-end candidates:
+    - `rk2_s4`
+    - `rk2_s8`
+    - `rk2_s16`
+    produce the same validation-selected accuracy and gate behavior in the
+    current multiseed study
+  - the non-default candidates only trade substantially higher runtime for
+    microscopic validation-energy differences
+  - `tf2_corrective_transport_default` should therefore keep:
+    - `bootstrap_integrator = "rk2"`
+    - `bootstrap_substeps = 4`
+  - current evidence says:
+    - bootstrap-target fidelity is not the current limiter for fixed-4-step
+      corrective transport
+  - the next single narrow move should therefore go beyond
+    curriculum/bootstrap-fidelity tuning and target a different transport-quality
+    bottleneck
 
 Required reporting:
 

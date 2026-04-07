@@ -2419,3 +2419,116 @@ Outcome:
 - the next narrow TF2 move should now be:
   - keep the current curriculum
   - test bootstrap-target fidelity rather than more curriculum tuning
+
+### TF2 bootstrap-target fidelity pass
+
+Goal:
+
+- determine whether the current fixed-4-step corrective default is bottlenecked by
+  bootstrap-target fidelity rather than by transport horizon or curriculum
+
+Scope:
+
+- do not change TF2 core math
+- do not reopen:
+  - identity semantics
+  - supervision semantics
+  - cadence semantics
+  - micro-step count
+  - curriculum knobs
+- keep fixed:
+  - `preset = tf2_corrective_transport_default`
+  - `use_teacher_free_features = true`
+  - `feature_aware_tangents = false`
+  - `micro_steps = 4`
+  - `incremental_weight_updates = false`
+  - `supervision_policy = "local_only"`
+  - `theta_update_cadence = "terminal_only"`
+  - `theta_update_budget = "matched"`
+  - `identity_loss_weight = 0.2`
+  - `warmup_epochs = 5`
+  - `hybrid_ramp_epochs = 10`
+  - current selector policy
+- vary only the existing bootstrap target construction:
+  - `bootstrap_integrator in {"euler", "rk2"}`
+  - `bootstrap_substeps in {1, 2, 4, 8, 16}`
+
+Files to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/__init__.py`
+- `src/pc/fmpc_tf2_bootstrap_fidelity_suite.py`
+- `experiments/fmpc_tf2_bootstrap_fidelity_suite.py`
+- `tests/test_fmpc_tf2_bootstrap_fidelity_suite_smoke.py`
+
+Offline-first evaluation rule:
+
+- do not begin with a training grid
+- first build a direct bootstrap-target fidelity probe on shared sampled
+  corrective-default states `(z_t, t_k, r_k)`
+- sample states from the actual corrective-default training regime using only the
+  local-only shadow stream `z_lf_k`, since that is where `u_boot` is supervised in
+  the current default
+- compare every candidate target against a fixed high-fidelity reference built from:
+  - the same `hidden_local_flow(context, z)`
+  - the same horizon `r_k`
+  - `bootstrap_integrator = "rk2"`
+  - `bootstrap_substeps = 64`
+
+Offline metrics to report:
+
+- MSE to the reference average velocity
+- relative MSE
+- cosine similarity to the reference
+- endpoint displacement error over horizon `r`
+- hidden energy after one bootstrap transport step
+- wall-clock cost per target evaluation
+
+Pruning rule:
+
+- always keep the current default candidate:
+  - `("rk2", 4)`
+- rank non-default candidates by offline target fidelity
+- carry forward at most 2 promising non-default candidates into end-to-end TF2
+  runs
+
+Validation to run:
+
+- `tests/test_fmpc_tf2_bootstrap_fidelity_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Expected deliverables:
+
+- one narrow artifact set under:
+  - `outputs/fmpc_tf2_bootstrap_fidelity_suite/`
+- a decision on whether:
+  - higher-fidelity `u_boot` materially improves held-out corrective TF2 behavior
+  - the corrective default should change
+  - or bootstrap-target fidelity is not the current limiter
+
+Outcome:
+
+- the completed bootstrap-target fidelity suite now indicates:
+  - offline target fidelity does improve monotonically as `bootstrap_substeps`
+    increase under `rk2`
+  - but the current default `rk2_s4` is already extremely close to the shared
+    `rk2_s64` reference under the same local field and horizon semantics
+  - the pruned end-to-end candidates:
+    - `rk2_s4`
+    - `rk2_s8`
+    - `rk2_s16`
+    produce identical validation-selected accuracy and gate-coverage behavior
+    within the current multiseed study
+  - the higher-fidelity candidates only reduce
+    `val_transported_final_energy` at floating-point-noise scale while adding
+    substantial runtime cost
+  - `tf2_corrective_transport_default` should therefore keep:
+    - `bootstrap_integrator = "rk2"`
+    - `bootstrap_substeps = 4`
+  - current evidence says:
+    - `u_boot` fidelity is not the current limiter for the fixed-4-step
+      corrective default
+  - the next single narrow TF2 move should now go beyond
+    curriculum/bootstrap-fidelity tuning and target a different transport-quality
+    bottleneck
