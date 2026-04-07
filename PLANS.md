@@ -2658,3 +2658,5 @@ Outcome:
   supervision-bundle split -> terminal-step action-output stabilization -> terminal-step direction anchoring
 - active narrow local diagnostic question has since moved to:
   terminal local-field direction trust-region in the true closed-loop regime
+- active narrow local adoption question has now moved to:
+  terminal local-field stabilizer adoption/selection in the true closed-loop regime
