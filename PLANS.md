@@ -2656,3 +2656,5 @@ Outcome:
   target/state cache -> open-vs-closed-loop trajectory coupling -> partial-open-loop
   handoff localization -> mirrored handoff asymmetry -> terminal-step
   supervision-bundle split -> terminal-step action-output stabilization -> terminal-step direction anchoring
+- active narrow local diagnostic question has since moved to:
+  terminal local-field direction trust-region in the true closed-loop regime
