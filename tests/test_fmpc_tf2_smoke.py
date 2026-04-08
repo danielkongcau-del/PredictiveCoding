@@ -71,6 +71,8 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert summary["time_encoding_variant"] == "raw"
     assert summary["terminal_local_field_direction_intervention"] == "none"
     assert summary["terminal_local_field_angle_clip_degrees"] == 30.0
+    assert summary["transported_output_alignment_weight"] == 0.0
+    assert summary["transported_output_alignment_schedule"] == "none"
     assert summary["checkpoint_selector"] == "gate_constrained_accuracy_then_val_accuracy"
     assert summary["selection_metric_source"] == "val_metric"
     assert summary["report_metric_source"] == "test_metric"
@@ -93,6 +95,8 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert config["transport"]["time_encoding_variant"] == "raw"
     assert config["transport"]["terminal_local_field_direction_intervention"] == "none"
     assert config["transport"]["terminal_local_field_angle_clip_degrees"] == 30.0
+    assert config["transport"]["transported_output_alignment_weight"] == 0.0
+    assert config["transport"]["transported_output_alignment_schedule"] == "none"
     assert "val_transported_final_energy" in epoch_rows[0]
     assert "val_local_field_only_final_energy" in epoch_rows[0]
 
@@ -119,6 +123,8 @@ def test_fmpc_tf2_entrypoint_defaults_to_adopted_terminal_angleclip_preset(tmp_p
         == "local_field_direction_angle_clip_keep_live_norm"
     )
     assert summary["terminal_local_field_angle_clip_degrees"] == 30.0
+    assert summary["transported_output_alignment_weight"] == 0.0
+    assert summary["transported_output_alignment_schedule"] == "none"
 
 
 def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> None:
@@ -165,3 +171,5 @@ def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> N
         == "local_field_direction_angle_clip_keep_live_norm"
     )
     assert corrective_angleclip.terminal_local_field_angle_clip_degrees == 30.0
+    assert corrective_angleclip.transported_output_alignment_weight == 0.0
+    assert corrective_angleclip.transported_output_alignment_schedule == "none"

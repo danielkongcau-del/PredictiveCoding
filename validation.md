@@ -1282,9 +1282,24 @@ Current TF2 adoption interpretation:
     - it is not mainly a selector/checkpoint issue
     - it is not mainly a residual transport-quality issue under the current
       train-time package
+  - the completed adopted-package readout-alignment confirmation pass now
+    indicates:
+    - a minimal output-side alignment aid based on transported readout
+      weighting does not materially change the adopted package
+    - both `final_micro_step_only` and `every_micro_step` variants are
+      indistinguishable from the current adopted default on:
+      - validation-selected accuracy
+      - test accuracy
+      - gate robustness
+      - report output MSE
+      - supervised transported output MSE
+      - internal slow-PC output MSE gap
+    - no readout-alignment candidate clears the promotion threshold
+    - current evidence therefore does not support adopting a transported
+      readout-alignment weight as the next TF2 package change
   - next single narrow move:
-    - run one adopted-package readout-alignment confirmation pass without
-      changing the TF2 transport family
+    - shift away from this specific readout-weighting aid and target a
+      different remaining issue inside the adopted package
 
 Required reporting:
 

@@ -718,3 +718,50 @@ This preset naming is an **implementation / validation contract**, not a new
 mathematical family. The normative mathematical change in this section is only the
 availability of the optional terminal local-field direction intervention during
 training.
+
+### 17.7 Optional transported output-alignment weighting
+
+TF2 may also expose an optional **output-side readout-alignment aid** that does
+not change the transport family or the teacher-free target construction.
+
+Configuration:
+
+- `transported_output_alignment_weight >= 0`
+- `transported_output_alignment_schedule in {`
+  - `"none"`,
+  - `"final_micro_step_only"`,
+  - `"every_micro_step"`,
+  `}`
+
+Normative meaning:
+
+- build the transported hidden state `z_(k+1)` exactly as in the current TF2
+  corrective package
+- build the target-clamped transported-state cache exactly as in the current TF2
+  theta-update path
+- compute the standard local parameter gradients from that transported state
+- if output alignment is active on the current micro-step, scale only the final
+  predictive layer parameter gradients by:
+
+```text
+(1 + lambda_out)
+```
+
+where `lambda_out = transported_output_alignment_weight`
+
+Schedule semantics:
+
+- `"none"`:
+  - no extra readout weighting
+- `"final_micro_step_only"`:
+  - apply the output-side gradient scaling only on the terminal micro-step
+- `"every_micro_step"`:
+  - apply the output-side gradient scaling on every micro-step where TF2 performs
+    a theta update
+
+This is a **train-time weighting extension** only:
+
+- it does not alter `u_boot`
+- it does not alter the identity target
+- it does not alter the terminal local-field direction intervention
+- it does not introduce a new TF2 transport family

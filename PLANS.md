@@ -2055,6 +2055,89 @@ Result:
   - one adopted-package readout-alignment confirmation pass without changing the
     TF2 transport family
 
+### TF2 adopted-package readout-alignment confirmation pass
+
+Goal:
+
+- test one minimal output-side alignment aid inside the adopted TF2 package
+- keep the TF2 transport family fixed
+- decide whether a tiny readout-side intervention materially narrows the
+  remaining slow-PC gap
+
+Files expected to touch:
+
+- `PLANS.md`
+- `spec_math.md`
+- `validation.md`
+- `src/pc/fmpc_tf2.py`
+- `src/pc/fmpc_tf2_readout_alignment_suite.py`
+- `experiments/fmpc_tf2_readout_alignment_suite.py`
+- `tests/test_fmpc_tf2_readout_alignment_suite_smoke.py`
+- `tests/test_fmpc_tf2_smoke.py`
+
+Planned intervention audit:
+
+- keep the adopted package fixed:
+  - `psi_family = "residualized_local_field"`
+  - `time_encoding_variant = "poly_rt2"`
+  - terminal local-field angle clip at `30` degrees
+- add only one optional output-side hook:
+  - transported output-alignment weight on the final PC readout layer
+  - small schedule family:
+    - `none`
+    - `final_micro_step_only`
+    - `every_micro_step`
+
+Planned candidate set:
+
+- control:
+  - adopted default package with no readout-alignment aid
+- candidate B:
+  - adopted package + transported output-alignment weight
+  - `final_micro_step_only`
+- optional candidate C:
+  - same weight
+  - `every_micro_step`
+
+Planned checks:
+
+- mean/std `val_accuracy`
+- mean/std `test_accuracy`
+- mean `gate_passing_epoch_count`
+- `selected_epoch_passes_gate_rate`
+- `selector_fallback_used_rate`
+- mean `val_transported_final_energy`
+- mean/std report output MSE
+- mean/std supervised transported output MSE
+- mean/std internal slow-PC output MSE gap
+- runtime / wall-clock proxy
+
+Planned interpretation output:
+
+- whether a minimal readout-alignment intervention improves the adopted package
+  without changing its transport family
+- whether the winning variant, if any, is strong enough for adoption
+- whether the remaining open question stays at readout alignment or shifts to a
+  different narrow issue inside the adopted package
+
+Result:
+
+- the completed adopted-package readout-alignment confirmation pass shows that
+  both tested readout-alignment variants are numerically indistinguishable from
+  the adopted control on:
+  - validation-selected accuracy
+  - test accuracy
+  - gate robustness
+  - report output MSE
+  - supervised transported output MSE
+  - internal slow-PC output MSE gap
+- neither `final_micro_step_only` nor `every_micro_step` transported
+  output-alignment weighting clears the adoption threshold
+- no readout-alignment variant should be promoted into the adopted package
+- the next narrow TF2 move should shift away from this specific transported
+  readout-weighting aid and target a different remaining issue inside the
+  adopted package
+
 JPC status after the completed probe:
 
 - JPC remains reference-only in TF2

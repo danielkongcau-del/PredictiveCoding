@@ -63,6 +63,7 @@ TF2TerminalLocalFieldDirectionIntervention = Literal[
     "local_field_direction_angle_clip_keep_live_norm",
     "local_field_direction_hard_replace_keep_live_norm",
 ]
+TF2TransportedOutputAlignmentSchedule = Literal["none", "final_micro_step_only", "every_micro_step"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 
@@ -113,6 +114,8 @@ class FMPCTF2Config:
     time_encoding_variant: TF2TimeEncodingVariant = "raw"
     terminal_local_field_direction_intervention: TF2TerminalLocalFieldDirectionIntervention = "none"
     terminal_local_field_angle_clip_degrees: float = 30.0
+    transported_output_alignment_weight: float = 0.0
+    transported_output_alignment_schedule: TF2TransportedOutputAlignmentSchedule = "none"
     psi_weight_scale: float = 0.05
     psi_eta_w: float = 0.01
     psi_eta_b: float | None = 0.01
@@ -183,6 +186,14 @@ class FMPCTF2Config:
             raise ValueError("Unsupported terminal_local_field_direction_intervention.")
         if not (0.0 < float(self.terminal_local_field_angle_clip_degrees) <= 180.0):
             raise ValueError("terminal_local_field_angle_clip_degrees must lie in (0.0, 180.0].")
+        if float(self.transported_output_alignment_weight) < 0.0:
+            raise ValueError("transported_output_alignment_weight must be non-negative.")
+        if self.transported_output_alignment_schedule not in {
+            "none",
+            "final_micro_step_only",
+            "every_micro_step",
+        }:
+            raise ValueError("Unsupported transported_output_alignment_schedule.")
         if (
             self.terminal_local_field_direction_intervention != "none"
             and self.supervision_policy != "local_only"
@@ -1096,11 +1107,17 @@ def _theta_update_from_transported_state(
     *,
     eta_w: float,
     eta_b: float,
+    output_alignment_scale: float = 0.0,
 ) -> float:
     states = hidden_states_from_state(context, transported_z)
     cache = compute_cache(states, model.layers)
     pre_update_energy = total_energy(cache, model.layers, context.batch_size)
     weight_gradients, bias_gradients = parameter_gradients(states, cache, model.layers)
+    if float(output_alignment_scale) > 0.0:
+        # The last layer gradient is the transported readout term; scaling it is the
+        # smallest output-side alignment aid that leaves the TF2 transport family unchanged.
+        weight_gradients[-1] = np.asarray(weight_gradients[-1], dtype=np.float64) * (1.0 + float(output_alignment_scale))
+        bias_gradients[-1] = np.asarray(bias_gradients[-1], dtype=np.float64) * (1.0 + float(output_alignment_scale))
     apply_parameter_updates(
         model.layers,
         weight_gradients,
@@ -1109,6 +1126,24 @@ def _theta_update_from_transported_state(
         eta_b=eta_b,
     )
     return float(pre_update_energy)
+
+
+def _output_alignment_scale_for_step(
+    config: FMPCTF2Config,
+    *,
+    is_terminal_step: bool,
+) -> float:
+    weight = float(config.transported_output_alignment_weight)
+    if weight <= 0.0:
+        return 0.0
+    schedule = config.transported_output_alignment_schedule
+    if schedule == "none":
+        return 0.0
+    if schedule == "every_micro_step":
+        return weight
+    if schedule == "final_micro_step_only":
+        return weight if is_terminal_step else 0.0
+    raise ValueError(f"Unsupported transported_output_alignment_schedule '{schedule}'.")
 
 
 def _run_tf2_micro_step(
@@ -1173,12 +1208,17 @@ def _run_tf2_micro_step(
     if event_log is not None:
         event_log.append("advance")
     if apply_theta_update:
+        output_alignment_scale = _output_alignment_scale_for_step(
+            config,
+            is_terminal_step=is_terminal_step,
+        )
         theta_energy = _theta_update_from_transported_state(
             model,
             context,
             z_on_next,
             eta_w=theta_eta_w,
             eta_b=theta_eta_b,
+            output_alignment_scale=output_alignment_scale,
         )
         if event_log is not None:
             event_log.append("theta_update")
@@ -1398,6 +1438,8 @@ def _config_payload(config: FMPCTF2Config) -> dict[str, Any]:
             "time_encoding_variant": config.time_encoding_variant,
             "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
             "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
+            "transported_output_alignment_weight": float(config.transported_output_alignment_weight),
+            "transported_output_alignment_schedule": config.transported_output_alignment_schedule,
             "identity_loss_weight": float(config.identity_loss_weight),
             "warmup_epochs": int(config.warmup_epochs),
             "hybrid_ramp_epochs": int(config.hybrid_ramp_epochs),
@@ -1588,6 +1630,8 @@ def run_fmpc_tf2_experiment(config: FMPCTF2Config) -> FMPCTF2RunResult:
         "time_encoding_variant": config.time_encoding_variant,
         "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
         "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
+        "transported_output_alignment_weight": float(config.transported_output_alignment_weight),
+        "transported_output_alignment_schedule": config.transported_output_alignment_schedule,
         "theta_micro_lr": float(theta_micro_lr),
         "theta_micro_bias_lr": float(theta_micro_bias_lr),
         "bootstrap_integrator": config.bootstrap_integrator,
