@@ -4,6 +4,10 @@ This document tracks the staged execution plan for the repository.
 
 The purpose is not to predict every future detail, but to prevent large unfocused implementation jumps.
 
+`PLANS.md` remains the only canonical long-horizon planning file.
+For the short active-status summary, read [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md) first.
+Do not create or treat `PLANS2.md` as an authoritative planning file.
+
 ---
 
 ## Phase 0 — Minimal mathematically faithful baseline

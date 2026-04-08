@@ -30,7 +30,7 @@ Current status split:
   - `tf2_corrective_transport_default`
 - the currently adopted TF2 experimental default on `main` is:
   - `tf2_corrective_transport_terminal_angleclip_default`
-- current TF2 work should be read through `AGENTS.md`, `PLANS.md`, and `validation.md`;
+- current TF2 work should be read through `AGENTS.md`, `CURRENT_STATE.md`, `PLANS.md`, and `validation.md`;
   this README status block may stay lighter than the active bridge-stage contract
 - The current Phase 2 freeze summary lives in `RESULTS.md`
 - Earlier train-only and train/eval-style Phase 2 conclusions are now treated as methodology-limited historical results
@@ -82,13 +82,14 @@ Before making code changes, read these files in order:
 
 1. `README.md`
 2. `AGENTS.md`
-3. `PLANS.md`
-4. `spec_math.md`
-5. `validation.md`
+3. `CURRENT_STATE.md`
+4. `PLANS.md`
+5. `spec_math.md`
+6. `validation.md`
 
 If any of those files conflict, precedence is:
 
-`spec_math.md` > `validation.md` > `AGENTS.md` > `PLANS.md` > `README.md`
+`spec_math.md` > `validation.md` > `AGENTS.md` > `CURRENT_STATE.md` > `PLANS.md` > `README.md`
 
 ## Design principles
 
@@ -104,6 +105,7 @@ If any of those files conflict, precedence is:
 predictive-coding/
   README.md
   AGENTS.md
+  CURRENT_STATE.md
   PLANS.md
   spec_math.md
   validation.md

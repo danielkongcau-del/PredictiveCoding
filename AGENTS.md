@@ -19,11 +19,16 @@ Before editing code, read:
 
 1. `README.md`
 2. `AGENTS.md`
-3. `PLANS.md`
-4. `spec_math.md`
-5. `validation.md`
+3. `CURRENT_STATE.md`
+4. `PLANS.md`
+5. `spec_math.md`
+6. `validation.md`
 
 Do not assume the current code is authoritative if it conflicts with the spec.
+
+Repository document precedence remains:
+
+- `spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md`
 
 ## Hard constraints
 
