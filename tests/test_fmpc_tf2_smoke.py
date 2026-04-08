@@ -97,6 +97,30 @@ def test_fmpc_tf2_smoke_run_writes_expected_artifacts(tmp_path: Path) -> None:
     assert "val_local_field_only_final_energy" in epoch_rows[0]
 
 
+def test_fmpc_tf2_entrypoint_defaults_to_adopted_terminal_angleclip_preset(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="fmpc_tf2_default_entrypoint_smoke",
+        epochs=2,
+        batch_size=64,
+        eval_steps=5,
+        layer_dims=(64, 16, 10),
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+
+    assert config["preset_name"] == "tf2_corrective_transport_terminal_angleclip_default"
+    assert summary["preset_name"] == "tf2_corrective_transport_terminal_angleclip_default"
+    assert summary["psi_family"] == "residualized_local_field"
+    assert summary["time_encoding_variant"] == "poly_rt2"
+    assert (
+        summary["terminal_local_field_direction_intervention"]
+        == "local_field_direction_angle_clip_keep_live_norm"
+    )
+    assert summary["terminal_local_field_angle_clip_degrees"] == 30.0
+
+
 def test_tf2_preset_builders_keep_canonical_and_expose_corrective_default() -> None:
     canonical = build_tf2_canonical_config()
     canonical_via_dispatch = build_tf2_preset_config("tf2_canonical")

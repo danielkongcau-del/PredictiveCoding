@@ -19,16 +19,18 @@ from pc.fmpc_tf2 import (
 def run(
     output_root: str | Path = "outputs",
     run_id: str | None = None,
-    preset_name: TF2PresetName = "tf2_canonical",
+    preset_name: TF2PresetName = "tf2_corrective_transport_terminal_angleclip_default",
     **overrides: object,
 ) -> FMPCTF2RunResult:
     """Run a named TF2 bridge preset on digits.
 
     Presets:
-    - `tf2_canonical`: hypothesis-driven iFMPC candidate with incremental
-      theta updates and mixed supervision.
-    - `tf2_corrective_transport_default`: empirical corrective-transport
-      working default from the current TF2 suite.
+    - `tf2_corrective_transport_terminal_angleclip_default`: current adopted TF2
+      experimental default on `main`.
+    - `tf2_corrective_transport_default`: historical plain corrective working
+      reference.
+    - `tf2_canonical`: hypothesis-driven iFMPC candidate with incremental theta
+      updates and mixed supervision.
     """
 
     config = build_tf2_preset_config(
