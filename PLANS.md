@@ -1932,6 +1932,63 @@ Current preset interpretation:
   - `terminal_local_field_angle_clip_degrees = 30`
 - do not silently replace the hypothesis-driven preset with the empirical preset
 
+### TF2 external comparison / gap-closure pass
+
+Goal:
+
+- run one narrow external comparison centered on the adopted TF2 experimental default
+- quantify how much it narrows the gap to the canonical slow-PC `digits` baseline
+- keep the pass evidence-driven and avoid opening any new TF2 mechanism family
+
+Files expected to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_tf2_external_comparison_suite.py`
+- `experiments/fmpc_tf2_external_comparison_suite.py`
+- `tests/test_fmpc_tf2_external_comparison_suite_smoke.py`
+
+Planned comparison set:
+
+- adopted TF2 experimental default:
+  - `tf2_corrective_transport_terminal_angleclip_default`
+- historical corrective working reference:
+  - `tf2_corrective_transport_default`
+- hypothesis-driven TF2 candidate:
+  - `tf2_canonical`
+- canonical slow-PC digits baseline:
+  - rerun inside the suite only if current local baseline artifacts are absent
+
+Planned checks:
+
+- mean/std `val_accuracy`
+- mean/std `test_accuracy`
+- mean `gate_passing_epoch_count`
+- `selected_epoch`
+- `selector_fallback_used_rate`
+- mean `val_transported_final_energy`
+- runtime / wall-clock
+- pairwise deltas:
+  - adopted default vs historical corrective reference
+  - adopted default vs `tf2_canonical`
+  - adopted default vs canonical slow-PC digits baseline
+
+Planned interpretation output:
+
+- whether the adopted TF2 default materially narrows the slow-PC gap
+- whether the historical corrective reference is now mainly historical
+- whether `tf2_canonical` remains an active pursuit or is now subordinate
+- whether the next stage should remain `continue TF2 bridge` or prepare a later broader stage
+
+Result:
+
+- the adopted default materially narrows the canonical slow-PC digits gap relative
+  to the best pre-adoption TF2 comparator, but the slow-PC gap remains open
+- the historical corrective reference is now mainly historical
+- `tf2_canonical` is clearly subordinate in the current phase
+- the next stage should remain:
+  - `continue TF2 bridge inside the adopted package`
+
 JPC status after the completed probe:
 
 - JPC remains reference-only in TF2

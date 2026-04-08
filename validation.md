@@ -1220,6 +1220,31 @@ Current TF2 adoption interpretation:
   - closure path:
     terminal-step direction anchoring -> true closed-loop trust-region rescue ->
     adoption/selection -> mainline confirmation
+- the completed external comparison / gap-closure pass now indicates:
+  - `tf2_corrective_transport_terminal_angleclip_default` materially narrows the
+    canonical slow-PC digits test gap relative to the best pre-adoption TF2
+    comparator:
+    - adopted gap: about `-0.0615`
+    - historical corrective gap: about `-0.0763`
+    - canonical gap: about `-0.0919`
+  - relative to the historical corrective working reference, the adopted default
+    gains about:
+    - `+0.0059` mean val accuracy
+    - `+0.0148` mean test accuracy
+  - relative to `tf2_canonical`, the adopted default gains about:
+    - `+0.0148` mean val accuracy
+    - `+0.0304` mean test accuracy
+  - the adopted default keeps:
+    - `selected_epoch_passes_gate_rate = 1.0`
+    - `selector_fallback_used_rate = 0.0`
+  - however, the canonical slow-PC digits baseline still leads by about:
+    - `+0.0437` mean val accuracy
+    - `+0.0615` mean test accuracy
+  - interpretation:
+    - `tf2_corrective_transport_default` is now mainly historical
+    - `tf2_canonical` is clearly subordinate in the current TF2 phase
+    - the next stage should remain:
+      - `continue TF2 bridge inside the adopted package`
 
 Required reporting:
 
