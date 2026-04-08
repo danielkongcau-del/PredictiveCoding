@@ -1362,6 +1362,44 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - run one adopted-package readout-sensitive / output-sensitive terminal
       direction diagnostic inside the current package
+  - the completed adopted-package output-sensitive terminal direction suite now
+    indicates:
+    - isolating the terminal intervention to the readout row-space does not
+      improve the adopted package
+    - both tested row-space-sensitive candidates underperform the current
+      adopted default:
+      - row-space-only angle clip:
+        - about `0.7963` mean val accuracy
+        - about `0.7896` mean test accuracy
+        - vs adopted control:
+          - `-0.0393` val accuracy
+          - `-0.0444` test accuracy
+      - row-space-only hard replace upper bound:
+        - about `0.8104` mean val accuracy
+        - about `0.8148` mean test accuracy
+        - vs adopted control:
+          - `-0.0252` val accuracy
+          - `-0.0193` test accuracy
+    - both candidates also worsen the targeted terminal row-space distortion:
+      - adopted control validation row-space fraction:
+        - about `0.5448`
+      - row-space-only angle clip validation row-space fraction:
+        - about `0.5949`
+      - row-space-only hard replace validation row-space fraction:
+        - about `0.5931`
+      - both candidates increase validation row-space RMS by about:
+        - `+0.0115` to `+0.0122`
+    - gate robustness does not collapse:
+      - `selected_epoch_passes_gate_rate = 1.0`
+      - `selector_fallback_used_rate = 0.0`
+      across the tested candidates
+  - decision:
+    - keep the current adopted TF2 experimental default unchanged:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+  - next single narrow move:
+    - run one adopted-package terminal row-space / orthogonal-component
+      coupling diagnostic, because the gain of the current full-vector angle
+      clip does not survive row-space-only isolation
 
 Required reporting:
 

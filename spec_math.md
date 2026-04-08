@@ -658,6 +658,8 @@ during training:
   - `"none"`
   - `"local_field_direction_angle_clip_keep_live_norm"`
   - `"local_field_direction_hard_replace_keep_live_norm"`
+  - `"local_field_direction_angle_clip_keep_live_norm_rowspace_only"`
+  - `"local_field_direction_hard_replace_keep_live_norm_rowspace_only"`
   - `}`
 
 This intervention is defined only for the **final micro-step** of the true closed-loop
@@ -694,6 +696,33 @@ TF2 keeps the learned terminal norm but clips the learned terminal direction int
 cone around `d_lf` with half-angle `terminal_local_field_angle_clip_degrees`:
 
 - `u_term = ||u_live|| * clip_dir(normalize(u_live), d_lf; theta_clip)`
+
+TF2 may also use the readout-relevant row-space of the current output layer:
+
+- `P_row = projector(rowspace(W_out))`
+- `P_orth = I - P_row`
+
+Define:
+
+- `u_live^row = P_row u_live`
+- `u_live^orth = P_orth u_live`
+- `d_lf^row = normalize(P_row d_lf)`
+
+If `terminal_local_field_direction_intervention = "local_field_direction_hard_replace_keep_live_norm_rowspace_only"`,
+TF2 keeps the live orthogonal component unchanged and replaces only the readout-row-space
+component direction while preserving its live norm:
+
+- `u_term = ||u_live^row|| * d_lf^row + u_live^orth`
+
+If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm_rowspace_only"`,
+TF2 keeps the live orthogonal component unchanged and clips only the readout-row-space
+component direction into a cone around `d_lf^row` with half-angle
+`terminal_local_field_angle_clip_degrees`:
+
+- `u_term = ||u_live^row|| * clip_dir(normalize(u_live^row), d_lf^row; theta_clip) + u_live^orth`
+
+If either the live row-space component or the anchor row-space component is degenerate,
+TF2 falls back to leaving the row-space component unchanged for that sample.
 
 The transported terminal state used for the immediate terminal theta update is then:
 

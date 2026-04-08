@@ -2329,6 +2329,115 @@ Result:
 - next single narrow move:
   - run one adopted-package readout-sensitive / output-sensitive terminal
     direction diagnostic inside the current package
+
+### TF2 adopted-package readout-sensitive / output-sensitive terminal direction diagnostic
+
+Goal:
+
+- test whether controlling the final micro-step specifically in the
+  readout-relevant row-space materially improves the adopted package
+- keep the transport family fixed while narrowing the remaining slow-PC gap
+
+Files expected to touch:
+
+- `PLANS.md`
+- `spec_math.md`
+- `validation.md`
+- `src/pc/fmpc_tf2.py`
+- `src/pc/fmpc_tf2_output_sensitive_terminal_direction_suite.py`
+- `experiments/fmpc_tf2_output_sensitive_terminal_direction_suite.py`
+- `tests/test_fmpc_tf2_output_sensitive_terminal_direction_suite_smoke.py`
+
+Planned scope:
+
+- keep the adopted package fixed:
+  - `psi_family = "residualized_local_field"`
+  - `time_encoding_variant = "poly_rt2"`
+  - `feature_aware_tangents = false`
+  - matched-budget semantics unchanged
+- use the current adopted preset as control:
+  - `tf2_corrective_transport_terminal_angleclip_default`
+- minimally extend the existing terminal local-field intervention hook to allow
+  a readout-row-space-sensitive variant on the final micro-step only
+
+Planned candidate set:
+
+- control:
+  - current adopted angle-clip default
+- one real candidate:
+  - row-space-sensitive terminal angle clip
+  - clip only the terminal action component inside the readout row-space
+  - keep the orthogonal component unchanged
+- optional upper-bound only if trivial:
+  - row-space-sensitive terminal hard replace with live orthogonal component kept
+
+Planned diagnostics:
+
+- integrated metrics:
+  - mean/std `val_accuracy`
+  - mean/std `test_accuracy`
+  - mean gate-passing epoch count
+  - `selected_epoch_passes_gate_rate`
+  - `selector_fallback_used_rate`
+  - mean `val_transported_final_energy`
+  - mean/std report output MSE
+  - mean/std supervised transported output MSE
+- terminal-knot row-space distortion metrics:
+  - `delta_h` total RMS
+  - `delta_h` row-space RMS
+  - `delta_h` row-space fraction
+- optional cheap report-only comparison against:
+  - canonical slow-PC digits baseline
+  - historical corrective reference
+
+Planned decision output:
+
+- adopt a row-space-sensitive terminal intervention only if it:
+  - materially improves validation-selected behavior
+  - reduces terminal row-space distortion
+  - does not materially harm gate robustness
+- otherwise keep the current adopted default unchanged
+
+Result:
+
+- the completed adopted-package output-sensitive terminal direction suite now
+  indicates:
+  - isolating the final micro-step intervention to the readout row-space does
+    not help
+  - both tested row-space-sensitive variants underperform the current adopted
+    control:
+    - row-space-only angle clip:
+      - mean val accuracy about `0.7963`
+      - mean test accuracy about `0.7896`
+      - vs control:
+        - `-0.0393` val accuracy
+        - `-0.0444` test accuracy
+    - row-space-only hard replace upper bound:
+      - mean val accuracy about `0.8104`
+      - mean test accuracy about `0.8148`
+      - vs control:
+        - `-0.0252` val accuracy
+        - `-0.0193` test accuracy
+  - the row-space-sensitive variants also move the endpoint geometry in the
+    wrong direction for the targeted metric:
+    - control validation row-space fraction:
+      - about `0.5448`
+    - row-space-only angle clip validation row-space fraction:
+      - about `0.5949`
+    - row-space-only hard replace validation row-space fraction:
+      - about `0.5931`
+    - both candidates increase validation row-space RMS by about:
+      - `+0.0115` to `+0.0122`
+  - gate robustness does not collapse:
+    - `selected_epoch_passes_gate_rate = 1.0` for all tested candidates
+    - but the accuracy tradeoff is still clearly negative
+- decision:
+  - keep the current adopted default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one adopted-package terminal row-space / orthogonal-component coupling
+    diagnostic, since the benefit of the current full-vector angle clip does not
+    survive row-space-only isolation
 - one next narrow TF2 move that stays inside the adopted package
 
 JPC status after the completed probe:

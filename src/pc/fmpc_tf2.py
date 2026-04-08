@@ -62,6 +62,8 @@ TF2TerminalLocalFieldDirectionIntervention = Literal[
     "none",
     "local_field_direction_angle_clip_keep_live_norm",
     "local_field_direction_hard_replace_keep_live_norm",
+    "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
+    "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
 ]
 TF2TransportedOutputAlignmentSchedule = Literal["none", "final_micro_step_only", "every_micro_step"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
@@ -182,6 +184,8 @@ class FMPCTF2Config:
             "none",
             "local_field_direction_angle_clip_keep_live_norm",
             "local_field_direction_hard_replace_keep_live_norm",
+            "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
+            "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
         }:
             raise ValueError("Unsupported terminal_local_field_direction_intervention.")
         if not (0.0 < float(self.terminal_local_field_angle_clip_degrees) <= 180.0):
@@ -823,17 +827,91 @@ def _clip_direction_to_anchor_cone(
     return _safe_direction(clipped)
 
 
+def _free_hidden_state_indices_from_context(context: FMPCTF1Context) -> list[int]:
+    if len(context.clamped_mask) <= 2:
+        return []
+    return [
+        layer_index
+        for layer_index in range(1, len(context.clamped_mask) - 1)
+        if not context.clamped_mask[layer_index]
+    ]
+
+
+def _final_hidden_block_slice(context: FMPCTF1Context) -> slice:
+    hidden_indices = _free_hidden_state_indices_from_context(context)
+    if not hidden_indices:
+        raise ValueError("TF2 terminal interventions require at least one free hidden layer.")
+    offset = 0
+    final_hidden_index = hidden_indices[-1]
+    for layer_index in hidden_indices:
+        width = int(np.asarray(context.states_template[layer_index], dtype=np.float64).shape[1])
+        if layer_index == final_hidden_index:
+            return slice(offset, offset + width)
+        offset += width
+    raise ValueError("Failed to resolve final hidden block slice.")
+
+
+def _rowspace_basis_from_output_weight(weight: np.ndarray) -> np.ndarray:
+    weight_array = np.asarray(weight, dtype=np.float64)
+    _, singular_values, vh = np.linalg.svd(weight_array, full_matrices=False)
+    rank = int(np.sum(singular_values > 1e-12))
+    if rank == 0:
+        return np.zeros((weight_array.shape[1], 0), dtype=np.float64)
+    return vh[:rank].T.copy()
+
+
+def _project_onto_rowspace(vectors: np.ndarray, basis: np.ndarray) -> np.ndarray:
+    vectors_array = np.asarray(vectors, dtype=np.float64)
+    if basis.shape[1] == 0:
+        return np.zeros_like(vectors_array)
+    return (vectors_array @ basis) @ basis.T
+
+
+def _apply_terminal_rowspace_only_direction_intervention(
+    raw_action: np.ndarray,
+    local_field_action: np.ndarray,
+    output_weight: np.ndarray,
+    context: FMPCTF1Context,
+    config: FMPCTF2Config,
+    *,
+    hard_replace: bool,
+) -> np.ndarray:
+    final_hidden_slice = _final_hidden_block_slice(context)
+    basis = _rowspace_basis_from_output_weight(output_weight)
+    stabilized_action = np.asarray(raw_action, dtype=np.float64).copy()
+    raw_final_hidden = stabilized_action[:, final_hidden_slice]
+    anchor_final_hidden = np.asarray(local_field_action, dtype=np.float64)[:, final_hidden_slice]
+    raw_row = _project_onto_rowspace(raw_final_hidden, basis)
+    raw_orth = raw_final_hidden - raw_row
+    anchor_row = _project_onto_rowspace(anchor_final_hidden, basis)
+    row_norm = _vector_norms(raw_row)[:, None]
+    if hard_replace:
+        stabilized_row = _safe_direction(anchor_row) * row_norm
+    else:
+        stabilized_row = _clip_direction_to_anchor_cone(
+            _safe_direction(raw_row),
+            _safe_direction(anchor_row),
+            max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),
+        ) * row_norm
+    stabilized_action[:, final_hidden_slice] = stabilized_row + raw_orth
+    return stabilized_action
+
+
 def _apply_terminal_local_field_direction_intervention(
     z_on_k: np.ndarray,
     dt: float,
     plan: TF2MicroStepPlan,
     config: FMPCTF2Config,
+    *,
+    context: FMPCTF1Context,
+    output_weight: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     intervention = config.terminal_local_field_direction_intervention
     raw_action = _action_from_step(z_on_k, plan.z_on_next, dt)
     if intervention == "none":
         return raw_action, plan.z_on_next.copy()
-    local_field_direction = _safe_direction(_extract_detached_local_flow_anchor(plan.psi_inputs, config))
+    local_field_action = _extract_detached_local_flow_anchor(plan.psi_inputs, config)
+    local_field_direction = _safe_direction(local_field_action)
     live_norm = _vector_norms(raw_action)[:, None]
     if intervention == "local_field_direction_hard_replace_keep_live_norm":
         stabilized_action = local_field_direction * live_norm
@@ -843,6 +921,24 @@ def _apply_terminal_local_field_direction_intervention(
             local_field_direction,
             max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),
         ) * live_norm
+    elif intervention == "local_field_direction_hard_replace_keep_live_norm_rowspace_only":
+        stabilized_action = _apply_terminal_rowspace_only_direction_intervention(
+            raw_action,
+            local_field_action,
+            output_weight,
+            context,
+            config,
+            hard_replace=True,
+        )
+    elif intervention == "local_field_direction_angle_clip_keep_live_norm_rowspace_only":
+        stabilized_action = _apply_terminal_rowspace_only_direction_intervention(
+            raw_action,
+            local_field_action,
+            output_weight,
+            context,
+            config,
+            hard_replace=False,
+        )
     else:
         raise ValueError(f"Unsupported terminal_local_field_direction_intervention '{intervention}'.")
     stabilized_next = np.asarray(z_on_k, dtype=np.float64) + float(dt) * stabilized_action
@@ -1189,6 +1285,8 @@ def _run_tf2_micro_step(
             dt,
             plan,
             config,
+            context=context,
+            output_weight=model.layers[-1].weight,
         )
     if sample_collector is not None:
         payload: dict[str, Any] = {
