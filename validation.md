@@ -1300,6 +1300,29 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - shift away from this specific readout-weighting aid and target a
       different remaining issue inside the adopted package
+  - the completed adopted-package readout-refit / endpoint-separability pass
+    now indicates:
+    - transported-endpoint readout refit is not a rescue:
+      - on the frozen transported basis, the refit head drives supervised
+        output MSE down to about `0.0017`
+      - but integrated prediction-mode behavior degrades sharply to about:
+        - `0.4844` mean val accuracy
+        - `0.4770` mean test accuracy
+    - slow-PC-endpoint readout refit does materially improve integrated
+      behavior over both the adopted control and the transported-endpoint
+      refit:
+      - about `+0.1133` mean val accuracy vs adopted control
+      - about `+0.1244` mean test accuracy vs adopted control
+      - about `+0.4644` mean val accuracy vs transported-endpoint refit
+      - about `+0.4815` mean test accuracy vs transported-endpoint refit
+    - diagnosis:
+      - the remaining adopted-package readout mismatch is now best explained as
+        an endpoint-basis / representation mismatch between transported
+        endpoints and that model's own slow-PC endpoints
+      - it is not mainly a simple transported-head fitting problem
+  - next single narrow move:
+    - run one adopted-package endpoint-basis / separability diagnostic at the
+      hidden-to-output interface, without changing the TF2 transport family
 
 Required reporting:
 

@@ -2138,6 +2138,96 @@ Result:
   readout-weighting aid and target a different remaining issue inside the
   adopted package
 
+### TF2 adopted-package readout-refit / endpoint-separability diagnostic
+
+Goal:
+
+- determine whether the remaining slow-PC gap inside the adopted TF2 package is
+  mainly:
+  - a poorly fitted output/readout head
+  - or a deeper mismatch between transported endpoints and that model's own
+    slow-PC endpoints
+
+Files expected to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_tf2_readout_refit_suite.py`
+- `experiments/fmpc_tf2_readout_refit_suite.py`
+- `tests/test_fmpc_tf2_readout_refit_suite_smoke.py`
+
+Planned scope:
+
+- keep the adopted package fixed:
+  - `psi_family = "residualized_local_field"`
+  - `time_encoding_variant = "poly_rt2"`
+  - terminal local-field angle clip at `30` degrees
+  - current TF2 identity semantics unchanged
+- do not change TF2 transport family or selector rules
+- run one post-hoc readout-only diagnostic on the selected adopted-package runs
+
+Planned candidate set:
+
+- control:
+  - current adopted default as-is
+- candidate B:
+  - same trained adopted model
+  - freeze hidden transport / hidden parameters
+  - refit the output layer only on transported endpoints
+- candidate C:
+  - same trained adopted model
+  - freeze hidden transport / hidden parameters
+  - refit the output layer only on that model's own target-clamped slow-PC
+    endpoints
+- report-only external context:
+  - canonical slow-PC digits baseline, reused if possible
+
+Planned checks:
+
+- mean/std `val_accuracy`
+- mean/std `test_accuracy`
+- mean/std report output MSE
+- mean/std supervised output MSE
+- mean `selected_epoch`
+- readout-refit selection metadata
+- runtime / wall-clock proxy
+- pairwise deltas:
+  - transported-endpoint readout refit vs control
+  - slow-PC-endpoint readout refit vs control
+  - slow-PC-endpoint readout refit vs transported-endpoint readout refit
+  - control vs canonical slow-PC baseline
+
+Planned interpretation output:
+
+- if transported-endpoint readout refit materially helps, treat the remaining
+  issue mainly as head fitting / readout optimization
+- if slow-PC-endpoint readout refit materially beats transported-endpoint
+  readout refit, treat the remaining issue mainly as endpoint-basis /
+  representation mismatch
+- if neither materially helps, shift the next narrow move to a different
+  package-internal issue
+
+Result:
+
+- the completed adopted-package readout-refit / endpoint-separability suite now
+  indicates:
+  - transported-endpoint readout refit does not rescue the adopted package:
+    - supervised transported output MSE drops sharply on the frozen transported
+      basis
+    - but integrated validation/test behavior collapses relative to the adopted
+      control
+  - slow-PC-endpoint readout refit does materially improve over both:
+    - the adopted control
+    - the transported-endpoint readout refit
+  - the strongest current reading is therefore:
+    - the remaining adopted-package readout mismatch is mainly an
+      endpoint-basis / representation mismatch between transported endpoints and
+      that model's own slow-PC endpoints
+    - it is not mainly a simple head-fitting problem on transported endpoints
+- the next narrow TF2 move should therefore be:
+  - one adopted-package endpoint-basis / separability diagnostic at the
+    hidden-to-output interface, without changing the TF2 transport family
+
 JPC status after the completed probe:
 
 - JPC remains reference-only in TF2
