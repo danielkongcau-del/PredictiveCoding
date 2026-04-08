@@ -1323,6 +1323,45 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - run one adopted-package endpoint-basis / separability diagnostic at the
       hidden-to-output interface, without changing the TF2 transport family
+  - the completed adopted-package endpoint-basis / separability suite now
+    indicates:
+    - the remaining mismatch is not a simple interface-separability deficit
+    - under the current frozen head, transported endpoints are actually more
+      separable than the same model's own slow-PC endpoints:
+      - validation frozen-head accuracy:
+        - transported about `0.9348`
+        - slow-PC about `0.8407`
+      - validation frozen-head output MSE:
+        - transported about `0.0517`
+        - slow-PC about `0.0605`
+      - validation between-class centroid margin:
+        - transported about `0.6334`
+        - slow-PC about `0.4700`
+      - validation Fisher separability ratio:
+        - transported about `1.8067`
+        - slow-PC about `1.5028`
+    - within-class spread only increases slightly under transported endpoints:
+      - validation mean within-class RMS delta:
+        - about `+0.0226`
+    - the dominant difference is instead a readout-relevant basis shift:
+      - per-sample endpoint delta row-space RMS fraction:
+        - about `0.5448`
+      - class-centroid displacement row-space fraction:
+        - about `0.5657`
+    - validation knot-wise geometry does not show a separability collapse:
+      - Fisher separability rises monotonically across knots
+      - nearest-centroid accuracy rises monotonically across knots
+      - total endpoint divergence from the model's own slow-PC endpoints grows
+        monotonically and is largest at the terminal knot
+  - diagnosis:
+    - the remaining adopted-package mismatch is now best explained as:
+      - distortion in the readout-relevant row-space
+    - it is not mainly:
+      - reduced between-class margin
+      - inflated within-class spread
+  - next single narrow move:
+    - run one adopted-package readout-sensitive / output-sensitive terminal
+      direction diagnostic inside the current package
 
 Required reporting:
 
