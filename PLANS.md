@@ -2538,6 +2538,114 @@ Result:
   - run one adopted-package split-threshold terminal coupling diagnostic that
     keeps both row-space and orthogonal components active but tests whether
     their clip strengths need to differ
+
+### TF2 adopted-package split-threshold terminal coupling diagnostic
+
+Goal:
+
+- test whether the current full-vector terminal angle clip can be improved by
+  keeping both:
+  - row-space control
+  - orthogonal-component control
+  active while assigning them different clip strengths
+
+Files expected to touch:
+
+- `PLANS.md`
+- `spec_math.md`
+- `validation.md`
+- `src/pc/fmpc_tf2.py`
+- `src/pc/fmpc_tf2_split_threshold_coupling_suite.py`
+- `experiments/fmpc_tf2_split_threshold_coupling_suite.py`
+- `tests/test_fmpc_tf2_split_threshold_coupling_suite_smoke.py`
+
+Planned candidate set:
+
+- adopted control:
+  - current full-vector terminal angle clip at `30` degrees
+- split-threshold candidate B:
+  - stricter row-space clip than orthogonal clip
+- split-threshold candidate C:
+  - stricter orthogonal clip than row-space clip
+- optional balanced sanity check:
+  - `30 / 30` split-threshold decomposition
+
+Planned diagnostics:
+
+- mean/std `val_accuracy`
+- mean/std `test_accuracy`
+- mean gate-passing epoch count
+- `selected_epoch_passes_gate_rate`
+- `selector_fallback_used_rate`
+- mean `val_transported_final_energy`
+- val report output MSE
+- val supervised transported output MSE
+- terminal-knot `delta_h` total RMS
+- terminal-knot row-space RMS
+- terminal-knot orthogonal RMS
+- terminal-knot row-space fraction
+- runtime proxy
+
+Planned interpretation output:
+
+- if no split-threshold candidate beats the adopted control, keep the current
+  adopted default unchanged
+- only promote a split-threshold variant if it improves validation-selected
+  behavior, improves row-space distortion in the intended direction, and does
+  not materially harm robustness
+
+Result:
+
+- the completed adopted-package split-threshold terminal coupling suite now
+  indicates:
+  - no split-threshold candidate beats the current adopted control
+  - stricter row-space clip than orthogonal clip underperforms by about:
+    - `-0.0326` mean val accuracy
+    - `-0.0311` mean test accuracy
+  - stricter orthogonal clip than row-space clip also underperforms by about:
+    - `-0.0407` mean val accuracy
+    - `-0.0304` mean test accuracy
+  - the balanced `30 / 30` split-threshold sanity check also underperforms by
+    about:
+    - `-0.0393` mean val accuracy
+    - `-0.0444` mean test accuracy
+  - gate robustness remains intact across the tested split-threshold variants:
+    - `selected_epoch_passes_gate_rate = 1.0`
+    - `selector_fallback_used_rate = 0.0`
+  - but all tested split-threshold variants worsen the targeted row-space
+    distortion metrics:
+    - adopted control validation row-space RMS:
+      - about `0.1536`
+    - row-strict split-threshold validation row-space RMS:
+      - about `0.1657`
+    - orth-strict split-threshold validation row-space RMS:
+      - about `0.1662`
+    - balanced `30 / 30` split-threshold validation row-space RMS:
+      - about `0.1651`
+    - adopted control validation row-space fraction:
+      - about `0.5448`
+    - row-strict split-threshold validation row-space fraction:
+      - about `0.5989`
+    - orth-strict split-threshold validation row-space fraction:
+      - about `0.6053`
+    - balanced `30 / 30` split-threshold validation row-space fraction:
+      - about `0.5949`
+  - all tested split-threshold variants reduce total endpoint RMS slightly, but
+    only by shifting a larger fraction of the mismatch into the readout-relevant
+    row-space
+- diagnosis:
+  - the gain of the current full-vector terminal angle clip does not seem to be
+    recoverable by keeping both subspaces active with different independent clip
+    strengths
+  - the current evidence therefore favors the unified full-vector cone geometry
+    over the tested split-threshold decompositions
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one adopted-package unified-cone vs split-subspace cone geometry
+    diagnostic to explain why the full-vector terminal clip dominates all tested
+    decomposed cone variants
 - one next narrow TF2 move that stays inside the adopted package
 
 JPC status after the completed probe:

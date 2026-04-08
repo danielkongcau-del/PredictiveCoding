@@ -65,6 +65,7 @@ TF2TerminalLocalFieldDirectionIntervention = Literal[
     "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
     "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
     "local_field_direction_angle_clip_keep_live_norm_orthogonal_only",
+    "local_field_direction_angle_clip_keep_live_norm_split_threshold",
 ]
 TF2TransportedOutputAlignmentSchedule = Literal["none", "final_micro_step_only", "every_micro_step"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
@@ -117,6 +118,8 @@ class FMPCTF2Config:
     time_encoding_variant: TF2TimeEncodingVariant = "raw"
     terminal_local_field_direction_intervention: TF2TerminalLocalFieldDirectionIntervention = "none"
     terminal_local_field_angle_clip_degrees: float = 30.0
+    terminal_local_field_rowspace_angle_clip_degrees: float = 30.0
+    terminal_local_field_orthogonal_angle_clip_degrees: float = 30.0
     transported_output_alignment_weight: float = 0.0
     transported_output_alignment_schedule: TF2TransportedOutputAlignmentSchedule = "none"
     psi_weight_scale: float = 0.05
@@ -188,10 +191,15 @@ class FMPCTF2Config:
             "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
             "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
             "local_field_direction_angle_clip_keep_live_norm_orthogonal_only",
+            "local_field_direction_angle_clip_keep_live_norm_split_threshold",
         }:
             raise ValueError("Unsupported terminal_local_field_direction_intervention.")
         if not (0.0 < float(self.terminal_local_field_angle_clip_degrees) <= 180.0):
             raise ValueError("terminal_local_field_angle_clip_degrees must lie in (0.0, 180.0].")
+        if not (0.0 < float(self.terminal_local_field_rowspace_angle_clip_degrees) <= 180.0):
+            raise ValueError("terminal_local_field_rowspace_angle_clip_degrees must lie in (0.0, 180.0].")
+        if not (0.0 < float(self.terminal_local_field_orthogonal_angle_clip_degrees) <= 180.0):
+            raise ValueError("terminal_local_field_orthogonal_angle_clip_degrees must lie in (0.0, 180.0].")
         if float(self.transported_output_alignment_weight) < 0.0:
             raise ValueError("transported_output_alignment_weight must be non-negative.")
         if self.transported_output_alignment_schedule not in {
@@ -929,6 +937,38 @@ def _apply_terminal_orthogonal_only_direction_intervention(
     return stabilized_action
 
 
+def _apply_terminal_split_threshold_direction_intervention(
+    raw_action: np.ndarray,
+    local_field_action: np.ndarray,
+    output_weight: np.ndarray,
+    context: FMPCTF1Context,
+    config: FMPCTF2Config,
+) -> np.ndarray:
+    final_hidden_slice = _final_hidden_block_slice(context)
+    basis = _rowspace_basis_from_output_weight(output_weight)
+    stabilized_action = np.asarray(raw_action, dtype=np.float64).copy()
+    raw_final_hidden = stabilized_action[:, final_hidden_slice]
+    anchor_final_hidden = np.asarray(local_field_action, dtype=np.float64)[:, final_hidden_slice]
+    raw_row = _project_onto_rowspace(raw_final_hidden, basis)
+    raw_orth = _project_onto_orthogonal_complement(raw_final_hidden, basis)
+    anchor_row = _project_onto_rowspace(anchor_final_hidden, basis)
+    anchor_orth = _project_onto_orthogonal_complement(anchor_final_hidden, basis)
+    row_norm = _vector_norms(raw_row)[:, None]
+    orth_norm = _vector_norms(raw_orth)[:, None]
+    stabilized_row = _clip_direction_to_anchor_cone(
+        _safe_direction(raw_row),
+        _safe_direction(anchor_row),
+        max_angle_degrees=float(config.terminal_local_field_rowspace_angle_clip_degrees),
+    ) * row_norm
+    stabilized_orth = _clip_direction_to_anchor_cone(
+        _safe_direction(raw_orth),
+        _safe_direction(anchor_orth),
+        max_angle_degrees=float(config.terminal_local_field_orthogonal_angle_clip_degrees),
+    ) * orth_norm
+    stabilized_action[:, final_hidden_slice] = stabilized_row + stabilized_orth
+    return stabilized_action
+
+
 def _apply_terminal_local_field_direction_intervention(
     z_on_k: np.ndarray,
     dt: float,
@@ -973,6 +1013,14 @@ def _apply_terminal_local_field_direction_intervention(
         )
     elif intervention == "local_field_direction_angle_clip_keep_live_norm_orthogonal_only":
         stabilized_action = _apply_terminal_orthogonal_only_direction_intervention(
+            raw_action,
+            local_field_action,
+            output_weight,
+            context,
+            config,
+        )
+    elif intervention == "local_field_direction_angle_clip_keep_live_norm_split_threshold":
+        stabilized_action = _apply_terminal_split_threshold_direction_intervention(
             raw_action,
             local_field_action,
             output_weight,
@@ -1576,6 +1624,12 @@ def _config_payload(config: FMPCTF2Config) -> dict[str, Any]:
             "time_encoding_variant": config.time_encoding_variant,
             "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
             "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
+            "terminal_local_field_rowspace_angle_clip_degrees": float(
+                config.terminal_local_field_rowspace_angle_clip_degrees
+            ),
+            "terminal_local_field_orthogonal_angle_clip_degrees": float(
+                config.terminal_local_field_orthogonal_angle_clip_degrees
+            ),
             "transported_output_alignment_weight": float(config.transported_output_alignment_weight),
             "transported_output_alignment_schedule": config.transported_output_alignment_schedule,
             "identity_loss_weight": float(config.identity_loss_weight),
@@ -1768,6 +1822,12 @@ def run_fmpc_tf2_experiment(config: FMPCTF2Config) -> FMPCTF2RunResult:
         "time_encoding_variant": config.time_encoding_variant,
         "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
         "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
+        "terminal_local_field_rowspace_angle_clip_degrees": float(
+            config.terminal_local_field_rowspace_angle_clip_degrees
+        ),
+        "terminal_local_field_orthogonal_angle_clip_degrees": float(
+            config.terminal_local_field_orthogonal_angle_clip_degrees
+        ),
         "transported_output_alignment_weight": float(config.transported_output_alignment_weight),
         "transported_output_alignment_schedule": config.transported_output_alignment_schedule,
         "theta_micro_lr": float(theta_micro_lr),

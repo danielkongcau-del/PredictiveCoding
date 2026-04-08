@@ -661,6 +661,7 @@ during training:
   - `"local_field_direction_angle_clip_keep_live_norm_rowspace_only"`
   - `"local_field_direction_hard_replace_keep_live_norm_rowspace_only"`
   - `"local_field_direction_angle_clip_keep_live_norm_orthogonal_only"`
+  - `"local_field_direction_angle_clip_keep_live_norm_split_threshold"`
   - `}`
 
 This intervention is defined only for the **final micro-step** of the true closed-loop
@@ -729,6 +730,14 @@ component direction into a cone around `d_lf^orth` with half-angle
 `terminal_local_field_angle_clip_degrees`:
 
 - `u_term = u_live^row + ||u_live^orth|| * clip_dir(normalize(u_live^orth), d_lf^orth; theta_clip)`
+
+If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm_split_threshold"`,
+TF2 keeps both components active but clips them with separate half-angles:
+
+- `theta_row = terminal_local_field_rowspace_angle_clip_degrees`
+- `theta_orth = terminal_local_field_orthogonal_angle_clip_degrees`
+- `u_term = ||u_live^row|| * clip_dir(normalize(u_live^row), d_lf^row; theta_row)
+           + ||u_live^orth|| * clip_dir(normalize(u_live^orth), d_lf^orth; theta_orth)`
 
 If either the live row-space component or the anchor row-space component is degenerate,
 TF2 falls back to leaving the row-space component unchanged for that sample.

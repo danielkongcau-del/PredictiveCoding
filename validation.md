@@ -1439,6 +1439,57 @@ Current TF2 adoption interpretation:
     - run one adopted-package split-threshold terminal coupling diagnostic that
       keeps both row-space and orthogonal components active but tests whether
       their clip strengths should differ
+  - the completed adopted-package split-threshold terminal coupling suite now
+    indicates:
+    - no split-threshold candidate beats the current adopted control
+    - stricter row-space clip than orthogonal clip underperforms by about:
+      - `-0.0326` mean val accuracy
+      - `-0.0311` mean test accuracy
+    - stricter orthogonal clip than row-space clip also underperforms by about:
+      - `-0.0407` mean val accuracy
+      - `-0.0304` mean test accuracy
+    - the balanced `30 / 30` split-threshold sanity check also underperforms by
+      about:
+      - `-0.0393` mean val accuracy
+      - `-0.0444` mean test accuracy
+    - gate robustness remains intact across the tested split-threshold
+      variants:
+      - `selected_epoch_passes_gate_rate = 1.0`
+      - `selector_fallback_used_rate = 0.0`
+    - but all tested split-threshold variants worsen the targeted row-space
+      distortion metrics:
+      - adopted control validation row-space RMS:
+        - about `0.1536`
+      - row-strict split-threshold validation row-space RMS:
+        - about `0.1657`
+      - orth-strict split-threshold validation row-space RMS:
+        - about `0.1662`
+      - balanced `30 / 30` split-threshold validation row-space RMS:
+        - about `0.1651`
+      - adopted control validation row-space fraction:
+        - about `0.5448`
+      - row-strict split-threshold validation row-space fraction:
+        - about `0.5989`
+      - orth-strict split-threshold validation row-space fraction:
+        - about `0.6053`
+      - balanced `30 / 30` split-threshold validation row-space fraction:
+        - about `0.5949`
+    - all tested split-threshold variants reduce total endpoint RMS slightly,
+      but only by shifting a larger fraction of the mismatch into the
+      readout-relevant row-space
+  - diagnosis:
+    - the gain of the current full-vector terminal angle clip does not seem to
+      be recoverable by keeping both subspaces active with different independent
+      clip strengths
+    - the current evidence therefore favors the unified full-vector cone
+      geometry over the tested split-threshold decompositions
+  - decision:
+    - keep the current adopted TF2 experimental default unchanged:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+  - next single narrow move:
+    - run one adopted-package unified-cone vs split-subspace cone geometry
+      diagnostic to explain why the full-vector terminal clip dominates all
+      tested decomposed cone variants
 
 Required reporting:
 
