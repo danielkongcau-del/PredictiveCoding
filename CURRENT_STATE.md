@@ -29,18 +29,19 @@ This file is the short active-state summary for the repository.
 
 ## Operationally Relevant Sealed Conclusions
 
-- Stay inside the corrective TF2 package on `main`; do not open AlphaFlow, µPC-style TF2 mainline scaling, or TF3 from the current state.
+- Stay inside the corrective TF2 package on `main`; do not open AlphaFlow, `µPC`-style TF2 mainline scaling, or TF3 from the current state.
 - The adopted angle-clip package materially improves over the historical corrective reference and remains the current TF2 experimental default on `main`.
 - The remaining slow-PC gap is not mainly a selector/checkpoint issue and not mainly a simple head-fit problem.
 - The dominant remaining mismatch inside the adopted package is best read as readout-relevant endpoint-basis distortion rather than simple separability collapse.
 - Row-space-only, orthogonal-only, and split-threshold terminal interventions are all non-adopted; keep the current full-vector terminal angle clip unchanged.
+- The unified-cone vs split-subspace geometry pass says the current gain is best explained by a shared full-space angular constraint, not by literal row/orth ratio preservation.
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
-  - run one adopted-package unified-cone vs split-subspace cone geometry diagnostic
+  - run one narrow geometry-preserving unified-cone-shape diagnostic inside the adopted full-vector family
 - Current active question:
-  - why the unified full-vector terminal cone helps while all tested decomposed cone variants underperform and worsen row-space distortion
+  - what geometry-preserving refinement, if any, can stay inside the unified full-vector cone family without reopening split-subspace decompositions
 
 ## Relevant Suites And Artifacts
 
@@ -58,6 +59,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_output_sensitive_terminal_direction_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_output_sensitive_terminal_direction_suite)
   - [outputs/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_terminal_coupling_suite)
   - [outputs/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_split_threshold_coupling_suite)
+  - [outputs/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_geometry_suite)
 
 ## Read Order And Precedence
 
@@ -73,5 +75,5 @@ This file is the short active-state summary for the repository.
 
 ## Commit Note
 
-- Latest known `main` commit at the time of this update:
-  - `ac6dd55f9035595351fab70538a958bcbd3906f7`
+- This file intentionally tracks active state rather than a moving commit tip.
+- Use `git rev-parse HEAD` when you need the exact current commit.

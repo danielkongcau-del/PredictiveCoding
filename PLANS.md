@@ -3391,3 +3391,65 @@ Outcome:
   - closure path:
     terminal-step direction anchoring -> true closed-loop trust-region rescue ->
     adoption/selection -> mainline confirmation
+
+## Current Narrow TF2 Execution Plan
+
+- active line remains:
+  - `Phase TF2 - iFMPC bridge stage`
+- current adopted package remains:
+  - `tf2_corrective_transport_terminal_angleclip_default`
+- current narrow diagnostic:
+  - run one adopted-package unified-cone vs split-subspace cone geometry suite
+- immediate files to touch:
+  - `PLANS.md`
+  - `validation.md`
+  - `src/pc/fmpc_tf2_unified_cone_geometry_suite.py`
+  - `experiments/fmpc_tf2_unified_cone_geometry_suite.py`
+  - `tests/test_fmpc_tf2_unified_cone_geometry_suite_smoke.py`
+- scope rule:
+  - keep the transport family and adopted package fixed; only add terminal-cone
+    geometry diagnostics for:
+    - full-vector angle clip
+    - row-space-only angle clip
+    - orthogonal-only angle clip
+    - split-threshold `20/45`, `45/20`, and `30/30`
+- target question:
+  - identify what shared geometric property of the unified full-vector cone is
+    preserved, and what split-subspace cones destroy
+- outcome:
+  - the completed adopted-package unified-cone vs split-subspace cone geometry
+    suite indicates:
+    - no split-subspace cone beats the current adopted control
+    - the best split candidate:
+      - row-strict `20 / 45`
+      still underperforms by about:
+      - `-0.0326` mean val accuracy
+      - `-0.0311` mean test accuracy
+    - every tested split-subspace cone leaves the stabilized full-space
+      terminal action outside the adopted `30` degree cone:
+      - adopted control mean full-space terminal angle to the local-field
+        anchor:
+        - about `30.0` degrees
+      - best split candidate:
+        - about `58.99` degrees
+      - all tested split candidates have:
+        - full-space angle-above-`30` degree rate `= 1.0`
+      - adopted control has:
+        - full-space angle-above-`30` degree rate `= 0.0`
+    - split-subspace cones preserve row/orth norm ratios more literally, but
+      that is not the helpful property:
+      - adopted control validation row/orth norm-ratio absolute change:
+        - about `1.3657`
+      - tested split-subspace variants:
+        - about `0.0`
+- diagnosis:
+  - the gain of the adopted full-vector terminal clip is best explained by a
+    shared full-space angular constraint that does not factorize into the
+    tested row-space / orthogonal sub-cones
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one narrow geometry-preserving unified-cone-shape diagnostic inside the
+    adopted full-vector family, rather than another split-subspace threshold
+    sweep

@@ -1490,6 +1490,47 @@ Current TF2 adoption interpretation:
     - run one adopted-package unified-cone vs split-subspace cone geometry
       diagnostic to explain why the full-vector terminal clip dominates all
       tested decomposed cone variants
+  - the completed adopted-package unified-cone vs split-subspace cone geometry
+    suite now indicates:
+    - no split-subspace cone matches the current adopted control
+    - the best split candidate in this tiny family:
+      - row-strict `20 / 45`
+      still underperforms by about:
+      - `-0.0326` mean val accuracy
+      - `-0.0311` mean test accuracy
+    - every tested split-subspace cone leaves the stabilized full-space terminal
+      action far outside the adopted `30` degree cone:
+      - adopted control mean terminal full-space angle to the local-field
+        anchor:
+        - about `30.0` degrees
+      - best split candidate:
+        - about `58.99` degrees
+      - all tested split candidates have:
+        - full-space angle-above-`30` degree rate `= 1.0`
+      - adopted control has:
+        - full-space angle-above-`30` degree rate `= 0.0`
+    - the split-subspace cones often preserve subspace-local norm ratios more
+      literally than the adopted control, but that does not rescue behavior:
+      - adopted control validation row/orth norm-ratio absolute change:
+        - about `1.3657`
+      - all tested split-subspace cases:
+        - about `0.0`
+    - current evidence therefore says:
+      - the useful property is not literal subspace ratio preservation
+      - the useful property is the shared full-space angular constraint of the
+        unified terminal cone
+      - that constraint does not factorize into the tested row-space /
+        orthogonal sub-cones
+  - diagnosis:
+    - the gain of the adopted full-vector terminal angle clip is now best read
+      as:
+      - `shared_full_space_geometry_not_literal_subspace_ratio_preservation`
+  - decision:
+    - keep the current adopted TF2 experimental default unchanged:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+  - next single narrow move:
+    - run one narrow geometry-preserving unified-cone-shape diagnostic inside
+      the adopted full-vector family, rather than another split-subspace sweep
 
 Required reporting:
 
