@@ -1989,6 +1989,72 @@ Result:
 - the next stage should remain:
   - `continue TF2 bridge inside the adopted package`
 
+### TF2 adopted-package vs slow-PC gap decomposition pass
+
+Goal:
+
+- diagnose where the remaining accuracy gap between the adopted TF2 package and the
+  canonical slow-PC digits baseline is actually coming from
+- keep the pass narrow, diagnostic, and inside the adopted package
+
+Files expected to touch:
+
+- `PLANS.md`
+- `validation.md`
+- `src/pc/fmpc_tf2_gap_decomposition_suite.py`
+- `experiments/fmpc_tf2_gap_decomposition_suite.py`
+- `tests/test_fmpc_tf2_gap_decomposition_suite_smoke.py`
+
+Planned comparison set:
+
+- adopted TF2 package:
+  - `tf2_corrective_transport_terminal_angleclip_default`
+- canonical slow-PC digits baseline
+- optional report-only historical reference:
+  - `tf2_corrective_transport_default`
+
+Planned diagnostics:
+
+- mean/std validation-selected accuracy against the canonical slow-PC baseline
+- output MSE and supervised hidden-state energy
+- adopted-package internal gap metrics against its own slow-PC fixed points:
+  - endpoint hidden-state RMS gap
+  - endpoint output-state RMS gap
+  - transport-output vs slow-PC-output error gap
+  - transport-energy vs slow-PC-energy gap
+- lightweight validation-knot breakdown for the adopted package to localize where
+  the deviation becomes largest
+
+Planned interpretation output:
+
+- whether the remaining gap is mainly:
+  - hidden-state transport quality
+  - output/readout mismatch
+  - selector/checkpoint effects
+  - training-budget effects
+  - or a mixed picture
+- one single recommended next TF2 move that stays inside the adopted package
+
+Result:
+
+- the adopted package still trails the canonical slow-PC digits baseline by
+  about:
+  - `-0.0437` mean val accuracy
+  - `-0.0615` mean test accuracy
+- selector/checkpoint effects are not the current limiter:
+  - `selected_epoch_passes_gate_rate = 1.0`
+  - `selector_fallback_used_rate = 0.0`
+- internal supervised decomposition indicates that the adopted package's
+  transport path is not the main remaining bottleneck:
+  - under the same trained model and target-clamped diagnostic, the transported
+    endpoint slightly improves on that model's own slow-PC fixed-point output
+    MSE and supervised final energy
+- the remaining external gap now appears to come mainly from output/readout
+  quality inside the adopted package rather than from residual transport quality
+- the next single narrow TF2 move should therefore be:
+  - one adopted-package readout-alignment confirmation pass without changing the
+    TF2 transport family
+
 JPC status after the completed probe:
 
 - JPC remains reference-only in TF2

@@ -1245,6 +1245,46 @@ Current TF2 adoption interpretation:
     - `tf2_canonical` is clearly subordinate in the current TF2 phase
     - the next stage should remain:
       - `continue TF2 bridge inside the adopted package`
+- the completed adopted-package vs slow-PC gap-decomposition pass now indicates:
+  - the external slow-PC gap remains materially open for the adopted package:
+    - about `-0.0437` mean val accuracy
+    - about `-0.0615` mean test accuracy
+  - selector/checkpoint effects are not the current limiter:
+    - `selected_epoch_passes_gate_rate = 1.0`
+    - `selector_fallback_used_rate = 0.0`
+  - diagnostic-only internal supervised decomposition inside the adopted package
+    indicates that transport quality is not the main remaining limiter:
+    - under the same trained model and target-clamped validation protocol, the
+      transported endpoint slightly improves on that model's own slow-PC
+      fixed-point output error by about:
+      - `-0.0087` val supervised output MSE
+      - `-0.0087` test supervised output MSE
+    - under the same diagnostic, the transported endpoint also sits slightly
+      below that model's own slow-PC fixed-point hidden energy by about:
+      - `-0.0036` val supervised final energy
+      - `-0.0037` test supervised final energy
+  - however, the adopted model's own slow-PC supervised output/readout still
+    trails the canonical slow-PC digits baseline by about:
+    - `+0.0115` val supervised output MSE
+    - `+0.0119` test supervised output MSE
+    - `+0.0577` val supervised final energy
+    - `+0.0594` test supervised final energy
+  - the lightweight validation-knot breakdown for the adopted package still
+    peaks at the terminal knot, but the residual internal transport deviation is
+    small relative to the remaining external accuracy gap:
+    - mean endpoint hidden-state RMS gap to the model's own slow-PC fixed point:
+      about `0.0352`
+    - mean endpoint output-state RMS gap to the model's own slow-PC outputs:
+      about `0.0311`
+  - diagnosis:
+    - the remaining slow-PC gap is now mainly an output/readout mismatch inside
+      the adopted package
+    - it is not mainly a selector/checkpoint issue
+    - it is not mainly a residual transport-quality issue under the current
+      train-time package
+  - next single narrow move:
+    - run one adopted-package readout-alignment confirmation pass without
+      changing the TF2 transport family
 
 Required reporting:
 
