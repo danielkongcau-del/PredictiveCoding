@@ -64,6 +64,7 @@ TF2TerminalLocalFieldDirectionIntervention = Literal[
     "local_field_direction_hard_replace_keep_live_norm",
     "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
     "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
+    "local_field_direction_angle_clip_keep_live_norm_orthogonal_only",
 ]
 TF2TransportedOutputAlignmentSchedule = Literal["none", "final_micro_step_only", "every_micro_step"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
@@ -186,6 +187,7 @@ class FMPCTF2Config:
             "local_field_direction_hard_replace_keep_live_norm",
             "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
             "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
+            "local_field_direction_angle_clip_keep_live_norm_orthogonal_only",
         }:
             raise ValueError("Unsupported terminal_local_field_direction_intervention.")
         if not (0.0 < float(self.terminal_local_field_angle_clip_degrees) <= 180.0):
@@ -867,6 +869,11 @@ def _project_onto_rowspace(vectors: np.ndarray, basis: np.ndarray) -> np.ndarray
     return (vectors_array @ basis) @ basis.T
 
 
+def _project_onto_orthogonal_complement(vectors: np.ndarray, basis: np.ndarray) -> np.ndarray:
+    vectors_array = np.asarray(vectors, dtype=np.float64)
+    return vectors_array - _project_onto_rowspace(vectors_array, basis)
+
+
 def _apply_terminal_rowspace_only_direction_intervention(
     raw_action: np.ndarray,
     local_field_action: np.ndarray,
@@ -882,7 +889,7 @@ def _apply_terminal_rowspace_only_direction_intervention(
     raw_final_hidden = stabilized_action[:, final_hidden_slice]
     anchor_final_hidden = np.asarray(local_field_action, dtype=np.float64)[:, final_hidden_slice]
     raw_row = _project_onto_rowspace(raw_final_hidden, basis)
-    raw_orth = raw_final_hidden - raw_row
+    raw_orth = _project_onto_orthogonal_complement(raw_final_hidden, basis)
     anchor_row = _project_onto_rowspace(anchor_final_hidden, basis)
     row_norm = _vector_norms(raw_row)[:, None]
     if hard_replace:
@@ -894,6 +901,31 @@ def _apply_terminal_rowspace_only_direction_intervention(
             max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),
         ) * row_norm
     stabilized_action[:, final_hidden_slice] = stabilized_row + raw_orth
+    return stabilized_action
+
+
+def _apply_terminal_orthogonal_only_direction_intervention(
+    raw_action: np.ndarray,
+    local_field_action: np.ndarray,
+    output_weight: np.ndarray,
+    context: FMPCTF1Context,
+    config: FMPCTF2Config,
+) -> np.ndarray:
+    final_hidden_slice = _final_hidden_block_slice(context)
+    basis = _rowspace_basis_from_output_weight(output_weight)
+    stabilized_action = np.asarray(raw_action, dtype=np.float64).copy()
+    raw_final_hidden = stabilized_action[:, final_hidden_slice]
+    anchor_final_hidden = np.asarray(local_field_action, dtype=np.float64)[:, final_hidden_slice]
+    raw_row = _project_onto_rowspace(raw_final_hidden, basis)
+    raw_orth = _project_onto_orthogonal_complement(raw_final_hidden, basis)
+    anchor_orth = _project_onto_orthogonal_complement(anchor_final_hidden, basis)
+    orth_norm = _vector_norms(raw_orth)[:, None]
+    stabilized_orth = _clip_direction_to_anchor_cone(
+        _safe_direction(raw_orth),
+        _safe_direction(anchor_orth),
+        max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),
+    ) * orth_norm
+    stabilized_action[:, final_hidden_slice] = raw_row + stabilized_orth
     return stabilized_action
 
 
@@ -938,6 +970,14 @@ def _apply_terminal_local_field_direction_intervention(
             context,
             config,
             hard_replace=False,
+        )
+    elif intervention == "local_field_direction_angle_clip_keep_live_norm_orthogonal_only":
+        stabilized_action = _apply_terminal_orthogonal_only_direction_intervention(
+            raw_action,
+            local_field_action,
+            output_weight,
+            context,
+            config,
         )
     else:
         raise ValueError(f"Unsupported terminal_local_field_direction_intervention '{intervention}'.")

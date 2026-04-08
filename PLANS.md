@@ -2438,6 +2438,106 @@ Result:
   - run one adopted-package terminal row-space / orthogonal-component coupling
     diagnostic, since the benefit of the current full-vector angle clip does not
     survive row-space-only isolation
+
+### TF2 adopted-package terminal row-space / orthogonal-component coupling diagnostic
+
+Goal:
+
+- determine whether the current full-vector terminal angle clip helps because it
+  couples:
+  - readout-row-space control
+  - and orthogonal-component control
+- test whether either subspace alone can match the adopted full-vector
+  intervention
+
+Files expected to touch:
+
+- `PLANS.md`
+- `spec_math.md`
+- `validation.md`
+- `src/pc/fmpc_tf2.py`
+- `src/pc/fmpc_tf2_terminal_coupling_suite.py`
+- `experiments/fmpc_tf2_terminal_coupling_suite.py`
+- `tests/test_fmpc_tf2_terminal_coupling_suite_smoke.py`
+
+Planned candidate set:
+
+- adopted control:
+  - current full-vector terminal angle clip
+- row-space-only angle clip:
+  - existing diagnostic reference
+- orthogonal-only angle clip:
+  - clip only the terminal orthogonal component
+  - keep the readout-row-space component unchanged
+- optional:
+  - include a trivial upper-bound control only if it improves interpretation
+    without widening the search
+
+Planned diagnostics:
+
+- mean/std `val_accuracy`
+- mean/std `test_accuracy`
+- mean gate-passing epoch count
+- `selected_epoch_passes_gate_rate`
+- `selector_fallback_used_rate`
+- mean `val_transported_final_energy`
+- val report output MSE
+- val supervised transported output MSE
+- terminal-knot `delta_h` total RMS
+- terminal-knot `delta_h` row-space RMS
+- terminal-knot `delta_h` orthogonal RMS
+- terminal-knot row-space fraction
+- runtime proxy
+
+Planned interpretation output:
+
+- if neither row-space-only nor orthogonal-only control matches the adopted
+  control, treat the current gain as a coupled row-space / orthogonal effect
+- only promote a narrower decomposed intervention if it materially improves
+  validation-selected behavior without harming robustness
+
+Result:
+
+- the completed adopted-package terminal row-space / orthogonal-component
+  coupling suite now indicates:
+  - neither decomposed intervention matches the current adopted control
+  - row-space-only angle clip underperforms the adopted control by about:
+    - `-0.0393` mean val accuracy
+    - `-0.0444` mean test accuracy
+  - orthogonal-only angle clip also underperforms by about:
+    - `-0.0444` mean val accuracy
+    - `-0.0289` mean test accuracy
+  - gate robustness does not collapse for the decomposed variants:
+    - `selected_epoch_passes_gate_rate = 1.0`
+    - `selector_fallback_used_rate = 0.0`
+  - but both narrower variants move the terminal endpoint geometry in the wrong
+    direction for the targeted readout-sensitive metric:
+    - adopted control validation row-space RMS:
+      - about `0.1536`
+    - row-space-only validation row-space RMS:
+      - about `0.1651`
+    - orthogonal-only validation row-space RMS:
+      - about `0.1683`
+    - adopted control validation row-space fraction:
+      - about `0.5448`
+    - row-space-only validation row-space fraction:
+      - about `0.5949`
+    - orthogonal-only validation row-space fraction:
+      - about `0.6168`
+  - both decomposed variants reduce total endpoint RMS slightly, but they do so
+    while harming validation-selected behavior and increasing the share of
+    endpoint mismatch that lands in the readout-relevant row-space
+- diagnosis:
+  - the gain of the current full-vector terminal angle clip is best explained
+    as a coupled row-space / orthogonal control effect
+  - neither subspace alone is an adequate replacement
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one adopted-package split-threshold terminal coupling diagnostic that
+    keeps both row-space and orthogonal components active but tests whether
+    their clip strengths need to differ
 - one next narrow TF2 move that stays inside the adopted package
 
 JPC status after the completed probe:

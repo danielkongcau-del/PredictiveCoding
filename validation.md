@@ -1400,6 +1400,45 @@ Current TF2 adoption interpretation:
     - run one adopted-package terminal row-space / orthogonal-component
       coupling diagnostic, because the gain of the current full-vector angle
       clip does not survive row-space-only isolation
+  - the completed adopted-package terminal row-space / orthogonal-component
+    coupling suite now indicates:
+    - neither decomposed intervention matches the current adopted control
+    - row-space-only angle clip underperforms by about:
+      - `-0.0393` mean val accuracy
+      - `-0.0444` mean test accuracy
+    - orthogonal-only angle clip also underperforms by about:
+      - `-0.0444` mean val accuracy
+      - `-0.0289` mean test accuracy
+    - gate robustness does not collapse for either decomposed candidate:
+      - `selected_epoch_passes_gate_rate = 1.0`
+      - `selector_fallback_used_rate = 0.0`
+    - both decomposed variants also worsen the targeted row-space distortion:
+      - adopted control validation row-space RMS:
+        - about `0.1536`
+      - row-space-only validation row-space RMS:
+        - about `0.1651`
+      - orthogonal-only validation row-space RMS:
+        - about `0.1683`
+      - adopted control validation row-space fraction:
+        - about `0.5448`
+      - row-space-only validation row-space fraction:
+        - about `0.5949`
+      - orthogonal-only validation row-space fraction:
+        - about `0.6168`
+    - both decomposed variants reduce total endpoint RMS slightly, but they do
+      so while increasing the fraction of mismatch that lands in the
+      readout-relevant row-space
+  - diagnosis:
+    - the gain of the current full-vector terminal angle clip is now best read
+      as a coupled row-space / orthogonal control effect
+    - neither subspace alone is an adequate replacement
+  - decision:
+    - keep the current adopted TF2 experimental default unchanged:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+  - next single narrow move:
+    - run one adopted-package split-threshold terminal coupling diagnostic that
+      keeps both row-space and orthogonal components active but tests whether
+      their clip strengths should differ
 
 Required reporting:
 
