@@ -1792,6 +1792,20 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - run one confirmation-level reformulation on the preterminal successor
       increment only
+  - the completed preterminal successor-increment confirmation now says:
+    - the increment-only direction trust-region toward the cached increment
+      keeps much more of the failed earlier-control gain than the safe
+      cached-increment lower bound:
+      - validation-accuracy retention vs failed anchor: about `75.9%`
+      - terminal row-space RMS retention vs failed anchor: about `65.8%`
+    - but it still reopens too much of the gate collapse:
+      - `seed_gate_positive_rate: 0.4`
+      - `selected_epoch_passes_gate_rate: 0.4`
+      - `selector_fallback_used_rate: 0.6`
+    - the resulting diagnosis is:
+      - `live_successor_increment_blocker_persists`
+  - next single narrow move:
+    - run the next narrower increment-internal source-localization step
 
 Required reporting:
 

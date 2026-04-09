@@ -3924,3 +3924,45 @@ Outcome:
 - next single narrow move:
   - run one confirmation-level reformulation on the preterminal successor
     increment only
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed live-successor-increment path as the higher-gain unstable
+      reference
+    - keep `live carry + cached increment` as the current safe lower-bound
+      reference
+    - test one increment-only direction trust-region toward the cached
+      increment while keeping the live increment norm unchanged
+    - promote only if the increment-only reformulation preserves the full
+      selector/gate contract while materially improving gain retention over the
+      current safe lower-bound reference
+- outcome:
+  - the completed preterminal successor-increment confirmation now says:
+    - the increment-only direction trust-region toward the cached increment
+      keeps much more of the failed earlier-control gain than the safe
+      cached-increment lower bound:
+      - validation-accuracy retention vs failed anchor: about `75.9%`
+      - terminal row-space RMS retention vs failed anchor: about `65.8%`
+    - but it still reopens too much of the gate collapse:
+      - `seed_gate_positive_rate: 0.4`
+      - `selected_epoch_passes_gate_rate: 0.4`
+      - `selector_fallback_used_rate: 0.6`
+- diagnosis:
+  - `live_successor_increment_blocker_persists`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run the next narrower increment-internal source-localization step
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed live-successor-increment path as the higher-gain
+      unstable reference
+    - keep the current increment-only direction-trust-region candidate as the
+      strongest non-adopted reformulation reference
+    - decompose the live preterminal successor increment itself into its
+      smallest internal source pieces
+    - use the result only to localize which internal part of the live
+      successor increment still turns retained drift/accuracy gain into
+      gate-contract loss

@@ -92,18 +92,28 @@ This file is the short active-state summary for the repository.
     - but it collapses back to near-control accuracy and terminal row-space metrics
   - `cached carry + live increment` stays almost identical to the failed higher-gain reference:
     - `mean_val_accuracy: 0.8563`
-    - `mean_gate_passing_epoch_count: 0.0`
-    - `selector_fallback_used_rate: 1.0`
+      - `mean_gate_passing_epoch_count: 0.0`
+      - `selector_fallback_used_rate: 1.0`
   - the current source-localization diagnosis is:
     - `live_successor_increment_is_primary_blocker`
+- The increment-only confirmation pass now says the preterminal live successor increment is still the blocker:
+  - the narrow direction trust-region candidate toward the cached increment keeps much more of the failed earlier-control gain than the safe cached-increment lower bound:
+    - validation-accuracy retention vs failed anchor: about `75.9%`
+    - terminal row-space RMS retention vs failed anchor: about `65.8%`
+  - but it still reopens too much of the gate collapse:
+    - `seed_gate_positive_rate: 0.4`
+    - `selected_epoch_passes_gate_rate: 0.4`
+    - `selector_fallback_used_rate: 0.6`
+  - the current confirmation-level diagnosis is:
+    - `live_successor_increment_blocker_persists`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a confirmation-level reformulation on the preterminal successor increment only rather than another low-live blend sweep or terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to the next narrower increment-internal source-localization step rather than another successor-value blend follow-up or any terminal-cone work
 - Current active question:
-  - can the live preterminal successor increment be minimally reformulated so that it keeps more of the earlier-control gain without reopening the gate collapse
+  - which internal part of the live preterminal successor increment still converts retained drift/accuracy gain into gate-contract loss
 
 ## Relevant Suites And Artifacts
 
@@ -133,6 +143,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_confirmation_suite)
   - [outputs/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_followup_suite)
   - [outputs/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_source_suite)
+  - [outputs/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_confirmation_suite)
 
 ## Read Order And Precedence
 
