@@ -106,14 +106,26 @@ This file is the short active-state summary for the repository.
     - `selector_fallback_used_rate: 0.6`
   - the current confirmation-level diagnosis is:
     - `live_successor_increment_blocker_persists`
+- The increment-internal source-localization pass now says the blocker sits mainly in the live successor-increment direction rather than in its magnitude:
+  - `exact cached direction + live magnitude` restores the full selector/gate contract:
+    - `seed_gate_positive_rate: 1.0`
+    - `selected_epoch_passes_gate_rate: 1.0`
+    - `selector_fallback_used_rate: 0.0`
+    - but it collapses back to near-control accuracy and terminal row-space metrics
+  - `cached magnitude + live direction` stays almost identical to the failed higher-gain unstable reference:
+    - `mean_val_accuracy: 0.8570`
+    - `mean_gate_passing_epoch_count: 0.0`
+    - `selector_fallback_used_rate: 1.0`
+  - the current increment-internal diagnosis is:
+    - `live_successor_increment_direction_is_primary_blocker`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to the next narrower increment-internal source-localization step rather than another successor-value blend follow-up or any terminal-cone work
+  - if TF2 work continues inside the adopted package, move to a confirmation-level reformulation on increment direction only rather than another broader successor-value or terminal-cone follow-up
 - Current active question:
-  - which internal part of the live preterminal successor increment still converts retained drift/accuracy gain into gate-contract loss
+  - can the live preterminal successor-increment direction be minimally reformulated so that it keeps more of the earlier-control gain without reopening gate collapse
 
 ## Relevant Suites And Artifacts
 
@@ -144,6 +156,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_followup_suite)
   - [outputs/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_source_suite)
   - [outputs/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_confirmation_suite)
+  - [outputs/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_source_suite)
 
 ## Read Order And Precedence
 

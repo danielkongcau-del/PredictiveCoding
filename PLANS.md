@@ -3961,8 +3961,46 @@ Outcome:
       unstable reference
     - keep the current increment-only direction-trust-region candidate as the
       strongest non-adopted reformulation reference
-    - decompose the live preterminal successor increment itself into its
-      smallest internal source pieces
-    - use the result only to localize which internal part of the live
-      successor increment still turns retained drift/accuracy gain into
-      gate-contract loss
+    - decompose the live preterminal successor increment itself into:
+      - increment direction
+      - increment magnitude
+    - keep the predecessor carry state semantics fixed
+    - test only the two smallest component-level substitutions:
+      - exact cached direction + live magnitude
+      - cached magnitude + live direction
+    - use the result only to localize whether the remaining blocker comes
+      mainly from increment direction, increment magnitude, or their
+      interaction
+- outcome:
+  - the completed increment-internal source-localization now says:
+    - `exact cached direction + live magnitude` restores the full
+      selector/gate contract:
+      - `seed_gate_positive_rate: 1.0`
+      - `selected_epoch_passes_gate_rate: 1.0`
+      - `selector_fallback_used_rate: 0.0`
+      - but it collapses back to near-control accuracy and terminal
+        row-space metrics
+    - `cached magnitude + live direction` remains almost identical to the
+      failed higher-gain unstable reference:
+      - `mean_val_accuracy: 0.8570`
+      - `mean_gate_passing_epoch_count: 0.0`
+      - `selector_fallback_used_rate: 1.0`
+- diagnosis:
+  - `live_successor_increment_direction_is_primary_blocker`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one confirmation-level reformulation on increment direction only
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed live/live earlier-control path as the higher-gain
+      unstable reference
+    - keep `exact cached direction + live magnitude` as the safe direction
+      lower-bound reference
+    - keep the current direction-trust-region candidate as the partial-signal
+      reference
+    - test only the smallest increment-direction-only reformulation that aims
+      to preserve more gain than the safe lower bound without reopening gate
+      collapse

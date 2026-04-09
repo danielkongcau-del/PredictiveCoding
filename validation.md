@@ -1806,6 +1806,16 @@ Current TF2 adoption interpretation:
       - `live_successor_increment_blocker_persists`
   - next single narrow move:
     - run the next narrower increment-internal source-localization step
+  - the completed increment-internal source-localization now says:
+    - `exact cached direction + live magnitude` restores the full
+      selector/gate contract but collapses back to near-control accuracy and
+      terminal row-space metrics
+    - `cached magnitude + live direction` remains almost identical to the
+      failed higher-gain unstable reference and keeps the gate collapse
+    - the resulting diagnosis is:
+      - `live_successor_increment_direction_is_primary_blocker`
+  - next single narrow move:
+    - run one confirmation-level reformulation on increment direction only
 
 Required reporting:
 
