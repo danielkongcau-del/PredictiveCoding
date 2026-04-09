@@ -3843,3 +3843,44 @@ Outcome:
   - run one smaller confirmation-level follow-up on the same preterminal
     successor-value component only, using the best narrow reformulation
     candidate from this pass
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed earlier-control `(-2,-1)` live successor-value package
+      as the non-adopted reference anchor
+    - keep the current best narrow `25%` live / `75%` cached successor-value
+      blend as the local reference anchor
+    - test only the immediate low-live neighborhood around that anchor:
+      - `20%` live / `80%` cached
+      - `30%` live / `70%` cached
+    - promote only if one nearby blend preserves the full selector/gate
+      contract, materially improves gain retention over the current `25/75`
+      anchor, and becomes adoption-viable relative to the current adopted
+      default
+- outcome:
+  - the completed successor-value low-live follow-up now says:
+    - the safer `20%` live / `80%` cached blend keeps the full selector/gate
+      contract:
+      - `seed_gate_positive_rate: 1.0`
+      - `selected_epoch_passes_gate_rate: 1.0`
+      - `selector_fallback_used_rate: 0.0`
+    - but `20/80` is weaker than the `25/75` anchor on retained gain:
+      - validation-accuracy retention vs failed anchor: about `27.6%`
+      - terminal row-space RMS retention vs failed anchor: about `20.0%`
+    - the more aggressive `30%` live / `70%` cached blend retains more gain:
+      - validation-accuracy retention vs failed anchor: about `37.9%`
+      - terminal row-space RMS retention vs failed anchor: about `31.4%`
+    - but `30/70` gives up the full selector/gate contract:
+      - `seed_gate_positive_rate: 0.8`
+      - `selected_epoch_passes_gate_rate: 0.8`
+      - `selector_fallback_used_rate: 0.2`
+- diagnosis:
+  - `local_successor_value_refinement_improves_but_not_to_adoption_level`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - treat the low-live blend neighborhood as checked for now
+  - if TF2 work continues inside the adopted package, move to a deeper
+    diagnostic on the live preterminal successor-value formulation itself
+    rather than another low-live blend sweep

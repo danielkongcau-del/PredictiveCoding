@@ -76,14 +76,22 @@ This file is the short active-state summary for the repository.
   - the `50%` live / `50%` cached blend recovers more geometry but gives up too much gate robustness
   - the current confirmation-level diagnosis is:
     - `successor_value_reformulation_recovers_partially_but_not_adoption_level`
+- The tiny low-live successor-value follow-up now says the immediate `25/75` neighborhood also does not reach adoption level:
+  - the safer `20%` live / `80%` cached blend keeps the full selector/gate contract but is weaker than the current `25%` live / `75%` cached anchor on both gain retention and terminal row-space recovery
+  - the more aggressive `30%` live / `70%` cached blend retains more of the earlier-control gain than the `25/75` anchor, but it gives up full gate robustness:
+    - `seed_gate_positive_rate: 0.8`
+    - `selected_epoch_passes_gate_rate: 0.8`
+    - `selector_fallback_used_rate: 0.2`
+  - the current local follow-up diagnosis is:
+    - `local_successor_value_refinement_improves_but_not_to_adoption_level`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a smaller confirmation-level follow-up on the same preterminal on-policy successor-value component only rather than another terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to a deeper diagnostic on the live preterminal successor-value formulation itself rather than another low-live blend sweep or terminal-cone follow-up
 - Current active question:
-  - can the best narrow successor-value reformulation keep more of the earlier-control gain without giving back the current full gate robustness contract
+  - what part of the live preterminal successor-value formulation still converts additional drift/accuracy gain into gate-contract loss once the low-live blend neighborhood has been checked
 
 ## Relevant Suites And Artifacts
 
@@ -111,6 +119,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_handoff_confirmation_suite)
   - [outputs/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_handoff_source_suite)
   - [outputs/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_confirmation_suite)
+  - [outputs/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_followup_suite)
 
 ## Read Order And Precedence
 

@@ -1766,6 +1766,21 @@ Current TF2 adoption interpretation:
     - run one smaller confirmation-level follow-up on the same preterminal
       successor-value component only, using the best narrow reformulation
       candidate from this pass
+  - the completed low-live successor-value follow-up now says:
+    - the safer `20%` live / `80%` cached blend keeps the full selector/gate
+      contract but is weaker than the `25%` live / `75%` cached anchor on both
+      gain retention and terminal row-space recovery
+    - the more aggressive `30%` live / `70%` cached blend retains more of the
+      earlier-control gain than the `25/75` anchor
+    - but `30/70` gives up full gate robustness:
+      - `seed_gate_positive_rate: 0.8`
+      - `selected_epoch_passes_gate_rate: 0.8`
+      - `selector_fallback_used_rate: 0.2`
+    - the resulting diagnosis is:
+      - `local_successor_value_refinement_improves_but_not_to_adoption_level`
+  - next single narrow move:
+    - move to a deeper diagnostic on the live preterminal successor-value
+      formulation itself rather than another low-live blend sweep
 
 Required reporting:
 
