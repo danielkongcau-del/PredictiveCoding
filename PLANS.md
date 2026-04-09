@@ -3802,3 +3802,44 @@ Outcome:
 - next single narrow move:
   - run one confirmation-level reformulation on the preterminal on-policy
     successor-value component only, without reopening any cone-family sweep
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed earlier-control `(-2,-1)` live successor-value package
+      as the narrow reference anchor
+    - test only one minimal fixed blend of the preterminal learned/on-policy
+      successor value toward the cached batch-start successor, plus at most one
+      additional fixed blend only if it remains genuinely narrow
+    - promote only if the reformulated successor value preserves the fixed
+      selector/gate contract while retaining a material part of the
+      earlier-control accuracy and drift gains
+- outcome:
+  - the completed adopted-package preterminal successor-value confirmation now
+    indicates:
+    - the best narrow candidate is the fixed `25%` live / `75%` cached
+      successor-value blend
+    - this best candidate preserves the full selector/gate contract:
+      - `seed_gate_positive_rate: 1.0`
+      - `selected_epoch_passes_gate_rate: 1.0`
+      - `selector_fallback_used_rate: 0.0`
+    - it improves over the current adopted control, but only partially:
+      - `mean_val_accuracy_delta vs control: +0.0067`
+      - `mean_val_terminal_rowspace_rms_delta vs control: -0.00272`
+      - `mean_gate_passing_epoch_count_delta vs control: -5.2`
+    - relative to the failed earlier-control anchor, it retains only:
+      - about `31%` of the validation-accuracy gain
+      - about `24.5%` of the terminal row-space RMS gain
+    - the stronger fixed `50%` live / `50%` cached blend recovers more
+      geometry but gives up too much gate robustness:
+      - `seed_gate_positive_rate: 0.8`
+      - `selected_epoch_passes_gate_rate: 0.8`
+      - `selector_fallback_used_rate: 0.2`
+- diagnosis:
+  - `successor_value_reformulation_recovers_partially_but_not_adoption_level`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one smaller confirmation-level follow-up on the same preterminal
+    successor-value component only, using the best narrow reformulation
+    candidate from this pass

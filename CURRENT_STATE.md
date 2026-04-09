@@ -69,14 +69,21 @@ This file is the short active-state summary for the repository.
   - swapping both successor components back to cached matches the `z_on_next`-only result, so the remaining blocker is not a cross-source successor inconsistency
   - the current active diagnosis is:
     - `stale_successor_value_is_primary_blocker`
+- The preterminal successor-value reformulation confirmation now says this component is still promising but not yet adoption-viable:
+  - the best narrow candidate is the fixed `25%` live / `75%` cached successor-value blend
+  - it preserves the full selector/gate contract and improves validation accuracy plus terminal row-space metrics over the current adopted control
+  - but it retains only about `31%` of the failed earlier-control validation-accuracy gain and about `24.5%` of the terminal row-space RMS gain
+  - the `50%` live / `50%` cached blend recovers more geometry but gives up too much gate robustness
+  - the current confirmation-level diagnosis is:
+    - `successor_value_reformulation_recovers_partially_but_not_adoption_level`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a confirmation-level reformulation on the preterminal on-policy successor-value component only rather than another terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to a smaller confirmation-level follow-up on the same preterminal on-policy successor-value component only rather than another terminal-cone follow-up
 - Current active question:
-  - can the preterminal on-policy successor-value component be minimally reformulated so that it keeps some earlier-control accuracy and drift gains without breaking the fixed selector/gate contract
+  - can the best narrow successor-value reformulation keep more of the earlier-control gain without giving back the current full gate robustness contract
 
 ## Relevant Suites And Artifacts
 
@@ -103,6 +110,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_source_localization_suite)
   - [outputs/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_handoff_confirmation_suite)
   - [outputs/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_handoff_source_suite)
+  - [outputs/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_confirmation_suite)
 
 ## Read Order And Precedence
 

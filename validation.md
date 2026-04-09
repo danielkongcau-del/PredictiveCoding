@@ -1749,6 +1749,23 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - run one confirmation-level reformulation on the preterminal on-policy
       successor-value component only, without reopening any cone-family sweep
+  - the completed adopted-package preterminal successor-value confirmation now
+    says:
+    - the best narrow candidate is the fixed `25%` live / `75%` cached
+      successor-value blend
+    - it preserves the full selector/gate contract and improves validation
+      accuracy plus terminal row-space metrics over the current adopted control
+    - but it retains only about `31%` of the failed earlier-control
+      validation-accuracy gain and about `24.5%` of the failed earlier-control
+      terminal row-space RMS gain
+    - the stronger fixed `50%` live / `50%` cached blend recovers more
+      geometry but gives up too much gate robustness
+    - the resulting diagnosis is:
+      - `successor_value_reformulation_recovers_partially_but_not_adoption_level`
+  - next single narrow move:
+    - run one smaller confirmation-level follow-up on the same preterminal
+      successor-value component only, using the best narrow reformulation
+      candidate from this pass
 
 Required reporting:
 
