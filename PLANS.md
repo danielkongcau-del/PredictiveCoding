@@ -3769,3 +3769,36 @@ Outcome:
 - next single narrow move:
   - run one narrower handoff-state source-localization step on the preterminal
     successor handoff itself rather than another cone-family sweep
+  - execution plan:
+    - keep the current adopted package and the failed `(-2,-1)` earlier-control
+      anchor fixed as reference cells
+    - audit the exact successor-handoff fields currently produced by the
+      preterminal step
+    - swap only one successor-handoff component at a time from live/on-policy
+      to cached form
+    - use the result to decide whether one successor-handoff component
+      dominates or whether the remaining blocker is still an interaction
+- outcome:
+  - the completed adopted-package successor-handoff source-localization suite
+    indicates:
+    - swapping only preterminal `z_on_next` back to the cached batch-start
+      successor fully restores the gate contract but collapses back to nearly
+      the adopted-control behavior:
+      - `mean_val_accuracy_delta vs control: +0.0007`
+      - `mean_gate_passing_epoch_count_delta vs control: 0.0`
+      - `terminal_rowspace_rms_gain_retained_fraction_from_control_to_failed_anchor: about -0.0057`
+    - swapping only preterminal `z_lf_next` back to the cached batch-start
+      successor leaves the failed earlier-control anchor unchanged:
+      - `mean_val_accuracy_delta vs failed anchor: 0.0`
+      - `mean_gate_passing_epoch_count_delta vs failed anchor: 0.0`
+    - swapping both successor components back to cached matches the
+      `z_on_next`-only result, so the remaining blocker is not a cross-source
+      successor inconsistency
+- diagnosis:
+  - `stale_successor_value_is_primary_blocker`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one confirmation-level reformulation on the preterminal on-policy
+    successor-value component only, without reopening any cone-family sweep

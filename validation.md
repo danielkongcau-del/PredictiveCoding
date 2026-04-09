@@ -1734,6 +1734,21 @@ Current TF2 adoption interpretation:
     - run one narrower handoff-state source-localization step on the
       preterminal successor handoff itself rather than another cone-family
       sweep
+  - the completed adopted-package successor-handoff source-localization suite
+    now says:
+    - swapping only preterminal `z_on_next` back to the cached batch-start
+      successor fully restores the gate contract but collapses back to near the
+      adopted-control behavior
+    - swapping only preterminal `z_lf_next` back to the cached batch-start
+      successor leaves the failed earlier-control reference unchanged
+    - swapping both successor components back to cached matches the
+      `z_on_next`-only result, so the remaining blocker is not a cross-source
+      successor inconsistency
+    - the resulting diagnosis is:
+      - `stale_successor_value_is_primary_blocker`
+  - next single narrow move:
+    - run one confirmation-level reformulation on the preterminal on-policy
+      successor-value component only, without reopening any cone-family sweep
 
 Required reporting:
 

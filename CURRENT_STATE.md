@@ -63,14 +63,20 @@ This file is the short active-state summary for the repository.
   - but it recovers only about `3.4%` of the earlier-control validation-accuracy gain and essentially none of the earlier row-space RMS gain
   - the current confirmation-level diagnosis is:
     - `handoff_reformulation_recovers_partially_but_not_adoption_level`
+- The successor-handoff source-localization pass now says the blocker is the learned/on-policy successor value itself rather than the local-field successor bundle:
+  - swapping only preterminal `z_on_next` back to the cached batch-start successor fully restores the gate contract but collapses back to near-control accuracy and row-space metrics
+  - swapping only preterminal `z_lf_next` back to the cached batch-start successor leaves the failed earlier-control reference unchanged
+  - swapping both successor components back to cached matches the `z_on_next`-only result, so the remaining blocker is not a cross-source successor inconsistency
+  - the current active diagnosis is:
+    - `stale_successor_value_is_primary_blocker`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a narrower source-localization step on the preterminal successor handoff itself rather than another terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to a confirmation-level reformulation on the preterminal on-policy successor-value component only rather than another terminal-cone follow-up
 - Current active question:
-  - which part of the preterminal successor handoff formulation suppresses the earlier-control accuracy and drift gains after gate coverage is restored
+  - can the preterminal on-policy successor-value component be minimally reformulated so that it keeps some earlier-control accuracy and drift gains without breaking the fixed selector/gate contract
 
 ## Relevant Suites And Artifacts
 
@@ -96,6 +102,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_late_rollout_drift_control_suite)
   - [outputs/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_source_localization_suite)
   - [outputs/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_handoff_confirmation_suite)
+  - [outputs/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_handoff_source_suite)
 
 ## Read Order And Precedence
 
