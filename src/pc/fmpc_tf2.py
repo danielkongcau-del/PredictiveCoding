@@ -119,6 +119,7 @@ class FMPCTF2Config:
     time_encoding_variant: TF2TimeEncodingVariant = "raw"
     terminal_local_field_direction_intervention: TF2TerminalLocalFieldDirectionIntervention = "none"
     terminal_local_field_angle_clip_degrees: float = 30.0
+    terminal_local_field_intervention_step_offsets: tuple[int, ...] = (-1,)
     terminal_local_field_rowspace_angle_clip_degrees: float = 30.0
     terminal_local_field_orthogonal_angle_clip_degrees: float = 30.0
     transported_output_alignment_weight: float = 0.0
@@ -198,6 +199,17 @@ class FMPCTF2Config:
             raise ValueError("Unsupported terminal_local_field_direction_intervention.")
         if not (0.0 < float(self.terminal_local_field_angle_clip_degrees) <= 180.0):
             raise ValueError("terminal_local_field_angle_clip_degrees must lie in (0.0, 180.0].")
+        if len(self.terminal_local_field_intervention_step_offsets) == 0:
+            raise ValueError("terminal_local_field_intervention_step_offsets must contain at least one step.")
+        resolved_intervention_indices: set[int] = set()
+        for raw_offset in self.terminal_local_field_intervention_step_offsets:
+            step_offset = int(raw_offset)
+            resolved_index = int(self.micro_steps) + step_offset if step_offset < 0 else step_offset
+            if not (0 <= resolved_index < int(self.micro_steps)):
+                raise ValueError(
+                    "terminal_local_field_intervention_step_offsets must resolve to valid micro-step indices."
+                )
+            resolved_intervention_indices.add(resolved_index)
         if not (0.0 < float(self.terminal_local_field_rowspace_angle_clip_degrees) <= 180.0):
             raise ValueError("terminal_local_field_rowspace_angle_clip_degrees must lie in (0.0, 180.0].")
         if not (0.0 < float(self.terminal_local_field_orthogonal_angle_clip_degrees) <= 180.0):
@@ -1381,6 +1393,14 @@ def _output_alignment_scale_for_step(
     raise ValueError(f"Unsupported transported_output_alignment_schedule '{schedule}'.")
 
 
+def _resolved_terminal_local_field_intervention_step_indices(config: FMPCTF2Config) -> tuple[int, ...]:
+    resolved_indices = {
+        int(config.micro_steps) + int(step_offset) if int(step_offset) < 0 else int(step_offset)
+        for step_offset in config.terminal_local_field_intervention_step_offsets
+    }
+    return tuple(sorted(resolved_indices))
+
+
 def _run_tf2_micro_step(
     model: PCNetwork,
     psi_network: MLPNetwork,
@@ -1397,6 +1417,7 @@ def _run_tf2_micro_step(
     theta_eta_w: float,
     theta_eta_b: float,
     is_terminal_step: bool = False,
+    apply_direction_intervention: bool = False,
     onpolicy_mix_ratio: float | None = None,
     event_log: list[str] | None = None,
     sample_collector: TF2SampleCollector | None = None,
@@ -1418,7 +1439,7 @@ def _run_tf2_micro_step(
     z_on_next = plan.z_on_next.copy()
     z_lf_next = plan.z_lf_next.copy()
     effective_prediction = _psi_predict(psi_network, plan.psi_inputs, config)
-    if is_terminal_step and config.terminal_local_field_direction_intervention != "none":
+    if apply_direction_intervention and config.terminal_local_field_direction_intervention != "none":
         effective_prediction, z_on_next = _apply_terminal_local_field_direction_intervention(
             z_on_k,
             dt,
@@ -1493,6 +1514,11 @@ def _train_one_batch_tf2(
     z_on = context.z0.copy()
     z_lf = context.z0.copy()
     active_cadence = _active_theta_update_cadence(config, epoch_index)
+    intervention_step_indices = (
+        _resolved_terminal_local_field_intervention_step_indices(config)
+        if config.terminal_local_field_direction_intervention != "none"
+        else ()
+    )
     micro_eta_w, micro_eta_b = _theta_micro_learning_rates(config, active_cadence)
     active_mix_ratio = _active_onpolicy_mix_ratio(config, epoch_index)
     total_losses: list[float] = []
@@ -1515,6 +1541,7 @@ def _train_one_batch_tf2(
             r_k=r_k,
             lambda_id=lambda_id,
             is_terminal_step=bool(step_index == (int(config.micro_steps) - 1)),
+            apply_direction_intervention=bool(step_index in intervention_step_indices),
             apply_theta_update=_theta_update_due_for_step(active_cadence, step_index),
             theta_eta_w=micro_eta_w,
             theta_eta_b=micro_eta_b,
@@ -1675,6 +1702,9 @@ def _config_payload(config: FMPCTF2Config) -> dict[str, Any]:
             "time_encoding_variant": config.time_encoding_variant,
             "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
             "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
+            "terminal_local_field_intervention_step_offsets": [
+                int(value) for value in config.terminal_local_field_intervention_step_offsets
+            ],
             "terminal_local_field_rowspace_angle_clip_degrees": float(
                 config.terminal_local_field_rowspace_angle_clip_degrees
             ),
@@ -1873,6 +1903,9 @@ def run_fmpc_tf2_experiment(config: FMPCTF2Config) -> FMPCTF2RunResult:
         "time_encoding_variant": config.time_encoding_variant,
         "terminal_local_field_direction_intervention": config.terminal_local_field_direction_intervention,
         "terminal_local_field_angle_clip_degrees": float(config.terminal_local_field_angle_clip_degrees),
+        "terminal_local_field_intervention_step_offsets": [
+            int(value) for value in config.terminal_local_field_intervention_step_offsets
+        ],
         "terminal_local_field_rowspace_angle_clip_degrees": float(
             config.terminal_local_field_rowspace_angle_clip_degrees
         ),

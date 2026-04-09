@@ -1688,6 +1688,18 @@ Current TF2 adoption interpretation:
     - `preterminal_accumulation_dominates`
   - next single narrow move:
     - run one narrow adopted-package late-rollout drift-control diagnostic next
+  - the completed adopted-package late-rollout drift-control suite now indicates:
+    - earlier same-geometry full-vector `30` degree control does reduce terminal
+      row-space drift and improves validation-selected behavior
+    - but the penultimate-plus-terminal and last-two-preterminal-plus-terminal
+      variants both collapse gate coverage to `0.0`
+    - therefore this is not an adoption path under the current gate / selector
+      contract
+  - diagnosis:
+    - `mixed_result_but_not_adoption_level`
+  - next single narrow move:
+    - run one narrow source-localization diagnostic on the preterminal update
+      formulation itself rather than another cone-family sweep
 
 Required reporting:
 

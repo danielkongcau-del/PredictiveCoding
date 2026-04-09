@@ -3652,3 +3652,44 @@ Outcome:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one narrow adopted-package late-rollout drift-control diagnostic next
+  - keep the current adopted preset fixed:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+  - do not add a new cone family
+  - test only whether the same adopted full-vector hard `30` degree cone helps
+    when moved earlier into the late rollout:
+    - terminal only
+    - penultimate plus terminal
+    - last two preterminal plus terminal
+    - optional penultimate-only diagnostic control
+  - use the result to decide whether earlier same-geometry late-rollout control
+    materially reduces preterminal drift without breaking the current robustness
+    contract
+- outcome:
+  - the completed adopted-package late-rollout drift-control suite indicates:
+    - the same adopted full-vector hard `30` degree cone does reduce late-rollout
+      drift when moved earlier:
+      - penultimate plus terminal mean validation row-space RMS:
+        - about `0.1536 -> 0.1425`
+      - last two preterminal plus terminal mean validation row-space RMS:
+        - about `0.1536 -> 0.1363`
+      - both earlier-control variants also improve validation-selected behavior:
+        - penultimate plus terminal mean val/test accuracy:
+          - `0.8570 / 0.8600`
+        - last two preterminal plus terminal mean val/test accuracy:
+          - `0.8748 / 0.8756`
+    - however, both earlier-control variants collapse the current robustness
+      contract:
+      - mean gate-passing epoch count:
+        - `16.8 -> 0.0`
+      - `selected_epoch_passes_gate_rate`:
+        - `1.0 -> 0.0`
+      - `selector_fallback_used_rate`:
+        - `0.0 -> 1.0`
+- diagnosis:
+  - `mixed_result_but_not_adoption_level`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one narrow source-localization diagnostic on the preterminal update
+    formulation itself rather than another cone-family sweep

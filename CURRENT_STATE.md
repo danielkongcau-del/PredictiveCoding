@@ -48,14 +48,18 @@ This file is the short active-state summary for the repository.
   - validation mean row-space gap share already present by the preterminal knot is about `0.7447`
   - test mean row-space gap share already present by the preterminal knot is about `0.7451`
   - the terminal jump contributes only about `0.255`
+- The late-rollout drift-control pass says this preterminal drift is not adoption-recoverable by simply moving the same adopted full-vector `30` degree cone earlier:
+  - penultimate-plus-terminal and last-two-preterminal-plus-terminal variants both reduce terminal row-space RMS and improve accuracy
+  - but both collapse gate coverage to `0.0`, force selector fallback to `1.0`, and therefore remain non-adopted
+  - the remaining blocker now points to the preterminal update formulation itself rather than another cone-family follow-up
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to late-rollout drift control rather than another terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to a preterminal-update source-localization question rather than another terminal-cone follow-up
 - Current active question:
-  - how to control late-rollout preterminal basis drift inside the adopted package without changing the transport family
+  - what part of the preterminal update formulation causes the energy-side gate collapse when earlier same-geometry drift control is applied
 
 ## Relevant Suites And Artifacts
 
@@ -78,6 +82,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_smooth_unified_cone_suite)
   - [outputs/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_robustness_suite)
   - [outputs/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_basis_drift_localization_suite)
+  - [outputs/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_late_rollout_drift_control_suite)
 
 ## Read Order And Precedence
 

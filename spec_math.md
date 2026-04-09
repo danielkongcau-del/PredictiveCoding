@@ -665,8 +665,15 @@ during training:
   - `"local_field_direction_angle_clip_keep_live_norm_split_threshold"`
   - `}`
 
-This intervention is defined only for the **final micro-step** of the true closed-loop
-training rollout. It does **not** change:
+By default, this intervention is defined only for the **final micro-step** of the
+true closed-loop training rollout. Diagnostic configurations may expose
+`terminal_local_field_intervention_step_offsets`, a set of late-rollout step
+offsets relative to the final micro-step, to apply the same intervention on a
+configured subset of late micro-steps. The adopted preset keeps:
+
+- `terminal_local_field_intervention_step_offsets = (-1,)`
+
+This does **not** change:
 
 - the remaining-horizon contract for `u_psi(z_t, r, t; c)`
 - the bootstrap target formula
