@@ -44,6 +44,7 @@ _IncrementMode = Literal[
     "live_successor_increment",
     "cached_successor_increment_lower_bound",
     "increment_direction_trust_region_keep_live_norm_30",
+    "increment_direction_trust_region_cached_magnitude",
     "exact_cached_direction_live_magnitude",
     "cached_magnitude_live_direction",
 ]
@@ -272,6 +273,25 @@ def _cached_magnitude_live_direction(
     return stabilized
 
 
+def _increment_direction_trust_region_cached_magnitude(
+    live_increment: np.ndarray,
+    cached_increment: np.ndarray,
+    *,
+    max_angle_degrees: float,
+) -> np.ndarray:
+    live = np.asarray(live_increment, dtype=np.float64)
+    cached = np.asarray(cached_increment, dtype=np.float64)
+    stabilized_direction = fmpc_tf2_module._clip_direction_to_anchor_cone(
+        fmpc_tf2_module._safe_direction(live),
+        fmpc_tf2_module._safe_direction(cached),
+        max_angle_degrees=float(max_angle_degrees),
+    )
+    cached_norm = np.linalg.norm(cached, axis=1, keepdims=True)
+    stabilized = stabilized_direction * cached_norm
+    ensure_finite_array(stabilized, "tf2_increment_direction_trust_region_cached_magnitude")
+    return stabilized
+
+
 def _reformulate_successor_increment(
     mode: _IncrementMode,
     *,
@@ -292,6 +312,13 @@ def _reformulate_successor_increment(
         result = live_carry + cached_increment
     elif mode == "increment_direction_trust_region_keep_live_norm_30":
         stabilized_increment = _increment_direction_trust_region_keep_live_norm(
+            live_increment,
+            cached_increment,
+            max_angle_degrees=float(config.increment_direction_trust_region_angle_degrees),
+        )
+        result = live_carry + stabilized_increment
+    elif mode == "increment_direction_trust_region_cached_magnitude":
+        stabilized_increment = _increment_direction_trust_region_cached_magnitude(
             live_increment,
             cached_increment,
             max_angle_degrees=float(config.increment_direction_trust_region_angle_degrees),

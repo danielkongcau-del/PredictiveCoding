@@ -1830,6 +1830,24 @@ Current TF2 adoption interpretation:
       - `live_successor_increment_direction_blocker_persists`
   - next single narrow move:
     - run one minimal direction-magnitude interaction diagnostic next
+  - the completed direction-magnitude interaction diagnostic now says:
+    - `30` degree direction trust-region + cached magnitude is effectively
+      identical to the current `30` degree direction-only reference:
+      - validation-accuracy retention vs failed anchor: about `75.9%`
+      - gate-robustness recovery vs control: about `25%`
+      - terminal row-space RMS retention vs failed anchor: about `65.9%`
+    - `20` degree direction trust-region + cached magnitude is effectively
+      identical to the current `20` degree direction-only reference:
+      - validation-accuracy retention vs failed anchor: about `44.8%`
+      - gate-robustness recovery vs control: about `54.8%`
+      - terminal row-space RMS retention vs failed anchor: about `42.0%`
+    - neither interaction candidate keeps the full selector/gate contract intact
+  - the resulting diagnosis is:
+    - `live_successor_increment_interaction_blocker_persists`
+  - next single narrow move:
+    - run one deeper diagnostic on the live successor increment formulation
+      itself rather than another broader successor-value, interaction, or
+      cone-family sweep
 
 Required reporting:
 

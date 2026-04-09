@@ -132,14 +132,26 @@ This file is the short active-state summary for the repository.
     - but it still does not keep the full selector/gate contract intact
   - the current direction-only confirmation diagnosis is:
     - `live_successor_increment_direction_blocker_persists`
+- The direction-magnitude interaction pass now says cached-magnitude interaction does not materially improve on the current direction-only tradeoff:
+  - `30` degree direction trust-region + cached magnitude remains effectively identical to the existing `30` degree direction-only reference:
+    - validation-accuracy retention vs failed anchor: about `75.9%`
+    - gate-robustness recovery vs control: about `25%`
+    - terminal row-space RMS retention vs failed anchor: about `65.9%`
+  - `20` degree direction trust-region + cached magnitude remains effectively identical to the existing `20` degree direction-only reference:
+    - validation-accuracy retention vs failed anchor: about `44.8%`
+    - gate-robustness recovery vs control: about `54.8%`
+    - terminal row-space RMS retention vs failed anchor: about `42.0%`
+  - neither interaction candidate keeps the full selector/gate contract intact
+  - the current direction-magnitude interaction diagnosis is:
+    - `live_successor_increment_interaction_blocker_persists`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to one minimal direction-magnitude interaction diagnostic next rather than another broader successor-value or terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to one deeper diagnostic on the live successor increment formulation itself rather than another broader successor-value, interaction, or terminal-cone follow-up
 - Current active question:
-  - what minimal direction-magnitude interaction inside the live preterminal successor increment still converts retained gain into gate collapse
+  - what in the live preterminal successor increment formulation is generating the bad live direction that still converts retained gain into gate collapse
 
 ## Relevant Suites And Artifacts
 
@@ -172,6 +184,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_confirmation_suite)
   - [outputs/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_source_suite)
   - [outputs/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_direction_confirmation_suite)
+  - [outputs/fmpc_tf2_successor_increment_interaction_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_interaction_suite)
 
 ## Read Order And Precedence
 

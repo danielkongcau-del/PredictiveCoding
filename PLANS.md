@@ -4036,6 +4036,31 @@ Outcome:
       lower-bound reference
     - keep the current direction-only trust-region candidates as interaction
       context only
-    - test only one minimal interaction-preserving increment reformulation
-      that changes how live direction and live magnitude are coupled without
-      reopening any cone-family or broader successor-value search
+    - test only the two smallest direction-magnitude interaction candidates:
+      - `30` degree direction trust-region + cached magnitude
+      - `20` degree direction trust-region + cached magnitude
+    - use the result only to decide whether a minimal joint reformulation of
+      direction and magnitude can retain more of the earlier-control gain
+      without breaking the current selector/gate contract
+- outcome:
+  - the completed direction-magnitude interaction diagnostic now says:
+    - `30` degree direction trust-region + cached magnitude is effectively
+      identical to the current `30` degree direction-only reference:
+      - validation-accuracy retention vs failed anchor: about `75.9%`
+      - gate-robustness recovery vs control: about `25%`
+      - terminal row-space RMS retention vs failed anchor: about `65.9%`
+    - `20` degree direction trust-region + cached magnitude is effectively
+      identical to the current `20` degree direction-only reference:
+      - validation-accuracy retention vs failed anchor: about `44.8%`
+      - gate-robustness recovery vs control: about `54.8%`
+      - terminal row-space RMS retention vs failed anchor: about `42.0%`
+    - neither interaction candidate keeps the full selector/gate contract intact
+- diagnosis:
+  - `live_successor_increment_interaction_blocker_persists`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one deeper diagnostic on the live successor increment formulation
+    itself rather than another broader successor-value, interaction, or
+    cone-family sweep
