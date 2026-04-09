@@ -84,14 +84,26 @@ This file is the short active-state summary for the repository.
     - `selector_fallback_used_rate: 0.2`
   - the current local follow-up diagnosis is:
     - `local_successor_value_refinement_improves_but_not_to_adoption_level`
+- The successor-value carry-vs-increment source-localization pass now says the remaining blocker sits in the live successor increment rather than in the predecessor carry state:
+  - `live carry + cached increment` restores the full selector/gate contract:
+    - `seed_gate_positive_rate: 1.0`
+    - `selected_epoch_passes_gate_rate: 1.0`
+    - `selector_fallback_used_rate: 0.0`
+    - but it collapses back to near-control accuracy and terminal row-space metrics
+  - `cached carry + live increment` stays almost identical to the failed higher-gain reference:
+    - `mean_val_accuracy: 0.8563`
+    - `mean_gate_passing_epoch_count: 0.0`
+    - `selector_fallback_used_rate: 1.0`
+  - the current source-localization diagnosis is:
+    - `live_successor_increment_is_primary_blocker`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a deeper diagnostic on the live preterminal successor-value formulation itself rather than another low-live blend sweep or terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to a confirmation-level reformulation on the preterminal successor increment only rather than another low-live blend sweep or terminal-cone follow-up
 - Current active question:
-  - what part of the live preterminal successor-value formulation still converts additional drift/accuracy gain into gate-contract loss once the low-live blend neighborhood has been checked
+  - can the live preterminal successor increment be minimally reformulated so that it keeps more of the earlier-control gain without reopening the gate collapse
 
 ## Relevant Suites And Artifacts
 
@@ -120,6 +132,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_handoff_source_suite)
   - [outputs/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_confirmation_suite)
   - [outputs/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_followup_suite)
+  - [outputs/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_source_suite)
 
 ## Read Order And Precedence
 

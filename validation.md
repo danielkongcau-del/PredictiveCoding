@@ -1781,6 +1781,17 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - move to a deeper diagnostic on the live preterminal successor-value
       formulation itself rather than another low-live blend sweep
+  - the completed successor-value carry-vs-increment source-localization now
+    says:
+    - `live carry + cached increment` restores the full selector/gate contract
+      but collapses back to near-control accuracy and terminal row-space metrics
+    - `cached carry + live increment` remains almost identical to the failed
+      higher-gain reference and keeps the gate collapse
+    - the resulting diagnosis is:
+      - `live_successor_increment_is_primary_blocker`
+  - next single narrow move:
+    - run one confirmation-level reformulation on the preterminal successor
+      increment only
 
 Required reporting:
 

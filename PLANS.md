@@ -3884,3 +3884,43 @@ Outcome:
   - if TF2 work continues inside the adopted package, move to a deeper
     diagnostic on the live preterminal successor-value formulation itself
     rather than another low-live blend sweep
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed earlier-control `(-2,-1)` live successor-value package
+      as the higher-gain non-adopted reference
+    - keep the current `25%` live / `75%` cached successor-value blend as the
+      best narrow safe reference
+    - decompose the preterminal live successor-value formulation only into:
+      - predecessor carry state `z_on_k`
+      - successor increment `Δ_on = z_on_next - z_on_k`
+    - test only the two smallest component-level substitutions:
+      - live carry + cached successor increment
+      - cached carry + live successor increment
+    - use the result only to localize whether the remaining blocker comes from
+      the live predecessor carry, the live successor increment, or their
+      interaction
+- outcome:
+  - the completed successor-value carry-vs-increment source-localization now
+    says:
+    - `live carry + cached increment` restores the full selector/gate contract:
+      - `seed_gate_positive_rate: 1.0`
+      - `selected_epoch_passes_gate_rate: 1.0`
+      - `selector_fallback_used_rate: 0.0`
+    - but `live carry + cached increment` collapses back to near-control
+      behavior:
+      - validation-accuracy retention vs failed anchor: about `3.4%`
+      - terminal row-space RMS retention vs failed anchor: about `-0.27%`
+    - `cached carry + live increment` remains almost identical to the failed
+      higher-gain reference:
+      - validation-accuracy retention vs failed anchor: about `96.6%`
+      - gate-robustness recovery vs control: `0.0`
+      - terminal row-space RMS retention vs failed anchor: about `102.4%`
+- diagnosis:
+  - `live_successor_increment_is_primary_blocker`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one confirmation-level reformulation on the preterminal successor
+    increment only
