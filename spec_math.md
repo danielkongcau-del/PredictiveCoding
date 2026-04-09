@@ -657,6 +657,7 @@ during training:
 - `terminal_local_field_direction_intervention in {`
   - `"none"`
   - `"local_field_direction_angle_clip_keep_live_norm"`
+  - `"local_field_direction_smooth_unified_cone_projection_keep_live_norm"`
   - `"local_field_direction_hard_replace_keep_live_norm"`
   - `"local_field_direction_angle_clip_keep_live_norm_rowspace_only"`
   - `"local_field_direction_hard_replace_keep_live_norm_rowspace_only"`
@@ -698,6 +699,14 @@ TF2 keeps the learned terminal norm but clips the learned terminal direction int
 cone around `d_lf` with half-angle `terminal_local_field_angle_clip_degrees`:
 
 - `u_term = ||u_live|| * clip_dir(normalize(u_live), d_lf; theta_clip)`
+
+If `terminal_local_field_direction_intervention = "local_field_direction_smooth_unified_cone_projection_keep_live_norm"`,
+TF2 stays in the same full-space local-field cone family, keeps the learned
+terminal norm, leaves in-cone actions unchanged, and applies a smooth interior
+projection toward `d_lf` only when the learned terminal direction falls outside
+the cone:
+
+- `u_term = ||u_live|| * smooth_clip_dir(normalize(u_live), d_lf; theta_clip)`
 
 TF2 may also use the readout-relevant row-space of the current output layer:
 

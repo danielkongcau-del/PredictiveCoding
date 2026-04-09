@@ -61,6 +61,7 @@ TF2TimeEncodingVariant = Literal["raw", "poly_rt2"]
 TF2TerminalLocalFieldDirectionIntervention = Literal[
     "none",
     "local_field_direction_angle_clip_keep_live_norm",
+    "local_field_direction_smooth_unified_cone_projection_keep_live_norm",
     "local_field_direction_hard_replace_keep_live_norm",
     "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
     "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
@@ -187,6 +188,7 @@ class FMPCTF2Config:
         if self.terminal_local_field_direction_intervention not in {
             "none",
             "local_field_direction_angle_clip_keep_live_norm",
+            "local_field_direction_smooth_unified_cone_projection_keep_live_norm",
             "local_field_direction_hard_replace_keep_live_norm",
             "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
             "local_field_direction_hard_replace_keep_live_norm_rowspace_only",
@@ -837,6 +839,47 @@ def _clip_direction_to_anchor_cone(
     return _safe_direction(clipped)
 
 
+def _smooth_project_direction_to_anchor_cone(
+    raw_direction: np.ndarray,
+    anchor_direction: np.ndarray,
+    *,
+    max_angle_degrees: float,
+) -> np.ndarray:
+    raw = np.asarray(raw_direction, dtype=np.float64)
+    anchor = np.asarray(anchor_direction, dtype=np.float64)
+    if raw.shape != anchor.shape:
+        raise ValueError("raw_direction and anchor_direction must share the same shape.")
+    projected = np.zeros_like(raw)
+    theta_max = float(np.deg2rad(float(max_angle_degrees)))
+    residual_span = max(float(np.pi - theta_max), 1e-12)
+    for row_index in range(int(raw.shape[0])):
+        raw_row = raw[row_index]
+        anchor_row = anchor[row_index]
+        raw_norm = float(np.linalg.norm(raw_row))
+        anchor_norm = float(np.linalg.norm(anchor_row))
+        if raw_norm <= 1e-12 or anchor_norm <= 1e-12:
+            projected[row_index] = raw_row
+            continue
+        raw_unit = raw_row / raw_norm
+        anchor_unit = anchor_row / anchor_norm
+        cosine = float(np.clip(np.dot(raw_unit, anchor_unit), -1.0, 1.0))
+        theta = float(np.arccos(cosine))
+        if theta <= theta_max:
+            projected[row_index] = raw_unit
+            continue
+        tangent = raw_unit - (cosine * anchor_unit)
+        tangent_norm = float(np.linalg.norm(tangent))
+        if tangent_norm <= 1e-12:
+            projected[row_index] = anchor_unit
+            continue
+        tangent_unit = tangent / tangent_norm
+        excess_fraction = float(np.clip((theta - theta_max) / residual_span, 0.0, 1.0))
+        smooth_step = float(excess_fraction * excess_fraction * (3.0 - (2.0 * excess_fraction)))
+        target_theta = float(theta_max * (1.0 - smooth_step))
+        projected[row_index] = (np.cos(target_theta) * anchor_unit) + (np.sin(target_theta) * tangent_unit)
+    return _safe_direction(projected)
+
+
 def _free_hidden_state_indices_from_context(context: FMPCTF1Context) -> list[int]:
     if len(context.clamped_mask) <= 2:
         return []
@@ -989,6 +1032,14 @@ def _apply_terminal_local_field_direction_intervention(
         stabilized_action = local_field_direction * live_norm
     elif intervention == "local_field_direction_angle_clip_keep_live_norm":
         stabilized_action = _clip_direction_to_anchor_cone(
+            _safe_direction(raw_action),
+            local_field_direction,
+            max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),
+        ) * live_norm
+    elif intervention == "local_field_direction_smooth_unified_cone_projection_keep_live_norm":
+        # Keep the same full-space local-field cone family as the adopted hard
+        # clip, but use a smooth interior projection for out-of-cone actions.
+        stabilized_action = _smooth_project_direction_to_anchor_cone(
             _safe_direction(raw_action),
             local_field_direction,
             max_angle_degrees=float(config.terminal_local_field_angle_clip_degrees),

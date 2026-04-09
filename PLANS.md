@@ -3503,3 +3503,41 @@ Outcome:
   - if TF2 work continues inside the adopted package, test at most one smooth
     unified-cone projection variant that tries to keep the interior-margin gain
     without paying the current gate-robustness cost
+- outcome:
+  - the completed adopted-package smooth unified-cone suite indicates:
+    - the smooth full-space cone remains non-adopted as a replacement default
+    - relative to the current adopted hard `30` degree cone, the smooth
+      candidate improves validation-selected behavior and row-space distortion:
+      - `+0.0037` mean val accuracy
+      - `+0.0074` mean test accuracy
+      - validation row-space RMS:
+        - about `0.1536 -> 0.1517`
+      - validation row-space fraction:
+        - about `0.5448 -> 0.5376`
+      - validation full-space angle to anchor:
+        - about `30.0 -> 24.1` degrees
+      - validation `> 30` degree violation rate remains:
+        - `0.0`
+    - relative to the old hard `20` degree interior-margin reference, the
+      smooth candidate partially recovers robustness:
+      - mean gate-passing epoch count:
+        - about `11.2 -> 12.4`
+      - `selected_epoch_passes_gate_rate`:
+        - about `0.8 -> 1.0`
+      - `selector_fallback_used_rate`:
+        - about `0.2 -> 0.0`
+    - but the smooth candidate still does not match the current adopted hard
+      `30` degree cone on gate robustness:
+      - mean gate-passing epoch count:
+        - about `16.8 -> 12.4`
+- diagnosis:
+  - the smooth unified-cone projection improves accuracy and row-space
+    distortion, but not enough to replace the current hard `30` degree adopted
+    control
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - if TF2 work continues inside the adopted package, treat this unified-cone
+    shape family as locally saturated and avoid another cone-shape sweep unless
+    a confirmation-level reason appears

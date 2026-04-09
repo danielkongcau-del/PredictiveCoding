@@ -29,20 +29,24 @@ This file is the short active-state summary for the repository.
 
 ## Operationally Relevant Sealed Conclusions
 
-- Stay inside the corrective TF2 package on `main`; do not open AlphaFlow, `µPC`-style TF2 mainline scaling, or TF3 from the current state.
+- Stay inside the corrective TF2 package on `main`; do not open AlphaFlow, `muPC`-style TF2 mainline scaling, or TF3 from the current state.
 - The adopted angle-clip package materially improves over the historical corrective reference and remains the current TF2 experimental default on `main`.
 - The remaining slow-PC gap is not mainly a selector/checkpoint issue and not mainly a simple head-fit problem.
 - The dominant remaining mismatch inside the adopted package is best read as readout-relevant endpoint-basis distortion rather than simple separability collapse.
 - Row-space-only, orthogonal-only, and split-threshold terminal interventions are all non-adopted; keep the current full-vector terminal angle clip unchanged.
 - The unified-cone vs split-subspace geometry pass says the current gain is best explained by a shared full-space angular constraint, not by literal row/orth ratio preservation.
 - The unified-cone-shape pass says the `20` degree interior-margin cone improves accuracy and row-space distortion, but not enough gate robustness to replace the current adopted `30` degree hard cone.
+- The smooth unified-cone projection pass also remains non-adopted:
+  - it improves accuracy and row-space distortion relative to the current hard `30` degree control
+  - it partially recovers the old `20` degree interior-margin robustness loss
+  - but it still does not recover enough gate robustness to replace the current adopted hard `30` degree cone
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
-  - if TF2 work continues inside the adopted package, test at most one smooth unified-cone projection variant that tries to keep the interior-margin gain without paying the current gate-robustness cost
+  - if TF2 work continues inside the adopted package, treat this unified-cone-shape family as locally saturated and avoid another cone-shape sweep unless a confirmation-level reason appears
 - Current active question:
-  - whether a single smooth unified-cone projection can preserve the `20` degree interior-margin gain while recovering the current adopted control's gate robustness
+  - whether any further work inside the current full-vector cone family is still justified, or whether the next package-internal diagnostic should move to a different remaining issue
 
 ## Relevant Suites And Artifacts
 
@@ -62,6 +66,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_split_threshold_coupling_suite)
   - [outputs/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_geometry_suite)
   - [outputs/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_shape_suite)
+  - [outputs/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_smooth_unified_cone_suite)
 
 ## Read Order And Precedence
 
