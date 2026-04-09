@@ -35,13 +35,14 @@ This file is the short active-state summary for the repository.
 - The dominant remaining mismatch inside the adopted package is best read as readout-relevant endpoint-basis distortion rather than simple separability collapse.
 - Row-space-only, orthogonal-only, and split-threshold terminal interventions are all non-adopted; keep the current full-vector terminal angle clip unchanged.
 - The unified-cone vs split-subspace geometry pass says the current gain is best explained by a shared full-space angular constraint, not by literal row/orth ratio preservation.
+- The unified-cone-shape pass says the `20` degree interior-margin cone improves accuracy and row-space distortion, but not enough gate robustness to replace the current adopted `30` degree hard cone.
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
-  - run one narrow geometry-preserving unified-cone-shape diagnostic inside the adopted full-vector family
+  - if TF2 work continues inside the adopted package, test at most one smooth unified-cone projection variant that tries to keep the interior-margin gain without paying the current gate-robustness cost
 - Current active question:
-  - what geometry-preserving refinement, if any, can stay inside the unified full-vector cone family without reopening split-subspace decompositions
+  - whether a single smooth unified-cone projection can preserve the `20` degree interior-margin gain while recovering the current adopted control's gate robustness
 
 ## Relevant Suites And Artifacts
 
@@ -60,6 +61,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_terminal_coupling_suite)
   - [outputs/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_split_threshold_coupling_suite)
   - [outputs/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_geometry_suite)
+  - [outputs/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_shape_suite)
 
 ## Read Order And Precedence
 

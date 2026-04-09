@@ -1531,6 +1531,49 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - run one narrow geometry-preserving unified-cone-shape diagnostic inside
       the adopted full-vector family, rather than another split-subspace sweep
+  - the completed adopted-package unified-cone-shape suite now indicates:
+    - no refined unified full-space cone shape is yet strong enough to replace
+      the current adopted control
+    - the stricter interior-margin `20` degree unified cone is the only tested
+      candidate that improves validation-selected behavior:
+      - `+0.0059` mean val accuracy
+      - `+0.0074` mean test accuracy
+    - the same `20` degree interior-margin candidate also improves the targeted
+      row-space distortion metrics:
+      - validation row-space RMS:
+        - about `0.1536 -> 0.1508`
+      - validation row-space fraction:
+        - about `0.5448 -> 0.5335`
+      - validation full-space terminal angle to anchor:
+        - about `30.0 -> 20.0` degrees
+      - validation `> 30` degree violation rate remains:
+        - `0.0`
+    - however, the `20` degree interior-margin candidate loses gate robustness:
+      - mean gate-passing epoch count:
+        - about `16.8 -> 11.2`
+      - `selected_epoch_passes_gate_rate`:
+        - about `1.0 -> 0.8`
+      - `selector_fallback_used_rate`:
+        - about `0.0 -> 0.2`
+    - the relaxed-boundary `40` degree unified cone does not help:
+      - `-0.0089` mean val accuracy
+      - `-0.0104` mean test accuracy
+      - validation row-space fraction worsens to about:
+        - `0.5575`
+      - validation `> 30` degree violation rate becomes:
+        - `1.0`
+  - diagnosis:
+    - the current `30` degree hard full-vector cone remains the best-supported
+      adopted default after accuracy-versus-robustness tradeoff
+    - the `20` degree interior-margin variant is promising on accuracy and
+      row-space distortion, but not yet safe on gate robustness
+  - decision:
+    - keep the current adopted TF2 experimental default unchanged:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+  - next single narrow move:
+    - if TF2 work continues inside the adopted package, test at most one smooth
+      unified-cone projection variant that tries to keep the interior-margin
+      gain without paying the current gate-robustness cost
 
 Required reporting:
 
