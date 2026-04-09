@@ -1016,6 +1016,13 @@ The next active stage is now:
 
 - `Phase TF2 - iFMPC bridge stage`
 
+Active-state sync:
+
+- the older teacher-based Phase 4 / 5A / 6A entries above remain sealed
+  baseline / diagnostic history
+- the active line on `main` remains the teacher-free:
+  - `Phase TF2 - iFMPC bridge stage`
+
 Interpretation:
 
 - TF2 builds on the sealed TF1 working preset and selector contract
@@ -1669,6 +1676,18 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - move to a different remaining package-internal issue rather than another
       unified-cone follow-up
+  - the completed adopted-package late-rollout basis-drift source-localization
+    suite now indicates:
+    - the remaining readout-relevant basis drift is mainly injected by
+      preterminal rollout accumulation rather than terminal jump injection
+    - validation mean preterminal contribution share is about:
+      - `0.7447`
+    - test mean preterminal contribution share is about:
+      - `0.7451`
+  - diagnosis:
+    - `preterminal_accumulation_dominates`
+  - next single narrow move:
+    - run one narrow adopted-package late-rollout drift-control diagnostic next
 
 Required reporting:
 

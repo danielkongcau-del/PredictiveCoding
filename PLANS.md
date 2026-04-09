@@ -8,6 +8,13 @@ The purpose is not to predict every future detail, but to prevent large unfocuse
 For the short active-status summary, read [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md) first.
 Do not create or treat `PLANS2.md` as an authoritative planning file.
 
+Active-state sync:
+
+- the active algorithmic line on `main` is the teacher-free:
+  - `Phase TF2 - iFMPC bridge stage`
+- the older teacher-based Phase 4 / 5A / 6A entries below remain sealed historical
+  baseline / diagnostic record, not the active line
+
 ---
 
 ## Phase 0 — Minimal mathematically faithful baseline
@@ -3607,3 +3614,41 @@ Outcome:
 - next single narrow move:
   - move to a different remaining package-internal issue rather than another
     unified-cone follow-up
+
+- current execution plan:
+  - run one narrow adopted-package late-rollout basis-drift source-localization
+    diagnostic
+  - keep the current adopted preset fixed:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+  - compare transported rollout knots against the same model's own target-clamped
+    slow-PC reference states
+  - localize whether the remaining readout-relevant basis drift is injected mainly
+    by:
+    - preterminal rollout accumulation
+    - or terminal jump injection
+  - use the result to choose exactly one next narrow TF2 move:
+    - late-rollout drift control if preterminal accumulation dominates
+    - terminal-jump formulation if terminal injection dominates
+- outcome:
+  - the completed adopted-package late-rollout basis-drift source-localization
+    suite indicates:
+    - the remaining readout-relevant basis drift is mainly injected by
+      preterminal rollout accumulation, not by the final terminal jump
+    - validation mean preterminal share is about:
+      - `0.7447`
+    - validation mean terminal-jump share is about:
+      - `0.2553`
+    - test mean preterminal share is about:
+      - `0.7451`
+    - test mean terminal-jump share is about:
+      - `0.2549`
+    - knot-wise drift and output-gap peaks still occur at the terminal knot, but
+      most of that terminal magnitude has already been accumulated by the
+      preterminal knot
+- diagnosis:
+  - `preterminal_accumulation_dominates`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one narrow adopted-package late-rollout drift-control diagnostic next

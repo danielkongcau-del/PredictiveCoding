@@ -44,14 +44,18 @@ This file is the short active-state summary for the repository.
   - both the hard `20` degree interior-margin reference and the smooth unified-cone reference are blocked mainly by systematic energy-side gate-margin collapse
   - neither variant shows a volatility-led or rare-bad-epoch explanation strong enough to justify another family-internal confirmation
   - the current hard `30` degree full-vector cone remains the local winner under the fixed selector/gate contract
+- The late-rollout basis-drift localization pass now says the remaining readout-relevant basis distortion is injected mainly by preterminal rollout accumulation rather than by the final terminal jump:
+  - validation mean row-space gap share already present by the preterminal knot is about `0.7447`
+  - test mean row-space gap share already present by the preterminal knot is about `0.7451`
+  - the terminal jump contributes only about `0.255`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
-  - unified-cone work should now be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a different remaining package-internal issue rather than another unified-cone follow-up
+  - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
+  - if TF2 work continues inside the adopted package, move to late-rollout drift control rather than another terminal-cone follow-up
 - Current active question:
-  - where the remaining adopted-package slow-PC gap is injected next, now that unified-cone geometry and robustness checks have been exhausted
+  - how to control late-rollout preterminal basis drift inside the adopted package without changing the transport family
 
 ## Relevant Suites And Artifacts
 
@@ -73,6 +77,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_shape_suite)
   - [outputs/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_smooth_unified_cone_suite)
   - [outputs/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_robustness_suite)
+  - [outputs/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_basis_drift_localization_suite)
 
 ## Read Order And Precedence
 
