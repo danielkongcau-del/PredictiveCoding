@@ -3541,3 +3541,69 @@ Outcome:
   - if TF2 work continues inside the adopted package, treat this unified-cone
     shape family as locally saturated and avoid another cone-shape sweep unless
     a confirmation-level reason appears
+  - run one confirmation-level unified-cone robustness-tradeoff diagnostic
+    using only:
+    - current hard `30` degree adopted control
+    - hard `20` degree interior-margin reference
+    - smooth unified-cone reference
+  - focus on per-epoch gate structure, selector fallback, threshold margins,
+    and volatility rather than another cone-shape search
+- outcome:
+  - the completed adopted-package unified-cone robustness suite indicates:
+    - this confirmation-level follow-up does not justify further work inside
+      the unified-cone family
+    - both the hard `20` degree interior-margin reference and the smooth
+      unified-cone reference remain blocked mainly by:
+      - `systematic_threshold_margin_collapse_mainly_on_energy_side`
+    - this is not primarily an accuracy-threshold issue:
+      - both non-adopted variants keep near-identical negative accuracy-margin
+        epoch fractions relative to the adopted control:
+        - about `0.0067`
+    - it is mainly an energy-side gate-margin issue:
+      - adopted control negative gate-energy-margin epoch fraction:
+        - about `0.72`
+      - hard `20` reference:
+        - about `0.8133`
+      - smooth unified-cone reference:
+        - about `0.7933`
+      - gate-failure attribution remains overwhelmingly energy-side for all
+        three cases:
+        - about `0.99` energy-only
+        - about `0.01` both
+        - about `0.0` accuracy-only
+    - it is also not well explained by higher temporal volatility:
+      - adopted control mean validation-accuracy volatility:
+        - about `0.0293`
+      - hard `20` reference:
+        - about `0.0266`
+      - smooth unified-cone reference:
+        - about `0.0266`
+      - adopted control mean validation-energy volatility:
+        - about `0.00702`
+      - hard `20` reference:
+        - about `0.00694`
+      - smooth unified-cone reference:
+        - about `0.00693`
+    - behavior-wise, both non-adopted variants still lose gate coverage:
+      - adopted control mean gate-passing epoch count:
+        - `16.8`
+      - hard `20` reference:
+        - `11.2`
+      - smooth unified-cone reference:
+        - `12.4`
+      - hard `20` `seed_gate_positive_rate`:
+        - `0.8`
+      - smooth unified-cone `seed_gate_positive_rate`:
+        - `1.0`
+      - adopted control `seed_gate_positive_rate`:
+        - `1.0`
+- diagnosis:
+  - the unified-cone family is now best treated as locally saturated under the
+    fixed gate and selector contract
+- decision:
+  - do not run another unified-cone confirmation inside this family
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - move to a different remaining package-internal issue rather than another
+    unified-cone follow-up
