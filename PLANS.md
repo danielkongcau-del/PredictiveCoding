@@ -4004,3 +4004,38 @@ Outcome:
     - test only the smallest increment-direction-only reformulation that aims
       to preserve more gain than the safe lower bound without reopening gate
       collapse
+- outcome:
+  - the completed increment-direction confirmation now says:
+    - the weaker `45` degree trust-region keeps more of the failed
+      earlier-control gain than the current `30` degree partial-signal
+      reference:
+      - validation-accuracy retention vs failed anchor: about `82.8%`
+      - terminal row-space RMS retention vs failed anchor: about `86.3%`
+      - but it fully reopens the gate collapse:
+        - `seed_gate_positive_rate: 0.0`
+        - `selector_fallback_used_rate: 1.0`
+    - the stronger `20` degree trust-region partially recovers gate
+      robustness:
+      - `seed_gate_positive_rate: 0.8`
+      - `selected_epoch_passes_gate_rate: 0.8`
+      - `selector_fallback_used_rate: 0.2`
+      - but it still does not preserve the full selector/gate contract
+- diagnosis:
+  - `live_successor_increment_direction_blocker_persists`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one minimal direction-magnitude interaction diagnostic next
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed live/live earlier-control path as the higher-gain
+      unstable reference
+    - keep `exact cached direction + live magnitude` as the safe direction
+      lower-bound reference
+    - keep the current direction-only trust-region candidates as interaction
+      context only
+    - test only one minimal interaction-preserving increment reformulation
+      that changes how live direction and live magnitude are coupled without
+      reopening any cone-family or broader successor-value search

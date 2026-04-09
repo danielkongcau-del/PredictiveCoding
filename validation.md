@@ -1816,6 +1816,20 @@ Current TF2 adoption interpretation:
       - `live_successor_increment_direction_is_primary_blocker`
   - next single narrow move:
     - run one confirmation-level reformulation on increment direction only
+  - the completed increment-direction confirmation now says:
+    - the weaker `45` degree trust-region keeps more of the failed
+      earlier-control gain than the current `30` degree partial-signal
+      reference, but it fully reopens the gate collapse
+    - the stronger `20` degree trust-region partially recovers gate
+      robustness:
+      - `seed_gate_positive_rate: 0.8`
+      - `selected_epoch_passes_gate_rate: 0.8`
+      - `selector_fallback_used_rate: 0.2`
+      - but it still does not keep the full selector/gate contract intact
+    - the resulting diagnosis is:
+      - `live_successor_increment_direction_blocker_persists`
+  - next single narrow move:
+    - run one minimal direction-magnitude interaction diagnostic next
 
 Required reporting:
 

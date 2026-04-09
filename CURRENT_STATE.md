@@ -114,18 +114,32 @@ This file is the short active-state summary for the repository.
     - but it collapses back to near-control accuracy and terminal row-space metrics
   - `cached magnitude + live direction` stays almost identical to the failed higher-gain unstable reference:
     - `mean_val_accuracy: 0.8570`
-    - `mean_gate_passing_epoch_count: 0.0`
-    - `selector_fallback_used_rate: 1.0`
+      - `mean_gate_passing_epoch_count: 0.0`
+      - `selector_fallback_used_rate: 1.0`
   - the current increment-internal diagnosis is:
     - `live_successor_increment_direction_is_primary_blocker`
+- The direction-only confirmation pass now says the live successor-increment direction is still blocked under the current selector/gate contract:
+  - the weaker `45` degree trust-region keeps more of the failed earlier-control gain than the current `30` degree partial-signal reference:
+    - validation-accuracy retention vs failed anchor: about `82.8%`
+    - terminal row-space RMS retention vs failed anchor: about `86.3%`
+    - but it fully reopens the gate collapse:
+      - `seed_gate_positive_rate: 0.0`
+      - `selector_fallback_used_rate: 1.0`
+  - the stronger `20` degree trust-region partially recovers gate robustness:
+    - `seed_gate_positive_rate: 0.8`
+    - `selected_epoch_passes_gate_rate: 0.8`
+    - `selector_fallback_used_rate: 0.2`
+    - but it still does not keep the full selector/gate contract intact
+  - the current direction-only confirmation diagnosis is:
+    - `live_successor_increment_direction_blocker_persists`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a confirmation-level reformulation on increment direction only rather than another broader successor-value or terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to one minimal direction-magnitude interaction diagnostic next rather than another broader successor-value or terminal-cone follow-up
 - Current active question:
-  - can the live preterminal successor-increment direction be minimally reformulated so that it keeps more of the earlier-control gain without reopening gate collapse
+  - what minimal direction-magnitude interaction inside the live preterminal successor increment still converts retained gain into gate collapse
 
 ## Relevant Suites And Artifacts
 
@@ -157,6 +171,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_source_suite)
   - [outputs/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_confirmation_suite)
   - [outputs/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_source_suite)
+  - [outputs/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_direction_confirmation_suite)
 
 ## Read Order And Precedence
 
