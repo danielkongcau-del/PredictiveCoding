@@ -3693,3 +3693,40 @@ Outcome:
 - next single narrow move:
   - run one narrow source-localization diagnostic on the preterminal update
     formulation itself rather than another cone-family sweep
+  - keep the current adopted preset fixed:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+  - include the failed earlier-control anchor:
+    - penultimate plus terminal same-geometry `30` degree cone
+  - vary only one preterminal formulation factor at a time around that failed
+    anchor:
+    - preterminal direction source
+    - preterminal handoff state
+    - optional narrow norm-handling variant only if it stays package-native
+  - use the result to localize which preterminal formulation component is the
+    primary cause of the resulting energy-side gate collapse
+- outcome:
+  - the completed adopted-package preterminal-update source-localization suite
+    indicates:
+    - the failed earlier-control gate collapse is primarily caused by the
+      preterminal on-policy handoff state, not by the preterminal direction
+      source and not by the preterminal norm handling
+    - swapping only the preterminal on-policy handoff back to the cached
+      batch-start successor restores gate coverage to the adopted-control level:
+      - `seed_gate_positive_rate: 0.0 -> 1.0`
+      - `selected_epoch_passes_gate_rate: 0.0 -> 1.0`
+      - `selector_fallback_used_rate: 1.0 -> 0.0`
+    - swapping only the preterminal direction source to on-policy live local
+      field keeps mean gate-passing epoch count at:
+      - `0.0`
+    - swapping only the preterminal norm handling to anchor norm also keeps
+      mean gate-passing epoch count at:
+      - `0.0`
+- diagnosis:
+  - `preterminal_handoff_state_is_primary_blocker`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one narrow adopted-package confirmation on the smallest preterminal
+    on-policy handoff reformulation that preserves the current selector/gate
+    contract

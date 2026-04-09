@@ -52,14 +52,20 @@ This file is the short active-state summary for the repository.
   - penultimate-plus-terminal and last-two-preterminal-plus-terminal variants both reduce terminal row-space RMS and improve accuracy
   - but both collapse gate coverage to `0.0`, force selector fallback to `1.0`, and therefore remain non-adopted
   - the remaining blocker now points to the preterminal update formulation itself rather than another cone-family follow-up
+- The preterminal-update source-localization pass now says the earlier-control gate collapse is primarily a preterminal on-policy handoff-state problem:
+  - swapping only the preterminal on-policy handoff back to the cached batch-start successor restores gate coverage to the adopted-control level
+  - swapping only the preterminal direction source to on-policy live local field does not recover any gate coverage
+  - swapping only the preterminal norm handling to anchor norm does not recover any gate coverage
+  - the current active diagnosis is:
+    - `preterminal_handoff_state_is_primary_blocker`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to a preterminal-update source-localization question rather than another terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to the smallest preterminal on-policy handoff reformulation confirmation rather than another terminal-cone follow-up
 - Current active question:
-  - what part of the preterminal update formulation causes the energy-side gate collapse when earlier same-geometry drift control is applied
+  - can the smallest preterminal on-policy handoff reformulation preserve the earlier-control accuracy and drift gains without violating the current selector/gate contract
 
 ## Relevant Suites And Artifacts
 
@@ -83,6 +89,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_robustness_suite)
   - [outputs/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_basis_drift_localization_suite)
   - [outputs/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_late_rollout_drift_control_suite)
+  - [outputs/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_source_localization_suite)
 
 ## Read Order And Precedence
 

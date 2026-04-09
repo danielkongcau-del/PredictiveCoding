@@ -1700,6 +1700,27 @@ Current TF2 adoption interpretation:
   - next single narrow move:
     - run one narrow source-localization diagnostic on the preterminal update
       formulation itself rather than another cone-family sweep
+  - the completed adopted-package preterminal-update source-localization suite
+    now indicates:
+    - the failed earlier-control gate collapse is best localized to the
+      preterminal on-policy handoff state rather than to the preterminal
+      direction source or the preterminal norm handling
+    - swapping only the preterminal on-policy handoff back to the cached
+      batch-start successor restores:
+      - `seed_gate_positive_rate: 0.0 -> 1.0`
+      - `selected_epoch_passes_gate_rate: 0.0 -> 1.0`
+      - `selector_fallback_used_rate: 1.0 -> 0.0`
+    - swapping only the preterminal direction source to on-policy live local
+      field keeps:
+      - mean gate-passing epoch count at `0.0`
+    - swapping only the preterminal norm handling to anchor norm also keeps:
+      - mean gate-passing epoch count at `0.0`
+  - diagnosis:
+    - `preterminal_handoff_state_is_primary_blocker`
+  - next single narrow move:
+    - run one narrow adopted-package confirmation on the smallest preterminal
+      on-policy handoff reformulation that preserves the current selector/gate
+      contract
 
 Required reporting:
 
