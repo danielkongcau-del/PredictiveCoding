@@ -58,14 +58,19 @@ This file is the short active-state summary for the repository.
   - swapping only the preterminal norm handling to anchor norm does not recover any gate coverage
   - the current active diagnosis is:
     - `preterminal_handoff_state_is_primary_blocker`
+- The smallest preterminal on-policy handoff reformulation confirmation now says the cached-handoff reformulation is not adoption-viable:
+  - it restores gate coverage to the adopted-control level
+  - but it recovers only about `3.4%` of the earlier-control validation-accuracy gain and essentially none of the earlier row-space RMS gain
+  - the current confirmation-level diagnosis is:
+    - `handoff_reformulation_recovers_partially_but_not_adoption_level`
 
 ## Current Narrow Open Question
 
 - Current next narrow move:
   - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, move to the smallest preterminal on-policy handoff reformulation confirmation rather than another terminal-cone follow-up
+  - if TF2 work continues inside the adopted package, move to a narrower source-localization step on the preterminal successor handoff itself rather than another terminal-cone follow-up
 - Current active question:
-  - can the smallest preterminal on-policy handoff reformulation preserve the earlier-control accuracy and drift gains without violating the current selector/gate contract
+  - which part of the preterminal successor handoff formulation suppresses the earlier-control accuracy and drift gains after gate coverage is restored
 
 ## Relevant Suites And Artifacts
 
@@ -90,6 +95,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_basis_drift_localization_suite)
   - [outputs/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_late_rollout_drift_control_suite)
   - [outputs/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_source_localization_suite)
+  - [outputs/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_handoff_confirmation_suite)
 
 ## Read Order And Precedence
 

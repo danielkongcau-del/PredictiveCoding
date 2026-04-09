@@ -1721,6 +1721,19 @@ Current TF2 adoption interpretation:
     - run one narrow adopted-package confirmation on the smallest preterminal
       on-policy handoff reformulation that preserves the current selector/gate
       contract
+  - the completed adopted-package preterminal handoff reformulation
+    confirmation now says:
+    - the minimal cached-handoff reformulation restores the fixed selector/gate
+      contract to the adopted-control level
+    - but it recovers only about `3.4%` of the failed earlier-control
+      validation-accuracy gain and essentially none of the earlier terminal
+      row-space RMS gain
+    - the resulting confirmation-level diagnosis is:
+      - `handoff_reformulation_recovers_partially_but_not_adoption_level`
+  - next single narrow move:
+    - run one narrower handoff-state source-localization step on the
+      preterminal successor handoff itself rather than another cone-family
+      sweep
 
 Required reporting:
 

@@ -3730,3 +3730,42 @@ Outcome:
   - run one narrow adopted-package confirmation on the smallest preterminal
     on-policy handoff reformulation that preserves the current selector/gate
     contract
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the earlier-control failure anchor:
+      - penultimate-plus-terminal same-geometry `30` degree cone
+    - test only the smallest cached-handoff reformulation candidate around that
+      failed anchor, plus at most one fixed blended-handoff variant only if the
+      implementation remains genuinely trivial
+    - treat this pass as confirmation-only:
+      - promote only if the cached-handoff reformulation preserves the
+        earlier-control accuracy and drift gains without violating the current
+        selector/gate contract
+- outcome:
+  - the completed adopted-package preterminal handoff reformulation
+    confirmation indicates:
+    - the minimal cached-handoff reformulation restores the full gate contract
+      to the adopted-control level:
+      - `seed_gate_positive_rate: 1.0`
+      - `selected_epoch_passes_gate_rate: 1.0`
+      - `selector_fallback_used_rate: 0.0`
+    - but it recovers only a very small fraction of the earlier-control gains:
+      - validation-accuracy recovery fraction vs the failed earlier-control
+        anchor:
+        - about `0.0345`
+      - terminal row-space RMS recovery fraction vs the failed earlier-control
+        anchor:
+        - about `-0.0057`
+    - pairwise vs the current adopted control stays essentially flat:
+      - `mean_val_accuracy_delta: +0.0007`
+      - `mean_test_accuracy_delta: +0.0007`
+      - `mean_val_terminal_rowspace_rms_delta: +0.00006`
+- diagnosis:
+  - `handoff_reformulation_recovers_partially_but_not_adoption_level`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - run one narrower handoff-state source-localization step on the preterminal
+    successor handoff itself rather than another cone-family sweep
