@@ -80,6 +80,7 @@ The repository now uses a layered documentation structure:
   - [RESULTS.md](/e:/CodeSpace/PredictiveCoding/RESULTS.md)
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
 - long historical detail:
+  - [archive/AGENTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/AGENTS_HISTORY.md)
   - [archive/README_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/README_HISTORY.md)
   - [archive/RESULTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/RESULTS_HISTORY.md)
   - [archive/PLANS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/PLANS_HISTORY.md)
@@ -190,6 +191,8 @@ Use these archives when you need older material:
 
 - earlier long-form README content:
   - [archive/README_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/README_HISTORY.md)
+- earlier long-form AGENTS wording:
+  - [archive/AGENTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/AGENTS_HISTORY.md)
 - earlier result narrative:
   - [archive/RESULTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/RESULTS_HISTORY.md)
 - earlier plan chain:

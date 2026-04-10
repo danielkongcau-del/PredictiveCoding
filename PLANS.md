@@ -150,6 +150,7 @@ Current repository document layers are:
 - current validation contract:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
 - historical long-form results, plan, and validation detail:
+  - [archive/AGENTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/AGENTS_HISTORY.md)
   - [archive/README_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/README_HISTORY.md)
   - [archive/RESULTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/RESULTS_HISTORY.md)
   - [archive/PLANS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/PLANS_HISTORY.md)
@@ -164,6 +165,7 @@ Objective:
 Changes:
 
 - add `LLM_BRIEF.md`
+- move historical AGENTS detail to `archive/AGENTS_HISTORY.md`
 - move historical README detail to `archive/README_HISTORY.md`
 - keep `RESULTS.md` as a short frozen-result summary
 - move historical results detail to `archive/RESULTS_HISTORY.md`
