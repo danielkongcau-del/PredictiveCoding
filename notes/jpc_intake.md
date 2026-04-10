@@ -11,7 +11,7 @@ mainline to JAX in this stage. JPC is being treated as:
 
 - a reference implementation for predictive-coding API design
 - a reference source for muPC-related parameterisation and inference diagnostics
-- a possible probe target for TF2 bridge experiments
+- a possible probe target for Stage 04 bridge experiments
 
 It is **not** being adopted as a new mainline substrate.
 
@@ -92,7 +92,7 @@ is strongly functional:
 - parameter updates are cleanly separated from activity updates
 - theoretical and numerical diagnostics are exposed as first-class utilities
 
-This is relevant to TF2 because the bridge stage likely wants:
+This is relevant to Stage 04 because the bridge stage likely wants:
 
 - clean separation between feedforward init, inference, and param updates
 - explicit support for multiple inference schedulers
@@ -101,23 +101,23 @@ This is relevant to TF2 because the bridge stage likely wants:
 ## Live probe update
 
 The completed local probe in `outputs/stage_04_incremental_bridge/tf2_jpc_probe/summary.json` should now be
-treated as the operative TF2 interpretation aid.
+treated as the operative Stage 04 interpretation aid.
 
 What the live probe currently supports:
 
-- JPC remains reference-only for TF2
+- JPC remains reference-only for Stage 04
 - many-step inference remains materially better than 1-step in:
   - the current PredictiveCoding layered PC substrate
   - JPC standard PC
 - the probe does not provide strong evidence that muPC-style scaling should now
-  replace incremental scheduling as the main TF2 focus
+  replace incremental scheduling as the main Stage 04 focus
 
-What this means for the current TF2 stage:
+What this means for the current Stage 04 line:
 
-- TF2 should continue to prioritize incremental scheduling and corrective
+- Stage 04 should continue to prioritize incremental scheduling and corrective
   transport
 - muPC-style scaling should remain a future candidate substrate mechanism
-- the current TF2 mainline should not introduce JPC runtime dependence or a new
+- the current Stage 04 mainline should not introduce JPC runtime dependence or a new
   scaling mechanism yet
 
 ## 1. Relevant JPC modules and exact APIs
@@ -144,7 +144,7 @@ Notes:
 - It explicitly supports `param_type in {"sp", "mupc", "ntp"}` and optional
   `skip_model`.
 - `init_activities_with_amort(...)` is hybrid-PC specific and relevant only as a
-  reference for amortised initialisation, not as a direct TF2 dependency.
+  reference for amortised initialisation, not as a direct Stage 04 dependency.
 
 ### Activity inference updates
 
@@ -268,7 +268,7 @@ Notes:
   - Hessian condition numbers
   - analytical activity solutions for linear nets
   - closed-form equilibrium energy comparisons
-- This is the most obviously useful part of JPC for TF2 bridge work.
+- This is the most obviously useful part of JPC for Stage 04 bridge work.
 
 ## 2. Does JPC already contain iPC-like scheduling?
 
@@ -322,7 +322,7 @@ Closest but not equivalent:
 - `make_hpc_step(...)`
   - hybrid PC with amortised initialisation, but still not iPC-style
 
-### Extension points if TF2 wants iFMPC / iPC-style probing
+### Extension points if Stage 04 wants iFMPC / iPC-style probing
 
 The cleanest extension points on the JPC side would be:
 
@@ -333,7 +333,7 @@ The cleanest extension points on the JPC side would be:
 That is, JPC exposes the right low-level bricks, but not the iPC schedule as a
 first-class API.
 
-## 3. Reuse classification for TF2
+## 3. Reuse classification for Stage 04
 
 ### Direct reference only
 
@@ -356,7 +356,7 @@ Useful to read, mirror conceptually, or cite, but not worth importing:
 
 ### Thin adapter candidate
 
-These are the pieces most worth mirroring or lightly wrapping in TF2 bridge
+These are the pieces most worth mirroring or lightly wrapping in Stage 04 bridge
 experiments:
 
 - the API decomposition:
@@ -381,11 +381,11 @@ For our repo this likely means "adapter by re-expression", not literal code impo
 - anything that hard-depends on JAX / Equinox / Diffrax / Optax
 - JPC high-level training wrappers as runtime dependencies
 - notebook-only example code
-- BPC, ePC, PDM, and hybrid-PC paths as immediate TF2 scope
+- BPC, ePC, PDM, and hybrid-PC paths as immediate Stage 04 scope
 
 Reason:
 
-- TF2 bridge wants to stay small and non-invasive
+- Stage 04 bridge work wants to stay small and non-invasive
 - our main repo is still architecturally distinct
 - literal import would create a cross-framework maintenance burden too early
 
@@ -407,7 +407,7 @@ Why useful:
   inference, and update calls via `param_type`.
 - the experiments explicitly monitor activity Hessian spectra and condition
   numbers during training and at initialisation.
-- this is directly relevant if TF2 wants a muPC-inspired hidden-state substrate
+- this is directly relevant if Stage 04 wants a muPC-inspired hidden-state substrate
   that is more stable under deeper or stiffer inference.
 
 ## 5. What is useful for iPC-inspired scheduling work
@@ -439,7 +439,7 @@ What is still missing for direct reuse:
 
 ## 6. What should remain outside our mainline for now
 
-Keep outside mainline TF2 for now:
+Keep outside mainline Stage 04 for now:
 
 - any direct dependency on JAX / Equinox / Optax / Diffrax
 - direct reuse of JPC model objects
@@ -449,7 +449,7 @@ Keep outside mainline TF2 for now:
 
 Reason:
 
-- TF2 is a bridge stage, not a framework migration
+- Stage 04 is a bridge stage, not a framework migration
 - the immediate need is mapping and probing, not replacing the repo substrate
 - we should keep the mainline legible and phase-bounded
 
@@ -467,7 +467,7 @@ These are the important mismatches to keep explicit:
 - JPC examples and tests focus on models compatible with its layer-list
   conventions and Equinox modules.
 
-None of these mismatches block a TF2 bridge note, but they argue against
+None of these mismatches block a Stage 04 bridge note, but they argue against
 directly importing JPC logic into our mainline right now.
 
 ## 8. Smallest non-invasive bridge plan for our repo
@@ -479,7 +479,7 @@ directly importing JPC logic into our mainline right now.
 
 ### Optional next step 1: `src/pc/jpc_bridge.py`
 
-Only if TF2 needs a lightweight reference shim. Keep it small and read-only in
+Only if Stage 04 needs a lightweight reference shim. Keep it small and read-only in
 spirit:
 
 - define pure-Python metadata structures that mirror JPC concepts:
@@ -495,7 +495,7 @@ Suggested scope:
   - `param_type`
   - `inference_mode`
   - `diagnostic_fields`
-- helper for turning a TF2 probe config into a comparable JPC-style descriptor
+- helper for turning a Stage 04 probe config into a comparable JPC-style descriptor
 
 ### Optional next step 2: `experiments/stage_04_incremental_bridge/tf2_jpc_probe.py`
 
@@ -504,13 +504,13 @@ This is the most attractive next bridge artifact.
 Purpose:
 
 - run a very small, isolated, explicitly optional comparison or probe
-- compare our TF2 bridge ideas against JPC-inspired scheduler / diagnostics
+- compare our Stage 04 bridge ideas against JPC-inspired scheduler / diagnostics
   conventions
 - keep all JAX/JPC contact quarantined to one experiment entrypoint
 
 Suggested initial responsibilities:
 
-- inspect whether a TF2 candidate schedule can reproduce a JPC-like decomposition:
+- inspect whether a Stage 04 candidate schedule can reproduce a JPC-like decomposition:
   - feedforward init
   - state-update loop
   - param-update point
@@ -527,7 +527,7 @@ Not for first pass:
 
 ## 9. Bottom line for FMPC Stage 04 Incremental Bridge
 
-For TF2 / iFMPC bridge planning, the most valuable lessons from JPC are:
+For Stage 04 / iFMPC bridge planning, the most valuable lessons from JPC are:
 
 - explicit decomposition of init / infer / param-update
 - clean support for both discrete and continuous inference
@@ -539,7 +539,7 @@ The most important negative result is:
 - JPC does **not** already provide the iPC-like interleaved state/weight update
   schedule we would want to bridge toward
 
-So the right TF2 stance is:
+So the right Stage 04 stance is:
 
 - use JPC as a reference and probe target
 - do not import it into mainline
