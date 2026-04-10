@@ -180,10 +180,10 @@ The gradient is:
 
 ```text
 dF/dX^l = (1 / (B sigma_l^2)) E^l
-          - (1 / (B sigma_(l+1)^2)) (E^(l+1) 鈯?phi_(l+1)'(A^(l+1))) @ W^(l+1)
+          - (1 / (B sigma_(l+1)^2)) (E^(l+1) ⊙ phi_(l+1)'(A^(l+1))) @ W^(l+1)
 ```
 
-where `鈯檂 is elementwise multiplication.
+where `⊙` is elementwise multiplication.
 
 The baseline explicit Euler update is:
 
@@ -196,7 +196,7 @@ or equivalently:
 ```text
 X^l <- X^l + eta_x * [
     -(1 / (B sigma_l^2)) E^l
-    + (1 / (B sigma_(l+1)^2)) (E^(l+1) 鈯?phi_(l+1)'(A^(l+1))) @ W^(l+1)
+    + (1 / (B sigma_(l+1)^2)) (E^(l+1) ⊙ phi_(l+1)'(A^(l+1))) @ W^(l+1)
 ]
 ```
 
@@ -245,11 +245,11 @@ After inference has finished for the current batch, update parameters by descend
 For each layer `l = 1, ..., L`:
 
 ```text
-dF/dW^l = -(1 / (B sigma_l^2)) (E^l 鈯?phi_l'(A^l))^T @ X^(l-1)
+dF/dW^l = -(1 / (B sigma_l^2)) (E^l ⊙ phi_l'(A^l))^T @ X^(l-1)
 ```
 
 ```text
-dF/db^l = -(1 / (B sigma_l^2)) sum_rows(E^l 鈯?phi_l'(A^l))
+dF/db^l = -(1 / (B sigma_l^2)) sum_rows(E^l ⊙ phi_l'(A^l))
 ```
 
 where `sum_rows(.)` sums across the batch dimension and returns shape `(n_l,)`.
@@ -264,16 +264,16 @@ b^l <- b^l - eta_b * dF/db^l
 Equivalent additive form:
 
 ```text
-W^l <- W^l + eta_w * (1 / (B sigma_l^2)) (E^l 鈯?phi_l'(A^l))^T @ X^(l-1)
+W^l <- W^l + eta_w * (1 / (B sigma_l^2)) (E^l ⊙ phi_l'(A^l))^T @ X^(l-1)
 ```
 
 ```text
-b^l <- b^l + eta_b * (1 / (B sigma_l^2)) sum_rows(E^l 鈯?phi_l'(A^l))
+b^l <- b^l + eta_b * (1 / (B sigma_l^2)) sum_rows(E^l ⊙ phi_l'(A^l))
 ```
 
 ### Default simplification
 
-In Phase 0鈥?, it is acceptable to use:
+In Phase 0-1, it is acceptable to use:
 
 ```text
 eta_b = eta_w
