@@ -88,6 +88,27 @@ The repository now uses a layered documentation structure:
 
 If you only need the current project picture, do not open the archive first.
 
+## Which Document Answers What
+
+Use this lookup rule when deciding where to read next:
+
+- if you want current active line, defaults, frozen/open status, or the immediate recommended move:
+  - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
+- if you want the current execution queue or current exploratory charter:
+  - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
+- if you want the current frozen result snapshot:
+  - [RESULTS.md](/e:/CodeSpace/PredictiveCoding/RESULTS.md)
+- if you want current acceptance rules or validation semantics:
+  - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
+- if you want the authoritative math:
+  - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+- if you want standing coding constraints:
+  - [AGENTS.md](/e:/CodeSpace/PredictiveCoding/AGENTS.md)
+- if you want older narratives and historical evidence chains:
+  - `archive/`
+
+For web GPT, [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md) is the cheapest starting point.
+
 ## FMPC Stage Map
 
 - `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
