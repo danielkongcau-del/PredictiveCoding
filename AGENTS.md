@@ -31,8 +31,8 @@ If repository documents conflict, precedence remains:
 
 For low-context prompt drafting or web GPT orientation:
 
-- start with `LLM_BRIEF.md`
-- then read `AGENTS.md` and `CURRENT_STATE.md`
+- start with `PROMPT_CONTEXT.md`
+- then read `LLM_BRIEF.md`, `AGENTS.md`, and `CURRENT_STATE.md`
 - open `RESULTS.md`, `spec_math.md`, the applicable `specs/` addendum, `PLANS.md`, `validation.md`, or `archive/` only as needed
 
 This does not replace the mandatory read order above when editing code.

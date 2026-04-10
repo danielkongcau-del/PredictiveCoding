@@ -2,6 +2,8 @@
 
 This file is the low-context starting point for web GPT sessions.
 
+If the task is specifically to draft a prompt for Codex or web GPT, read `PROMPT_CONTEXT.md` first.
+
 - It is a convenience map, not the highest-precedence authority.
 - If documents conflict, follow:
   - `spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md`
@@ -21,6 +23,8 @@ Start here, then expand only as needed:
 
 If you want a specific kind of information, read this file:
 
+- shortest prompt-writing context:
+  - `PROMPT_CONTEXT.md`
 - current active line, current defaults, current next move:
   - `CURRENT_STATE.md`
 - current forward plan and immediate queue:

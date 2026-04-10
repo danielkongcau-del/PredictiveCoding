@@ -63,9 +63,10 @@ If documents conflict, repository precedence is:
 
 For low-context web GPT prompt drafting, start with:
 
-1. `LLM_BRIEF.md`
-2. `AGENTS.md`
-3. `CURRENT_STATE.md`
+1. `PROMPT_CONTEXT.md`
+2. `LLM_BRIEF.md`
+3. `AGENTS.md`
+4. `CURRENT_STATE.md`
 
 Then open `RESULTS.md`, `spec_math.md`, `PLANS.md`, `validation.md`, or `archive/` only as needed.
 
@@ -74,6 +75,7 @@ Then open `RESULTS.md`, `spec_math.md`, `PLANS.md`, `validation.md`, or `archive
 The repository now uses a layered documentation structure:
 
 - low-context entry:
+  - [PROMPT_CONTEXT.md](/e:/CodeSpace/PredictiveCoding/PROMPT_CONTEXT.md)
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
 - current operational docs:
   - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
@@ -95,6 +97,8 @@ Use this lookup rule when deciding where to read next:
 
 - if you want current active line, defaults, frozen/open status, or the immediate recommended move:
   - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
+- if you want the shortest prompt-drafting context for web GPT:
+  - [PROMPT_CONTEXT.md](/e:/CodeSpace/PredictiveCoding/PROMPT_CONTEXT.md)
 - if you want the current execution queue or current exploratory charter:
   - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - if you want the current frozen result snapshot:
@@ -109,7 +113,8 @@ Use this lookup rule when deciding where to read next:
 - if you want older narratives and historical evidence chains:
   - `archive/`
 
-For web GPT, [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md) is the cheapest starting point.
+For web GPT prompt drafting, [PROMPT_CONTEXT.md](/e:/CodeSpace/PredictiveCoding/PROMPT_CONTEXT.md) is the cheapest starting point.
+For general low-context repository orientation, use [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md).
 
 ## FMPC Stage Map
 
@@ -132,6 +137,7 @@ Interpretation:
 ```text
 predictive-coding/
   LLM_BRIEF.md
+  PROMPT_CONTEXT.md
   README.md
   AGENTS.md
   CURRENT_STATE.md
