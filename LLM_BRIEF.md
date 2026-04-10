@@ -113,6 +113,7 @@ Do not do these by default:
 
 Historical long-form context now lives in:
 
+- `archive/README_HISTORY.md`
 - `archive/RESULTS_HISTORY.md`
 - `archive/PLANS_HISTORY.md`
 - `archive/validation_history.md`
