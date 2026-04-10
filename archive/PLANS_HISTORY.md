@@ -1466,7 +1466,7 @@ The preferred direct-supervision design is:
 The MeanFlow identity must still apply to the full combined transport law:
 
 - `u_hat = u_local + u_corr`
-- `u_hat 鈮-g_s + dt * d/dtau_s u_hat`
+- `u_hat ≈ g_s + dt * d/dtau_s u_hat`
 - with:
   - `d/dtau_s u_hat = d/dtau_s u_local + d/dtau_s u_corr`
 
@@ -1826,7 +1826,7 @@ Formal algorithm contract:
 - energy substrate:
   - `F_theta(z; c)` is the current target-clamped layered-PC batch energy
 - local field:
-  - `g_theta(z; c) = --_z F_theta(z; c)`
+- `g_theta(z; c) = -∇_z F_theta(z; c)`
 - slow predict/eval remains the current canonical slow-PC path
 
 Micro-step schedule:
@@ -1834,7 +1834,7 @@ Micro-step schedule:
 - let `H = micro_steps`
 - use uniform knots:
   - `t_k = k / H`
-  - `-t = 1 / H`
+  - `Δt = 1 / H`
   - `r_k = 1 - t_k`
 - maintain two train-time hidden-state streams:
   - `z_on_k`: learned on-policy state
