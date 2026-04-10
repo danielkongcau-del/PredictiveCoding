@@ -1913,6 +1913,12 @@ Current TF2 adoption interpretation:
       - do not reframe that exploratory line as replacing the current active
         `Phase TF2 - iFMPC bridge stage` on `main` until it is explicitly
         chartered
+    - the chosen immediate action is:
+      - charter a planning-only post-TF2 exploratory line:
+        - `teacher_free_fmpc_ef_exploratory`
+      - keep it on the current layered substrate
+      - keep the current active line on `main` unchanged while that exploratory
+        charter is being evaluated
 
 Required reporting:
 

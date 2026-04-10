@@ -174,6 +174,8 @@ This file is the short active-state summary for the repository.
 - Current next narrow move:
   - stop package-internal TF2 digging from this state
   - only reopen TF2 mainline digging if a genuinely different issue family appears from new evidence or if the project explicitly decides to leave the current package / selector-gate contract
+  - current planning-only next move:
+    - charter `teacher_free_fmpc_ef_exploratory`
 - Current active question:
   - no different remaining package-internal issue is currently recommended for pursuit inside the adopted TF2 package
 - Post-triage decision memo:
@@ -185,6 +187,11 @@ This file is the short active-state summary for the repository.
     - keep the current adopted TF2 package frozen as the bridge result on `main`
     - redirect the next planning effort to a post-TF2 teacher-free FMPC / EF exploratory line that explicitly leaves the current corrective package or selector-gate contract
     - do not rewrite the current active line on `main` until that exploratory line is explicitly chartered
+  - the chosen immediate action is:
+    - charter a planning-only post-TF2 exploratory line:
+      - `teacher_free_fmpc_ef_exploratory`
+    - keep it on the current layered substrate
+    - keep the current active line on `main` unchanged while that exploratory charter is being evaluated
 
 ## Relevant Suites And Artifacts
 

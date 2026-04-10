@@ -4177,3 +4177,81 @@ Outcome:
     - do not reframe that exploratory line as replacing the current active
       `Phase TF2 - iFMPC bridge stage` on `main` until it is explicitly
       chartered
+
+## Post-TF2 exploratory line — teacher_free_fmpc_ef_exploratory
+
+Status:
+
+- planning-only exploratory charter
+- this does **not** replace the current active line on `main`
+- the active line on `main` remains:
+  - `Phase TF2 - iFMPC bridge stage`
+
+Objective:
+
+- define the first post-TF2 exploratory line on the current layered predictive-coding
+  substrate for a teacher-free FMPC / EF-style core that is evaluated as a new
+  mechanism family rather than as another package-internal repair of the current
+  corrective TF2 package
+
+Non-goals:
+
+- do not reopen package-internal TF2 diagnostics
+- do not redefine the current adopted TF2 default
+- do not introduce AlphaFlow, `muPC`-style TF2 scaling, or TF3 code in the first
+  exploratory charter
+- do not rewrite the current `main` branch narrative as if TF2 were already
+  abandoned
+- do not depend on teacher trajectories, teacher fixed points, or teacher-generated
+  regression targets
+
+Why this line explicitly leaves the current corrective package or selector-gate contract:
+
+- the current corrective TF2 package is already locally saturated under the current
+  selector/gate contract
+- the remaining slow-PC gap survives all credible package-internal TF2 issue families
+  currently evidenced in the repo
+- therefore any justified next line must be evaluated as a new exploratory regime
+  rather than as another local repair of the current corrective package
+
+First two experiments:
+
+1. Exploratory mechanism-validating core probe
+   - stay on the current layered substrate
+   - use the teacher-free average-velocity contract already defined in
+     `spec_math.md`
+   - keep the first exploratory `u_psi` input minimal:
+     - `(z_t, r, t; c)`
+   - use detached short-horizon bootstrap average-velocity as the primary anchor
+   - keep predict/eval on the existing slow-PC path
+   - primary readout is mechanism-first:
+     - one-step energy decrease
+     - few-step fixed-point residual decrease
+     - determinism / artifact correctness
+     - no teacher dependency in target construction
+   - task accuracy is report-only in this first experiment
+
+2. Frozen-bridge vs exploratory-core comparison
+   - compare the exploratory core against:
+     - the frozen adopted TF2 bridge result
+     - the canonical slow-PC digits baseline
+   - keep the same layered substrate and same dataset workflow
+   - report:
+     - mechanism metrics from experiment 1
+     - report-only task accuracy / output metrics
+     - runtime / stability
+   - use this comparison only to decide whether the exploratory line has enough
+     signal to justify a v2 charter
+
+Acceptance criteria for the exploratory stage:
+
+- the run is fully teacher-free in target construction
+- artifacts are deterministic and numerically stable
+- the exploratory core shows a clear mechanism-level win on at least one of:
+  - one-step energy decrease
+  - few-step fixed-point residual decrease
+  relative to the frozen adopted TF2 bridge result
+- the exploratory line yields a coherent reason to continue that is not just
+  another rephrasing of the current corrective TF2 package
+- report-only task accuracy should be logged, but it is not the gate for the
+  first exploratory stage
