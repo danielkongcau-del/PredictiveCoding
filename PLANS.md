@@ -4159,3 +4159,21 @@ Outcome:
   - only reopen TF2 mainline digging if a genuinely different issue family
     appears from new evidence or if the project explicitly decides to leave the
     current package / selector-gate contract
+- post-triage decision memo:
+  - package-internal TF2 digging is closed from the current state because the
+    adopted package has already exhausted the credible internal issue families
+    surfaced by the evidence chain:
+    - readout alignment is an exact no-op on the adopted package
+    - detached bootstrap-source, one-step target-lag, and bootstrap-to-identity
+      curriculum follow-ups do not materially improve the adopted package
+    - the late-rollout successor-value and successor-increment line now ends in
+      a strengthened formulation-level blocker rather than an adoption-viable
+      local repair
+  - recommended next project move:
+    - keep the current adopted TF2 package frozen as the bridge result on `main`
+    - move the next planning effort to a post-TF2 teacher-free FMPC / EF
+      exploratory line that explicitly leaves the current corrective package or
+      selector-gate contract
+    - do not reframe that exploratory line as replacing the current active
+      `Phase TF2 - iFMPC bridge stage` on `main` until it is explicitly
+      chartered

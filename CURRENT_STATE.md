@@ -176,6 +176,15 @@ This file is the short active-state summary for the repository.
   - only reopen TF2 mainline digging if a genuinely different issue family appears from new evidence or if the project explicitly decides to leave the current package / selector-gate contract
 - Current active question:
   - no different remaining package-internal issue is currently recommended for pursuit inside the adopted TF2 package
+- Post-triage decision memo:
+  - package-internal TF2 digging is considered closed from the current state because the remaining slow-PC gap is still present, but every credible internal corrective package issue family now has a sealed negative result:
+    - readout alignment is an exact no-op on the adopted package
+    - detached bootstrap-source, one-step target-lag, and bootstrap-to-identity curriculum follow-ups do not materially improve the adopted package
+    - the late-rollout successor-value and successor-increment line now terminates in a strengthened formulation-level blocker rather than an adoption-viable local fix
+  - the recommended next project move is:
+    - keep the current adopted TF2 package frozen as the bridge result on `main`
+    - redirect the next planning effort to a post-TF2 teacher-free FMPC / EF exploratory line that explicitly leaves the current corrective package or selector-gate contract
+    - do not rewrite the current active line on `main` until that exploratory line is explicitly chartered
 
 ## Relevant Suites And Artifacts
 
