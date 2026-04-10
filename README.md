@@ -37,6 +37,8 @@ Current working interpretation:
   - `toy_sine_regression`: MLP stays ahead
 - Phase 3 currently provides standalone `digits_mlp` and `digits_pc` baselines on `sklearn.datasets.load_digits`
 - the first Stage 05 exploratory probe has positive mechanism signal on energy and fixed-point residual, but its task accuracy remains report-only and well below the frozen Stage 04 bridge result
+- Stage 05 evaluation remains mechanism-first:
+  - task accuracy is report-only and is not the current acceptance gate
 
 Use these short current documents for details:
 

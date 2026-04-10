@@ -70,6 +70,8 @@ Current probe status:
   - one-step validation energy improves vs identity
   - configured two-step validation energy improves vs identity
   - configured two-step fixed-point residual improves vs identity
+- Stage 05 evaluation remains mechanism-first:
+  - task accuracy is report-only and is not the current acceptance gate
 - task accuracy remains report-only and is still well below the frozen Stage 04 bridge result
 
 ## Current Recommendation
