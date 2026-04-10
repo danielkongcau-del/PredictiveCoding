@@ -22,7 +22,8 @@ Before editing code, read:
 3. `CURRENT_STATE.md`
 4. `PLANS.md`
 5. `spec_math.md`
-6. `validation.md`
+6. the applicable stage addendum under `specs/` if the task touches stage-specific FMPC logic
+7. `validation.md`
 
 If repository documents conflict, precedence remains:
 
@@ -32,7 +33,7 @@ For low-context prompt drafting or web GPT orientation:
 
 - start with `LLM_BRIEF.md`
 - then read `AGENTS.md` and `CURRENT_STATE.md`
-- open `RESULTS.md`, `PLANS.md`, `validation.md`, or `archive/` only as needed
+- open `RESULTS.md`, `spec_math.md`, the applicable `specs/` addendum, `PLANS.md`, `validation.md`, or `archive/` only as needed
 
 This does not replace the mandatory read order above when editing code.
 

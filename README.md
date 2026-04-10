@@ -54,7 +54,8 @@ Before making code changes, read these files in order:
 3. `CURRENT_STATE.md`
 4. `PLANS.md`
 5. `spec_math.md`
-6. `validation.md`
+6. the applicable stage addendum under `specs/` if the task touches FMPC stage-specific logic
+7. `validation.md`
 
 If documents conflict, repository precedence is:
 
@@ -102,6 +103,7 @@ Use this lookup rule when deciding where to read next:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
 - if you want the authoritative math:
   - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+  - plus the applicable stage addendum under [specs/](/e:/CodeSpace/PredictiveCoding/specs)
 - if you want standing coding constraints:
   - [AGENTS.md](/e:/CodeSpace/PredictiveCoding/AGENTS.md)
 - if you want older narratives and historical evidence chains:
@@ -136,6 +138,7 @@ predictive-coding/
   PLANS.md
   RESULTS.md
   spec_math.md
+  specs/
   validation.md
   archive/
   src/pc/
@@ -154,6 +157,9 @@ Important lookup rules:
   - `src/pc/stage_03_transport_core_v1/`
   - `src/pc/stage_04_incremental_bridge/`
   - `src/pc/stage_05_ef_core_probe/`
+- stage-specific mathematical addenda live under:
+  - `specs/stage_03_transport_core_v1.md`
+  - `specs/stage_04_incremental_bridge.md`
 - matching stage experiment entry points live under:
   - `experiments/stage_04_incremental_bridge/`
   - `experiments/stage_05_ef_core_probe/`

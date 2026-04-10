@@ -132,6 +132,10 @@ Stage 05 should not be promoted merely because of a small task-metric fluctuatio
 
 - low-context prompt entry:
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
+- math layer:
+  - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+  - [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md)
+  - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
 - current frozen result summary:
   - [RESULTS.md](/e:/CodeSpace/PredictiveCoding/RESULTS.md)
 - current validation contract:

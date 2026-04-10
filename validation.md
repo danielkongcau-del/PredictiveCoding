@@ -13,7 +13,7 @@ A valid change should still demonstrate:
 2. numerical sanity
 3. behavioral sanity
 4. reproducibility
-5. traceability to `spec_math.md`
+5. traceability to the math layer rooted at `spec_math.md`
 
 ## Stage 04 Validation Status
 
@@ -143,6 +143,9 @@ Use the current docs this way:
 
 - low-context summary:
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
+- math layer:
+  - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+  - applicable stage addenda under [specs/](/e:/CodeSpace/PredictiveCoding/specs)
 - operational state:
   - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
 - active plan:

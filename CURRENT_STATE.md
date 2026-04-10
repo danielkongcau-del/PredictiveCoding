@@ -24,6 +24,17 @@ For the full numbered stage map and directory layout, use [README.md](/e:/CodeSp
 - Historical corrective working reference:
   - `tf2_corrective_transport_default`
 
+## Relevant Math Layer
+
+- Baseline root spec:
+  - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+- Stage 04 bridge math:
+  - [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md)
+  - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
+- Current Stage 05 note:
+  - there is no separate Stage 05 math addendum yet
+  - the current probe reuses the baseline substrate plus the Stage 03 transport contract where applicable
+
 ## Stage 04 Status
 
 The corrective Incremental Bridge package is now treated as closed from the current state.

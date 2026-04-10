@@ -13,7 +13,7 @@ Start here, then expand only as needed:
 1. `LLM_BRIEF.md`
 2. `AGENTS.md`
 3. `CURRENT_STATE.md`
-4. the relevant part of `spec_math.md`
+4. the relevant part of `spec_math.md` and the applicable addendum under `specs/`
 5. `PLANS.md`, `RESULTS.md`, or `validation.md` only if the task needs them
 6. `archive/` only if historical context is truly required
 
@@ -31,6 +31,7 @@ If you want a specific kind of information, read this file:
   - `validation.md`
 - mathematical definitions and update equations:
   - `spec_math.md`
+  - plus the applicable file under `specs/`
 - standing coding rules and non-negotiable constraints:
   - `AGENTS.md`
 - repository layout, stage map, and entry navigation:
@@ -92,6 +93,18 @@ Current known state:
   - `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
 - exploratory core probe:
   - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+
+## Current Math Entry Points
+
+- baseline root spec:
+  - `spec_math.md`
+- Stage 03 transport addendum:
+  - `specs/stage_03_transport_core_v1.md`
+- Stage 04 bridge addendum:
+  - `specs/stage_04_incremental_bridge.md`
+- current Stage 05 note:
+  - there is no separate Stage 05 math addendum yet
+  - the current probe reuses the baseline substrate plus the Stage 03 average-velocity contract where applicable
 
 ## Current Artifact Roots
 
