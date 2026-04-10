@@ -143,6 +143,48 @@ predictive-coding/
     notes.md
 ```
 
+## Stage directory guide
+
+After the repository-organization pass, stage-specific research files are no
+longer kept in one flat directory. Use the following lookup rule:
+
+- `src/pc/`
+  - shared predictive-coding substrate stays at the package root
+  - stage-specific FMPC logic lives under:
+    - `src/pc/fmpc_v0/`
+    - `src/pc/interval_meanflow/`
+    - `src/pc/tf1/`
+    - `src/pc/tf2/`
+    - `src/pc/exploratory/`
+- `experiments/`
+  - baseline and pre-FMPC scripts now live under `experiments/baseline/`
+  - FMPC stage scripts are grouped under their matching stage folders
+- `tests/`
+  - TF2 smoke and suite tests live under `tests/tf2/`
+  - post-TF2 exploratory tests live under `tests/exploratory/`
+  - non-stage-specific bridge checks may remain at the root, for example:
+    - `tests/test_jpc_bridge_smoke.py`
+- `outputs/`
+  - newer FMPC artifact trees are grouped by stage, for example:
+    - `outputs/tf2/`
+    - `outputs/exploratory/`
+  - older baseline artifacts may still keep their historical stable names such as:
+    - `outputs/digits_mlp/`
+    - `outputs/digits_pc/`
+    - `outputs/digits_baselines/`
+
+Practical shortcut:
+
+- if you know the research stage first, start from the matching subfolder
+- if you are looking for the current mainline implementation, start from:
+  - `src/pc/tf2/`
+  - `experiments/tf2/`
+  - `tests/tf2/`
+- if you are looking for the post-TF2 mechanism probe, start from:
+  - `src/pc/exploratory/`
+  - `experiments/exploratory/`
+  - `tests/exploratory/`
+
 ## Initial implementation target
 
 The first usable milestone is a minimal supervised PC network with:
