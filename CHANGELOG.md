@@ -71,7 +71,10 @@
   - an MNIST workflow
 - Clarified usage/docs that the default `digits_mlp` run writes to the stable `outputs/digits_mlp/` directory and overwrites earlier files there on rerun
 
-## phase1_5-stable
+## historical phase1_5-stable baseline label
+
+- The original `phase1_5-stable` git tag has been retired; this heading is now
+  only a changelog label for the old baseline state.
 
 - Stabilized Phase 0 predictive coding baseline
 - Added structured experiment runner and output artifacts

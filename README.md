@@ -584,12 +584,14 @@ Important Phase 2f and Phase 2g notes:
 
 ## Frozen reference point
 
-The repository's frozen pre-Phase-2 baseline remains the `phase1_5-stable` tag:
+The repository's frozen pre-Phase-2 baseline remains the historical
+`phase1_5-stable` baseline label. The old git tag has been retired, so this
+name should now be read as documentation-only historical shorthand:
 
 - the baseline predictive-coding math is frozen
 - the current toy benchmarks and output schemas are frozen
 - repository hygiene now assumes generated outputs, egg-info, caches, and temporary artifacts are not versioned
-- the current Phase 2 branch builds a minimal MLP comparison path on top of that frozen baseline
+- the current Phase 2 line builds a minimal MLP comparison path on top of that frozen baseline
 
 ## A note on predictive coding variants
 
