@@ -378,7 +378,7 @@ Those are not part of the baseline unless they are explicitly added in later ver
 
 ---
 
-## 16. Teacher-free FMPC v1 addendum
+## 16. Transport Core v1 addendum
 
 This addendum defines the first teacher-free FMPC transport contract without changing
 the baseline predictive-coding energy, hidden-state gradient, or local parameter-update
@@ -386,7 +386,7 @@ mathematics.
 
 ### 16.1 Scope
 
-Teacher-free FMPC v1 applies only to the existing layered predictive-coding substrate.
+Transport Core v1 applies only to the existing layered predictive-coding substrate.
 
 - it does not define a general PCG substrate
 - it does not redefine predict-mode inference
@@ -395,7 +395,7 @@ Teacher-free FMPC v1 applies only to the existing layered predictive-coding subs
 
 ### 16.2 Training context and hidden latent
 
-Teacher-free FMPC v1 uses the supervised training context:
+Transport Core v1 uses the supervised training context:
 
 - `c = (x, y)`
 - `x^0 = x` remains clamped
@@ -413,7 +413,7 @@ This uses the repository's existing hidden-state flattening contract:
 
 ### 16.3 Local energy substrate and instantaneous flow
 
-Teacher-free FMPC v1 reuses the baseline predictive-coding energy:
+Transport Core v1 reuses the baseline predictive-coding energy:
 
 - `E_theta(z; c) := F(states(z; x, y), theta)`
 
@@ -432,7 +432,7 @@ No teacher approximation is assumed in this definition.
 
 ### 16.4 Average-velocity model and time contract
 
-Teacher-free FMPC v1 introduces an average-velocity model:
+Transport Core v1 introduces an average-velocity model:
 
 - `u_psi(z_t, r, t; c)`
 
@@ -457,7 +457,7 @@ The coarse transport update is:
 
 ### 16.5 Fixed-terminal-time MeanFlow identity direction
 
-Teacher-free FMPC v1 uses the fixed-terminal-time direction:
+Transport Core v1 uses the fixed-terminal-time direction:
 
 - `(dt, dr) = (+1, -1)`
 
@@ -498,15 +498,15 @@ The repository therefore distinguishes two identity-tangent semantics:
     identity approximation, not the full total derivative through the augmented
     feature-dependent input
 
-Current TF2 contract note:
+Current Incremental Bridge contract note:
 
-- the canonical TF2 default may keep the truncated feature-frozen identity
+- the canonical Incremental Bridge default may keep the truncated feature-frozen identity
   approximation when matched validation runs do not show a stable empirical gain from
   feature-aware tangents
 
 ### 16.6 Parameter updates after transport
 
-Teacher-free FMPC v1 changes only the hidden-state transport path used during training.
+Transport Core v1 changes only the hidden-state transport path used during training.
 
 After transport produces a terminal hidden state `z_hat`, the repository still applies
 the same local parameter-update rule already defined for the baseline:
@@ -523,10 +523,10 @@ This addendum therefore does **not** redefine:
 - the baseline local parameter-update equations
 
 
-## 17. TF2 iFMPC bridge-stage addendum
+## 17. Incremental Bridge addendum
 
 This addendum defines an experimental **training-time scheduling extension** on top of
-Phase TF1 without changing:
+Phase Transport Core v1 without changing:
 
 - the baseline predictive-coding energy
 - the baseline hidden-state gradient definition
@@ -535,7 +535,7 @@ Phase TF1 without changing:
 
 ### 17.1 Scope
 
-TF2 remains teacher-free and layered-PC-specific.
+Phase Incremental Bridge remains teacher-free and layered-PC-specific.
 
 - it does not introduce a new substrate class
 - it does not depend on JPC runtime
@@ -550,7 +550,7 @@ Let `H = micro_steps` and define uniform rollout knots:
 - `-t = 1 / H`
 - `r_k = 1 - t_k`
 
-TF2 maintains two training-time hidden-state streams:
+Phase Incremental Bridge maintains two training-time hidden-state streams:
 
 - `z_on_k`: learned on-policy hidden state
 - `z_lf_k`: detached local-field-only shadow state
@@ -562,7 +562,7 @@ The state advances remain:
 
 where:
 
-- `u_psi` is the same teacher-free average-velocity model from the TF1 addendum
+- `u_psi` is the same teacher-free average-velocity model from the Transport Core v1 addendum
 - `g_theta(z; c) = --_z E_theta(z; c)` is unchanged
 
 ### 17.3 Frozen-within-micro-step semantics
@@ -589,7 +589,7 @@ The required order is:
 
 ### 17.4 Mixed-policy teacher-free supervision
 
-TF2 uses one of:
+Phase Incremental Bridge uses one of:
 
 - `supervision_policy = "local_only"`
 - `supervision_policy = "mixed"`
@@ -601,13 +601,13 @@ For `mixed`, `psi` is supervised on the concatenation of detached:
 - `z_lf_k`
 - `z_on_k`
 
-Targets remain the same TF1 teacher-free targets:
+Targets remain the same Transport Core v1 teacher-free targets:
 
 - `u_boot` from local self-bootstrap
 - `u_id = g_t + r_k * D_T u_psi(...)`
 - `L = L_boot + lambda_id * L_id`
 
-If TF2 uses appended teacher-free current-state features in the psi input, then the
+If Phase Incremental Bridge uses appended teacher-free current-state features in the psi input, then the
 same two identity-tangent semantics from Section 16.5.1 apply:
 
 - `feature_aware_tangents = true`
@@ -619,7 +619,7 @@ same two identity-tangent semantics from Section 16.5.1 apply:
 
 ### 17.5 Matched theta-update budget
 
-TF2 introduces an explicit scheduling control:
+Incremental Bridge introduces an explicit scheduling control:
 
 - `theta_update_budget in {"matched", "unmatched"}`
 
@@ -651,7 +651,7 @@ baseline local parameter-update rule itself.
 
 ### 17.6 Terminal local-field direction intervention
 
-TF2 may optionally apply a **terminal-step teacher-free direction intervention**
+Incremental Bridge may optionally apply a **terminal-step teacher-free direction intervention**
 during training:
 
 - `terminal_local_field_direction_intervention in {`
@@ -690,32 +690,32 @@ terminal psi input:
 - `d_lf = normalize(g_t)`
 
 where `g_t` is the existing detached teacher-free local-flow block already present in
-the TF2 input features.
+the Incremental Bridge input features.
 
-If `terminal_local_field_direction_intervention = "none"`, TF2 uses:
+If `terminal_local_field_direction_intervention = "none"`, Incremental Bridge uses:
 
 - `u_term = u_live`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_hard_replace_keep_live_norm"`,
-TF2 keeps the learned terminal norm but replaces the direction:
+Incremental Bridge keeps the learned terminal norm but replaces the direction:
 
 - `u_term = ||u_live|| * d_lf`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm"`,
-TF2 keeps the learned terminal norm but clips the learned terminal direction into a
+Incremental Bridge keeps the learned terminal norm but clips the learned terminal direction into a
 cone around `d_lf` with half-angle `terminal_local_field_angle_clip_degrees`:
 
 - `u_term = ||u_live|| * clip_dir(normalize(u_live), d_lf; theta_clip)`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_smooth_unified_cone_projection_keep_live_norm"`,
-TF2 stays in the same full-space local-field cone family, keeps the learned
+Incremental Bridge stays in the same full-space local-field cone family, keeps the learned
 terminal norm, leaves in-cone actions unchanged, and applies a smooth interior
 projection toward `d_lf` only when the learned terminal direction falls outside
 the cone:
 
 - `u_term = ||u_live|| * smooth_clip_dir(normalize(u_live), d_lf; theta_clip)`
 
-TF2 may also use the readout-relevant row-space of the current output layer:
+Incremental Bridge may also use the readout-relevant row-space of the current output layer:
 
 - `P_row = projector(rowspace(W_out))`
 - `P_orth = I - P_row`
@@ -728,27 +728,27 @@ Define:
 - `d_lf^orth = normalize(P_orth d_lf)`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_hard_replace_keep_live_norm_rowspace_only"`,
-TF2 keeps the live orthogonal component unchanged and replaces only the readout-row-space
+Incremental Bridge keeps the live orthogonal component unchanged and replaces only the readout-row-space
 component direction while preserving its live norm:
 
 - `u_term = ||u_live^row|| * d_lf^row + u_live^orth`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm_rowspace_only"`,
-TF2 keeps the live orthogonal component unchanged and clips only the readout-row-space
+Incremental Bridge keeps the live orthogonal component unchanged and clips only the readout-row-space
 component direction into a cone around `d_lf^row` with half-angle
 `terminal_local_field_angle_clip_degrees`:
 
 - `u_term = ||u_live^row|| * clip_dir(normalize(u_live^row), d_lf^row; theta_clip) + u_live^orth`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm_orthogonal_only"`,
-TF2 keeps the live row-space component unchanged and clips only the orthogonal
+Incremental Bridge keeps the live row-space component unchanged and clips only the orthogonal
 component direction into a cone around `d_lf^orth` with half-angle
 `terminal_local_field_angle_clip_degrees`:
 
 - `u_term = u_live^row + ||u_live^orth|| * clip_dir(normalize(u_live^orth), d_lf^orth; theta_clip)`
 
 If `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm_split_threshold"`,
-TF2 keeps both components active but clips them with separate half-angles:
+Incremental Bridge keeps both components active but clips them with separate half-angles:
 
 - `theta_row = terminal_local_field_rowspace_angle_clip_degrees`
 - `theta_orth = terminal_local_field_orthogonal_angle_clip_degrees`
@@ -756,16 +756,16 @@ TF2 keeps both components active but clips them with separate half-angles:
            + ||u_live^orth|| * clip_dir(normalize(u_live^orth), d_lf^orth; theta_orth)`
 
 If either the live row-space component or the anchor row-space component is degenerate,
-TF2 falls back to leaving the row-space component unchanged for that sample.
+Incremental Bridge falls back to leaving the row-space component unchanged for that sample.
 
 If either the live orthogonal component or the anchor orthogonal component is degenerate,
-TF2 falls back to leaving the orthogonal component unchanged for that sample.
+Incremental Bridge falls back to leaving the orthogonal component unchanged for that sample.
 
 The transported terminal state used for the immediate terminal theta update is then:
 
 - `z_{k+1} = z_k + Δt * u_term`
 
-This is a **training-time stabilization option** only. It preserves the TF2 teacher-free
+This is a **training-time stabilization option** only. It preserves the Incremental Bridge teacher-free
 target construction and keeps the historical corrective preset available as an
 unstabilized reference.
 
@@ -787,7 +787,7 @@ training.
 
 ### 17.7 Optional transported output-alignment weighting
 
-TF2 may also expose an optional **output-side readout-alignment aid** that does
+Incremental Bridge may also expose an optional **output-side readout-alignment aid** that does
 not change the transport family or the teacher-free target construction.
 
 Configuration:
@@ -801,9 +801,9 @@ Configuration:
 
 Normative meaning:
 
-- build the transported hidden state `z_(k+1)` exactly as in the current TF2
+- build the transported hidden state `z_(k+1)` exactly as in the current Incremental Bridge
   corrective package
-- build the target-clamped transported-state cache exactly as in the current TF2
+- build the target-clamped transported-state cache exactly as in the current Incremental Bridge
   theta-update path
 - compute the standard local parameter gradients from that transported state
 - if output alignment is active on the current micro-step, scale only the final
@@ -822,7 +822,7 @@ Schedule semantics:
 - `"final_micro_step_only"`:
   - apply the output-side gradient scaling only on the terminal micro-step
 - `"every_micro_step"`:
-  - apply the output-side gradient scaling on every micro-step where TF2 performs
+  - apply the output-side gradient scaling on every micro-step where Incremental Bridge performs
     a theta update
 
 This is a **train-time weighting extension** only:
@@ -830,4 +830,4 @@ This is a **train-time weighting extension** only:
 - it does not alter `u_boot`
 - it does not alter the identity target
 - it does not alter the terminal local-field direction intervention
-- it does not introduce a new TF2 transport family
+- it does not introduce a new Incremental Bridge transport family

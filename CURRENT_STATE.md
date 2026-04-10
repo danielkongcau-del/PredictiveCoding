@@ -11,13 +11,25 @@ This file is the short active-state summary for the repository.
 - Active branch:
   - `main`
 - Active algorithmic line:
-  - `Phase TF2 - iFMPC bridge stage`
+  - `Phase Incremental Bridge`
+
+## Stage Naming Rule
+
+- Human-readable stage names now describe mechanism and project role rather than use
+  `TF*` labels.
+- Current naming map:
+  - `fmpc_v0/` -> `Phase Reference Prep`
+  - `interval_meanflow/` -> `Phase Interval Velocity Exploration`
+  - `tf1/` -> `Phase Transport Core v1`
+  - `tf2/` -> `Phase Incremental Bridge`
+  - `exploratory/` -> `Phase EF Core Probe`
+- Legacy directory names remain unchanged for compatibility in this pass.
 
 ## Current Adopted Defaults
 
-- Current adopted TF2 experimental default on `main`:
+- Current adopted Incremental Bridge experimental default on `main`:
   - `tf2_corrective_transport_terminal_angleclip_default`
-- Current canonical TF2 identity default:
+- Current canonical Incremental Bridge identity default:
   - `feature_aware_tangents = false`
 
 ## Historical Reference Presets
@@ -29,8 +41,8 @@ This file is the short active-state summary for the repository.
 
 ## Operationally Relevant Sealed Conclusions
 
-- Stay inside the corrective TF2 package on `main`; do not open AlphaFlow, `muPC`-style TF2 mainline scaling, or TF3 from the current state.
-- The adopted angle-clip package materially improves over the historical corrective reference and remains the current TF2 experimental default on `main`.
+- Stay inside the corrective Incremental Bridge package on `main`; do not open AlphaFlow, `muPC`-style bridge-stage mainline scaling, or TF3 from the current state.
+- The adopted angle-clip package materially improves over the historical corrective reference and remains the current Incremental Bridge experimental default on `main`.
 - The remaining slow-PC gap is not mainly a selector/checkpoint issue and not mainly a simple head-fit problem.
 - The dominant remaining mismatch inside the adopted package is best read as readout-relevant endpoint-basis distortion rather than simple separability collapse.
 - The adopted-package readout-alignment confirmation is sealed as a no-op:
@@ -167,36 +179,36 @@ This file is the short active-state summary for the repository.
 - The remaining-issue triage pass now says no different package-internal issue survives as a credible next adopted-package diagnostic:
   - the readout-alignment family is sealed as an exact no-op on the adopted package
   - the older bootstrap-source, target-lag, and curriculum families do not show a credible reopen path from the current adopted-package state
-  - combined with the strengthened live successor-increment formulation blocker, the adopted corrective TF2 package is now best treated as locally saturated under the current selector/gate contract
+  - combined with the strengthened live successor-increment formulation blocker, the adopted corrective Incremental Bridge package is now best treated as locally saturated under the current selector/gate contract
 
 ## Current Recommendation
 
 - Current next narrow move:
-  - stop package-internal TF2 digging from this state
-  - only reopen TF2 mainline digging if a genuinely different issue family appears from new evidence or if the project explicitly decides to leave the current package / selector-gate contract
+  - stop package-internal Incremental Bridge digging from this state
+  - only reopen bridge-stage mainline digging if a genuinely different issue family appears from new evidence or if the project explicitly decides to leave the current package / selector-gate contract
   - current exploratory next move:
     - run the frozen-bridge vs exploratory-core comparison under
-      `teacher_free_fmpc_ef_exploratory`
+      `ef_core_probe`
 - Current active question:
-  - package-internal TF2 digging remains closed
+  - package-internal Incremental Bridge digging remains closed
   - current exploratory question:
-    - does the first post-TF2 teacher-free core probe show enough mechanism
+    - does the first post-bridge core probe show enough mechanism
       signal to justify the frozen-bridge vs exploratory-core comparison?
 - Post-triage decision memo:
-  - package-internal TF2 digging is considered closed from the current state because the remaining slow-PC gap is still present, but every credible internal corrective package issue family now has a sealed negative result:
+  - package-internal Incremental Bridge digging is considered closed from the current state because the remaining slow-PC gap is still present, but every credible internal corrective package issue family now has a sealed negative result:
     - readout alignment is an exact no-op on the adopted package
     - detached bootstrap-source, one-step target-lag, and bootstrap-to-identity curriculum follow-ups do not materially improve the adopted package
     - the late-rollout successor-value and successor-increment line now terminates in a strengthened formulation-level blocker rather than an adoption-viable local fix
   - the recommended next project move is:
-    - keep the current adopted TF2 package frozen as the bridge result on `main`
-    - redirect the next planning effort to a post-TF2 teacher-free FMPC / EF exploratory line that explicitly leaves the current corrective package or selector-gate contract
+    - keep the current adopted Incremental Bridge package frozen as the bridge result on `main`
+    - redirect the next planning effort to a post-bridge FMPC / EF exploratory line that explicitly leaves the current corrective package or selector-gate contract
     - do not rewrite the current active line on `main` until that exploratory line is explicitly chartered
   - the chosen immediate action is:
-    - implement the first post-TF2 exploratory core probe under:
-      - `teacher_free_fmpc_ef_exploratory`
+    - implement the first post-bridge exploratory core probe under:
+      - `ef_core_probe`
     - keep it on the current layered substrate
     - keep the current active line on `main` unchanged while that exploratory line is being evaluated
-- The first post-TF2 exploratory core probe now exists on the current layered substrate:
+- The first post-bridge exploratory core probe now exists on the current layered substrate:
   - implementation path:
     - `src/pc/exploratory/fmpc_ef_exploratory_probe.py`
     - `experiments/exploratory/fmpc_ef_exploratory_probe.py`
@@ -206,7 +218,7 @@ This file is the short active-state summary for the repository.
     - local flow definition: `exact_negative_hidden_state_gradient`
     - `u_psi` is parameterized as:
       - `u_psi = g_theta + residual_mlp(z_t, target_onehot, t, r)`
-  - the first canonical exploratory run now shows a positive mechanism signal without changing the active TF2 line:
+  - the first canonical exploratory run now shows a positive mechanism signal without changing the active Incremental Bridge line:
     - one-step transported final energy beats identity/no-transport on validation:
       - `energy_delta_vs_identity: -0.0001458`
     - configured two-step transported final energy also beats identity/no-transport on validation:
@@ -214,9 +226,9 @@ This file is the short active-state summary for the repository.
     - configured two-step fixed-point residual also drops below identity/no-transport on validation:
       - `fixed_point_residual_delta_vs_identity: -7.99e-07`
     - the run is deterministic and fully teacher-free in artifact construction
-    - task accuracy remains report-only and is still well below the frozen TF2 bridge result
-- Current post-TF2 exploratory recommendation:
-  - keep the frozen TF2 bridge result unchanged on `main`
+    - task accuracy remains report-only and is still well below the frozen Incremental Bridge bridge result
+- Current post-bridge exploratory recommendation:
+  - keep the frozen Incremental Bridge result unchanged on `main`
   - use the exploratory probe only as mechanism evidence
   - run the frozen-bridge vs exploratory-core comparison next to decide whether the exploratory line has enough signal to justify a v2 charter
 

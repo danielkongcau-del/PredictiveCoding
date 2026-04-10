@@ -10,8 +10,15 @@ Do not create or treat `PLANS2.md` as an authoritative planning file.
 
 Active-state sync:
 
-- the active algorithmic line on `main` is the teacher-free:
-  - `Phase TF2 - iFMPC bridge stage`
+- the active algorithmic line on `main` is:
+  - `Phase Incremental Bridge`
+- human-readable stage names now follow mechanism/role naming:
+  - `fmpc_v0/` -> `Phase Reference Prep`
+  - `interval_meanflow/` -> `Phase Interval Velocity Exploration`
+  - `tf1/` -> `Phase Transport Core v1`
+  - `tf2/` -> `Phase Incremental Bridge`
+  - `exploratory/` -> `Phase EF Core Probe`
+- legacy directory names remain unchanged for compatibility in this pass
 - the older teacher-based Phase 4 / 5A / 6A entries below remain sealed historical
   baseline / diagnostic record, not the active line
 
@@ -1537,11 +1544,11 @@ Interpretation:
 - therefore Phase 6A should be treated as a sealed exploratory branch with known defects,
   not as a passed stage
 
-## Phase TF1 — Teacher-free FMPC v1
+## Phase Transport Core v1
 
 The next stage is now opened by project decision as:
 
-- `Phase TF1 — Teacher-free FMPC v1`
+- `Phase Transport Core v1`
 
 This stage starts from a repo state where:
 
@@ -1550,10 +1557,10 @@ This stage starts from a repo state where:
 - MeanFlow diagnostics from Phase 6A may still inform design choices,
   but they do not constitute a passing prerequisite
 
-Phase TF1 should be treated as a new stage entry rather than a retroactive claim that
+Phase Transport Core v1 should be treated as a new stage entry rather than a retroactive claim that
 Phase 6A succeeded.
 
-## Phase TF1 — Teacher-free FMPC v1
+## Phase Transport Core v1
 
 Objective:
 
@@ -1645,10 +1652,10 @@ Experiment entrypoint:
 
 - `experiments/tf1/fmpc_tf1.py`
 - named presets:
-  - `mechanism_smoke` = small TF1 substrate `(64, 16, 10)`
+- `mechanism_smoke` = small Transport Core v1 substrate `(64, 16, 10)`
   - `baseline_comparable` = baseline-sized digits substrate `(64, 64, 10)`
   - `baseline_working_default` = current evidence-driven but provisional
-    working TF1 preset:
+    working Transport Core v1 preset:
     - baseline-sized digits substrate `(64, 64, 10)`
     - `tf1_mlp_aug`
     - `transport_steps = 1`
@@ -1659,7 +1666,7 @@ Experiment entrypoint:
 
 Checkpoint-selection contract:
 
-- selector policy is now part of the explicit main TF1 experiment contract
+- selector policy is now part of the explicit main Transport Core v1 experiment contract
 - supported checkpoint selectors are:
   - `energy_only`
   - `val_accuracy_only`
@@ -1670,7 +1677,7 @@ Checkpoint-selection contract:
 - old presets remain unchanged as historical/reference presets
 - the working-default preset is evidence-driven but still provisional
 
-Acceptance criteria for the first TF1 mechanism-validating pass:
+Acceptance criteria for the first Transport Core v1 mechanism-validating pass:
 
 - the run is fully teacher-free:
   - no teacher manifests
@@ -1689,7 +1696,7 @@ Acceptance criteria for the first TF1 mechanism-validating pass:
   - identical `theta` snapshot
   - identical batch split
   - identical energy metric
-- the best TF1 candidate must satisfy on validation:
+- the best Transport Core v1 candidate must satisfy on validation:
   - `val_transported_final_energy < val_identity_final_energy`
   - `val_transported_final_energy <= val_local_field_only_final_energy`
   - `val_accuracy > majority baseline`
@@ -1702,22 +1709,22 @@ Risks / open questions:
 - few-step coarse transport may improve validation energy while leaving slow-PC
   accuracy gains modest
 - feature-aware tangents may help later, but they should not be required for the
-  first viable TF1 core
-- the current `backend="fmpc"` placeholder remains intentionally unused in TF1 v1
+  first viable Transport Core v1 core
+- the current `backend="fmpc"` placeholder remains intentionally unused in Transport Core v1
 
-## Phase TF1 seal-off note
+## Phase Transport Core v1 seal-off note
 
-Phase TF1 is now sealed as the first completed **teacher-free FMPC v1** stage.
+Phase Transport Core v1 is now sealed as the first completed artifact-independent transport stage.
 
-What TF1 established:
+What Transport Core v1 established:
 
 - a fully teacher-free FMPC main path that does not depend on:
   - teacher manifests
   - teacher checkpoints
   - teacher trajectories
   - teacher-generated regression targets
-- explicit selector-integrated checkpoint selection in the main TF1 path
-- the evidence-driven working TF1 preset:
+- explicit selector-integrated checkpoint selection in the main Transport Core v1 path
+- the evidence-driven working Transport Core v1 preset:
   - `baseline_working_default`
 - small, reproducible supporting studies for:
   - selector alignment
@@ -1731,23 +1738,23 @@ What remained unresolved at seal-off:
 
 - `baseline_working_default` clearly beats `baseline_comparable`, but the gap to the
   canonical slow-PC digits baseline remains material
-- the narrow TF1 accuracy-improvement sweep did not materially reduce that gap
-- TF1 therefore does **not** yet justify replacing the canonical slow iterative PC
+- the narrow Transport Core v1 accuracy-improvement sweep did not materially reduce that gap
+- Transport Core v1 therefore does **not** yet justify replacing the canonical slow iterative PC
   baseline as the strongest digits accuracy reference
 
 Interpretation:
 
-- TF1 succeeded as a teacher-free bridge-establishment stage
-- TF1 did **not** yet close the accuracy gap to the canonical slow-PC baseline
-- `baseline_working_default` should be treated as the sealed TF1 working default,
-  not as a claim that TF1 is already competitive enough to stop further bridge work
+- Transport Core v1 succeeded as an artifact-independent bridge-establishment stage
+- Transport Core v1 did **not** yet close the accuracy gap to the canonical slow-PC baseline
+- `baseline_working_default` should be treated as the sealed Transport Core v1 working default,
+  not as a claim that Transport Core v1 is already competitive enough to stop further bridge work
 
-## Phase TF2 - iFMPC bridge stage
+## Phase Incremental Bridge
 
 Objective:
 
 - test whether **incremental scheduling** is the missing mechanism between the sealed
-  TF1 working default and a stronger teacher-free FMPC path
+  Transport Core v1 working default and a stronger artifact-independent FMPC path
 - keep the current layered predictive-coding energy substrate intact
 - keep the baseline local parameter-update rule intact
 - add only:
@@ -1756,7 +1763,7 @@ Objective:
   - mixed-policy teacher-free supervision for `psi`
   - explicit forward-init stability diagnostics
 
-Why TF2 is a bridge stage rather than the final paradigm:
+Why Phase Incremental Bridge is a bridge stage rather than the final paradigm:
 
 - it still uses the existing layered PC substrate and the same local energy
 - it keeps the baseline local parameter-update rule rather than introducing a new
@@ -1830,7 +1837,7 @@ Mixed-policy supervision:
     - detached `z_on_k`
   - use simple batch concatenation for equal source weighting
 
-TF2 supervision targets remain exactly TF1-style teacher-free targets:
+Incremental Bridge supervision targets remain exactly Transport Core v1-style teacher-free targets:
 
 - `u_boot` from `bootstrap_average_velocity_target(...)`
 - `u_id = g_t + r_k * D_T u_psi(...)`
@@ -1877,7 +1884,7 @@ What has moved beyond baseline PC:
 - learned average-velocity transport `u_psi`
 - micro-step interleaving of state transport and parameter updates
 - mixed-policy teacher-free supervision for `psi`
-- selector-governed checkpoint choice carried forward from TF1
+- selector-governed checkpoint choice carried forward from Transport Core v1
 
 Files to add / modify:
 
@@ -1896,7 +1903,7 @@ Files to add / modify:
   - `tests/tf2/test_fmpc_tf2_smoke.py`
   - `tests/tf2/test_fmpc_tf2_suite_smoke.py`
 
-Reuse without changing TF1 behavior:
+Reuse without changing Transport Core v1 behavior:
 
 - `src/pc/tf1/fmpc_tf1_flow.py`
 - `src/pc/tf1/fmpc_tf1_jvp.py`
@@ -1904,7 +1911,7 @@ Reuse without changing TF1 behavior:
 Experiment entrypoints:
 
 - `experiments/tf2/fmpc_tf2.py`
-  - canonical single-run TF2 bridge experiment
+  - canonical single-run Incremental Bridge bridge experiment
 - `experiments/tf2/fmpc_tf2_suite.py`
   - narrow multiseed bridge-validation suite
 
@@ -1936,20 +1943,20 @@ Current preset interpretation:
   - `incremental_weight_updates = false`
   - `supervision_policy = "local_only"`
   - `theta_update_budget = "matched"`
-- adopt `tf2_corrective_transport_terminal_angleclip_default` as the current TF2 experimental default on `main`
+- adopt `tf2_corrective_transport_terminal_angleclip_default` as the current Incremental Bridge experimental default on `main`
   - `psi_family = "residualized_local_field"`
   - `time_encoding_variant = "poly_rt2"`
   - `terminal_local_field_direction_intervention = "local_field_direction_angle_clip_keep_live_norm"`
   - `terminal_local_field_angle_clip_degrees = 30`
 - do not silently replace the hypothesis-driven preset with the empirical preset
 
-### TF2 external comparison / gap-closure pass
+### Incremental Bridge external comparison / gap-closure pass
 
 Goal:
 
-- run one narrow external comparison centered on the adopted TF2 experimental default
+- run one narrow external comparison centered on the adopted Incremental Bridge experimental default
 - quantify how much it narrows the gap to the canonical slow-PC `digits` baseline
-- keep the pass evidence-driven and avoid opening any new TF2 mechanism family
+- keep the pass evidence-driven and avoid opening any new Incremental Bridge mechanism family
 
 Files expected to touch:
 
@@ -1961,11 +1968,11 @@ Files expected to touch:
 
 Planned comparison set:
 
-- adopted TF2 experimental default:
+- adopted Incremental Bridge experimental default:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - historical corrective working reference:
   - `tf2_corrective_transport_default`
-- hypothesis-driven TF2 candidate:
+- hypothesis-driven Incremental Bridge candidate:
   - `tf2_canonical`
 - canonical slow-PC digits baseline:
   - rerun inside the suite only if current local baseline artifacts are absent
@@ -1986,25 +1993,25 @@ Planned checks:
 
 Planned interpretation output:
 
-- whether the adopted TF2 default materially narrows the slow-PC gap
+- whether the adopted Incremental Bridge default materially narrows the slow-PC gap
 - whether the historical corrective reference is now mainly historical
 - whether `tf2_canonical` remains an active pursuit or is now subordinate
-- whether the next stage should remain `continue TF2 bridge` or prepare a later broader stage
+- whether the next stage should remain `continue Incremental Bridge bridge` or prepare a later broader stage
 
 Result:
 
 - the adopted default materially narrows the canonical slow-PC digits gap relative
-  to the best pre-adoption TF2 comparator, but the slow-PC gap remains open
+  to the best pre-adoption Incremental Bridge comparator, but the slow-PC gap remains open
 - the historical corrective reference is now mainly historical
 - `tf2_canonical` is clearly subordinate in the current phase
 - the next stage should remain:
-  - `continue TF2 bridge inside the adopted package`
+  - `continue Incremental Bridge bridge inside the adopted package`
 
-### TF2 adopted-package vs slow-PC gap decomposition pass
+### Incremental Bridge adopted-package vs slow-PC gap decomposition pass
 
 Goal:
 
-- diagnose where the remaining accuracy gap between the adopted TF2 package and the
+- diagnose where the remaining accuracy gap between the adopted Incremental Bridge package and the
   canonical slow-PC digits baseline is actually coming from
 - keep the pass narrow, diagnostic, and inside the adopted package
 
@@ -2018,7 +2025,7 @@ Files expected to touch:
 
 Planned comparison set:
 
-- adopted TF2 package:
+- adopted Incremental Bridge package:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - canonical slow-PC digits baseline
 - optional report-only historical reference:
@@ -2044,7 +2051,7 @@ Planned interpretation output:
   - selector/checkpoint effects
   - training-budget effects
   - or a mixed picture
-- one single recommended next TF2 move that stays inside the adopted package
+- one single recommended next Incremental Bridge move that stays inside the adopted package
 
 Result:
 
@@ -2062,16 +2069,16 @@ Result:
     MSE and supervised final energy
 - the remaining external gap now appears to come mainly from output/readout
   quality inside the adopted package rather than from residual transport quality
-- the next single narrow TF2 move should therefore be:
+- the next single narrow Incremental Bridge move should therefore be:
   - one adopted-package readout-alignment confirmation pass without changing the
-    TF2 transport family
+    Incremental Bridge transport family
 
-### TF2 adopted-package readout-alignment confirmation pass
+### Incremental Bridge adopted-package readout-alignment confirmation pass
 
 Goal:
 
-- test one minimal output-side alignment aid inside the adopted TF2 package
-- keep the TF2 transport family fixed
+- test one minimal output-side alignment aid inside the adopted Incremental Bridge package
+- keep the Incremental Bridge transport family fixed
 - decide whether a tiny readout-side intervention materially narrows the
   remaining slow-PC gap
 
@@ -2145,15 +2152,15 @@ Result:
 - neither `final_micro_step_only` nor `every_micro_step` transported
   output-alignment weighting clears the adoption threshold
 - no readout-alignment variant should be promoted into the adopted package
-- the next narrow TF2 move should shift away from this specific transported
+- the next narrow Incremental Bridge move should shift away from this specific transported
   readout-weighting aid and target a different remaining issue inside the
   adopted package
 
-### TF2 adopted-package readout-refit / endpoint-separability diagnostic
+### Incremental Bridge adopted-package readout-refit / endpoint-separability diagnostic
 
 Goal:
 
-- determine whether the remaining slow-PC gap inside the adopted TF2 package is
+- determine whether the remaining slow-PC gap inside the adopted Incremental Bridge package is
   mainly:
   - a poorly fitted output/readout head
   - or a deeper mismatch between transported endpoints and that model's own
@@ -2173,8 +2180,8 @@ Planned scope:
   - `psi_family = "residualized_local_field"`
   - `time_encoding_variant = "poly_rt2"`
   - terminal local-field angle clip at `30` degrees
-  - current TF2 identity semantics unchanged
-- do not change TF2 transport family or selector rules
+  - current Incremental Bridge identity semantics unchanged
+- do not change Incremental Bridge transport family or selector rules
 - run one post-hoc readout-only diagnostic on the selected adopted-package runs
 
 Planned candidate set:
@@ -2235,11 +2242,11 @@ Result:
       endpoint-basis / representation mismatch between transported endpoints and
       that model's own slow-PC endpoints
     - it is not mainly a simple head-fitting problem on transported endpoints
-- the next narrow TF2 move should therefore be:
+- the next narrow Incremental Bridge move should therefore be:
   - one adopted-package endpoint-basis / separability diagnostic at the
-    hidden-to-output interface, without changing the TF2 transport family
+    hidden-to-output interface, without changing the Incremental Bridge transport family
 
-### TF2 adopted-package endpoint-basis / separability diagnostic
+### Incremental Bridge adopted-package endpoint-basis / separability diagnostic
 
 Goal:
 
@@ -2262,7 +2269,7 @@ Planned scope:
   - `psi_family = "residualized_local_field"`
   - `time_encoding_variant = "poly_rt2"`
   - terminal local-field angle clip at `30` degrees
-  - current TF2 identity semantics unchanged
+  - current Incremental Bridge identity semantics unchanged
 - do not change transport family, selector rules, or checkpoint semantics
 - compare only:
   - transported penultimate endpoints
@@ -2341,7 +2348,7 @@ Result:
   - run one adopted-package readout-sensitive / output-sensitive terminal
     direction diagnostic inside the current package
 
-### TF2 adopted-package readout-sensitive / output-sensitive terminal direction diagnostic
+### Incremental Bridge adopted-package readout-sensitive / output-sensitive terminal direction diagnostic
 
 Goal:
 
@@ -2450,7 +2457,7 @@ Result:
     diagnostic, since the benefit of the current full-vector angle clip does not
     survive row-space-only isolation
 
-### TF2 adopted-package terminal row-space / orthogonal-component coupling diagnostic
+### Incremental Bridge adopted-package terminal row-space / orthogonal-component coupling diagnostic
 
 Goal:
 
@@ -2543,14 +2550,14 @@ Result:
     as a coupled row-space / orthogonal control effect
   - neither subspace alone is an adequate replacement
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one adopted-package split-threshold terminal coupling diagnostic that
     keeps both row-space and orthogonal components active but tests whether
     their clip strengths need to differ
 
-### TF2 adopted-package split-threshold terminal coupling diagnostic
+### Incremental Bridge adopted-package split-threshold terminal coupling diagnostic
 
 Goal:
 
@@ -2651,23 +2658,23 @@ Result:
   - the current evidence therefore favors the unified full-vector cone geometry
     over the tested split-threshold decompositions
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one adopted-package unified-cone vs split-subspace cone geometry
     diagnostic to explain why the full-vector terminal clip dominates all tested
     decomposed cone variants
-- one next narrow TF2 move that stays inside the adopted package
+- one next narrow Incremental Bridge move that stays inside the adopted package
 
 JPC status after the completed probe:
 
-- JPC remains reference-only in TF2
-- TF2 must not depend on JPC runtime
+- JPC remains reference-only in Incremental Bridge
+- Incremental Bridge must not depend on JPC runtime
 - the completed JPC probe supports prioritizing incremental scheduling over
   substrate scaling in the current phase
 - the probe does not provide strong evidence that muPC-style scaling should now
-  replace incremental scheduling as the main TF2 focus
-- muPC-style scaling remains a future candidate mechanism, not the present TF2
+  replace incremental scheduling as the main Incremental Bridge focus
+- muPC-style scaling remains a future candidate mechanism, not the present Incremental Bridge
   mainline
 
 TF2A suite grid:
@@ -2687,7 +2694,7 @@ Keep fixed across the suite:
 - `checkpoint_selector = "gate_constrained_accuracy_then_val_accuracy"`
 - `theta_update_budget = "matched"`
 
-Forward-init stability diagnostics required in TF2:
+Forward-init stability diagnostics required in Incremental Bridge:
 
 - per-layer hidden forward-init RMS
 - per-layer hidden forward-init mean L2 norm
@@ -2706,8 +2713,8 @@ Acceptance criteria:
   - validation-only selector semantics are preserved
   - no NaN / Inf
 - target acceptance:
-  - improve mean validation accuracy over the sealed TF1 working default
-  - improve mean test accuracy over the sealed TF1 working default
+  - improve mean validation accuracy over the sealed Transport Core v1 working default
+  - improve mean test accuracy over the sealed Transport Core v1 working default
   - reduce the gap to the canonical slow-PC digits baseline
 
 Risks / open questions:
@@ -2721,20 +2728,20 @@ Risks / open questions:
 
 Interpretation:
 
-- current TF2 evidence supports corrective transport strongly
-- current TF2 evidence does not yet support full incremental iFMPC /
+- current Incremental Bridge evidence supports corrective transport strongly
+- current Incremental Bridge evidence does not yet support full incremental iFMPC /
   interleaved parameter-learning as the empirical winner
-- if TF2 improves over sealed TF1 but still trails slow-PC materially, the next stage
-  should remain inside `continue TF2 bridge`
-- if TF2 improves weakly and the diagnostics continue to point to poor conditioning,
+- if Incremental Bridge improves over sealed Transport Core v1 but still trails slow-PC materially, the next stage
+  should remain inside `continue Incremental Bridge bridge`
+- if Incremental Bridge improves weakly and the diagnostics continue to point to poor conditioning,
   the next stage should become `strengthen substrate scaling later`
 - only a clearly stronger bridge result should justify `move toward generalized TF3 later`
 
-### TF2 audit patch — EF alignment
+### Incremental Bridge audit patch — EF alignment
 
 Goal:
 
-- audit the active TF2 bridge code against the current repository spec before making
+- audit the active Incremental Bridge bridge code against the current repository spec before making
   any further EF-style transport changes
 - keep the patch minimal, explicit, and reversible
 
@@ -2753,7 +2760,7 @@ Audit targets:
    - `every_micro_step`
    so that matched budget is defined against the actual number of theta updates that
    are applied under the active cadence
-3. strengthen the focused TF2 tests so the intended semantics are enforced
+3. strengthen the focused Incremental Bridge tests so the intended semantics are enforced
 
 Files to touch:
 
@@ -2769,7 +2776,7 @@ Files to touch:
 
 Planned minimal changes:
 
-- make the TF2/spec wording explicit about the difference between:
+- make the Incremental Bridge/spec wording explicit about the difference between:
   - feature-aware total-derivative identity semantics
   - truncated feature-frozen identity semantics
 - correct matched-budget theta micro learning rates so they normalize by the number
@@ -2785,17 +2792,17 @@ Validation to run:
 
 Assumptions:
 
-- TF2 remains teacher-free and NumPy-only
+- Incremental Bridge remains teacher-free and NumPy-only
 - this patch does not introduce muPC-style scaling, JPC runtime dependence, or a new
   selector policy
 - if the current default `feature_aware_tangents = false` is kept, it must be
   documented as an explicit approximation rather than an unqualified `D_T`
 
-### TF2 identity semantics decision pass
+### Incremental Bridge identity semantics decision pass
 
 Goal:
 
-- decide whether the canonical TF2 identity semantics should remain:
+- decide whether the canonical Incremental Bridge identity semantics should remain:
   - `feature_aware_tangents = false`
   as the current truncated identity approximation
 - or switch to:
@@ -2804,11 +2811,11 @@ Goal:
 
 Scope:
 
-- do not change TF2 core math
+- do not change Incremental Bridge core math
 - do not change baseline PC math
 - do not introduce muPC-style scaling
 - do not start TF3
-- only compare the two identity semantics under otherwise matched TF2 settings
+- only compare the two identity semantics under otherwise matched Incremental Bridge settings
 
 Files to touch:
 
@@ -2838,7 +2845,7 @@ Planned suite:
 
 Decision rule:
 
-- promote feature-aware tangents to the canonical TF2 default only if the
+- promote feature-aware tangents to the canonical Incremental Bridge default only if the
   `tf2_canonical` runs show:
   - stable completion with no NaN/Inf failures
   - materially better validation-selected behavior
@@ -2867,12 +2874,12 @@ Decision outcome:
   from `feature_aware_tangents = true` under either:
   - `tf2_canonical`
   - `tf2_corrective_transport_default`
-- the canonical TF2 default therefore remains:
+- the canonical Incremental Bridge default therefore remains:
   - `feature_aware_tangents = false`
 - feature-aware tangents remain available as a more complete augmented-input identity
   approximation, but not as the current default
 
-### TF2 corrective-transport attribution pass
+### Incremental Bridge corrective-transport attribution pass
 
 Goal:
 
@@ -2883,13 +2890,13 @@ Goal:
 
 Scope:
 
-- do not change TF2 core math
-- do not reopen the TF2 identity-semantics decision
+- do not change Incremental Bridge core math
+- do not reopen the Incremental Bridge identity-semantics decision
 - keep:
   - `feature_aware_tangents = false`
   - `theta_update_budget = "matched"`
   - the current selector policy
-- compare only the existing TF2 bridge family on `digits`
+- compare only the existing Incremental Bridge bridge family on `digits`
 
 Files to touch:
 
@@ -2942,7 +2949,7 @@ Expected deliverables:
 
 Attribution outcome:
 
-- the completed attribution suite shows that the current empirical TF2 advantage is
+- the completed attribution suite shows that the current empirical Incremental Bridge advantage is
   explained primarily by cadence:
   - moving away from `every_micro_step` toward `terminal_only` under matched budget
     produces the largest stable gain
@@ -2958,9 +2965,9 @@ Attribution outcome:
   - keep `tf2_corrective_transport_default`
   - keep `feature_aware_tangents = false`
   - keep `theta_update_budget = "matched"`
-  - test a slightly larger micro-step count before reopening broader TF2 semantics
+  - test a slightly larger micro-step count before reopening broader Incremental Bridge semantics
 
-### TF2 corrective micro-step horizon pass
+### Incremental Bridge corrective micro-step horizon pass
 
 Goal:
 
@@ -2970,7 +2977,7 @@ Goal:
 
 Scope:
 
-- do not change TF2 core math
+- do not change Incremental Bridge core math
 - do not reopen identity semantics, cadence semantics, or supervision semantics
 - keep fixed:
   - `feature_aware_tangents = false`
@@ -3039,12 +3046,12 @@ Outcome:
   - the apparent gain from `micro_steps > 4` is mainly a compute-budget effect,
     not a genuine transport-horizon win
   - `micro_steps = 4` should remain the corrective-transport default
-- the next narrow TF2 move should be:
+- the next narrow Incremental Bridge move should be:
   - keep `micro_steps = 4`
   - test one transport-quality change inside the current corrective default
     rather than adding more inner-loop micro-step compute
 
-### TF2 bootstrap-identity curriculum pass
+### Incremental Bridge bootstrap-identity curriculum pass
 
 Goal:
 
@@ -3054,7 +3061,7 @@ Goal:
 
 Scope:
 
-- do not change TF2 core math
+- do not change Incremental Bridge core math
 - do not reopen:
   - identity semantics
   - cadence semantics
@@ -3148,11 +3155,11 @@ Outcome:
     - `identity_loss_weight = 0.2`
     - `warmup_epochs = 5`
     - `hybrid_ramp_epochs = 10`
-- the next narrow TF2 move should now be:
+- the next narrow Incremental Bridge move should now be:
   - keep the current curriculum
   - test bootstrap-target fidelity rather than more curriculum tuning
 
-### TF2 bootstrap-target fidelity pass
+### Incremental Bridge bootstrap-target fidelity pass
 
 Goal:
 
@@ -3161,7 +3168,7 @@ Goal:
 
 Scope:
 
-- do not change TF2 core math
+- do not change Incremental Bridge core math
 - do not reopen:
   - identity semantics
   - supervision semantics
@@ -3222,7 +3229,7 @@ Pruning rule:
 - always keep the current default candidate:
   - `("rk2", 4)`
 - rank non-default candidates by offline target fidelity
-- carry forward at most 2 promising non-default candidates into end-to-end TF2
+- carry forward at most 2 promising non-default candidates into end-to-end Incremental Bridge
   runs
 
 Validation to run:
@@ -3235,7 +3242,7 @@ Expected deliverables:
 - one narrow artifact set under:
   - `outputs/tf2/fmpc_tf2_bootstrap_fidelity_suite/`
 - a decision on whether:
-  - higher-fidelity `u_boot` materially improves held-out corrective TF2 behavior
+  - higher-fidelity `u_boot` materially improves held-out corrective Incremental Bridge behavior
   - the corrective default should change
   - or bootstrap-target fidelity is not the current limiter
 
@@ -3261,11 +3268,11 @@ Outcome:
   - current evidence says:
     - `u_boot` fidelity is not the current limiter for the fixed-4-step
       corrective default
-- the next single narrow TF2 move should now go beyond
+- the next single narrow Incremental Bridge move should now go beyond
   curriculum/bootstrap-fidelity tuning and target a different transport-quality
   bottleneck
 
-### TF2 bootstrap-target source-bias pass
+### Incremental Bridge bootstrap-target source-bias pass
 
 Goal:
 
@@ -3274,7 +3281,7 @@ Goal:
 
 Scope:
 
-- do not change TF2 core math
+- do not change Incremental Bridge core math
 - do not reopen:
   - identity semantics
   - supervision semantics
@@ -3379,8 +3386,8 @@ Outcome:
       - `tf2_corrective_transport_default`
       - local-field bootstrap source
   - detached slow-PC sources remain diagnostic-only / baseline-only and should
-    not be promoted directly into the TF2 mainline
-- the originally logged next single narrow TF2 move at that point was:
+    not be promoted directly into the Incremental Bridge mainline
+- the originally logged next single narrow Incremental Bridge move at that point was:
 - psi-side transport expressivity under the fixed teacher-free local-field
   source
 - latest local diagnostic chain has since advanced beyond that point through:
@@ -3394,15 +3401,15 @@ Outcome:
   terminal local-field stabilizer adoption/selection in the true closed-loop regime
 - package-level mainline confirmation has now concluded:
   - `tf2_corrective_transport_default` remains the historical corrective working reference
-  - `tf2_corrective_transport_terminal_angleclip_default` is the currently adopted TF2 experimental default on `main`
+  - `tf2_corrective_transport_terminal_angleclip_default` is the currently adopted Incremental Bridge experimental default on `main`
   - closure path:
     terminal-step direction anchoring -> true closed-loop trust-region rescue ->
     adoption/selection -> mainline confirmation
 
-## Current Narrow TF2 Execution Plan
+## Current Narrow Incremental Bridge Execution Plan
 
 - active line remains:
-  - `Phase TF2 - iFMPC bridge stage`
+  - `Phase Incremental Bridge - iFMPC bridge stage`
 - current adopted package remains:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current narrow diagnostic:
@@ -3454,7 +3461,7 @@ Outcome:
     shared full-space angular constraint that does not factorize into the
     tested row-space / orthogonal sub-cones
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one narrow geometry-preserving unified-cone-shape diagnostic inside the
@@ -3504,10 +3511,10 @@ Outcome:
   - the `20` degree interior-margin variant is promising on accuracy and
     row-space distortion, but not yet safe on gate robustness
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
-  - if TF2 work continues inside the adopted package, test at most one smooth
+  - if Incremental Bridge work continues inside the adopted package, test at most one smooth
     unified-cone projection variant that tries to keep the interior-margin gain
     without paying the current gate-robustness cost
 - outcome:
@@ -3542,10 +3549,10 @@ Outcome:
     distortion, but not enough to replace the current hard `30` degree adopted
     control
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
-  - if TF2 work continues inside the adopted package, treat this unified-cone
+  - if Incremental Bridge work continues inside the adopted package, treat this unified-cone
     shape family as locally saturated and avoid another cone-shape sweep unless
     a confirmation-level reason appears
   - run one confirmation-level unified-cone robustness-tradeoff diagnostic
@@ -3609,7 +3616,7 @@ Outcome:
     fixed gate and selector contract
 - decision:
   - do not run another unified-cone confirmation inside this family
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - move to a different remaining package-internal issue rather than another
@@ -3626,7 +3633,7 @@ Outcome:
     by:
     - preterminal rollout accumulation
     - or terminal jump injection
-  - use the result to choose exactly one next narrow TF2 move:
+  - use the result to choose exactly one next narrow Incremental Bridge move:
     - late-rollout drift control if preterminal accumulation dominates
     - terminal-jump formulation if terminal injection dominates
 - outcome:
@@ -3648,7 +3655,7 @@ Outcome:
 - diagnosis:
   - `preterminal_accumulation_dominates`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one narrow adopted-package late-rollout drift-control diagnostic next
@@ -3688,7 +3695,7 @@ Outcome:
 - diagnosis:
   - `mixed_result_but_not_adoption_level`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one narrow source-localization diagnostic on the preterminal update
@@ -3724,7 +3731,7 @@ Outcome:
 - diagnosis:
   - `preterminal_handoff_state_is_primary_blocker`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one narrow adopted-package confirmation on the smallest preterminal
@@ -3764,7 +3771,7 @@ Outcome:
 - diagnosis:
   - `handoff_reformulation_recovers_partially_but_not_adoption_level`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one narrower handoff-state source-localization step on the preterminal
@@ -3797,7 +3804,7 @@ Outcome:
 - diagnosis:
   - `stale_successor_value_is_primary_blocker`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one confirmation-level reformulation on the preterminal on-policy
@@ -3837,7 +3844,7 @@ Outcome:
 - diagnosis:
   - `successor_value_reformulation_recovers_partially_but_not_adoption_level`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one smaller confirmation-level follow-up on the same preterminal
@@ -3877,11 +3884,11 @@ Outcome:
 - diagnosis:
   - `local_successor_value_refinement_improves_but_not_to_adoption_level`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - treat the low-live blend neighborhood as checked for now
-  - if TF2 work continues inside the adopted package, move to a deeper
+  - if Incremental Bridge work continues inside the adopted package, move to a deeper
     diagnostic on the live preterminal successor-value formulation itself
     rather than another low-live blend sweep
   - execution plan:
@@ -3919,7 +3926,7 @@ Outcome:
 - diagnosis:
   - `live_successor_increment_is_primary_blocker`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one confirmation-level reformulation on the preterminal successor
@@ -3950,7 +3957,7 @@ Outcome:
 - diagnosis:
   - `live_successor_increment_blocker_persists`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run the next narrower increment-internal source-localization step
@@ -3988,7 +3995,7 @@ Outcome:
 - diagnosis:
   - `live_successor_increment_direction_is_primary_blocker`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one confirmation-level reformulation on increment direction only
@@ -4023,7 +4030,7 @@ Outcome:
 - diagnosis:
   - `live_successor_increment_direction_blocker_persists`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one minimal direction-magnitude interaction diagnostic next
@@ -4058,7 +4065,7 @@ Outcome:
 - diagnosis:
   - `live_successor_increment_interaction_blocker_persists`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
   - run one deeper diagnostic on the live successor increment formulation
@@ -4082,7 +4089,7 @@ Outcome:
       - live anchor + cached residual
       - cached anchor + live residual
     - keep the same adopted preterminal/terminal angle-clip geometry,
-      selector/gate contract, and the rest of the corrective TF2 package fixed
+      selector/gate contract, and the rest of the corrective Incremental Bridge package fixed
     - use the result only to decide whether the bad live direction localizes
       to one internal additive term or whether the formulation blocker should
       be strengthened as a whole
@@ -4109,10 +4116,10 @@ Outcome:
 - diagnosis:
   - `bad_live_direction_source_not_yet_localized_but_formulation_blocker_strengthened`
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
-  - if TF2 work continues inside the adopted package, treat the live
+  - if Incremental Bridge work continues inside the adopted package, treat the live
     preterminal successor increment as a strengthened formulation-level blocker
     and do not continue another broader successor-value, interaction, or
     cone-family sweep from this state
@@ -4120,7 +4127,7 @@ Outcome:
   - run one very narrow remaining-issue triage pass before creating any new
     adopted-package diagnostic
   - audit the current authority docs together with the existing adopted-package
-    and near-mainline TF2 outputs:
+    and near-mainline Incremental Bridge outputs:
     - readout alignment
     - bootstrap-source bias
     - target-lag coupling
@@ -4146,21 +4153,21 @@ Outcome:
       - no tested bootstrap↔identity curriculum materially beat the fixed-4-step
         corrective default
     - combined with the already strengthened successor-increment formulation
-      blocker, the adopted corrective TF2 package is now best treated as
+      blocker, the adopted corrective Incremental Bridge package is now best treated as
       locally saturated from this state
 - diagnosis:
   - no different remaining package-internal issue is currently worth pursuing
-    inside the adopted TF2 package
+    inside the adopted Incremental Bridge package
 - decision:
-  - keep the current adopted TF2 experimental default unchanged:
+  - keep the current adopted Incremental Bridge experimental default unchanged:
     - `tf2_corrective_transport_terminal_angleclip_default`
 - next single narrow move:
-  - stop package-internal TF2 digging from this state
-  - only reopen TF2 mainline digging if a genuinely different issue family
+  - stop package-internal Incremental Bridge digging from this state
+  - only reopen Incremental Bridge mainline digging if a genuinely different issue family
     appears from new evidence or if the project explicitly decides to leave the
     current package / selector-gate contract
 - post-triage decision memo:
-  - package-internal TF2 digging is closed from the current state because the
+  - package-internal Incremental Bridge digging is closed from the current state because the
     adopted package has already exhausted the credible internal issue families
     surfaced by the evidence chain:
     - readout alignment is an exact no-op on the adopted package
@@ -4170,46 +4177,46 @@ Outcome:
       a strengthened formulation-level blocker rather than an adoption-viable
       local repair
   - recommended next project move:
-    - keep the current adopted TF2 package frozen as the bridge result on `main`
-    - move the next planning effort to a post-TF2 teacher-free FMPC / EF
+    - keep the current adopted Incremental Bridge package frozen as the bridge result on `main`
+    - move the next planning effort to a post-bridge FMPC / EF
       exploratory line that explicitly leaves the current corrective package or
       selector-gate contract
     - do not reframe that exploratory line as replacing the current active
-      `Phase TF2 - iFMPC bridge stage` on `main` until it is explicitly
+      `Phase Incremental Bridge` on `main` until it is explicitly
       chartered
 
-## Post-TF2 exploratory line — teacher_free_fmpc_ef_exploratory
+## Post-bridge exploratory line — ef_core_probe
 
 Status:
 
 - planning-only exploratory charter
 - this does **not** replace the current active line on `main`
 - the active line on `main` remains:
-  - `Phase TF2 - iFMPC bridge stage`
+  - `Phase Incremental Bridge`
 
 Objective:
 
-- define the first post-TF2 exploratory line on the current layered predictive-coding
+- define the first post-bridge exploratory line on the current layered predictive-coding
   substrate for a teacher-free FMPC / EF-style core that is evaluated as a new
   mechanism family rather than as another package-internal repair of the current
-  corrective TF2 package
+  corrective Incremental Bridge package
 
 Non-goals:
 
-- do not reopen package-internal TF2 diagnostics
-- do not redefine the current adopted TF2 default
-- do not introduce AlphaFlow, `muPC`-style TF2 scaling, or TF3 code in the first
+- do not reopen package-internal Incremental Bridge diagnostics
+- do not redefine the current adopted Incremental Bridge default
+- do not introduce AlphaFlow, `muPC`-style bridge-stage scaling, or TF3 code in the first
   exploratory charter
-- do not rewrite the current `main` branch narrative as if TF2 were already
+- do not rewrite the current `main` branch narrative as if the bridge stage were already
   abandoned
 - do not depend on teacher trajectories, teacher fixed points, or teacher-generated
   regression targets
 
 Why this line explicitly leaves the current corrective package or selector-gate contract:
 
-- the current corrective TF2 package is already locally saturated under the current
+- the current corrective Incremental Bridge package is already locally saturated under the current
   selector/gate contract
-- the remaining slow-PC gap survives all credible package-internal TF2 issue families
+- the remaining slow-PC gap survives all credible package-internal bridge-stage issue families
   currently evidenced in the repo
 - therefore any justified next line must be evaluated as a new exploratory regime
   rather than as another local repair of the current corrective package
@@ -4233,7 +4240,7 @@ First two experiments:
 
 2. Frozen-bridge vs exploratory-core comparison
    - compare the exploratory core against:
-     - the frozen adopted TF2 bridge result
+     - the frozen adopted Incremental Bridge result
      - the canonical slow-PC digits baseline
    - keep the same layered substrate and same dataset workflow
    - report:
@@ -4250,9 +4257,9 @@ Acceptance criteria for the exploratory stage:
 - the exploratory core shows a clear mechanism-level win on at least one of:
   - one-step energy decrease
   - few-step fixed-point residual decrease
-  relative to the frozen adopted TF2 bridge result
+  relative to the frozen adopted Incremental Bridge result
 - the exploratory line yields a coherent reason to continue that is not just
-  another rephrasing of the current corrective TF2 package
+  another rephrasing of the current corrective Incremental Bridge package
 - report-only task accuracy should be logged, but it is not the gate for the
   first exploratory stage
 
@@ -4296,15 +4303,15 @@ Completed execution result:
   - report-only validation / test accuracy:
     - `0.2889 / 0.3000`
 - the probe should still be read as exploratory mechanism evidence only:
-  - it does not beat the frozen TF2 bridge result on task accuracy
-  - it does not replace the active `Phase TF2 - iFMPC bridge stage` line on `main`
+  - it does not beat the frozen Incremental Bridge result on task accuracy
+  - it does not replace the active `Phase Incremental Bridge` line on `main`
 
 Next execution sub-step:
 
 - run the frozen-bridge vs exploratory-core comparison next
 - compare:
-  - the frozen adopted TF2 bridge result
-  - the post-TF2 exploratory core probe
+  - the frozen adopted Incremental Bridge result
+  - the post-bridge exploratory core probe
   - the canonical slow-PC digits baseline
 - keep the comparison mechanism-first:
   - transport and residual metrics are the gate
@@ -4355,7 +4362,33 @@ Validation plan:
 
 - run `py_compile` on moved stage modules and experiment entrypoints
 - run representative smoke tests for:
-  - TF2
-  - post-TF2 exploratory probe
+  - Incremental Bridge
+  - post-bridge exploratory probe
   - any moved root-level bridge smoke that still exercises shared substrate code
 - confirm doc references and working tree cleanliness before push/sync
+
+## Stage naming cleanup — remove TF-style stage labels
+
+Objective:
+
+- stop using `Transport Core v1` / `Incremental Bridge` as the human-readable stage names for current
+  development
+
+Execution scope:
+
+- update authority docs and README to use mechanism/role-based stage names
+- keep existing code paths and directory names unchanged in this pass for
+  compatibility
+
+New human-readable stage names:
+
+- `fmpc_v0/` -> `Phase Reference Prep`
+- `interval_meanflow/` -> `Phase Interval Velocity Exploration`
+- `tf1/` -> `Phase Transport Core v1`
+- `tf2/` -> `Phase Incremental Bridge`
+- `exploratory/` -> `Phase EF Core Probe`
+
+Validation plan:
+
+- run a markdown consistency pass across authority docs
+- confirm the active line, exploratory line, and legacy-directory note are aligned

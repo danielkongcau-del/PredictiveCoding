@@ -59,10 +59,19 @@ Repository document precedence remains:
 
 - Teacher-based FMPC work from Phase 4 through Phase 6A is now a **frozen baseline /
   diagnostic reference**.
-- Teacher-free FMPC work from Phase TF1 onward is the **main algorithmic line**.
-- Phase TF1 is sealed as the first teacher-free transport stage.
-- The current active teacher-free stage is:
-  - `Phase TF2 — iFMPC bridge stage`
+- The post-reference FMPC line beginning with `tf1/` is the **main algorithmic line**.
+- Human-readable stage names now follow mechanism/role naming rather than `TF*`
+  labels:
+  - `fmpc_v0/` -> `Phase Reference Prep`
+  - `interval_meanflow/` -> `Phase Interval Velocity Exploration`
+  - `tf1/` -> `Phase Transport Core v1`
+  - `tf2/` -> `Phase Incremental Bridge`
+  - `exploratory/` -> `Phase EF Core Probe`
+- Legacy directory names remain unchanged for compatibility in this pass; do not infer
+  the human-readable stage name from the folder name alone.
+- Phase Transport Core v1 is sealed as the first artifact-independent transport stage.
+- The current active FMPC stage is:
+  - `Phase Incremental Bridge`
 - Unless a plan explicitly labels something as baseline or diagnostic, new FMPC work
   must not depend on:
   - teacher trajectories

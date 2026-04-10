@@ -24,13 +24,13 @@ Current status split:
 - This does not mean a real-data PC-vs-MLP comparison is already done
 - Phase 4 is sealed as the FMPC-v0 preparation checkpoint
 - teacher-based FMPC is now frozen as baseline / diagnostic reference
-- the current active FMPC line is the teacher-free:
-  - `Phase TF2 - iFMPC bridge stage`
-- the historical corrective TF2 working reference remains:
+- the current active FMPC line is:
+  - `Phase Incremental Bridge`
+- the historical corrective Incremental Bridge working reference remains:
   - `tf2_corrective_transport_default`
-- the currently adopted TF2 experimental default on `main` is:
+- the currently adopted Incremental Bridge experimental default on `main` is:
   - `tf2_corrective_transport_terminal_angleclip_default`
-- current TF2 work should be read through `AGENTS.md`, `CURRENT_STATE.md`, `PLANS.md`, and `validation.md`;
+- current Incremental Bridge work should be read through `AGENTS.md`, `CURRENT_STATE.md`, `PLANS.md`, and `validation.md`;
   this README status block may stay lighter than the active bridge-stage contract
 - The current Phase 2 freeze summary lives in `RESULTS.md`
 - Earlier train-only and train/eval-style Phase 2 conclusions are now treated as methodology-limited historical results
@@ -148,6 +148,15 @@ predictive-coding/
 After the repository-organization pass, stage-specific research files are no
 longer kept in one flat directory. Use the following lookup rule:
 
+Human-readable stage names now follow mechanism/role naming, while some legacy
+directory names are retained for compatibility:
+
+- `fmpc_v0/` -> `Phase Reference Prep`
+- `interval_meanflow/` -> `Phase Interval Velocity Exploration`
+- `tf1/` -> `Phase Transport Core v1`
+- `tf2/` -> `Phase Incremental Bridge`
+- `exploratory/` -> `Phase EF Core Probe`
+
 - `src/pc/`
   - shared predictive-coding substrate stays at the package root
   - stage-specific FMPC logic lives under:
@@ -160,8 +169,8 @@ longer kept in one flat directory. Use the following lookup rule:
   - baseline and pre-FMPC scripts now live under `experiments/baseline/`
   - FMPC stage scripts are grouped under their matching stage folders
 - `tests/`
-  - TF2 smoke and suite tests live under `tests/tf2/`
-  - post-TF2 exploratory tests live under `tests/exploratory/`
+  - Incremental Bridge smoke and suite tests live under `tests/tf2/`
+  - post-bridge exploratory tests live under `tests/exploratory/`
   - non-stage-specific bridge checks may remain at the root, for example:
     - `tests/test_jpc_bridge_smoke.py`
 - `outputs/`
@@ -180,7 +189,7 @@ Practical shortcut:
   - `src/pc/tf2/`
   - `experiments/tf2/`
   - `tests/tf2/`
-- if you are looking for the post-TF2 mechanism probe, start from:
+- if you are looking for the post-bridge mechanism probe, start from:
   - `src/pc/exploratory/`
   - `experiments/exploratory/`
   - `tests/exploratory/`
