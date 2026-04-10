@@ -91,6 +91,14 @@ If any of those files conflict, precedence is:
 
 `spec_math.md` > `validation.md` > `AGENTS.md` > `CURRENT_STATE.md` > `PLANS.md` > `README.md`
 
+For low-context web GPT prompt drafting, start with:
+
+1. `LLM_BRIEF.md`
+2. `AGENTS.md`
+3. `CURRENT_STATE.md`
+
+Then open `spec_math.md`, `PLANS.md`, `validation.md`, or `archive/` only as needed.
+
 ## Design principles
 
 1. **Math first.** Code must implement the current mathematical spec, not a guessed variant.
@@ -103,12 +111,16 @@ If any of those files conflict, precedence is:
 
 ```text
 predictive-coding/
+  LLM_BRIEF.md
   README.md
   AGENTS.md
   CURRENT_STATE.md
   PLANS.md
   spec_math.md
   validation.md
+  archive/
+    PLANS_HISTORY.md
+    validation_history.md
   src/
     pc/
       __init__.py
@@ -119,25 +131,25 @@ predictive-coding/
       models.py
       training.py
       utils.py
-      fmpc_v0/
-      interval_meanflow/
-      tf1/
-      tf2/
-      exploratory/
+      stage_01_reference_prep/
+      stage_02_interval_velocity/
+      stage_03_transport_core_v1/
+      stage_04_incremental_bridge/
+      stage_05_ef_core_probe/
   experiments/
     baseline/
-    fmpc_v0/
-    interval_meanflow/
-    tf1/
-    tf2/
-    exploratory/
+    stage_01_reference_prep/
+    stage_02_interval_velocity/
+    stage_03_transport_core_v1/
+    stage_04_incremental_bridge/
+    stage_05_ef_core_probe/
   tests/
-    tf2/
-    exploratory/
+    stage_04_incremental_bridge/
+    stage_05_ef_core_probe/
     test_jpc_bridge_smoke.py
   outputs/
-    tf2/
-    exploratory/
+    stage_04_incremental_bridge/
+    stage_05_ef_core_probe/
     .gitkeep
   references/
     notes.md
@@ -148,14 +160,14 @@ predictive-coding/
 After the repository-organization pass, stage-specific research files are no
 longer kept in one flat directory. Use the following lookup rule:
 
-Human-readable stage names now follow mechanism/role naming, while some legacy
-directory names are retained for compatibility:
+Human-readable stage names now follow mechanism/role naming, and the current
+stage directories are numbered chronologically:
 
-- `fmpc_v0/` -> `FMPC Stage 01 Reference Prep`
-- `interval_meanflow/` -> `FMPC Stage 02 Interval Velocity Exploration`
-- `tf1/` -> `FMPC Stage 03 Transport Core v1`
-- `tf2/` -> `FMPC Stage 04 Incremental Bridge`
-- `exploratory/` -> `FMPC Stage 05 EF Core Probe`
+- `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
+- `stage_02_interval_velocity/` -> `FMPC Stage 02 Interval Velocity Exploration`
+- `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
+- `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
+- `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
 
 - `src/pc/`
   - shared predictive-coding substrate stays at the package root
@@ -193,6 +205,20 @@ Practical shortcut:
   - `src/pc/stage_05_ef_core_probe/`
   - `experiments/stage_05_ef_core_probe/`
   - `tests/stage_05_ef_core_probe/`
+
+## Document navigation guide
+
+The repository now uses three document layers:
+
+- `LLM_BRIEF.md`
+  - lowest-cost entry point for web GPT and new prompt sessions
+- `CURRENT_STATE.md`, `PLANS.md`, `validation.md`
+  - short current-state, current-plan, and current-validation documents
+- `archive/`
+  - long historical plan and validation detail retained for reference
+
+If you only need the current operational picture, avoid opening the historical
+archive first.
 
 ## Initial implementation target
 

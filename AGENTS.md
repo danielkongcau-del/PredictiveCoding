@@ -30,6 +30,14 @@ Repository document precedence remains:
 
 - `spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md`
 
+For low-context prompt drafting or web GPT orientation:
+
+- start with `LLM_BRIEF.md`
+- then read `AGENTS.md` and `CURRENT_STATE.md`
+- open `PLANS.md`, `validation.md`, or `archive/` only as needed
+
+This does not replace the mandatory read order above when editing code.
+
 ## Hard constraints
 
 1. **Do not introduce deep learning frameworks** in Phase 0–2.
