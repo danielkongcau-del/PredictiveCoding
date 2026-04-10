@@ -119,17 +119,25 @@ predictive-coding/
       models.py
       training.py
       utils.py
+      fmpc_v0/
+      interval_meanflow/
+      tf1/
+      tf2/
+      exploratory/
   experiments/
-    toy_linear.py
-    toy_mlp.py
-    mnist_mlp.py          # later phase
+    baseline/
+    fmpc_v0/
+    interval_meanflow/
+    tf1/
+    tf2/
+    exploratory/
   tests/
-    test_shapes.py
-    test_energy.py
-    test_inference.py
-    test_weight_updates.py
-    test_regression_smoke.py
+    tf2/
+    exploratory/
+    test_jpc_bridge_smoke.py
   outputs/
+    tf2/
+    exploratory/
     .gitkeep
   references/
     notes.md
@@ -249,70 +257,70 @@ Notes on the saved artifacts:
 With the `pc` environment active, the existing PC toy benchmarks are:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/toy_regression.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/toy_sine_regression.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/toy_blobs_classification.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/toy_regression.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/toy_sine_regression.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/toy_blobs_classification.py
 ```
 
 Phase 2a adds a minimal standard-MLP comparison script:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/compare_pc_vs_mlp.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/compare_pc_vs_mlp.py
 ```
 
 Phase 2b adds a narrow predictive-coding sensitivity script:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_sensitivity.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_sensitivity.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_sensitivity.py toy_regression
 ```
 
 Phase 2c adds a narrow multi-seed aggregate script:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_multiseed.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_multiseed.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_multiseed.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_multiseed.py toy_regression
 ```
 
 Phase 2d adds a narrow diagnostic script for understanding the tuned-PC vs MLP gap:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_diagnostics.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_diagnostics.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_diagnostics.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_diagnostics.py toy_regression
 ```
 
 Phase 3 currently adds two **standalone digits baselines** with aligned protocol semantics:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/digits_mlp.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/digits_pc.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/summarize_digits_baselines.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/digits_mlp.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/digits_pc.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/summarize_digits_baselines.py
 ```
 
 Phase 4 preparation also adds one harder standalone real-data PC benchmark option:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/fashion_mnist_pc.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/digits_pc_inference_baselines.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/fmpc_v0_prepare.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/fashion_mnist_pc.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/digits_pc_inference_baselines.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/fmpc_v0/fmpc_v0_prepare.py
 ```
 
 Notes:
 
 - this uses `sklearn.datasets.fetch_openml("Fashion-MNIST")` through the repository dataset loader
 - it is a standalone benchmark option for infrastructure preparation, not a formal comparison pipeline
-- `experiments/digits_pc_inference_baselines.py` is a standalone inference-baseline hardening study:
+- `experiments/baseline/digits_pc_inference_baselines.py` is a standalone inference-baseline hardening study:
   - it compares explicit `euler` and `rk2` predictive-coding inference methods under small fixed step budgets
   - it does not change the predictive-coding learning rule
   - it is not a formal real-data PC-vs-MLP comparison
-- `experiments/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
+- `experiments/fmpc_v0/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
   - it trains a standard real-data PC teacher under the current baseline path
   - it exports `z0` / `z_star` teacher targets plus optional trajectories
   - it records future student transport/refinement settings only as placeholders
   - it does not implement a transporter and does not write any FMPC result
 - standalone `digits_pc` summaries keep `teacher_reference` explicit but disable it by default:
   - predict-mode candidate-vs-teacher gaps are often trivial under forward initialization
-  - meaningful FMPC teacher targets should instead come from `experiments/fmpc_v0_prepare.py`
+  - meaningful FMPC teacher targets should instead come from `experiments/fmpc_v0/fmpc_v0_prepare.py`
 
 These write:
 
@@ -354,7 +362,7 @@ Meaning of the current Phase 3 output:
 - it reports the headline result on held-out `test_metric`
 - the `digits_mlp` and `digits_pc` runs now share those protocol rules
 - the canonical `digits_pc` baseline now reflects the best single-run candidate from a small stabilization sweep selected by `val_metric`
-- `experiments/summarize_digits_baselines.py` can produce a small side-by-side digest from the two existing `summary.json` files
+- `experiments/baseline/summarize_digits_baselines.py` can produce a small side-by-side digest from the two existing `summary.json` files
 - the current Phase 3 checkpoint should therefore be read from:
   - `outputs/digits_mlp/`
   - `outputs/digits_pc/`
@@ -388,29 +396,29 @@ What Phase 3 has not completed:
 Phase 2e adds a narrow tuned-PC budget tradeoff script:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_budget_tradeoff.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_budget_tradeoff.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_budget_tradeoff.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_budget_tradeoff.py toy_regression
 ```
 
 Phase 2f adds a train/val/test-aware joint PC search:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_joint_search.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/pc_joint_search.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_joint_search.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/pc_joint_search.py toy_regression
 ```
 
 Phase 2g adds a matched PC/MLP search under the same validation/test protocol:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/phase2g_matched_search.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/phase2g_matched_search.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/phase2g_matched_search.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/phase2g_matched_search.py toy_regression
 ```
 
 Phase 2g.1 adds a small local boundary-check study around the current Phase 2g best configs:
 
 ```powershell
-& 'D:\Anaconda\envs\pc\python.exe' experiments/phase2g1_boundary_check.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/phase2g1_boundary_check.py toy_regression
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/phase2g1_boundary_check.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/phase2g1_boundary_check.py toy_regression
 ```
 
 The first Phase 2b pass stays intentionally small:

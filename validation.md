@@ -1921,20 +1921,20 @@ Current TF2 adoption interpretation:
         line is being evaluated
 - the first post-TF2 exploratory probe now exists:
   - implementation path:
-    - `src/pc/fmpc_ef_exploratory_probe.py`
-    - `experiments/fmpc_ef_exploratory_probe.py`
-    - `tests/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `src/pc/exploratory/fmpc_ef_exploratory_probe.py`
+    - `experiments/exploratory/fmpc_ef_exploratory_probe.py`
+    - `tests/exploratory/test_fmpc_ef_exploratory_probe_smoke.py`
   - no `spec_math.md` change was required:
     - the probe stays inside the existing Section 16 teacher-free
       average-velocity contract
   - focused validation commands:
-    - `python -m py_compile src/pc/fmpc_ef_exploratory_probe.py experiments/fmpc_ef_exploratory_probe.py tests/test_fmpc_ef_exploratory_probe_smoke.py`
-    - `$env:PYTHONPATH='src'; python -m pytest tests/test_fmpc_ef_exploratory_probe_smoke.py -q`
-    - `$env:PYTHONPATH='src'; python experiments/fmpc_ef_exploratory_probe.py`
+    - `python -m py_compile src/pc/exploratory/fmpc_ef_exploratory_probe.py experiments/exploratory/fmpc_ef_exploratory_probe.py tests/exploratory/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `$env:PYTHONPATH='src'; python -m pytest tests/exploratory/test_fmpc_ef_exploratory_probe_smoke.py -q`
+    - `$env:PYTHONPATH='src'; python experiments/exploratory/fmpc_ef_exploratory_probe.py`
   - focused validation result:
     - `3 passed in 2.44s`
     - output directory:
-      - `outputs/fmpc_ef_exploratory_probe`
+      - `outputs/exploratory/fmpc_ef_exploratory_probe`
   - canonical run summary:
     - `teacher_free: true`
     - `uses_teacher_artifacts: false`

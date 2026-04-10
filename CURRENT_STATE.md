@@ -198,9 +198,9 @@ This file is the short active-state summary for the repository.
     - keep the current active line on `main` unchanged while that exploratory line is being evaluated
 - The first post-TF2 exploratory core probe now exists on the current layered substrate:
   - implementation path:
-    - `src/pc/fmpc_ef_exploratory_probe.py`
-    - `experiments/fmpc_ef_exploratory_probe.py`
-    - `tests/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `src/pc/exploratory/fmpc_ef_exploratory_probe.py`
+    - `experiments/exploratory/fmpc_ef_exploratory_probe.py`
+    - `tests/exploratory/test_fmpc_ef_exploratory_probe_smoke.py`
   - it stays fully teacher-free in target construction:
     - direct anchor source: `self_bootstrap_local_field`
     - local flow definition: `exact_negative_hidden_state_gradient`
@@ -223,41 +223,41 @@ This file is the short active-state summary for the repository.
 ## Relevant Suites And Artifacts
 
 - Core preset and terminal-intervention code:
-  - [src/pc/fmpc_tf2.py](/e:/CodeSpace/PredictiveCoding/src/pc/fmpc_tf2.py)
+  - [src/pc/tf2/fmpc_tf2.py](/e:/CodeSpace/PredictiveCoding/src/pc/tf2/fmpc_tf2.py)
 - Current source-of-truth validation log:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
 - Current long-horizon plan:
   - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - Recent authority artifact sets:
-  - [outputs/fmpc_tf2_external_comparison_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_external_comparison_suite)
-  - [outputs/fmpc_tf2_gap_decomposition_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_gap_decomposition_suite)
-  - [outputs/fmpc_tf2_readout_refit_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_readout_refit_suite)
-  - [outputs/fmpc_tf2_readout_alignment_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_readout_alignment_suite)
-  - [outputs/fmpc_tf2_bootstrap_source_bias_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_bootstrap_source_bias_suite)
-  - [outputs/fmpc_tf2_target_lag_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_target_lag_coupling_suite)
-  - [outputs/fmpc_tf2_curriculum_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_curriculum_suite)
-  - [outputs/fmpc_tf2_endpoint_basis_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_endpoint_basis_suite)
-  - [outputs/fmpc_tf2_output_sensitive_terminal_direction_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_output_sensitive_terminal_direction_suite)
-  - [outputs/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_terminal_coupling_suite)
-  - [outputs/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_split_threshold_coupling_suite)
-  - [outputs/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_geometry_suite)
-  - [outputs/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_shape_suite)
-  - [outputs/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_smooth_unified_cone_suite)
-  - [outputs/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_unified_cone_robustness_suite)
-  - [outputs/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_basis_drift_localization_suite)
-  - [outputs/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_late_rollout_drift_control_suite)
-  - [outputs/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_source_localization_suite)
-  - [outputs/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_preterminal_handoff_confirmation_suite)
-  - [outputs/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_handoff_source_suite)
-  - [outputs/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_confirmation_suite)
-  - [outputs/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_followup_suite)
-  - [outputs/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_value_source_suite)
-  - [outputs/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_confirmation_suite)
-  - [outputs/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_source_suite)
-  - [outputs/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_direction_confirmation_suite)
-  - [outputs/fmpc_tf2_successor_increment_interaction_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_interaction_suite)
-  - [outputs/fmpc_tf2_successor_increment_formulation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_formulation_suite)
-  - [outputs/fmpc_ef_exploratory_probe](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_ef_exploratory_probe)
+  - [outputs/tf2/fmpc_tf2_external_comparison_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_external_comparison_suite)
+  - [outputs/tf2/fmpc_tf2_gap_decomposition_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_gap_decomposition_suite)
+  - [outputs/tf2/fmpc_tf2_readout_refit_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_readout_refit_suite)
+  - [outputs/tf2/fmpc_tf2_readout_alignment_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_readout_alignment_suite)
+  - [outputs/tf2/fmpc_tf2_bootstrap_source_bias_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_bootstrap_source_bias_suite)
+  - [outputs/tf2/fmpc_tf2_target_lag_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_target_lag_coupling_suite)
+  - [outputs/tf2/fmpc_tf2_curriculum_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_curriculum_suite)
+  - [outputs/tf2/fmpc_tf2_endpoint_basis_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_endpoint_basis_suite)
+  - [outputs/tf2/fmpc_tf2_output_sensitive_terminal_direction_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_output_sensitive_terminal_direction_suite)
+  - [outputs/tf2/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_terminal_coupling_suite)
+  - [outputs/tf2/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_split_threshold_coupling_suite)
+  - [outputs/tf2/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_unified_cone_geometry_suite)
+  - [outputs/tf2/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_unified_cone_shape_suite)
+  - [outputs/tf2/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_smooth_unified_cone_suite)
+  - [outputs/tf2/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_unified_cone_robustness_suite)
+  - [outputs/tf2/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_basis_drift_localization_suite)
+  - [outputs/tf2/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_late_rollout_drift_control_suite)
+  - [outputs/tf2/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_preterminal_source_localization_suite)
+  - [outputs/tf2/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_preterminal_handoff_confirmation_suite)
+  - [outputs/tf2/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_handoff_source_suite)
+  - [outputs/tf2/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_value_confirmation_suite)
+  - [outputs/tf2/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_value_followup_suite)
+  - [outputs/tf2/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_value_source_suite)
+  - [outputs/tf2/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_increment_confirmation_suite)
+  - [outputs/tf2/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_increment_source_suite)
+  - [outputs/tf2/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_increment_direction_confirmation_suite)
+  - [outputs/tf2/fmpc_tf2_successor_increment_interaction_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_increment_interaction_suite)
+  - [outputs/tf2/fmpc_tf2_successor_increment_formulation_suite](/e:/CodeSpace/PredictiveCoding/outputs/tf2/fmpc_tf2_successor_increment_formulation_suite)
+  - [outputs/exploratory/fmpc_ef_exploratory_probe](/e:/CodeSpace/PredictiveCoding/outputs/exploratory/fmpc_ef_exploratory_probe)
 
 ## Read Order And Precedence
 

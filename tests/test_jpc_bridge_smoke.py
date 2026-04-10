@@ -17,7 +17,7 @@ def _read_json(path: Path) -> dict[str, object]:
 
 
 def test_jpc_bridge_probe_writes_expected_artifacts(tmp_path: Path) -> None:
-    module = runpy.run_path(str(ROOT / "experiments" / "tf2_jpc_probe.py"))
+    module = runpy.run_path(str(ROOT / "experiments" / "tf2" / "tf2_jpc_probe.py"))
     run = module["run"]
 
     result = run(output_root=tmp_path, run_id="tf2_jpc_probe_smoke", batch_size=6, inference_steps_horizon=4)

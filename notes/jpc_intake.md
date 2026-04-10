@@ -100,7 +100,7 @@ This is relevant to TF2 because the bridge stage likely wants:
 
 ## Live probe update
 
-The completed local probe in `outputs/tf2_jpc_probe/summary.json` should now be
+The completed local probe in `outputs/tf2/tf2_jpc_probe/summary.json` should now be
 treated as the operative TF2 interpretation aid.
 
 What the live probe currently supports:
@@ -497,7 +497,7 @@ Suggested scope:
   - `diagnostic_fields`
 - helper for turning a TF2 probe config into a comparable JPC-style descriptor
 
-### Optional next step 2: `experiments/tf2_jpc_probe.py`
+### Optional next step 2: `experiments/tf2/tf2_jpc_probe.py`
 
 This is the most attractive next bridge artifact.
 
