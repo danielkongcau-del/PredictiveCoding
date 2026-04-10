@@ -72,6 +72,13 @@ For low-context web GPT prompt drafting, start with:
 
 Then open `RESULTS.md`, `spec_math.md`, `PLANS.md`, `validation.md`, or `archive/` only as needed.
 
+In most prompt-drafting sessions, this is enough:
+
+- `PROMPT_CONTEXT.md`
+- `CURRENT_STATE.md`
+
+Add `AGENTS.md`, `spec_math.md`, `validation.md`, or `PLANS.md` only if the prompt needs coding constraints, math, acceptance rules, or a concrete execution queue.
+
 ## Document Guide
 
 The repository now uses a layered documentation structure:

@@ -34,6 +34,16 @@ It is not meant to replace:
 6. `PLANS.md`, `RESULTS.md`, or `validation.md` only if the task needs them
 7. `archive/` only if historical evidence is truly necessary
 
+For most prompt-drafting sessions, this is enough:
+
+- `PROMPT_CONTEXT.md`
+- `CURRENT_STATE.md`
+
+Add `AGENTS.md` if the prompt may cause code changes.
+Add `spec_math.md` and `specs/` only if the prompt is math-sensitive.
+Add `validation.md` only if acceptance rules or gating language matter.
+Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
+
 ## Current Project Reality
 
 - active branch:

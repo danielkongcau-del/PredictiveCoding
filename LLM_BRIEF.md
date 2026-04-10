@@ -19,6 +19,12 @@ Start here, then expand only as needed:
 5. `PLANS.md`, `RESULTS.md`, or `validation.md` only if the task needs them
 6. `archive/` only if historical context is truly required
 
+For most new-session orientation, `LLM_BRIEF.md` plus `CURRENT_STATE.md` is enough.
+
+Open `AGENTS.md` if the task may lead to code changes.
+Open `spec_math.md` and `specs/` only if the task is math-sensitive.
+Open `validation.md` only if acceptance rules matter.
+
 ## Document Finder
 
 If you want a specific kind of information, read this file:
