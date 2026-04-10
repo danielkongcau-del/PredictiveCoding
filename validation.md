@@ -1914,11 +1914,45 @@ Current TF2 adoption interpretation:
         `Phase TF2 - iFMPC bridge stage` on `main` until it is explicitly
         chartered
     - the chosen immediate action is:
-      - charter a planning-only post-TF2 exploratory line:
+      - implement the first post-TF2 exploratory core probe under:
         - `teacher_free_fmpc_ef_exploratory`
       - keep it on the current layered substrate
       - keep the current active line on `main` unchanged while that exploratory
-        charter is being evaluated
+        line is being evaluated
+- the first post-TF2 exploratory probe now exists:
+  - implementation path:
+    - `src/pc/fmpc_ef_exploratory_probe.py`
+    - `experiments/fmpc_ef_exploratory_probe.py`
+    - `tests/test_fmpc_ef_exploratory_probe_smoke.py`
+  - no `spec_math.md` change was required:
+    - the probe stays inside the existing Section 16 teacher-free
+      average-velocity contract
+  - focused validation commands:
+    - `python -m py_compile src/pc/fmpc_ef_exploratory_probe.py experiments/fmpc_ef_exploratory_probe.py tests/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `$env:PYTHONPATH='src'; python -m pytest tests/test_fmpc_ef_exploratory_probe_smoke.py -q`
+    - `$env:PYTHONPATH='src'; python experiments/fmpc_ef_exploratory_probe.py`
+  - focused validation result:
+    - `3 passed in 2.44s`
+    - output directory:
+      - `outputs/fmpc_ef_exploratory_probe`
+  - canonical run summary:
+    - `teacher_free: true`
+    - `uses_teacher_artifacts: false`
+    - one-step validation energy delta vs identity:
+      - `-0.0001458`
+    - configured two-step validation energy delta vs identity:
+      - `-0.0001500`
+    - configured two-step validation fixed-point residual delta vs identity:
+      - `-7.99e-07`
+    - report-only validation / test accuracy:
+      - `0.2889 / 0.3000`
+  - resulting exploratory diagnosis:
+    - the first post-TF2 core probe achieves mechanism-level energy decrease
+      and fixed-point residual reduction without teacher artifacts
+    - it still sits far below the frozen TF2 bridge result on report-only task
+      accuracy
+  - recommended next move:
+    - run the frozen-bridge vs exploratory-core comparison next
 
 Required reporting:
 

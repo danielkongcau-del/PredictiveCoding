@@ -174,10 +174,14 @@ This file is the short active-state summary for the repository.
 - Current next narrow move:
   - stop package-internal TF2 digging from this state
   - only reopen TF2 mainline digging if a genuinely different issue family appears from new evidence or if the project explicitly decides to leave the current package / selector-gate contract
-  - current planning-only next move:
-    - charter `teacher_free_fmpc_ef_exploratory`
+  - current exploratory next move:
+    - run the frozen-bridge vs exploratory-core comparison under
+      `teacher_free_fmpc_ef_exploratory`
 - Current active question:
-  - no different remaining package-internal issue is currently recommended for pursuit inside the adopted TF2 package
+  - package-internal TF2 digging remains closed
+  - current exploratory question:
+    - does the first post-TF2 teacher-free core probe show enough mechanism
+      signal to justify the frozen-bridge vs exploratory-core comparison?
 - Post-triage decision memo:
   - package-internal TF2 digging is considered closed from the current state because the remaining slow-PC gap is still present, but every credible internal corrective package issue family now has a sealed negative result:
     - readout alignment is an exact no-op on the adopted package
@@ -188,10 +192,33 @@ This file is the short active-state summary for the repository.
     - redirect the next planning effort to a post-TF2 teacher-free FMPC / EF exploratory line that explicitly leaves the current corrective package or selector-gate contract
     - do not rewrite the current active line on `main` until that exploratory line is explicitly chartered
   - the chosen immediate action is:
-    - charter a planning-only post-TF2 exploratory line:
+    - implement the first post-TF2 exploratory core probe under:
       - `teacher_free_fmpc_ef_exploratory`
     - keep it on the current layered substrate
-    - keep the current active line on `main` unchanged while that exploratory charter is being evaluated
+    - keep the current active line on `main` unchanged while that exploratory line is being evaluated
+- The first post-TF2 exploratory core probe now exists on the current layered substrate:
+  - implementation path:
+    - `src/pc/fmpc_ef_exploratory_probe.py`
+    - `experiments/fmpc_ef_exploratory_probe.py`
+    - `tests/test_fmpc_ef_exploratory_probe_smoke.py`
+  - it stays fully teacher-free in target construction:
+    - direct anchor source: `self_bootstrap_local_field`
+    - local flow definition: `exact_negative_hidden_state_gradient`
+    - `u_psi` is parameterized as:
+      - `u_psi = g_theta + residual_mlp(z_t, target_onehot, t, r)`
+  - the first canonical exploratory run now shows a positive mechanism signal without changing the active TF2 line:
+    - one-step transported final energy beats identity/no-transport on validation:
+      - `energy_delta_vs_identity: -0.0001458`
+    - configured two-step transported final energy also beats identity/no-transport on validation:
+      - `energy_delta_vs_identity: -0.0001500`
+    - configured two-step fixed-point residual also drops below identity/no-transport on validation:
+      - `fixed_point_residual_delta_vs_identity: -7.99e-07`
+    - the run is deterministic and fully teacher-free in artifact construction
+    - task accuracy remains report-only and is still well below the frozen TF2 bridge result
+- Current post-TF2 exploratory recommendation:
+  - keep the frozen TF2 bridge result unchanged on `main`
+  - use the exploratory probe only as mechanism evidence
+  - run the frozen-bridge vs exploratory-core comparison next to decide whether the exploratory line has enough signal to justify a v2 charter
 
 ## Relevant Suites And Artifacts
 
@@ -230,6 +257,7 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_direction_confirmation_suite)
   - [outputs/fmpc_tf2_successor_increment_interaction_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_interaction_suite)
   - [outputs/fmpc_tf2_successor_increment_formulation_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_successor_increment_formulation_suite)
+  - [outputs/fmpc_ef_exploratory_probe](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_ef_exploratory_probe)
 
 ## Read Order And Precedence
 

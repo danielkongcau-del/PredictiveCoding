@@ -4255,3 +4255,57 @@ Acceptance criteria for the exploratory stage:
   another rephrasing of the current corrective TF2 package
 - report-only task accuracy should be logged, but it is not the gate for the
   first exploratory stage
+
+Current execution sub-step:
+
+- implement one minimal mechanism-validating probe on the current layered
+  substrate:
+  - add `src/pc/fmpc_ef_exploratory_probe.py`
+  - add `experiments/fmpc_ef_exploratory_probe.py`
+  - add `tests/test_fmpc_ef_exploratory_probe_smoke.py`
+- keep the probe teacher-free in target construction:
+  - exact local flow `g_theta(z; c) = -∇_z E_theta(z; c)`
+  - detached short-horizon bootstrap average-velocity anchor
+  - minimal `u_psi(z_t, r, t; c)` input on the current layered encoding
+- keep predict/eval on the existing slow-PC path
+- require the first smoke run to report:
+  - one-step energy decrease vs identity/no-transport
+  - few-step fixed-point residual decrease vs identity/no-transport when
+    `transport_steps > 1`
+  - deterministic artifact generation
+  - report-only task accuracy
+
+Completed execution result:
+
+- the first exploratory probe is now implemented:
+  - `src/pc/fmpc_ef_exploratory_probe.py`
+  - `experiments/fmpc_ef_exploratory_probe.py`
+  - `tests/test_fmpc_ef_exploratory_probe_smoke.py`
+- the probe keeps the current layered substrate and current slow-PC predict/eval
+  path, while staying fully teacher-free in target construction
+- the first canonical exploratory run in `outputs/fmpc_ef_exploratory_probe`
+  shows a positive mechanism-first signal:
+  - one-step validation energy delta vs identity/no-transport:
+    - `-0.0001458`
+  - configured two-step validation energy delta vs identity/no-transport:
+    - `-0.0001500`
+  - configured two-step validation fixed-point residual delta vs identity/no-transport:
+    - `-7.99e-07`
+  - deterministic artifacts:
+    - `true`
+  - report-only validation / test accuracy:
+    - `0.2889 / 0.3000`
+- the probe should still be read as exploratory mechanism evidence only:
+  - it does not beat the frozen TF2 bridge result on task accuracy
+  - it does not replace the active `Phase TF2 - iFMPC bridge stage` line on `main`
+
+Next execution sub-step:
+
+- run the frozen-bridge vs exploratory-core comparison next
+- compare:
+  - the frozen adopted TF2 bridge result
+  - the post-TF2 exploratory core probe
+  - the canonical slow-PC digits baseline
+- keep the comparison mechanism-first:
+  - transport and residual metrics are the gate
+  - task accuracy remains report-only at this stage
