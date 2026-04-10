@@ -141,13 +141,16 @@ Current repository document layers are:
 
 - low-context prompt entry:
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
+- current frozen result summary:
+  - [RESULTS.md](/e:/CodeSpace/PredictiveCoding/RESULTS.md)
 - current operational state:
   - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
 - current forward plan:
   - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - current validation contract:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
-- historical long-form plan and validation detail:
+- historical long-form results, plan, and validation detail:
+  - [archive/RESULTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/RESULTS_HISTORY.md)
   - [archive/PLANS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/PLANS_HISTORY.md)
   - [archive/validation_history.md](/e:/CodeSpace/PredictiveCoding/archive/validation_history.md)
 
@@ -160,9 +163,11 @@ Objective:
 Changes:
 
 - add `LLM_BRIEF.md`
+- keep `RESULTS.md` as a short frozen-result summary
+- move historical results detail to `archive/RESULTS_HISTORY.md`
 - move historical plan detail to `archive/PLANS_HISTORY.md`
 - move historical validation detail to `archive/validation_history.md`
-- keep `CURRENT_STATE.md`, `PLANS.md`, and `validation.md` short and current
+- keep `CURRENT_STATE.md`, `PLANS.md`, `RESULTS.md`, and `validation.md` short and current
 
 Validation:
 
@@ -170,6 +175,7 @@ Validation:
   - `LLM_BRIEF.md`
   - `CURRENT_STATE.md`
   - `PLANS.md`
+  - `RESULTS.md`
   - `validation.md`
   - `README.md`
   - `AGENTS.md`

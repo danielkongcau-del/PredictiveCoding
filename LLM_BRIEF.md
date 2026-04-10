@@ -93,6 +93,8 @@ Do not do these by default:
   - `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
 - exploratory core probe:
   - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+- current frozen results summary:
+  - `RESULTS.md`
 - current operational summary:
   - `CURRENT_STATE.md`
 - current active plan:
@@ -111,6 +113,7 @@ Do not do these by default:
 
 Historical long-form context now lives in:
 
+- `archive/RESULTS_HISTORY.md`
 - `archive/PLANS_HISTORY.md`
 - `archive/validation_history.md`
 

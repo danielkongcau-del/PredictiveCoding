@@ -32,7 +32,8 @@ Current status split:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current Incremental Bridge work should be read through `AGENTS.md`, `CURRENT_STATE.md`, `PLANS.md`, and `validation.md`;
   this README status block may stay lighter than the active bridge-stage contract
-- The current Phase 2 freeze summary lives in `RESULTS.md`
+- The current frozen results summary lives in `RESULTS.md`
+- Historical long-form result history now lives in `archive/RESULTS_HISTORY.md`
 - Earlier train-only and train/eval-style Phase 2 conclusions are now treated as methodology-limited historical results
 - Current strongest Phase 2 conclusion comes from the best-known Phase 2 evidence chain:
   - Phase 2g matched PC/MLP search
@@ -46,7 +47,8 @@ Current status split:
   - `toy_sine_regression`: boundary-check-refined MLP beats boundary-check-refined PC on held-out test, stays ahead on most seeds in the current multi-seed check, and remains ahead in the refreshed budget study
   - Phase 2 is stable enough to proceed to Phase 3, but that does not imply exhaustive search saturation or global optimality
 - Local output-retention note:
-  - the scientific Phase 2 conclusions are preserved in `RESULTS.md` and `validation.md`
+  - the current scientific result summary is preserved in `RESULTS.md` and `validation.md`
+  - older result narrative and historical detail now live in `archive/RESULTS_HISTORY.md`
   - local output cleanup is allowed; older Phase 2 generated outputs may need to be regenerated if you want to inspect them again
 - the current canonical Phase 3 artifact set is:
   - `outputs/digits_mlp/`
