@@ -107,6 +107,118 @@ Good prompts for this repository should:
 - opening a broad experimental zoo when the repo state only justifies one narrow pass
 - treating report-only accuracy as the Stage 05 acceptance gate
 
+## Copy-Paste Prompt Skeleton
+
+Use the skeleton below when you want web GPT to draft a prompt for Codex.
+
+Rules for using it:
+
+- keep only the blocks that matter for the current task
+- replace bracketed placeholders with concrete repo facts
+- do not add broad sweeps if the repo state only justifies a narrow pass
+- if the task is docs-only or planning-only, say that explicitly
+- if the task should not change defaults, say that explicitly
+
+```text
+Goal:
+Use branch `main` only. [Describe the exact task in one sentence.]
+
+Read order:
+1. README.md
+2. AGENTS.md
+3. CURRENT_STATE.md
+4. PLANS.md
+5. spec_math.md
+6. [applicable file under specs/ if stage-specific math matters]
+7. validation.md
+
+Repository precedence:
+spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md
+
+Current repo state to respect:
+- Active branch: `main`
+- Active algorithmic line on `main` remains:
+  - `FMPC Stage 04 Incremental Bridge`
+- Frozen Stage 04 bridge result on `main`:
+  - `tf2_corrective_transport_terminal_angleclip_default`
+- Current canonical bridge identity default:
+  - `feature_aware_tangents = false`
+- Current exploratory line:
+  - `FMPC Stage 05 EF Core Probe`
+- [Add only the few current facts that materially constrain this task.]
+
+Do not reopen:
+- [List only the blocked or sealed families relevant to this task.]
+
+Task:
+1. [First concrete step.]
+2. [Second concrete step.]
+3. [If code is allowed, list the smallest files to touch.]
+4. [If metrics or outputs are required, list them explicitly.]
+
+Constraints:
+- NumPy-first only
+- preserve backward compatibility for existing named presets
+- keep the patch narrow and reversible
+- [Add task-specific constraints only if they are real.]
+
+Validation:
+- [If docs-only: run a markdown consistency pass and report it.]
+- [If code changes: run the narrowest relevant pytest subset.]
+- [If experiments are needed: run only the smallest suite needed for a real answer.]
+
+Done when:
+- [State the exact question that must be answered.]
+- [State which docs must agree afterward, if applicable.]
+- [State the minimum required deliverables.]
+```
+
+## Recommended Task Modes
+
+Use one of these three headers near the top of the prompt so Codex can choose the right level of action immediately.
+
+### Implementation Pass
+
+Use this when you want code changes.
+
+```text
+This pass is implementation-first.
+- Code changes are allowed.
+- Keep experiments minimal.
+- Update docs only if needed for factual consistency.
+```
+
+### Planning-Only Pass
+
+Use this when you want a decision memo, charter, or next-step design without new experiment code.
+
+```text
+This pass is planning-only unless a tiny factual doc sync is required.
+- Do not add new experimental code.
+- Prefer existing evidence over new search.
+```
+
+### Docs-Only Pass
+
+Use this when you want cleanup, consistency, naming, or structure changes.
+
+```text
+This pass is docs-only.
+- Do not change algorithmic code.
+- Do not change validation semantics unless the task explicitly asks for it.
+```
+
+## Minimal Fill-In Checklist
+
+Before sending a prompt drafted from this file, make sure it answers these:
+
+- Is the task implementation, planning-only, or docs-only?
+- Does it stay inside Stage 04, or does it explicitly leave the frozen bridge package?
+- Does it respect the current frozen Stage 04 result?
+- Does it avoid reopening sealed Stage 04 families without new evidence?
+- If math matters, did it point to the right `specs/` addendum?
+- Did it define a narrow success condition instead of a broad search?
+
 ## If You Need More Than This File
 
 - project map and document finder:
