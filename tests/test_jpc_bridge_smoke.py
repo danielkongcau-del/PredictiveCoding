@@ -17,7 +17,7 @@ def _read_json(path: Path) -> dict[str, object]:
 
 
 def test_jpc_bridge_probe_writes_expected_artifacts(tmp_path: Path) -> None:
-    module = runpy.run_path(str(ROOT / "experiments" / "tf2" / "tf2_jpc_probe.py"))
+    module = runpy.run_path(str(ROOT / "experiments" / "incremental_bridge" / "tf2_jpc_probe.py"))
     run = module["run"]
 
     result = run(output_root=tmp_path, run_id="tf2_jpc_probe_smoke", batch_size=6, inference_steps_horizon=4)
@@ -28,9 +28,9 @@ def test_jpc_bridge_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     config = _read_json(run_dir / "config.json")
     summary = _read_json(run_dir / "summary.json")
 
-    assert config["phase"] == "Phase TF2"
+    assert config["phase"] == "Phase Incremental Bridge"
     assert config["stage"] == "ifmpc_bridge_jpc_probe"
-    assert summary["phase"] == "Phase TF2"
+    assert summary["phase"] == "Phase Incremental Bridge"
     assert summary["stage"] == "ifmpc_bridge_jpc_probe"
     assert summary["probe_type"] == "reference_only"
     assert summary["benchmark_equivalence"] is False

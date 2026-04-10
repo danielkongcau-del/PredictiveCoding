@@ -511,7 +511,7 @@ def probe_jpc_inference_energy(
 
 def _config_payload(config: TF2JPCProbeConfig) -> dict[str, Any]:
     return {
-        "phase": "Phase TF2",
+        "phase": "Phase Incremental Bridge",
         "stage": "ifmpc_bridge_jpc_probe",
         "probe_type": "reference_only",
         "benchmark_equivalence": False,
@@ -644,7 +644,7 @@ def run_tf2_jpc_probe(config: TF2JPCProbeConfig) -> TF2JPCProbeRunResult:
         )
 
     summary = {
-        "phase": "Phase TF2",
+        "phase": "Phase Incremental Bridge",
         "stage": "ifmpc_bridge_jpc_probe",
         "probe_type": "reference_only",
         "benchmark_equivalence": False,

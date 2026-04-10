@@ -4,7 +4,7 @@ from .comparison import ComparisonRunResult, run_benchmark_comparison
 from .datasets import load_digits_split, load_fashion_mnist_split
 from .pc_budget_tradeoff import PCBudgetTradeoffRunResult, run_pc_budget_tradeoff_study
 from .experiment import ExperimentConfig, ExperimentRunResult, run_supervised_experiment
-from .fmpc_v0.fmpc_protocol import (
+from .reference_prep.fmpc_protocol import (
     FMPCPreparationConfig,
     FMPCPreparationRunResult,
     FMPC_PREPARATION_SCHEMA_VERSION,
@@ -15,17 +15,17 @@ from .fmpc_v0.fmpc_protocol import (
     save_pc_teacher_checkpoint,
     run_fmpc_v0_preparation,
 )
-from .fmpc_v0.fmpc_student_data import (
+from .reference_prep.fmpc_student_data import (
     FMPCStudentDataset,
     FMPCStudentSplit,
     build_fmpc_student_inputs,
     load_fmpc_student_dataset,
 )
-from .fmpc_v0.fmpc_student_normalization import (
+from .reference_prep.fmpc_student_normalization import (
     FMPCStudentNormalizationStats,
     fit_fmpc_student_normalization,
 )
-from .fmpc_v0.fmpc_student_baselines import (
+from .reference_prep.fmpc_student_baselines import (
     ClassMeanDeltaStudent,
     RidgeDeltaStudent,
     RidgeDeltaStudentConfig,
@@ -33,7 +33,7 @@ from .fmpc_v0.fmpc_student_baselines import (
     StandardizedMLPStudentConfig,
     identity_delta_prediction,
 )
-from .fmpc_v0.fmpc_student import (
+from .reference_prep.fmpc_student import (
     FMPCStudentConfig,
     FMPCStudentRunResult,
     FMPCStudentTransporter,
@@ -45,12 +45,12 @@ from .fmpc_v0.fmpc_student import (
     prepare_fmpc_student_teacher_references,
     run_fmpc_student_experiment,
 )
-from .fmpc_v0.fmpc_student_suite import (
+from .reference_prep.fmpc_student_suite import (
     FMPCStudentSuiteConfig,
     FMPCStudentSuiteRunResult,
     run_fmpc_student_suite,
 )
-from .interval_meanflow.fmpc_interval_data import (
+from .interval_velocity.fmpc_interval_data import (
     FMPCIntervalBatch,
     FMPCIntervalDataset,
     FMPCIntervalSplit,
@@ -65,7 +65,7 @@ from .interval_meanflow.fmpc_interval_data import (
     sample_balanced_interval_batch,
     teacher_step_aligned_rollout_schedules,
 )
-from .interval_meanflow.fmpc_interval_features import (
+from .interval_velocity.fmpc_interval_features import (
     FMPCIntervalTeacherFeatureBundle,
     FMPCIntervalTeacherFeatureSplitContext,
     FMPCIntervalTeacherStateFeatures,
@@ -78,13 +78,13 @@ from .interval_meanflow.fmpc_interval_features import (
     precompute_interval_teacher_trajectory_feature_tangents,
     precompute_interval_teacher_trajectory_features,
 )
-from .interval_meanflow.fmpc_interval_normalization import (
+from .interval_velocity.fmpc_interval_normalization import (
     FMPCIntervalNormalizationStats,
     fit_fmpc_interval_augmented_normalization,
     fit_fmpc_interval_normalization,
     transform_interval_block_targets,
 )
-from .interval_meanflow.fmpc_interval_student import (
+from .interval_velocity.fmpc_interval_student import (
     FMPCIntervalRolloutResult,
     FMPCIntervalRolloutAuxiliaryBatches,
     FMPCIntervalSuiteConfig,
@@ -101,12 +101,12 @@ from .interval_meanflow.fmpc_interval_student import (
     rollout_interval_student,
     run_fmpc_interval_suite,
 )
-from .interval_meanflow.fmpc_meanflow_jvp import (
+from .interval_velocity.fmpc_meanflow_jvp import (
     MeanFlowMLPJVPResult,
     build_meanflow_input_tangent,
     forward_mlp_with_jvp,
 )
-from .interval_meanflow.fmpc_meanflow_student import (
+from .interval_velocity.fmpc_meanflow_student import (
     FMPCMeanFlowSuiteConfig,
     FMPCMeanFlowSuiteRunResult,
     MeanFlowMLPStudent,
@@ -118,7 +118,7 @@ from .interval_meanflow.fmpc_meanflow_student import (
     reconstruct_meanflow_velocity,
     run_fmpc_meanflow_suite,
 )
-from .tf1.fmpc_tf1 import (
+from .transport_core_v1.fmpc_tf1 import (
     FMPCTF1Config,
     FMPCTF1EpochSnapshot,
     FMPCTF1RunResult,
@@ -129,47 +129,47 @@ from .tf1.fmpc_tf1 import (
     build_tf1_preset_config,
     run_fmpc_tf1_experiment,
 )
-from .tf1.fmpc_tf1_suite import (
+from .transport_core_v1.fmpc_tf1_suite import (
     FMPCTF1SuiteConfig,
     FMPCTF1SuiteRunResult,
     run_fmpc_tf1_suite,
 )
-from .tf1.fmpc_tf1_selection_suite import (
+from .transport_core_v1.fmpc_tf1_selection_suite import (
     FMPCTF1SelectionSuiteConfig,
     FMPCTF1SelectionSuiteRunResult,
     run_fmpc_tf1_selection_suite,
 )
-from .tf1.fmpc_tf1_gate_coverage_suite import (
+from .transport_core_v1.fmpc_tf1_gate_coverage_suite import (
     FMPCTF1GateCoverageSuiteConfig,
     FMPCTF1GateCoverageSuiteRunResult,
     run_fmpc_tf1_gate_coverage_suite,
 )
-from .tf1.fmpc_tf1_multiseed_suite import (
+from .transport_core_v1.fmpc_tf1_multiseed_suite import (
     FMPCTF1MultiSeedSuiteConfig,
     FMPCTF1MultiSeedSuiteRunResult,
     run_fmpc_tf1_multiseed_suite,
 )
-from .tf1.fmpc_tf1_selector_policy_suite import (
+from .transport_core_v1.fmpc_tf1_selector_policy_suite import (
     FMPCTF1SelectorPolicySuiteConfig,
     FMPCTF1SelectorPolicySuiteRunResult,
     run_fmpc_tf1_selector_policy_suite,
 )
-from .tf1.fmpc_tf1_default_adoption_suite import (
+from .transport_core_v1.fmpc_tf1_default_adoption_suite import (
     FMPCTF1DefaultAdoptionSuiteConfig,
     FMPCTF1DefaultAdoptionSuiteRunResult,
     run_fmpc_tf1_default_adoption_suite,
 )
-from .tf1.fmpc_tf1_external_comparison_suite import (
+from .transport_core_v1.fmpc_tf1_external_comparison_suite import (
     FMPCTF1ExternalComparisonSuiteConfig,
     FMPCTF1ExternalComparisonSuiteRunResult,
     run_fmpc_tf1_external_comparison_suite,
 )
-from .tf1.fmpc_tf1_accuracy_tuning_suite import (
+from .transport_core_v1.fmpc_tf1_accuracy_tuning_suite import (
     FMPCTF1AccuracyTuningSuiteConfig,
     FMPCTF1AccuracyTuningSuiteRunResult,
     run_fmpc_tf1_accuracy_tuning_suite,
 )
-from .tf2.fmpc_tf2 import (
+from .incremental_bridge.fmpc_tf2 import (
     FMPCTF2Config,
     FMPCTF2EpochSnapshot,
     FMPCTF2RunResult,
@@ -181,52 +181,52 @@ from .tf2.fmpc_tf2 import (
     build_tf2_preset_config,
     run_fmpc_tf2_experiment,
 )
-from .tf2.fmpc_tf2_suite import (
+from .incremental_bridge.fmpc_tf2_suite import (
     FMPCTF2SuiteConfig,
     FMPCTF2SuiteRunResult,
     run_fmpc_tf2_suite,
 )
-from .tf2.fmpc_tf2_default_adoption_suite import (
+from .incremental_bridge.fmpc_tf2_default_adoption_suite import (
     FMPCTF2DefaultAdoptionSuiteConfig,
     FMPCTF2DefaultAdoptionSuiteRunResult,
     run_fmpc_tf2_default_adoption_suite,
 )
-from .tf2.fmpc_tf2_mainline_adoption_suite import (
+from .incremental_bridge.fmpc_tf2_mainline_adoption_suite import (
     FMPCTF2MainlineAdoptionSuiteConfig,
     FMPCTF2MainlineAdoptionSuiteRunResult,
     run_fmpc_tf2_mainline_adoption_suite,
 )
-from .tf2.fmpc_tf2_identity_semantics_suite import (
+from .incremental_bridge.fmpc_tf2_identity_semantics_suite import (
     FMPCTF2IdentitySemanticsSuiteConfig,
     FMPCTF2IdentitySemanticsSuiteRunResult,
     run_fmpc_tf2_identity_semantics_suite,
 )
-from .tf2.fmpc_tf2_attribution_suite import (
+from .incremental_bridge.fmpc_tf2_attribution_suite import (
     FMPCTF2AttributionSuiteConfig,
     FMPCTF2AttributionSuiteRunResult,
     run_fmpc_tf2_attribution_suite,
 )
-from .tf2.fmpc_tf2_microstep_horizon_suite import (
+from .incremental_bridge.fmpc_tf2_microstep_horizon_suite import (
     FMPCTF2MicrostepHorizonSuiteConfig,
     FMPCTF2MicrostepHorizonSuiteRunResult,
     run_fmpc_tf2_microstep_horizon_suite,
 )
-from .tf2.fmpc_tf2_curriculum_suite import (
+from .incremental_bridge.fmpc_tf2_curriculum_suite import (
     FMPCTF2CurriculumSuiteConfig,
     FMPCTF2CurriculumSuiteRunResult,
     run_fmpc_tf2_curriculum_suite,
 )
-from .tf2.fmpc_tf2_bootstrap_fidelity_suite import (
+from .incremental_bridge.fmpc_tf2_bootstrap_fidelity_suite import (
     FMPCTF2BootstrapFidelitySuiteConfig,
     FMPCTF2BootstrapFidelitySuiteRunResult,
     run_fmpc_tf2_bootstrap_fidelity_suite,
 )
-from .tf2.fmpc_tf2_bootstrap_source_bias_suite import (
+from .incremental_bridge.fmpc_tf2_bootstrap_source_bias_suite import (
     FMPCTF2BootstrapSourceBiasSuiteConfig,
     FMPCTF2BootstrapSourceBiasSuiteRunResult,
     run_fmpc_tf2_bootstrap_source_bias_suite,
 )
-from .tf2.fmpc_tf2b_interleaving_suite import (
+from .incremental_bridge.fmpc_tf2b_interleaving_suite import (
     FMPCTF2BInterleavingSuiteConfig,
     FMPCTF2BInterleavingSuiteRunResult,
     run_fmpc_tf2b_interleaving_suite,

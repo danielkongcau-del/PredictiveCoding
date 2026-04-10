@@ -1,4 +1,4 @@
-# JPC Intake for Phase TF2 / iFMPC Bridge
+# JPC Intake for Phase Incremental Bridge / iFMPC Bridge
 
 Status: read-only intake of `third_party/jpc` as a reference codebase. No files in
 `third_party/jpc` were modified. No PredictiveCoding mainline code was changed in
@@ -100,7 +100,7 @@ This is relevant to TF2 because the bridge stage likely wants:
 
 ## Live probe update
 
-The completed local probe in `outputs/tf2/tf2_jpc_probe/summary.json` should now be
+The completed local probe in `outputs/incremental_bridge/tf2_jpc_probe/summary.json` should now be
 treated as the operative TF2 interpretation aid.
 
 What the live probe currently supports:
@@ -497,7 +497,7 @@ Suggested scope:
   - `diagnostic_fields`
 - helper for turning a TF2 probe config into a comparable JPC-style descriptor
 
-### Optional next step 2: `experiments/tf2/tf2_jpc_probe.py`
+### Optional next step 2: `experiments/incremental_bridge/tf2_jpc_probe.py`
 
 This is the most attractive next bridge artifact.
 
@@ -525,7 +525,7 @@ Not for first pass:
 - no attempt to align numerical outputs exactly across frameworks
 - no rewrite of PredictiveCoding core APIs around JAX
 
-## 9. Bottom line for Phase TF2
+## 9. Bottom line for Phase Incremental Bridge
 
 For TF2 / iFMPC bridge planning, the most valuable lessons from JPC are:
 

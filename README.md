@@ -160,23 +160,23 @@ directory names are retained for compatibility:
 - `src/pc/`
   - shared predictive-coding substrate stays at the package root
   - stage-specific FMPC logic lives under:
-    - `src/pc/fmpc_v0/`
-    - `src/pc/interval_meanflow/`
-    - `src/pc/tf1/`
-    - `src/pc/tf2/`
-    - `src/pc/exploratory/`
+    - `src/pc/reference_prep/`
+    - `src/pc/interval_velocity/`
+    - `src/pc/transport_core_v1/`
+    - `src/pc/incremental_bridge/`
+    - `src/pc/ef_core_probe/`
 - `experiments/`
   - baseline and pre-FMPC scripts now live under `experiments/baseline/`
   - FMPC stage scripts are grouped under their matching stage folders
 - `tests/`
-  - Incremental Bridge smoke and suite tests live under `tests/tf2/`
-  - post-bridge exploratory tests live under `tests/exploratory/`
+  - Incremental Bridge smoke and suite tests live under `tests/incremental_bridge/`
+  - post-bridge exploratory tests live under `tests/ef_core_probe/`
   - non-stage-specific bridge checks may remain at the root, for example:
     - `tests/test_jpc_bridge_smoke.py`
 - `outputs/`
   - newer FMPC artifact trees are grouped by stage, for example:
-    - `outputs/tf2/`
-    - `outputs/exploratory/`
+    - `outputs/incremental_bridge/`
+    - `outputs/ef_core_probe/`
   - older baseline artifacts may still keep their historical stable names such as:
     - `outputs/digits_mlp/`
     - `outputs/digits_pc/`
@@ -186,13 +186,13 @@ Practical shortcut:
 
 - if you know the research stage first, start from the matching subfolder
 - if you are looking for the current mainline implementation, start from:
-  - `src/pc/tf2/`
-  - `experiments/tf2/`
-  - `tests/tf2/`
+  - `src/pc/incremental_bridge/`
+  - `experiments/incremental_bridge/`
+  - `tests/incremental_bridge/`
 - if you are looking for the post-bridge mechanism probe, start from:
-  - `src/pc/exploratory/`
-  - `experiments/exploratory/`
-  - `tests/exploratory/`
+  - `src/pc/ef_core_probe/`
+  - `experiments/ef_core_probe/`
+  - `tests/ef_core_probe/`
 
 ## Initial implementation target
 
@@ -353,7 +353,7 @@ Phase 4 preparation also adds one harder standalone real-data PC benchmark optio
 ```powershell
 & 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/fashion_mnist_pc.py
 & 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/digits_pc_inference_baselines.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/fmpc_v0/fmpc_v0_prepare.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/reference_prep/fmpc_v0_prepare.py
 ```
 
 Notes:
@@ -364,14 +364,14 @@ Notes:
   - it compares explicit `euler` and `rk2` predictive-coding inference methods under small fixed step budgets
   - it does not change the predictive-coding learning rule
   - it is not a formal real-data PC-vs-MLP comparison
-- `experiments/fmpc_v0/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
+- `experiments/reference_prep/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
   - it trains a standard real-data PC teacher under the current baseline path
   - it exports `z0` / `z_star` teacher targets plus optional trajectories
   - it records future student transport/refinement settings only as placeholders
   - it does not implement a transporter and does not write any FMPC result
 - standalone `digits_pc` summaries keep `teacher_reference` explicit but disable it by default:
   - predict-mode candidate-vs-teacher gaps are often trivial under forward initialization
-  - meaningful FMPC teacher targets should instead come from `experiments/fmpc_v0/fmpc_v0_prepare.py`
+  - meaningful FMPC teacher targets should instead come from `experiments/reference_prep/fmpc_v0_prepare.py`
 
 These write:
 
