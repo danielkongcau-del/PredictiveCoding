@@ -33,6 +33,12 @@ This file is the short active-state summary for the repository.
 - The adopted angle-clip package materially improves over the historical corrective reference and remains the current TF2 experimental default on `main`.
 - The remaining slow-PC gap is not mainly a selector/checkpoint issue and not mainly a simple head-fit problem.
 - The dominant remaining mismatch inside the adopted package is best read as readout-relevant endpoint-basis distortion rather than simple separability collapse.
+- The adopted-package readout-alignment confirmation is sealed as a no-op:
+  - `readout_align_final_w050` and `readout_align_every_w050` remain identical to the adopted control on validation accuracy, test accuracy, gate counts, transported energy, and report-output MSE
+- Older bootstrap-target-side follow-ups are not credible remaining limiters from the current adopted-package state:
+  - detached slow-PC bootstrap source did not materially beat the local-field source end-to-end
+  - one-step lagged target snapshots did not improve behavior
+  - no tested bootstrap↔identity curriculum materially beat the fixed-4-step corrective default
 - Row-space-only, orthogonal-only, and split-threshold terminal interventions are all non-adopted; keep the current full-vector terminal angle clip unchanged.
 - The unified-cone vs split-subspace geometry pass says the current gain is best explained by a shared full-space angular constraint, not by literal row/orth ratio preservation.
 - The unified-cone-shape pass says the `20` degree interior-margin cone improves accuracy and row-space distortion, but not enough gate robustness to replace the current adopted `30` degree hard cone.
@@ -158,14 +164,18 @@ This file is the short active-state summary for the repository.
   - neither single-term substitution restores any gate robustness, and both retain essentially `100%` of the failed-anchor accuracy / row-space gain
   - the current formulation-level diagnosis is:
     - `bad_live_direction_source_not_yet_localized_but_formulation_blocker_strengthened`
+- The remaining-issue triage pass now says no different package-internal issue survives as a credible next adopted-package diagnostic:
+  - the readout-alignment family is sealed as an exact no-op on the adopted package
+  - the older bootstrap-source, target-lag, and curriculum families do not show a credible reopen path from the current adopted-package state
+  - combined with the strengthened live successor-increment formulation blocker, the adopted corrective TF2 package is now best treated as locally saturated under the current selector/gate contract
 
-## Current Narrow Open Question
+## Current Recommendation
 
 - Current next narrow move:
-  - unified-cone work should continue to be treated as locally saturated under the current selector/gate contract
-  - if TF2 work continues inside the adopted package, treat the live preterminal successor increment as a strengthened formulation-level blocker and do not continue another broader successor-value, interaction, or terminal-cone sweep from this state
+  - stop package-internal TF2 digging from this state
+  - only reopen TF2 mainline digging if a genuinely different issue family appears from new evidence or if the project explicitly decides to leave the current package / selector-gate contract
 - Current active question:
-  - which different remaining package-internal issue, if any, is still worth pursuing once the live successor increment line is treated as a formulation-level blocker
+  - no different remaining package-internal issue is currently recommended for pursuit inside the adopted TF2 package
 
 ## Relevant Suites And Artifacts
 
@@ -179,6 +189,10 @@ This file is the short active-state summary for the repository.
   - [outputs/fmpc_tf2_external_comparison_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_external_comparison_suite)
   - [outputs/fmpc_tf2_gap_decomposition_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_gap_decomposition_suite)
   - [outputs/fmpc_tf2_readout_refit_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_readout_refit_suite)
+  - [outputs/fmpc_tf2_readout_alignment_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_readout_alignment_suite)
+  - [outputs/fmpc_tf2_bootstrap_source_bias_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_bootstrap_source_bias_suite)
+  - [outputs/fmpc_tf2_target_lag_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_target_lag_coupling_suite)
+  - [outputs/fmpc_tf2_curriculum_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_curriculum_suite)
   - [outputs/fmpc_tf2_endpoint_basis_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_endpoint_basis_suite)
   - [outputs/fmpc_tf2_output_sensitive_terminal_direction_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_output_sensitive_terminal_direction_suite)
   - [outputs/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/fmpc_tf2_terminal_coupling_suite)

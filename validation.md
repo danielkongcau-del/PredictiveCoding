@@ -1870,10 +1870,31 @@ Current TF2 adoption interpretation:
   - the resulting diagnosis is:
     - `bad_live_direction_source_not_yet_localized_but_formulation_blocker_strengthened`
   - next single narrow move:
-    - if TF2 work continues inside the adopted package, treat the live
-      preterminal successor increment as a strengthened formulation-level
-      blocker and do not continue another broader successor-value,
-      interaction, or cone-family sweep from this state
+    - run one very narrow remaining-issue triage pass before creating any
+      different adopted-package diagnostic
+  - the completed remaining-issue triage now says:
+    - no different package-internal issue survives as a credible next
+      adopted-package diagnostic under the current selector/gate contract
+    - the adopted-package readout-alignment confirmation is exactly a no-op:
+      - `readout_align_final_w050` and `readout_align_every_w050` remain
+        identical to the adopted control on validation accuracy, test accuracy,
+        gate counts, transported energy, and report-output MSE
+    - the older bootstrap-source-bias, one-step target-lag, and
+      bootstrap↔identity curriculum families do not provide a credible reopen
+      path from the current adopted-package state:
+      - detached slow-PC bootstrap source did not materially beat the
+        local-field source end-to-end
+      - one-step lagged target snapshots did not improve behavior
+      - no tested bootstrap↔identity curriculum materially beat the fixed-4-step
+        corrective default
+    - combined with the strengthened live successor-increment formulation
+      blocker, the adopted corrective TF2 package is now best treated as
+      locally saturated under the current selector/gate contract
+  - the resulting recommendation is:
+    - stop package-internal TF2 digging from this state
+    - only reopen TF2 mainline digging if a genuinely different issue family
+      appears from new evidence or if the project explicitly decides to leave
+      the current package / selector-gate contract
 
 Required reporting:
 

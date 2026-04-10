@@ -4116,3 +4116,46 @@ Outcome:
     preterminal successor increment as a strengthened formulation-level blocker
     and do not continue another broader successor-value, interaction, or
     cone-family sweep from this state
+- execution plan:
+  - run one very narrow remaining-issue triage pass before creating any new
+    adopted-package diagnostic
+  - audit the current authority docs together with the existing adopted-package
+    and near-mainline TF2 outputs:
+    - readout alignment
+    - bootstrap-source bias
+    - target-lag coupling
+    - curriculum
+    - gap decomposition and external comparison
+  - build a compact issue-status table that marks each remaining issue family
+    as sealed or still credible from the current repo evidence
+  - add a new experiment suite only if one genuinely different package-internal
+    issue survives the triage
+- outcome:
+  - the completed remaining-issue triage now says:
+    - no different package-internal issue survives as a credible next adopted-package
+      diagnostic under the current selector/gate contract
+    - the adopted-package readout-alignment confirmation is exactly a no-op:
+      - `readout_align_final_w050` and `readout_align_every_w050` both remain
+        identical to the adopted control on validation accuracy, test accuracy,
+        gate counts, transported energy, and report-output MSE
+    - the older bootstrap-source-bias, one-step target-lag, and
+      bootstrap↔identity curriculum passes do not provide a credible reopen path:
+      - detached slow-PC bootstrap source did not materially beat the local-field
+        source end-to-end
+      - one-step lagged target snapshots did not improve behavior
+      - no tested bootstrap↔identity curriculum materially beat the fixed-4-step
+        corrective default
+    - combined with the already strengthened successor-increment formulation
+      blocker, the adopted corrective TF2 package is now best treated as
+      locally saturated from this state
+- diagnosis:
+  - no different remaining package-internal issue is currently worth pursuing
+    inside the adopted TF2 package
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - stop package-internal TF2 digging from this state
+  - only reopen TF2 mainline digging if a genuinely different issue family
+    appears from new evidence or if the project explicitly decides to leave the
+    current package / selector-gate contract
