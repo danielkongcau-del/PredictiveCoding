@@ -1,4 +1,4 @@
-﻿# FMPC Stage 03 Transport Core v1 Addendum
+# FMPC Stage 03 Transport Core v1 Addendum
 
 This file extends the baseline math in [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md).
 

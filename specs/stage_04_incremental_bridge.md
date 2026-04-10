@@ -1,4 +1,4 @@
-﻿# FMPC Stage 04 Incremental Bridge Addendum
+# FMPC Stage 04 Incremental Bridge Addendum
 
 This file extends the baseline math in [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md) and the Stage 03 transport addendum in [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md).
 

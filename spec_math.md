@@ -1,4 +1,4 @@
-﻿# Mathematical Specification
+# Mathematical Specification
 
 This file defines the **baseline mathematical formulation** for the repository.
 
