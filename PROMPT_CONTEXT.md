@@ -38,6 +38,8 @@ It is not meant to replace:
 
 - active branch:
   - `main`
+- active algorithmic line on `main`:
+  - `FMPC Stage 04 Incremental Bridge`
 - frozen bridge result on `main`:
   - `FMPC Stage 04 Incremental Bridge`
 - current adopted bridge default:
@@ -53,6 +55,12 @@ It is not meant to replace:
 - Stage 04 is treated as the frozen bridge result on `main`
 - the current open question is whether Stage 05 earns a v2 charter
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
+
+## Current Recommended Next Move
+
+- keep the Stage 04 bridge result frozen on `main`
+- run the frozen-bridge vs exploratory-core comparison next
+- use that comparison to decide whether Stage 05 earns a v2 charter
 
 ## What Prompt Writers Must Not Reopen
 

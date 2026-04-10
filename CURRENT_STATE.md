@@ -33,7 +33,7 @@ For the full numbered stage map and directory layout, use [README.md](/e:/CodeSp
   - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
 - Current Stage 05 note:
   - there is no separate Stage 05 math addendum yet
-  - the current probe reuses the baseline substrate plus the Stage 03 transport contract where applicable
+  - the current probe reuses the baseline substrate plus the Stage 03 average-velocity transport contract where applicable
 
 ## Stage 04 Status
 
@@ -97,7 +97,9 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - current active validation contract:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
-- low-context prompt entry:
+- prompt-drafting context:
+  - [PROMPT_CONTEXT.md](/e:/CodeSpace/PredictiveCoding/PROMPT_CONTEXT.md)
+- low-context repository entry:
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
 
 ## Relevant Artifacts

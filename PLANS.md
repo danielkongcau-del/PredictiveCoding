@@ -130,7 +130,9 @@ Stage 05 should not be promoted merely because of a small task-metric fluctuatio
 
 ## Document Shortcuts
 
-- low-context prompt entry:
+- prompt-drafting context:
+  - [PROMPT_CONTEXT.md](/e:/CodeSpace/PredictiveCoding/PROMPT_CONTEXT.md)
+- low-context repository entry:
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
 - math layer:
   - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
