@@ -13,13 +13,7 @@ This file is the short operational summary for the repository.
 - Active algorithmic line on `main`:
   - `FMPC Stage 04 Incremental Bridge`
 
-## FMPC Stage Map
-
-- `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
-- `stage_02_interval_velocity/` -> `FMPC Stage 02 Interval Velocity Exploration`
-- `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
-- `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
-- `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
+For the full numbered stage map and directory layout, use [README.md](/e:/CodeSpace/PredictiveCoding/README.md).
 
 ## Current Defaults
 

@@ -5,24 +5,17 @@ This file tracks the current forward plan only.
 - Historical plan detail has moved to [archive/PLANS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/PLANS_HISTORY.md).
 - The goal of this file is to stay short enough to be read at the start of a new session.
 
-## Active-State Sync
+## Planning Anchors
 
 - Active branch:
   - `main`
 - Active algorithmic line:
   - `FMPC Stage 04 Incremental Bridge`
-- Current adopted Stage 04 default:
-  - `tf2_corrective_transport_terminal_angleclip_default`
-- Current exploratory line:
-  - `FMPC Stage 05 EF Core Probe`
-
-## FMPC Stage Naming
-
-- `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
-- `stage_02_interval_velocity/` -> `FMPC Stage 02 Interval Velocity Exploration`
-- `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
-- `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
-- `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
+- Current defaults, current stage map, and frozen/open-line status live in:
+  - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
+- Planning should assume:
+  - Stage 04 remains frozen as the bridge result
+  - Stage 05 remains the current exploratory line
 
 ## Planning Rule
 
@@ -135,52 +128,14 @@ Secondary report-only signals:
 
 Stage 05 should not be promoted merely because of a small task-metric fluctuation without a clear mechanism advantage.
 
-## Documentation Architecture
-
-Current repository document layers are:
+## Document Shortcuts
 
 - low-context prompt entry:
   - [LLM_BRIEF.md](/e:/CodeSpace/PredictiveCoding/LLM_BRIEF.md)
 - current frozen result summary:
   - [RESULTS.md](/e:/CodeSpace/PredictiveCoding/RESULTS.md)
-- current operational state:
-  - [CURRENT_STATE.md](/e:/CodeSpace/PredictiveCoding/CURRENT_STATE.md)
-- current forward plan:
-  - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - current validation contract:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
-- historical long-form results, plan, and validation detail:
-  - [archive/AGENTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/AGENTS_HISTORY.md)
-  - [archive/README_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/README_HISTORY.md)
-  - [archive/RESULTS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/RESULTS_HISTORY.md)
+- historical long-form detail:
   - [archive/PLANS_HISTORY.md](/e:/CodeSpace/PredictiveCoding/archive/PLANS_HISTORY.md)
   - [archive/validation_history.md](/e:/CodeSpace/PredictiveCoding/archive/validation_history.md)
-
-## This Turn: Documentation Context-Thinning Refactor
-
-Objective:
-
-- make the repository more usable for low-context web GPT prompt drafting
-
-Changes:
-
-- add `LLM_BRIEF.md`
-- move historical AGENTS detail to `archive/AGENTS_HISTORY.md`
-- move historical README detail to `archive/README_HISTORY.md`
-- keep `RESULTS.md` as a short frozen-result summary
-- move historical results detail to `archive/RESULTS_HISTORY.md`
-- move historical plan detail to `archive/PLANS_HISTORY.md`
-- move historical validation detail to `archive/validation_history.md`
-- keep `CURRENT_STATE.md`, `PLANS.md`, `RESULTS.md`, and `validation.md` short and current
-
-Validation:
-
-- markdown consistency pass across:
-  - `LLM_BRIEF.md`
-  - `CURRENT_STATE.md`
-  - `PLANS.md`
-  - `RESULTS.md`
-  - `validation.md`
-  - `README.md`
-  - `AGENTS.md`
-- ensure the Google Drive sync script includes the new briefing and archive docs
