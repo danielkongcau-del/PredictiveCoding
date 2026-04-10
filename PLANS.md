@@ -4064,3 +4064,55 @@ Outcome:
   - run one deeper diagnostic on the live successor increment formulation
     itself rather than another broader successor-value, interaction, or
     cone-family sweep
+  - execution plan:
+    - keep the current adopted package as the control:
+      - `tf2_corrective_transport_terminal_angleclip_default`
+    - keep the failed live/live earlier-control path as the higher-gain
+      unstable reference
+    - keep `live carry + cached increment` as the nearest safe cached/control
+      lower-bound reference
+    - decompose the live preterminal successor increment formulation into the
+      smallest internal additive contributors actually used by the code before
+      the final update is formed:
+      - detached local-field anchor term `g_t`
+      - learned residual term added on top of `g_t`
+    - derive the corresponding cached additive contributors from the cached
+      preterminal plan
+    - test only the two smallest formulation-local substitutions:
+      - live anchor + cached residual
+      - cached anchor + live residual
+    - keep the same adopted preterminal/terminal angle-clip geometry,
+      selector/gate contract, and the rest of the corrective TF2 package fixed
+    - use the result only to decide whether the bad live direction localizes
+      to one internal additive term or whether the formulation blocker should
+      be strengthened as a whole
+- outcome:
+  - the completed deeper live successor-increment formulation diagnostic now
+    says:
+    - swapping only the learned residual term to the cached analogue while
+      keeping the live detached local-field anchor term leaves behavior
+      effectively identical to the failed live/live earlier-control reference:
+      - `mean_val_accuracy: 0.8570`
+      - `mean_gate_passing_epoch_count: 0.0`
+      - `selector_fallback_used_rate: 1.0`
+      - `mean_val_terminal_rowspace_rms: 0.1425`
+    - swapping only the detached local-field anchor term to the cached
+      analogue while keeping the live learned residual term also leaves
+      behavior effectively identical to the failed live/live earlier-control
+      reference:
+      - `mean_val_accuracy: 0.8570`
+      - `mean_gate_passing_epoch_count: 0.0`
+      - `selector_fallback_used_rate: 1.0`
+      - `mean_val_terminal_rowspace_rms: 0.1425`
+    - neither single-term substitution restores any gate robustness, and both
+      retain essentially `100%` of the failed-anchor accuracy / row-space gain
+- diagnosis:
+  - `bad_live_direction_source_not_yet_localized_but_formulation_blocker_strengthened`
+- decision:
+  - keep the current adopted TF2 experimental default unchanged:
+    - `tf2_corrective_transport_terminal_angleclip_default`
+- next single narrow move:
+  - if TF2 work continues inside the adopted package, treat the live
+    preterminal successor increment as a strengthened formulation-level blocker
+    and do not continue another broader successor-value, interaction, or
+    cone-family sweep from this state
