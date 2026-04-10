@@ -11,19 +11,18 @@ This file is the short active-state summary for the repository.
 - Active branch:
   - `main`
 - Active algorithmic line:
-  - `Phase Incremental Bridge`
+  - `FMPC Stage 04 Incremental Bridge`
 
 ## Stage Naming Rule
 
 - Human-readable stage names now describe mechanism and project role rather than use
   `TF*` labels.
 - Current naming map:
-  - `fmpc_v0/` -> `Phase Reference Prep`
-  - `interval_meanflow/` -> `Phase Interval Velocity Exploration`
-  - `tf1/` -> `Phase Transport Core v1`
-  - `tf2/` -> `Phase Incremental Bridge`
-  - `exploratory/` -> `Phase EF Core Probe`
-- Legacy directory names remain unchanged for compatibility in this pass.
+  - `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
+  - `stage_02_interval_velocity/` -> `FMPC Stage 02 Interval Velocity Exploration`
+  - `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
+  - `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
+  - `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
 
 ## Current Adopted Defaults
 
@@ -210,9 +209,9 @@ This file is the short active-state summary for the repository.
     - keep the current active line on `main` unchanged while that exploratory line is being evaluated
 - The first post-bridge exploratory core probe now exists on the current layered substrate:
   - implementation path:
-    - `src/pc/ef_core_probe/fmpc_ef_exploratory_probe.py`
-    - `experiments/ef_core_probe/fmpc_ef_exploratory_probe.py`
-    - `tests/ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+    - `experiments/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+    - `tests/stage_05_ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
   - it stays fully teacher-free in target construction:
     - direct anchor source: `self_bootstrap_local_field`
     - local flow definition: `exact_negative_hidden_state_gradient`
@@ -235,41 +234,41 @@ This file is the short active-state summary for the repository.
 ## Relevant Suites And Artifacts
 
 - Core preset and terminal-intervention code:
-  - [src/pc/incremental_bridge/fmpc_tf2.py](/e:/CodeSpace/PredictiveCoding/src/pc/incremental_bridge/fmpc_tf2.py)
+  - [src/pc/stage_04_incremental_bridge/fmpc_tf2.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_04_incremental_bridge/fmpc_tf2.py)
 - Current source-of-truth validation log:
   - [validation.md](/e:/CodeSpace/PredictiveCoding/validation.md)
 - Current long-horizon plan:
   - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - Recent authority artifact sets:
-  - [outputs/incremental_bridge/fmpc_tf2_external_comparison_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_external_comparison_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_gap_decomposition_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_gap_decomposition_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_readout_refit_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_readout_refit_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_readout_alignment_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_readout_alignment_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_target_lag_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_target_lag_coupling_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_curriculum_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_curriculum_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_endpoint_basis_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_endpoint_basis_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_terminal_coupling_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_split_threshold_coupling_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_unified_cone_geometry_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_unified_cone_shape_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_smooth_unified_cone_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_unified_cone_robustness_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_basis_drift_localization_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_late_rollout_drift_control_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_preterminal_source_localization_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_preterminal_handoff_confirmation_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_handoff_source_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_value_confirmation_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_value_followup_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_value_source_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_increment_confirmation_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_increment_source_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_increment_direction_confirmation_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_increment_interaction_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_increment_interaction_suite)
-  - [outputs/incremental_bridge/fmpc_tf2_successor_increment_formulation_suite](/e:/CodeSpace/PredictiveCoding/outputs/incremental_bridge/fmpc_tf2_successor_increment_formulation_suite)
-  - [outputs/ef_core_probe/fmpc_ef_exploratory_probe](/e:/CodeSpace/PredictiveCoding/outputs/ef_core_probe/fmpc_ef_exploratory_probe)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_external_comparison_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_external_comparison_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_gap_decomposition_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_gap_decomposition_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_readout_refit_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_readout_refit_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_readout_alignment_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_readout_alignment_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_target_lag_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_target_lag_coupling_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_curriculum_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_curriculum_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_endpoint_basis_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_endpoint_basis_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_terminal_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_terminal_coupling_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_split_threshold_coupling_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_split_threshold_coupling_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_unified_cone_geometry_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_unified_cone_geometry_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_unified_cone_shape_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_unified_cone_shape_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_smooth_unified_cone_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_smooth_unified_cone_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_unified_cone_robustness_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_unified_cone_robustness_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_basis_drift_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_basis_drift_localization_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_late_rollout_drift_control_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_late_rollout_drift_control_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_preterminal_source_localization_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_preterminal_source_localization_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_preterminal_handoff_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_preterminal_handoff_confirmation_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_handoff_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_handoff_source_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_value_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_value_confirmation_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_value_followup_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_value_followup_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_value_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_value_source_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_confirmation_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_source_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_source_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_direction_confirmation_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_direction_confirmation_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_interaction_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_interaction_suite)
+  - [outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_formulation_suite](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge/fmpc_tf2_successor_increment_formulation_suite)
+  - [outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe)
 
 ## Read Order And Precedence
 

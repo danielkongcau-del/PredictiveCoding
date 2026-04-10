@@ -526,7 +526,7 @@ This addendum therefore does **not** redefine:
 ## 17. Incremental Bridge addendum
 
 This addendum defines an experimental **training-time scheduling extension** on top of
-Phase Transport Core v1 without changing:
+FMPC Stage 03 Transport Core v1 without changing:
 
 - the baseline predictive-coding energy
 - the baseline hidden-state gradient definition
@@ -535,7 +535,7 @@ Phase Transport Core v1 without changing:
 
 ### 17.1 Scope
 
-Phase Incremental Bridge remains teacher-free and layered-PC-specific.
+FMPC Stage 04 Incremental Bridge remains teacher-free and layered-PC-specific.
 
 - it does not introduce a new substrate class
 - it does not depend on JPC runtime
@@ -550,7 +550,7 @@ Let `H = micro_steps` and define uniform rollout knots:
 - `-t = 1 / H`
 - `r_k = 1 - t_k`
 
-Phase Incremental Bridge maintains two training-time hidden-state streams:
+FMPC Stage 04 Incremental Bridge maintains two training-time hidden-state streams:
 
 - `z_on_k`: learned on-policy hidden state
 - `z_lf_k`: detached local-field-only shadow state
@@ -589,7 +589,7 @@ The required order is:
 
 ### 17.4 Mixed-policy teacher-free supervision
 
-Phase Incremental Bridge uses one of:
+FMPC Stage 04 Incremental Bridge uses one of:
 
 - `supervision_policy = "local_only"`
 - `supervision_policy = "mixed"`
@@ -607,7 +607,7 @@ Targets remain the same Transport Core v1 teacher-free targets:
 - `u_id = g_t + r_k * D_T u_psi(...)`
 - `L = L_boot + lambda_id * L_id`
 
-If Phase Incremental Bridge uses appended teacher-free current-state features in the psi input, then the
+If FMPC Stage 04 Incremental Bridge uses appended teacher-free current-state features in the psi input, then the
 same two identity-tangent semantics from Section 16.5.1 apply:
 
 - `feature_aware_tangents = true`

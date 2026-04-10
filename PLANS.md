@@ -11,21 +11,56 @@ Do not create or treat `PLANS2.md` as an authoritative planning file.
 Active-state sync:
 
 - the active algorithmic line on `main` is:
-  - `Phase Incremental Bridge`
+  - `FMPC Stage 04 Incremental Bridge`
 - human-readable stage names now follow mechanism/role naming:
-  - `fmpc_v0/` -> `Phase Reference Prep`
-  - `interval_meanflow/` -> `Phase Interval Velocity Exploration`
-  - `tf1/` -> `Phase Transport Core v1`
-  - `tf2/` -> `Phase Incremental Bridge`
-  - `exploratory/` -> `Phase EF Core Probe`
+  - `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
+  - `stage_02_interval_velocity/` -> `FMPC Stage 02 Interval Velocity Exploration`
+  - `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
+  - `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
+  - `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
 - stage directory names have now been migrated to:
-  - `reference_prep/`
-  - `interval_velocity/`
-  - `transport_core_v1/`
-  - `incremental_bridge/`
-  - `ef_core_probe/`
+  - `stage_01_reference_prep/`
+  - `stage_02_interval_velocity/`
+  - `stage_03_transport_core_v1/`
+  - `stage_04_incremental_bridge/`
+  - `stage_05_ef_core_probe/`
 - the older teacher-based Phase 4 / 5A / 6A entries below remain sealed historical
   baseline / diagnostic record, not the active line
+
+## FMPC stage numbering migration
+
+Goal:
+
+- add explicit chronological numbering to the five FMPC stage names without changing
+  algorithm semantics
+- avoid colliding with the repository-wide `Phase 0 / 1 / 2 / 3 ...` naming
+
+Numbering contract:
+
+- human-readable FMPC stage names become:
+  - `FMPC Stage 01 Reference Prep`
+  - `FMPC Stage 02 Interval Velocity Exploration`
+  - `FMPC Stage 03 Transport Core v1`
+  - `FMPC Stage 04 Incremental Bridge`
+  - `FMPC Stage 05 EF Core Probe`
+- stage-specific import-safe directory names become:
+  - `stage_01_reference_prep/`
+  - `stage_02_interval_velocity/`
+  - `stage_03_transport_core_v1/`
+  - `stage_04_incremental_bridge/`
+  - `stage_05_ef_core_probe/`
+
+Files to touch:
+
+- stage directories under `src/pc/`, `experiments/`, `tests/`, and tracked `outputs/`
+- import paths and experiment/test entrypoint paths
+- authority docs and stage-name metadata fields that expose the human-readable stage names
+
+Validation:
+
+- re-run representative `py_compile`
+- re-run the full `tests/stage_04_incremental_bridge/` smoke set after the path migration
+- re-run the exploratory and JPC bridge smoke tests
 
 ---
 
@@ -721,9 +756,9 @@ Train a first-pass offline FMPC-v0 student on `digits` that learns endpoint hidd
 ### Files likely to touch in the first slice
 
 - `PLANS.md`
-- `src/pc/reference_prep/fmpc_student_data.py`
-- `src/pc/reference_prep/fmpc_student.py`
-- `experiments/reference_prep/fmpc_v0_student.py`
+- `src/pc/stage_01_reference_prep/fmpc_student_data.py`
+- `src/pc/stage_01_reference_prep/fmpc_student.py`
+- `experiments/stage_01_reference_prep/fmpc_v0_student.py`
 - focused tests under `tests/`
 
 ### Exit criteria
@@ -760,11 +795,11 @@ Files likely to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/reference_prep/fmpc_protocol.py`
-- `src/pc/reference_prep/fmpc_student_data.py`
-- `src/pc/reference_prep/fmpc_student.py`
-- `experiments/reference_prep/fmpc_v0_prepare.py`
-- `experiments/reference_prep/fmpc_v0_student.py`
+- `src/pc/stage_01_reference_prep/fmpc_protocol.py`
+- `src/pc/stage_01_reference_prep/fmpc_student_data.py`
+- `src/pc/stage_01_reference_prep/fmpc_student.py`
+- `experiments/stage_01_reference_prep/fmpc_v0_prepare.py`
+- `experiments/stage_01_reference_prep/fmpc_v0_student.py`
 - focused tests under `tests/`
 
 Required repairs:
@@ -861,11 +896,11 @@ Files likely to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/reference_prep/fmpc_student_normalization.py`
-- `src/pc/reference_prep/fmpc_student_baselines.py`
-- `src/pc/reference_prep/fmpc_student_suite.py`
-- `src/pc/reference_prep/fmpc_student.py`
-- `experiments/reference_prep/fmpc_v0_student_suite.py`
+- `src/pc/stage_01_reference_prep/fmpc_student_normalization.py`
+- `src/pc/stage_01_reference_prep/fmpc_student_baselines.py`
+- `src/pc/stage_01_reference_prep/fmpc_student_suite.py`
+- `src/pc/stage_01_reference_prep/fmpc_student.py`
+- `experiments/stage_01_reference_prep/fmpc_v0_student_suite.py`
 - focused tests under `tests/`
 
 Acceptance checks:
@@ -968,12 +1003,12 @@ Files likely to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/reference_prep/fmpc_protocol.py`
-- `src/pc/interval_velocity/fmpc_interval_data.py`
-- `src/pc/interval_velocity/fmpc_interval_normalization.py`
-- `src/pc/interval_velocity/fmpc_interval_student.py`
-- `experiments/interval_velocity/fmpc_interval_suite.py`
-- `experiments/reference_prep/fmpc_v0_prepare.py`
+- `src/pc/stage_01_reference_prep/fmpc_protocol.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_data.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_normalization.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_student.py`
+- `experiments/stage_02_interval_velocity/fmpc_interval_suite.py`
+- `experiments/stage_01_reference_prep/fmpc_v0_prepare.py`
 - focused tests under `tests/`
 
 Acceptance checks:
@@ -1140,11 +1175,11 @@ Files likely to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/interval_velocity/fmpc_interval_features.py`
-- `src/pc/interval_velocity/fmpc_interval_data.py`
-- `src/pc/interval_velocity/fmpc_interval_normalization.py`
-- `src/pc/interval_velocity/fmpc_interval_student.py`
-- `experiments/interval_velocity/fmpc_interval_suite.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_features.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_data.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_normalization.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_student.py`
+- `experiments/stage_02_interval_velocity/fmpc_interval_suite.py`
 - focused tests under `tests/`
 
 Acceptance gate:
@@ -1499,10 +1534,10 @@ Phase 6A.3 should compare at least:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/interval_velocity/fmpc_interval_features.py`
-- `src/pc/interval_velocity/fmpc_meanflow_jvp.py`
-- `src/pc/interval_velocity/fmpc_meanflow_student.py`
-- `experiments/interval_velocity/fmpc_meanflow_suite.py`
+- `src/pc/stage_02_interval_velocity/fmpc_interval_features.py`
+- `src/pc/stage_02_interval_velocity/fmpc_meanflow_jvp.py`
+- `src/pc/stage_02_interval_velocity/fmpc_meanflow_student.py`
+- `experiments/stage_02_interval_velocity/fmpc_meanflow_suite.py`
 - minimal export updates in `src/pc/__init__.py`
 - focused tests under `tests/`
 
@@ -1549,11 +1584,11 @@ Interpretation:
 - therefore Phase 6A should be treated as a sealed exploratory branch with known defects,
   not as a passed stage
 
-## Phase Transport Core v1
+## FMPC Stage 03 Transport Core v1
 
 The next stage is now opened by project decision as:
 
-- `Phase Transport Core v1`
+- `FMPC Stage 03 Transport Core v1`
 
 This stage starts from a repo state where:
 
@@ -1562,10 +1597,10 @@ This stage starts from a repo state where:
 - MeanFlow diagnostics from Phase 6A may still inform design choices,
   but they do not constitute a passing prerequisite
 
-Phase Transport Core v1 should be treated as a new stage entry rather than a retroactive claim that
+FMPC Stage 03 Transport Core v1 should be treated as a new stage entry rather than a retroactive claim that
 Phase 6A succeeded.
 
-## Phase Transport Core v1
+## FMPC Stage 03 Transport Core v1
 
 Objective:
 
@@ -1604,10 +1639,10 @@ Non-goals:
 Files to add / modify:
 
 - add:
-  - `src/pc/transport_core_v1/fmpc_tf1_flow.py`
-  - `src/pc/transport_core_v1/fmpc_tf1_jvp.py`
-  - `src/pc/transport_core_v1/fmpc_tf1.py`
-  - `experiments/transport_core_v1/fmpc_tf1.py`
+  - `src/pc/stage_03_transport_core_v1/fmpc_tf1_flow.py`
+  - `src/pc/stage_03_transport_core_v1/fmpc_tf1_jvp.py`
+  - `src/pc/stage_03_transport_core_v1/fmpc_tf1.py`
+  - `experiments/stage_03_transport_core_v1/fmpc_tf1.py`
   - `tests/test_fmpc_tf1_flow.py`
   - `tests/test_fmpc_tf1_jvp.py`
   - `tests/test_fmpc_tf1_targets.py`
@@ -1655,7 +1690,7 @@ Training schedule:
 
 Experiment entrypoint:
 
-- `experiments/transport_core_v1/fmpc_tf1.py`
+- `experiments/stage_03_transport_core_v1/fmpc_tf1.py`
 - named presets:
 - `mechanism_smoke` = small Transport Core v1 substrate `(64, 16, 10)`
   - `baseline_comparable` = baseline-sized digits substrate `(64, 64, 10)`
@@ -1717,9 +1752,9 @@ Risks / open questions:
   first viable Transport Core v1 core
 - the current `backend="fmpc"` placeholder remains intentionally unused in Transport Core v1
 
-## Phase Transport Core v1 seal-off note
+## FMPC Stage 03 Transport Core v1 seal-off note
 
-Phase Transport Core v1 is now sealed as the first completed artifact-independent transport stage.
+FMPC Stage 03 Transport Core v1 is now sealed as the first completed artifact-independent transport stage.
 
 What Transport Core v1 established:
 
@@ -1754,7 +1789,7 @@ Interpretation:
 - `baseline_working_default` should be treated as the sealed Transport Core v1 working default,
   not as a claim that Transport Core v1 is already competitive enough to stop further bridge work
 
-## Phase Incremental Bridge
+## FMPC Stage 04 Incremental Bridge
 
 Objective:
 
@@ -1768,7 +1803,7 @@ Objective:
   - mixed-policy teacher-free supervision for `psi`
   - explicit forward-init stability diagnostics
 
-Why Phase Incremental Bridge is a bridge stage rather than the final paradigm:
+Why FMPC Stage 04 Incremental Bridge is a bridge stage rather than the final paradigm:
 
 - it still uses the existing layered PC substrate and the same local energy
 - it keeps the baseline local parameter-update rule rather than introducing a new
@@ -1899,25 +1934,25 @@ Files to add / modify:
   - `spec_math.md`
   - `src/pc/__init__.py`
 - add:
-  - `src/pc/incremental_bridge/fmpc_tf2.py`
-  - `src/pc/incremental_bridge/fmpc_tf2_suite.py`
-  - `experiments/incremental_bridge/fmpc_tf2.py`
-  - `experiments/incremental_bridge/fmpc_tf2_suite.py`
-  - `tests/incremental_bridge/test_fmpc_tf2_dynamics.py`
-  - `tests/incremental_bridge/test_fmpc_tf2_targets.py`
-  - `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
-  - `tests/incremental_bridge/test_fmpc_tf2_suite_smoke.py`
+  - `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
+  - `src/pc/stage_04_incremental_bridge/fmpc_tf2_suite.py`
+  - `experiments/stage_04_incremental_bridge/fmpc_tf2.py`
+  - `experiments/stage_04_incremental_bridge/fmpc_tf2_suite.py`
+  - `tests/stage_04_incremental_bridge/test_fmpc_tf2_dynamics.py`
+  - `tests/stage_04_incremental_bridge/test_fmpc_tf2_targets.py`
+  - `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
+  - `tests/stage_04_incremental_bridge/test_fmpc_tf2_suite_smoke.py`
 
 Reuse without changing Transport Core v1 behavior:
 
-- `src/pc/transport_core_v1/fmpc_tf1_flow.py`
-- `src/pc/transport_core_v1/fmpc_tf1_jvp.py`
+- `src/pc/stage_03_transport_core_v1/fmpc_tf1_flow.py`
+- `src/pc/stage_03_transport_core_v1/fmpc_tf1_jvp.py`
 
 Experiment entrypoints:
 
-- `experiments/incremental_bridge/fmpc_tf2.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2.py`
   - canonical single-run Incremental Bridge bridge experiment
-- `experiments/incremental_bridge/fmpc_tf2_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_suite.py`
   - narrow multiseed bridge-validation suite
 
 Canonical TF2A defaults:
@@ -1967,9 +2002,9 @@ Files expected to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2_external_comparison_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_external_comparison_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_external_comparison_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_external_comparison_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_external_comparison_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_external_comparison_suite_smoke.py`
 
 Planned comparison set:
 
@@ -2024,9 +2059,9 @@ Files expected to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2_gap_decomposition_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_gap_decomposition_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_gap_decomposition_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_gap_decomposition_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_gap_decomposition_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_gap_decomposition_suite_smoke.py`
 
 Planned comparison set:
 
@@ -2092,11 +2127,11 @@ Files expected to touch:
 - `PLANS.md`
 - `spec_math.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2.py`
-- `src/pc/incremental_bridge/fmpc_tf2_readout_alignment_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_readout_alignment_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_readout_alignment_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_readout_alignment_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_readout_alignment_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_readout_alignment_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Planned intervention audit:
 
@@ -2175,9 +2210,9 @@ Files expected to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2_readout_refit_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_readout_refit_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_readout_refit_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_readout_refit_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_readout_refit_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_readout_refit_suite_smoke.py`
 
 Planned scope:
 
@@ -2264,9 +2299,9 @@ Files expected to touch:
 
 - `PLANS.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2_endpoint_basis_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_endpoint_basis_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_endpoint_basis_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_endpoint_basis_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_endpoint_basis_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_endpoint_basis_suite_smoke.py`
 
 Planned scope:
 
@@ -2366,10 +2401,10 @@ Files expected to touch:
 - `PLANS.md`
 - `spec_math.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2.py`
-- `src/pc/incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_output_sensitive_terminal_direction_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_output_sensitive_terminal_direction_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_output_sensitive_terminal_direction_suite_smoke.py`
 
 Planned scope:
 
@@ -2478,10 +2513,10 @@ Files expected to touch:
 - `PLANS.md`
 - `spec_math.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2.py`
-- `src/pc/incremental_bridge/fmpc_tf2_terminal_coupling_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_terminal_coupling_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_terminal_coupling_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_terminal_coupling_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_terminal_coupling_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_terminal_coupling_suite_smoke.py`
 
 Planned candidate set:
 
@@ -2577,10 +2612,10 @@ Files expected to touch:
 - `PLANS.md`
 - `spec_math.md`
 - `validation.md`
-- `src/pc/incremental_bridge/fmpc_tf2.py`
-- `src/pc/incremental_bridge/fmpc_tf2_split_threshold_coupling_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_split_threshold_coupling_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_split_threshold_coupling_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_split_threshold_coupling_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_split_threshold_coupling_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_split_threshold_coupling_suite_smoke.py`
 
 Planned candidate set:
 
@@ -2772,11 +2807,11 @@ Files to touch:
 - `PLANS.md`
 - `spec_math.md`
 - `validation.md`
-- `src/pc/transport_core_v1/fmpc_tf1_jvp.py`
-- `src/pc/incremental_bridge/fmpc_tf2.py`
-- `tests/incremental_bridge/test_fmpc_tf2_dynamics.py`
-- `tests/incremental_bridge/test_fmpc_tf2_targets.py`
-- optionally `tests/incremental_bridge/test_fmpc_tf2_smoke.py` if new provenance/reporting fields are
+- `src/pc/stage_03_transport_core_v1/fmpc_tf1_jvp.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_dynamics.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_targets.py`
+- optionally `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py` if new provenance/reporting fields are
   added
 
 Planned minimal changes:
@@ -2791,9 +2826,9 @@ Planned minimal changes:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_dynamics.py`
-- `tests/incremental_bridge/test_fmpc_tf2_targets.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_dynamics.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_targets.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Assumptions:
 
@@ -2828,10 +2863,10 @@ Files to touch:
 - `validation.md`
 - optionally `spec_math.md` if the default decision needs extra contract wording
 - `src/pc/__init__.py`
-- `src/pc/incremental_bridge/fmpc_tf2_identity_semantics_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_identity_semantics_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_identity_semantics_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_identity_semantics_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_identity_semantics_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_identity_semantics_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Planned suite:
 
@@ -2860,15 +2895,15 @@ Decision rule:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_identity_semantics_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_targets.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_identity_semantics_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_targets.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Deliverables:
 
-- `outputs/incremental_bridge/fmpc_tf2_identity_semantics_suite/config.json`
-- `outputs/incremental_bridge/fmpc_tf2_identity_semantics_suite/aggregate_runs.csv`
-- `outputs/incremental_bridge/fmpc_tf2_identity_semantics_suite/aggregate_summary.json`
+- `outputs/stage_04_incremental_bridge/fmpc_tf2_identity_semantics_suite/config.json`
+- `outputs/stage_04_incremental_bridge/fmpc_tf2_identity_semantics_suite/aggregate_runs.csv`
+- `outputs/stage_04_incremental_bridge/fmpc_tf2_identity_semantics_suite/aggregate_summary.json`
 
 Decision outcome:
 
@@ -2908,9 +2943,9 @@ Files to touch:
 - `README.md`
 - `PLANS.md`
 - `src/pc/__init__.py`
-- `src/pc/incremental_bridge/fmpc_tf2_attribution_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_attribution_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_attribution_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_attribution_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_attribution_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_attribution_suite_smoke.py`
 
 Planned suite:
 
@@ -2940,13 +2975,13 @@ Planned suite:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_attribution_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_attribution_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Expected deliverables:
 
 - one attribution suite artifact set under:
-  - `outputs/incremental_bridge/fmpc_tf2_attribution_suite/`
+  - `outputs/stage_04_incremental_bridge/fmpc_tf2_attribution_suite/`
 - an evidence-backed explanation for:
   - why the corrective transport default is currently preferred
   - which factor should remain default
@@ -3002,9 +3037,9 @@ Files to touch:
 - `PLANS.md`
 - `validation.md`
 - `src/pc/__init__.py`
-- `src/pc/incremental_bridge/fmpc_tf2_microstep_horizon_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_microstep_horizon_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_microstep_horizon_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_microstep_horizon_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_microstep_horizon_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_microstep_horizon_suite_smoke.py`
 
 Matching rule:
 
@@ -3026,13 +3061,13 @@ Matching rule:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_microstep_horizon_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_microstep_horizon_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Expected deliverables:
 
 - one narrow suite artifact set under:
-  - `outputs/incremental_bridge/fmpc_tf2_microstep_horizon_suite/`
+  - `outputs/stage_04_incremental_bridge/fmpc_tf2_microstep_horizon_suite/`
 - a decision on whether:
   - `micro_steps > 4` remains better under matched inner compute
   - or the current gain is mainly a compute-budget effect
@@ -3094,9 +3129,9 @@ Files to touch:
 - `PLANS.md`
 - `validation.md`
 - `src/pc/__init__.py`
-- `src/pc/incremental_bridge/fmpc_tf2_curriculum_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_curriculum_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_curriculum_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_curriculum_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_curriculum_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_curriculum_suite_smoke.py`
 
 Staged / pruned search rule:
 
@@ -3129,13 +3164,13 @@ Materiality threshold for opening Stage 2:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_curriculum_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_curriculum_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Expected deliverables:
 
 - one narrow suite artifact set under:
-  - `outputs/incremental_bridge/fmpc_tf2_curriculum_suite/`
+  - `outputs/stage_04_incremental_bridge/fmpc_tf2_curriculum_suite/`
 - a decision on whether:
   - better bootstrap↔identity curriculum improves fixed-4-step transport quality
   - the corrective default should change
@@ -3202,9 +3237,9 @@ Files to touch:
 - `PLANS.md`
 - `validation.md`
 - `src/pc/__init__.py`
-- `src/pc/incremental_bridge/fmpc_tf2_bootstrap_fidelity_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_bootstrap_fidelity_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_bootstrap_fidelity_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_bootstrap_fidelity_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_bootstrap_fidelity_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_bootstrap_fidelity_suite_smoke.py`
 
 Offline-first evaluation rule:
 
@@ -3239,13 +3274,13 @@ Pruning rule:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_bootstrap_fidelity_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_bootstrap_fidelity_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Expected deliverables:
 
 - one narrow artifact set under:
-  - `outputs/incremental_bridge/fmpc_tf2_bootstrap_fidelity_suite/`
+  - `outputs/stage_04_incremental_bridge/fmpc_tf2_bootstrap_fidelity_suite/`
 - a decision on whether:
   - higher-fidelity `u_boot` materially improves held-out corrective Incremental Bridge behavior
   - the corrective default should change
@@ -3321,9 +3356,9 @@ Files to touch:
 - `PLANS.md`
 - `validation.md` only if the conclusion changes the next narrow move
 - `src/pc/__init__.py`
-- `src/pc/incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite.py`
-- `experiments/incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite.py`
-- `tests/incremental_bridge/test_fmpc_tf2_bootstrap_source_bias_suite_smoke.py`
+- `src/pc/stage_04_incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite.py`
+- `experiments/stage_04_incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_bootstrap_source_bias_suite_smoke.py`
 
 Offline-first evaluation rule:
 
@@ -3354,13 +3389,13 @@ Pruning rule:
 
 Validation to run:
 
-- `tests/incremental_bridge/test_fmpc_tf2_bootstrap_source_bias_suite_smoke.py`
-- `tests/incremental_bridge/test_fmpc_tf2_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_bootstrap_source_bias_suite_smoke.py`
+- `tests/stage_04_incremental_bridge/test_fmpc_tf2_smoke.py`
 
 Expected deliverables:
 
 - one narrow artifact set under:
-  - `outputs/incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite/`
+  - `outputs/stage_04_incremental_bridge/fmpc_tf2_bootstrap_source_bias_suite/`
 - a decision on whether:
   - the current `u_boot` is bottlenecked by terminal-source bias
   - a detached slow-PC source materially beats the current local-field source
@@ -3414,7 +3449,7 @@ Outcome:
 ## Current Narrow Incremental Bridge Execution Plan
 
 - active line remains:
-  - `Phase Incremental Bridge - iFMPC bridge stage`
+  - `FMPC Stage 04 Incremental Bridge - iFMPC bridge stage`
 - current adopted package remains:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current narrow diagnostic:
@@ -3422,9 +3457,9 @@ Outcome:
 - immediate files to touch:
   - `PLANS.md`
   - `validation.md`
-  - `src/pc/incremental_bridge/fmpc_tf2_unified_cone_geometry_suite.py`
-  - `experiments/incremental_bridge/fmpc_tf2_unified_cone_geometry_suite.py`
-  - `tests/incremental_bridge/test_fmpc_tf2_unified_cone_geometry_suite_smoke.py`
+  - `src/pc/stage_04_incremental_bridge/fmpc_tf2_unified_cone_geometry_suite.py`
+  - `experiments/stage_04_incremental_bridge/fmpc_tf2_unified_cone_geometry_suite.py`
+  - `tests/stage_04_incremental_bridge/test_fmpc_tf2_unified_cone_geometry_suite_smoke.py`
 - scope rule:
   - keep the transport family and adopted package fixed; only add terminal-cone
     geometry diagnostics for:
@@ -4187,7 +4222,7 @@ Outcome:
       exploratory line that explicitly leaves the current corrective package or
       selector-gate contract
     - do not reframe that exploratory line as replacing the current active
-      `Phase Incremental Bridge` on `main` until it is explicitly
+      `FMPC Stage 04 Incremental Bridge` on `main` until it is explicitly
       chartered
 
 ## Post-bridge exploratory line — ef_core_probe
@@ -4197,7 +4232,7 @@ Status:
 - planning-only exploratory charter
 - this does **not** replace the current active line on `main`
 - the active line on `main` remains:
-  - `Phase Incremental Bridge`
+  - `FMPC Stage 04 Incremental Bridge`
 
 Objective:
 
@@ -4272,9 +4307,9 @@ Current execution sub-step:
 
 - implement one minimal mechanism-validating probe on the current layered
   substrate:
-  - add `src/pc/ef_core_probe/fmpc_ef_exploratory_probe.py`
-  - add `experiments/ef_core_probe/fmpc_ef_exploratory_probe.py`
-  - add `tests/ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
+  - add `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+  - add `experiments/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+  - add `tests/stage_05_ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
 - keep the probe teacher-free in target construction:
   - exact local flow `g_theta(z; c) = -∇_z E_theta(z; c)`
   - detached short-horizon bootstrap average-velocity anchor
@@ -4290,12 +4325,12 @@ Current execution sub-step:
 Completed execution result:
 
 - the first exploratory probe is now implemented:
-  - `src/pc/ef_core_probe/fmpc_ef_exploratory_probe.py`
-  - `experiments/ef_core_probe/fmpc_ef_exploratory_probe.py`
-  - `tests/ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
+  - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+  - `experiments/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+  - `tests/stage_05_ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
 - the probe keeps the current layered substrate and current slow-PC predict/eval
   path, while staying fully teacher-free in target construction
-- the first canonical exploratory run in `outputs/ef_core_probe/fmpc_ef_exploratory_probe`
+- the first canonical exploratory run in `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe`
   shows a positive mechanism-first signal:
   - one-step validation energy delta vs identity/no-transport:
     - `-0.0001458`
@@ -4309,7 +4344,7 @@ Completed execution result:
     - `0.2889 / 0.3000`
 - the probe should still be read as exploratory mechanism evidence only:
   - it does not beat the frozen Incremental Bridge result on task accuracy
-  - it does not replace the active `Phase Incremental Bridge` line on `main`
+  - it does not replace the active `FMPC Stage 04 Incremental Bridge` line on `main`
 
 Next execution sub-step:
 
@@ -4387,11 +4422,11 @@ Execution scope:
 
 New human-readable stage names:
 
-- `fmpc_v0/` -> `Phase Reference Prep`
-- `interval_meanflow/` -> `Phase Interval Velocity Exploration`
-- `tf1/` -> `Phase Transport Core v1`
-- `tf2/` -> `Phase Incremental Bridge`
-- `exploratory/` -> `Phase EF Core Probe`
+- `fmpc_v0/` -> `FMPC Stage 01 Reference Prep`
+- `interval_meanflow/` -> `FMPC Stage 02 Interval Velocity Exploration`
+- `tf1/` -> `FMPC Stage 03 Transport Core v1`
+- `tf2/` -> `FMPC Stage 04 Incremental Bridge`
+- `exploratory/` -> `FMPC Stage 05 EF Core Probe`
 
 Validation plan:
 
@@ -4407,11 +4442,11 @@ Objective:
 
 Migration map:
 
-- `src/pc/reference_prep/` -> `src/pc/reference_prep/`
-- `src/pc/interval_velocity/` -> `src/pc/interval_velocity/`
-- `src/pc/transport_core_v1/` -> `src/pc/transport_core_v1/`
-- `src/pc/incremental_bridge/` -> `src/pc/incremental_bridge/`
-- `src/pc/ef_core_probe/` -> `src/pc/ef_core_probe/`
+- `src/pc/stage_01_reference_prep/` -> `src/pc/stage_01_reference_prep/`
+- `src/pc/stage_02_interval_velocity/` -> `src/pc/stage_02_interval_velocity/`
+- `src/pc/stage_03_transport_core_v1/` -> `src/pc/stage_03_transport_core_v1/`
+- `src/pc/stage_04_incremental_bridge/` -> `src/pc/stage_04_incremental_bridge/`
+- `src/pc/stage_05_ef_core_probe/` -> `src/pc/stage_05_ef_core_probe/`
 - match the same renaming under:
   - `experiments/`
   - `tests/`

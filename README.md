@@ -25,7 +25,7 @@ Current status split:
 - Phase 4 is sealed as the FMPC-v0 preparation checkpoint
 - teacher-based FMPC is now frozen as baseline / diagnostic reference
 - the current active FMPC line is:
-  - `Phase Incremental Bridge`
+  - `FMPC Stage 04 Incremental Bridge`
 - the historical corrective Incremental Bridge working reference remains:
   - `tf2_corrective_transport_default`
 - the currently adopted Incremental Bridge experimental default on `main` is:
@@ -151,32 +151,32 @@ longer kept in one flat directory. Use the following lookup rule:
 Human-readable stage names now follow mechanism/role naming, while some legacy
 directory names are retained for compatibility:
 
-- `fmpc_v0/` -> `Phase Reference Prep`
-- `interval_meanflow/` -> `Phase Interval Velocity Exploration`
-- `tf1/` -> `Phase Transport Core v1`
-- `tf2/` -> `Phase Incremental Bridge`
-- `exploratory/` -> `Phase EF Core Probe`
+- `fmpc_v0/` -> `FMPC Stage 01 Reference Prep`
+- `interval_meanflow/` -> `FMPC Stage 02 Interval Velocity Exploration`
+- `tf1/` -> `FMPC Stage 03 Transport Core v1`
+- `tf2/` -> `FMPC Stage 04 Incremental Bridge`
+- `exploratory/` -> `FMPC Stage 05 EF Core Probe`
 
 - `src/pc/`
   - shared predictive-coding substrate stays at the package root
   - stage-specific FMPC logic lives under:
-    - `src/pc/reference_prep/`
-    - `src/pc/interval_velocity/`
-    - `src/pc/transport_core_v1/`
-    - `src/pc/incremental_bridge/`
-    - `src/pc/ef_core_probe/`
+    - `src/pc/stage_01_reference_prep/`
+    - `src/pc/stage_02_interval_velocity/`
+    - `src/pc/stage_03_transport_core_v1/`
+    - `src/pc/stage_04_incremental_bridge/`
+    - `src/pc/stage_05_ef_core_probe/`
 - `experiments/`
   - baseline and pre-FMPC scripts now live under `experiments/baseline/`
   - FMPC stage scripts are grouped under their matching stage folders
 - `tests/`
-  - Incremental Bridge smoke and suite tests live under `tests/incremental_bridge/`
-  - post-bridge exploratory tests live under `tests/ef_core_probe/`
+  - Incremental Bridge smoke and suite tests live under `tests/stage_04_incremental_bridge/`
+  - post-bridge exploratory tests live under `tests/stage_05_ef_core_probe/`
   - non-stage-specific bridge checks may remain at the root, for example:
     - `tests/test_jpc_bridge_smoke.py`
 - `outputs/`
   - newer FMPC artifact trees are grouped by stage, for example:
-    - `outputs/incremental_bridge/`
-    - `outputs/ef_core_probe/`
+    - `outputs/stage_04_incremental_bridge/`
+    - `outputs/stage_05_ef_core_probe/`
   - older baseline artifacts may still keep their historical stable names such as:
     - `outputs/digits_mlp/`
     - `outputs/digits_pc/`
@@ -186,13 +186,13 @@ Practical shortcut:
 
 - if you know the research stage first, start from the matching subfolder
 - if you are looking for the current mainline implementation, start from:
-  - `src/pc/incremental_bridge/`
-  - `experiments/incremental_bridge/`
-  - `tests/incremental_bridge/`
+  - `src/pc/stage_04_incremental_bridge/`
+  - `experiments/stage_04_incremental_bridge/`
+  - `tests/stage_04_incremental_bridge/`
 - if you are looking for the post-bridge mechanism probe, start from:
-  - `src/pc/ef_core_probe/`
-  - `experiments/ef_core_probe/`
-  - `tests/ef_core_probe/`
+  - `src/pc/stage_05_ef_core_probe/`
+  - `experiments/stage_05_ef_core_probe/`
+  - `tests/stage_05_ef_core_probe/`
 
 ## Initial implementation target
 
@@ -353,7 +353,7 @@ Phase 4 preparation also adds one harder standalone real-data PC benchmark optio
 ```powershell
 & 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/fashion_mnist_pc.py
 & 'D:\Anaconda\envs\pc\python.exe' experiments/baseline/digits_pc_inference_baselines.py
-& 'D:\Anaconda\envs\pc\python.exe' experiments/reference_prep/fmpc_v0_prepare.py
+& 'D:\Anaconda\envs\pc\python.exe' experiments/stage_01_reference_prep/fmpc_v0_prepare.py
 ```
 
 Notes:
@@ -364,14 +364,14 @@ Notes:
   - it compares explicit `euler` and `rk2` predictive-coding inference methods under small fixed step budgets
   - it does not change the predictive-coding learning rule
   - it is not a formal real-data PC-vs-MLP comparison
-- `experiments/reference_prep/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
+- `experiments/stage_01_reference_prep/fmpc_v0_prepare.py` is a teacher-only FMPC-v0 preparation scaffold:
   - it trains a standard real-data PC teacher under the current baseline path
   - it exports `z0` / `z_star` teacher targets plus optional trajectories
   - it records future student transport/refinement settings only as placeholders
   - it does not implement a transporter and does not write any FMPC result
 - standalone `digits_pc` summaries keep `teacher_reference` explicit but disable it by default:
   - predict-mode candidate-vs-teacher gaps are often trivial under forward initialization
-  - meaningful FMPC teacher targets should instead come from `experiments/reference_prep/fmpc_v0_prepare.py`
+  - meaningful FMPC teacher targets should instead come from `experiments/stage_01_reference_prep/fmpc_v0_prepare.py`
 
 These write:
 

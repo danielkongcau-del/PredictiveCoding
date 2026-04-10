@@ -906,29 +906,29 @@ Therefore:
 - Phase 6A findings remain diagnostically useful
 - but Phase 6A does **not** count as a passed stage
 
-## Phase Transport Core v1 validation entry
+## FMPC Stage 03 Transport Core v1 validation entry
 
 The next stage is now opened as:
 
-- `Phase Transport Core v1`
+- `FMPC Stage 03 Transport Core v1`
 
 This opening should be interpreted conservatively:
 
 - it is a new project decision, not evidence that Phase 6A passed
 - the sealed Phase 5B.2 winner remains the strongest passed transport baseline
-- any Phase Transport Core v1 result should still be compared back to:
+- any FMPC Stage 03 Transport Core v1 result should still be compared back to:
   - the carried-forward Phase 5A endpoint ridge baseline
   - the sealed Phase 5B.2 winner
   - and, where relevant, the best diagnostic families from Phase 6A
 
-## Phase Transport Core v1 validation contract
+## FMPC Stage 03 Transport Core v1 validation contract
 
 This section defines the first teacher-free FMPC validation rule set.
 
 Baseline positioning:
 
 - teacher-based FMPC remains frozen baseline / diagnostic reference
-- Phase Transport Core v1 is the new main line
+- FMPC Stage 03 Transport Core v1 is the new main line
 - Transport Core v1 validation must not depend on teacher trajectories, teacher fixed points,
   or teacher-generated regression targets
 
@@ -991,9 +991,9 @@ Report-only expectations:
 - `baseline_working_default` is the current evidence-driven but still
   provisional working Transport Core v1 preset; it should not be read as a sealed stage pass
 
-## Phase Transport Core v1 seal-off note
+## FMPC Stage 03 Transport Core v1 seal-off note
 
-Phase Transport Core v1 is now sealed as the first completed artifact-independent FMPC transport stage.
+FMPC Stage 03 Transport Core v1 is now sealed as the first completed artifact-independent FMPC transport stage.
 
 Sealed Transport Core v1 conclusion:
 
@@ -1010,18 +1010,18 @@ Therefore:
 - Transport Core v1 is **not** sealed as an accuracy-competitive replacement for the canonical
   slow-PC digits baseline
 
-## Phase Incremental Bridge validation entry
+## FMPC Stage 04 Incremental Bridge validation entry
 
 The next active stage is now:
 
-- `Phase Incremental Bridge`
+- `FMPC Stage 04 Incremental Bridge`
 
 Active-state sync:
 
 - the older teacher-based Phase 4 / 5A / 6A entries above remain sealed
   baseline / diagnostic history
 - the active line on `main` remains:
-  - `Phase Incremental Bridge`
+  - `FMPC Stage 04 Incremental Bridge`
 
 Interpretation:
 
@@ -1032,7 +1032,7 @@ Interpretation:
   - the sealed Transport Core v1 working default
   - the canonical slow-PC digits baseline
 
-## Phase Incremental Bridge validation contract
+## FMPC Stage 04 Incremental Bridge validation contract
 
 Bridge-stage scope:
 
@@ -1911,7 +1911,7 @@ Current Incremental Bridge adoption interpretation:
         exploratory line that explicitly leaves the current corrective package
         or selector-gate contract
       - do not reframe that exploratory line as replacing the current active
-        `Phase Incremental Bridge` on `main` until it is explicitly
+        `FMPC Stage 04 Incremental Bridge` on `main` until it is explicitly
         chartered
     - the chosen immediate action is:
       - implement the first post-bridge exploratory core probe under:
@@ -1921,20 +1921,20 @@ Current Incremental Bridge adoption interpretation:
         line is being evaluated
 - the first post-bridge exploratory probe now exists:
   - implementation path:
-    - `src/pc/ef_core_probe/fmpc_ef_exploratory_probe.py`
-    - `experiments/ef_core_probe/fmpc_ef_exploratory_probe.py`
-    - `tests/ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+    - `experiments/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+    - `tests/stage_05_ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
   - no `spec_math.md` change was required:
     - the probe stays inside the existing Section 16 teacher-free
       average-velocity contract
   - focused validation commands:
-    - `python -m py_compile src/pc/ef_core_probe/fmpc_ef_exploratory_probe.py experiments/ef_core_probe/fmpc_ef_exploratory_probe.py tests/ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
-    - `$env:PYTHONPATH='src'; python -m pytest tests/ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py -q`
-    - `$env:PYTHONPATH='src'; python experiments/ef_core_probe/fmpc_ef_exploratory_probe.py`
+    - `python -m py_compile src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py experiments/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py tests/stage_05_ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py`
+    - `$env:PYTHONPATH='src'; python -m pytest tests/stage_05_ef_core_probe/test_fmpc_ef_exploratory_probe_smoke.py -q`
+    - `$env:PYTHONPATH='src'; python experiments/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
   - focused validation result:
     - `3 passed in 2.44s`
     - output directory:
-      - `outputs/ef_core_probe/fmpc_ef_exploratory_probe`
+      - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe`
   - canonical run summary:
     - `teacher_free: true`
     - `uses_teacher_artifacts: false`
