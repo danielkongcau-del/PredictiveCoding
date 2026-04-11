@@ -89,6 +89,9 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the dedicated Stage 05 v2 diagnostics now conclude:
   - `likely_undertrained`
   - the current low report-only accuracy is not primarily a selection-rule artifact
+- the completed Stage 05 v2 longer-training validation now concludes:
+  - the stronger same-family budget materially improves configured-step mechanism and report-only accuracy
+  - the stronger budget still hits the final training boundary on every seed
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -96,7 +99,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- if Stage 05 continues, draft the next narrow step as a longer-training / budget test on the current v2 reference before inventing a new family
+- if Stage 05 continues, draft the next narrow step as another budget push on the current v2 reference before inventing a new family or opening a true v3 charter
 
 ## What Prompt Writers Must Not Reopen
 

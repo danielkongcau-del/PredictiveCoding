@@ -182,6 +182,37 @@ Required framing:
 - do not change the Stage 05 v2 transport family before the budget question is answered
 - do not treat any Stage 05 result as a default-replacement claim against the frozen bridge result
 
+Completed outcome:
+
+- the dedicated longer-training validation now exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
+- the same Stage 05 v2 family with a stronger `24`-epoch budget materially improves:
+  - configured-step validation energy delta vs identity
+  - configured-step validation fixed-point residual delta vs identity
+  - report-only validation accuracy
+  - report-only test accuracy
+- the stronger budget still selects the final training epoch on every seed
+- the current answer is therefore:
+  - keep pushing budget on the same v2 family
+  - do not open a true Stage 05 v3 mechanism charter yet
+
+Current execution plan:
+
+- keep the current Stage 05 v2 family fixed
+- run the next narrow budget push only on the same:
+  - `transport_family = two_branch_residual_meanflow_core`
+  - `feature_aware_state_branch_tangents = true`
+  - residual branch structure
+  - corrected residual identity contract
+  - selection rule
+- require the next budget pass to report again:
+  - configured-step validation mechanism metrics
+  - val/test accuracy
+  - selected epoch
+  - whether selection still hits the final training boundary
+  - runtime
+- only open a true Stage 05 v3 charter after the stronger-budget line stops looking boundary-limited
+
 ## Exploratory Acceptance Criteria
 
 For the current Stage 05 exploratory stage, acceptance is mechanism-first.

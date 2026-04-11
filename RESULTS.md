@@ -122,6 +122,46 @@ Relevant artifacts:
 - `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
 
+## FMPC Stage 05 Longer-Training Validation Snapshot
+
+Current formal validation:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
+
+Current comparison result:
+
+- current Stage 05 v2 budget:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0001763621381912032`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-9.455861891589161e-07`
+  - mean validation accuracy:
+    - `0.27037037037037037`
+  - mean test accuracy:
+    - `0.27283950617283953`
+  - selected epoch:
+    - `12 / 12` on every seed
+- longer same-family Stage 05 v2 budget:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0002055564608433036`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.0470158476959545e-06`
+  - mean validation accuracy:
+    - `0.417283950617284`
+  - mean test accuracy:
+    - `0.4`
+  - selected epoch:
+    - `24 / 24` on every seed
+
+Current interpretation:
+
+- the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism magnitude
+- the stronger same-family budget also materially improves report-only accuracy
+- the stronger budget still selects the final training epoch on every seed
+- the next move therefore remains:
+  - continue pushing budget on the same v2 family
+  - do not open a true Stage 05 v3 mechanism charter yet
+
 ## FMPC Stage 05 Frozen-Bridge Comparison Snapshot
 
 Current formal comparison:

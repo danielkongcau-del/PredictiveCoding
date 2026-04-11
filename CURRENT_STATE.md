@@ -114,6 +114,13 @@ Current probe status:
   - the current low report-only accuracy is not primarily a selection-rule artifact
   - the current narrow diagnosis is:
     - `likely_undertrained`
+- the narrow Stage 05 v2 longer-training validation now exists under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
+- current longer-training validation result:
+  - the same v2 family with a stronger `24`-epoch budget materially improves configured-step mechanism magnitude over the current `12`-epoch budget
+  - the same stronger budget also materially improves report-only validation and test accuracy
+  - the stronger budget still selects the final training epoch on every seed
+  - the budget question is therefore not yet closed
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
@@ -121,6 +128,7 @@ Current probe status:
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - the current evidence points first to training / budget limitation on the v2 reference, not to state-branch removal or selection-rule misalignment
+  - the completed longer-training validation strengthens that interpretation rather than closing it
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -130,7 +138,7 @@ Current probe status:
 - Do not use any current Stage 05 comparison as a claim that Stage 05 should replace the frozen bridge result on `main`.
 - Use the current Stage 05 v2 candidate as the new exploratory reference.
 - Keep Stage 05 mechanism-first and task accuracy report-only.
-- If Stage 05 continues from the current state, target longer training / budget on the existing v2 reference before inventing a new mechanism family.
+- If Stage 05 continues from the current state, continue pushing budget on the existing v2 reference before inventing a new mechanism family or opening a true v3 charter.
 
 ## Reopen Conditions
 
@@ -169,3 +177,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison)
 - Stage 05 v2 diagnostics artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_diagnostics](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_diagnostics)
+- Stage 05 v2 longer-training validation artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)

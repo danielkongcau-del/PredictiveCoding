@@ -36,6 +36,8 @@ ComparisonMethodName = Literal[
     "stage_05_corrected_residual_core",
     "stage_05_corrected_residual_core_v1",
     "stage_05_two_branch_corrected_residual_core_v2",
+    "stage_05_two_branch_corrected_residual_core_v2_current_budget",
+    "stage_05_two_branch_corrected_residual_core_v2_longer_training",
 ]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
@@ -43,8 +45,20 @@ STAGE04_METHOD_NAME: ComparisonMethodName = "stage_04_frozen_bridge"
 STAGE05_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core"
 STAGE05_V1_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core_v1"
 STAGE05_V2_METHOD_NAME: ComparisonMethodName = "stage_05_two_branch_corrected_residual_core_v2"
+STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: ComparisonMethodName = (
+    "stage_05_two_branch_corrected_residual_core_v2_current_budget"
+)
+STAGE05_V2_LONGER_TRAINING_METHOD_NAME: ComparisonMethodName = (
+    "stage_05_two_branch_corrected_residual_core_v2_longer_training"
+)
 JUSTIFY_V2_DECISION_NAME = "stage05_corrected_residual_core_justifies_v2_charter"
 STAGE05_V2_FAVORABLE_DECISION_NAME = "stage05_v2_improves_mechanism_magnitude_over_v1"
+STAGE05_V2_LONGER_TRAINING_DECISION_NAME = (
+    "stage05_v2_longer_training_materially_improves_configured_step_mechanism"
+)
+STAGE05_V2_LONGER_TRAINING_ACCURACY_DECISION_NAME = (
+    "stage05_v2_longer_training_materially_improves_report_only_accuracy"
+)
 
 
 @dataclass
@@ -172,6 +186,56 @@ class CorrectedResidualCoreV1VsV2ComparisonConfig:
             raise ValueError("stage05_epochs and stage05_eval_steps must be positive.")
         if self.stage05_transport_steps <= 0:
             raise ValueError("stage05_transport_steps must be positive.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
+class Stage05V2LongerTrainingValidationConfig:
+    """Compare the current Stage 05 v2 budget against a longer-training budget."""
+
+    experiment_name: str = "stage05_v2_longer_training_validation"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0, 1, 2)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    current_stage05_epochs: int = 12
+    longer_stage05_epochs: int = 24
+    stage05_eval_steps: int = 15
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+    configured_step_improvement_fraction_threshold: float = 0.05
+    report_accuracy_improvement_threshold: float = 0.01
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The Stage 05 v2 longer-training validation currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.current_stage05_epochs <= 0 or self.longer_stage05_epochs <= 0:
+            raise ValueError("current_stage05_epochs and longer_stage05_epochs must be positive.")
+        if self.longer_stage05_epochs <= self.current_stage05_epochs:
+            raise ValueError("longer_stage05_epochs must be greater than current_stage05_epochs.")
+        if self.stage05_eval_steps <= 0:
+            raise ValueError("stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+        if self.configured_step_improvement_fraction_threshold < 0.0:
+            raise ValueError("configured_step_improvement_fraction_threshold must be non-negative.")
+        if self.report_accuracy_improvement_threshold < 0.0:
+            raise ValueError("report_accuracy_improvement_threshold must be non-negative.")
 
     def resolved_run_id(self) -> str:
         if self.run_id is not None:
@@ -393,15 +457,24 @@ def _stage05_v1_config(
     )
 
 
-def _stage05_v2_config(
-    config: CorrectedResidualCoreV1VsV2ComparisonConfig,
+def _build_stage05_v2_config(
     *,
-    seed: int,
     output_root: Path,
+    experiment_name: str,
+    seed: int,
+    train_fraction: float,
+    val_fraction: float,
+    test_fraction: float,
+    batch_size: int,
+    shuffle_batches: bool,
+    epochs: int,
+    eval_steps: int,
+    layer_dims: tuple[int, ...],
+    transport_steps: int,
 ) -> FMPCEFExploratoryProbeConfig:
     return build_fmpc_ef_exploratory_probe_config(
         output_root=output_root,
-        experiment_name=STAGE05_V2_METHOD_NAME,
+        experiment_name=experiment_name,
         output_layout="run_id_subdir",
         run_id=f"seed_{seed}",
         run_seed=seed,
@@ -409,6 +482,30 @@ def _stage05_v2_config(
         model_init_seed=seed,
         psi_init_seed=seed,
         batch_order_seed=seed,
+        train_fraction=float(train_fraction),
+        val_fraction=float(val_fraction),
+        test_fraction=float(test_fraction),
+        batch_size=int(batch_size),
+        shuffle_batches=bool(shuffle_batches),
+        epochs=int(epochs),
+        eval_steps=int(eval_steps),
+        layer_dims=layer_dims,
+        transport_steps=int(transport_steps),
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+    )
+
+
+def _stage05_v2_config(
+    config: CorrectedResidualCoreV1VsV2ComparisonConfig,
+    *,
+    seed: int,
+    output_root: Path,
+) -> FMPCEFExploratoryProbeConfig:
+    return _build_stage05_v2_config(
+        output_root=output_root,
+        experiment_name=STAGE05_V2_METHOD_NAME,
+        seed=seed,
         train_fraction=float(config.train_fraction),
         val_fraction=float(config.val_fraction),
         test_fraction=float(config.test_fraction),
@@ -418,8 +515,6 @@ def _stage05_v2_config(
         eval_steps=int(config.stage05_eval_steps),
         layer_dims=config.stage05_layer_dims,
         transport_steps=int(config.stage05_transport_steps),
-        use_two_branch_residual_core=True,
-        feature_aware_state_branch_tangents=True,
     )
 
 
@@ -429,16 +524,10 @@ def _stage05_v2_bridge_config(
     seed: int,
     output_root: Path,
 ) -> FMPCEFExploratoryProbeConfig:
-    return build_fmpc_ef_exploratory_probe_config(
+    return _build_stage05_v2_config(
         output_root=output_root,
         experiment_name=STAGE05_V2_METHOD_NAME,
-        output_layout="run_id_subdir",
-        run_id=f"seed_{seed}",
-        run_seed=seed,
-        data_seed=seed,
-        model_init_seed=seed,
-        psi_init_seed=seed,
-        batch_order_seed=seed,
+        seed=seed,
         train_fraction=float(config.train_fraction),
         val_fraction=float(config.val_fraction),
         test_fraction=float(config.test_fraction),
@@ -448,8 +537,30 @@ def _stage05_v2_bridge_config(
         eval_steps=int(config.stage05_eval_steps),
         layer_dims=config.stage05_layer_dims,
         transport_steps=int(config.stage05_transport_steps),
-        use_two_branch_residual_core=True,
-        feature_aware_state_branch_tangents=True,
+    )
+
+
+def _stage05_v2_budget_config(
+    config: Stage05V2LongerTrainingValidationConfig,
+    *,
+    seed: int,
+    output_root: Path,
+    experiment_name: str,
+    epochs: int,
+) -> FMPCEFExploratoryProbeConfig:
+    return _build_stage05_v2_config(
+        output_root=output_root,
+        experiment_name=experiment_name,
+        seed=seed,
+        train_fraction=float(config.train_fraction),
+        val_fraction=float(config.val_fraction),
+        test_fraction=float(config.test_fraction),
+        batch_size=int(config.batch_size),
+        shuffle_batches=bool(config.shuffle_batches),
+        epochs=int(epochs),
+        eval_steps=int(config.stage05_eval_steps),
+        layer_dims=config.stage05_layer_dims,
+        transport_steps=int(config.stage05_transport_steps),
     )
 
 
@@ -531,6 +642,7 @@ def _stage04_row(
         expected_batch_size=config.batch_size,
         expected_shuffle_batches=config.shuffle_batches,
     )
+    selected_epoch = int(result.summary.get("selected_epoch", config.epochs))
     timing = dict(result.summary.get("timing", {}))
     runtime_proxy = float(timing.get("train_wall_time_seconds", 0.0)) + float(
         timing.get("final_evaluation_wall_time_seconds", 0.0)
@@ -562,6 +674,9 @@ def _stage04_row(
         "test_accuracy": float(test_accuracy),
         "val_output_mse": float(val_output_mse),
         "test_output_mse": float(test_output_mse),
+        "selected_epoch": int(selected_epoch),
+        "total_training_epochs": int(config.epochs),
+        "selection_hits_final_training_boundary": bool(int(selected_epoch) >= int(config.epochs)),
         "runtime_proxy_seconds": float(runtime_proxy),
         "acceptance_contract": "mechanism_first_comparison_context",
         "mechanism_signal_positive": bool(
@@ -591,6 +706,7 @@ def _stage05_row(
         expected_batch_size=config.batch_size,
         expected_shuffle_batches=config.shuffle_batches,
     )
+    selected_epoch = int(summary["selected_epoch"])
     runtime_proxy = float(summary.get("train_wall_time_seconds", 0.0)) + float(
         summary.get("evaluation_wall_time_seconds", 0.0)
     )
@@ -621,6 +737,9 @@ def _stage05_row(
         "test_accuracy": float(summary["test_accuracy"]),
         "val_output_mse": float(summary["val_output_mse"]),
         "test_output_mse": float(summary["test_output_mse"]),
+        "selected_epoch": int(selected_epoch),
+        "total_training_epochs": int(config.epochs),
+        "selection_hits_final_training_boundary": bool(int(selected_epoch) >= int(config.epochs)),
         "runtime_proxy_seconds": float(runtime_proxy),
         "acceptance_contract": str(summary["acceptance_contract"]),
         "mechanism_signal_positive": bool(
@@ -684,6 +803,9 @@ def _stage05_core_row(
         "test_accuracy": float(summary["test_accuracy"]),
         "val_output_mse": float(summary["val_output_mse"]),
         "test_output_mse": float(summary["test_output_mse"]),
+        "selected_epoch": int(summary["selected_epoch"]),
+        "total_training_epochs": int(config.epochs),
+        "selection_hits_final_training_boundary": bool(int(summary["selected_epoch"]) >= int(config.epochs)),
         "runtime_proxy_seconds": float(runtime_proxy),
         "acceptance_contract": str(summary["acceptance_contract"]),
         "mechanism_signal_positive": bool(
@@ -712,6 +834,11 @@ def _method_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "num_runs": int(len(rows)),
         "configured_transport_steps": int(rows[0]["configured_transport_steps"]),
+        "total_training_epochs": int(rows[0].get("total_training_epochs", 0)),
+        "selected_epoch": _metric_summary("selected_epoch"),
+        "selection_hits_final_training_boundary_rate": _rate(
+            [bool(row.get("selection_hits_final_training_boundary", False)) for row in rows]
+        ),
         "deterministic_artifact_check_rate": _rate(artifact_checks),
         "mechanism_signal_positive_rate": _rate(mechanism_checks),
         "one_step_energy_delta_vs_identity": _metric_summary("one_step_energy_delta_vs_identity"),
@@ -1770,6 +1897,428 @@ def run_corrected_residual_core_v1_vs_v2_comparison(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_stage05_v1_vs_v2_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _negative_magnitude_relative_gain(
+    *,
+    current_value: float,
+    candidate_value: float,
+) -> float:
+    baseline = abs(float(current_value))
+    candidate = abs(float(candidate_value))
+    scale = max(baseline, 1e-12)
+    return float((candidate - baseline) / scale)
+
+
+def _stage05_v2_longer_training_protocol_payload(
+    config: Stage05V2LongerTrainingValidationConfig,
+) -> dict[str, Any]:
+    return {
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "current_budget_reference": {
+            "method_name": STAGE05_V2_CURRENT_BUDGET_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "epochs": int(config.current_stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "longer_training_candidate": {
+            "method_name": STAGE05_V2_LONGER_TRAINING_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "epochs": int(config.longer_stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "decision_rule": {
+            "primary_split": "validation",
+            "task_accuracy_is_report_only": True,
+            "configured_step_improvement_fraction_threshold": float(
+                config.configured_step_improvement_fraction_threshold
+            ),
+            "report_accuracy_improvement_threshold": float(
+                config.report_accuracy_improvement_threshold
+            ),
+            "longer_budget_selection_rule_unchanged": True,
+        },
+    }
+
+
+def _stage05_v2_longer_training_decision(
+    *,
+    rows: list[dict[str, Any]],
+    config: Stage05V2LongerTrainingValidationConfig,
+    by_method: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], str]:
+    current_rows = _method_rows(rows, STAGE05_V2_CURRENT_BUDGET_METHOD_NAME)
+    longer_rows = _method_rows(rows, STAGE05_V2_LONGER_TRAINING_METHOD_NAME)
+    current_by_seed = {int(row["seed"]): row for row in current_rows}
+    longer_by_seed = {int(row["seed"]): row for row in longer_rows}
+    shared_seeds = sorted(set(current_by_seed).intersection(longer_by_seed))
+    if not shared_seeds:
+        raise ValueError("Longer-training decision requires shared seeds.")
+
+    current_summary = by_method[STAGE05_V2_CURRENT_BUDGET_METHOD_NAME]
+    longer_summary = by_method[STAGE05_V2_LONGER_TRAINING_METHOD_NAME]
+    current_energy_mean = float(
+        current_summary["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    longer_energy_mean = float(
+        longer_summary["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    current_residual_mean = float(
+        current_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    longer_residual_mean = float(
+        longer_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    current_val_accuracy_mean = float(current_summary["val_accuracy"]["mean"])
+    longer_val_accuracy_mean = float(longer_summary["val_accuracy"]["mean"])
+    current_test_accuracy_mean = float(current_summary["test_accuracy"]["mean"])
+    longer_test_accuracy_mean = float(longer_summary["test_accuracy"]["mean"])
+
+    configured_energy_gain_fraction = _negative_magnitude_relative_gain(
+        current_value=current_energy_mean,
+        candidate_value=longer_energy_mean,
+    )
+    configured_residual_gain_fraction = _negative_magnitude_relative_gain(
+        current_value=current_residual_mean,
+        candidate_value=longer_residual_mean,
+    )
+    energy_seed_improvement_rate = _rate(
+        [
+            float(longer_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            < float(current_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            for seed in shared_seeds
+        ]
+    )
+    residual_seed_improvement_rate = _rate(
+        [
+            float(longer_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            < float(current_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            for seed in shared_seeds
+        ]
+    )
+    configured_step_mechanism_improved_materially = bool(
+        configured_energy_gain_fraction
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and configured_residual_gain_fraction
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and energy_seed_improvement_rate >= 0.5
+        and residual_seed_improvement_rate >= 0.5
+    )
+    val_accuracy_gain = float(longer_val_accuracy_mean - current_val_accuracy_mean)
+    test_accuracy_gain = float(longer_test_accuracy_mean - current_test_accuracy_mean)
+    report_only_accuracy_improved_materially = bool(
+        val_accuracy_gain >= float(config.report_accuracy_improvement_threshold)
+        and test_accuracy_gain >= float(config.report_accuracy_improvement_threshold)
+    )
+    current_budget_boundary_all = bool(
+        all(bool(row["selection_hits_final_training_boundary"]) for row in current_rows)
+    )
+    longer_budget_boundary_all = bool(
+        all(bool(row["selection_hits_final_training_boundary"]) for row in longer_rows)
+    )
+    longer_budget_boundary_rate = _rate(
+        [bool(row["selection_hits_final_training_boundary"]) for row in longer_rows]
+    )
+    recommended_next_move = (
+        "continue_with_budget"
+        if longer_budget_boundary_all
+        else "open_stage05_v3_charter"
+    )
+    if longer_budget_boundary_all:
+        rationale = (
+            "The stronger Stage 05 v2 budget still selects the final training epoch on every seed, "
+            "so the budget question is not yet closed."
+        )
+    elif configured_step_mechanism_improved_materially or report_only_accuracy_improved_materially:
+        rationale = (
+            "The stronger Stage 05 v2 budget improves the current v2 reference without still selecting "
+            "the final training epoch on every seed, so the budget question is now better answered "
+            "and the next step can move to a true v3 charter if needed."
+        )
+    else:
+        rationale = (
+            "The stronger Stage 05 v2 budget no longer looks boundary-limited and still does not "
+            "materially improve the current v2 reference, so a true v3 mechanism charter is now justified."
+        )
+    decision = {
+        STAGE05_V2_LONGER_TRAINING_DECISION_NAME: bool(
+            configured_step_mechanism_improved_materially
+        ),
+        STAGE05_V2_LONGER_TRAINING_ACCURACY_DECISION_NAME: bool(
+            report_only_accuracy_improved_materially
+        ),
+        "configured_step_energy_gain_fraction": float(configured_energy_gain_fraction),
+        "configured_step_residual_gain_fraction": float(configured_residual_gain_fraction),
+        "configured_step_energy_seed_improvement_rate": float(energy_seed_improvement_rate),
+        "configured_step_residual_seed_improvement_rate": float(residual_seed_improvement_rate),
+        "val_accuracy_gain": float(val_accuracy_gain),
+        "test_accuracy_gain": float(test_accuracy_gain),
+        "current_budget_selection_hits_final_training_boundary_on_all_seeds": bool(
+            current_budget_boundary_all
+        ),
+        "longer_budget_selection_hits_final_training_boundary_on_all_seeds": bool(
+            longer_budget_boundary_all
+        ),
+        "longer_budget_selection_hits_final_training_boundary_rate": float(
+            longer_budget_boundary_rate
+        ),
+        "recommended_next_move": recommended_next_move,
+    }
+    return decision, rationale
+
+
+def _stage05_v2_longer_training_supports_lines(
+    *,
+    decision: dict[str, Any],
+    by_method: dict[str, dict[str, Any]],
+) -> list[str]:
+    current_summary = by_method[STAGE05_V2_CURRENT_BUDGET_METHOD_NAME]
+    longer_summary = by_method[STAGE05_V2_LONGER_TRAINING_METHOD_NAME]
+    return [
+        (
+            "The longer-training Stage 05 v2 candidate materially improves configured-step mechanism magnitude over the current budget."
+            if decision[STAGE05_V2_LONGER_TRAINING_DECISION_NAME]
+            else "The longer-training Stage 05 v2 candidate does not yet materially improve configured-step mechanism magnitude over the current budget."
+        ),
+        (
+            "The longer-training Stage 05 v2 candidate materially improves report-only accuracy over the current budget."
+            if decision[STAGE05_V2_LONGER_TRAINING_ACCURACY_DECISION_NAME]
+            else "The longer-training Stage 05 v2 candidate does not yet materially improve report-only accuracy over the current budget."
+        ),
+        (
+            "The stronger budget still hits the final training boundary on every seed."
+            if decision["longer_budget_selection_hits_final_training_boundary_on_all_seeds"]
+            else "The stronger budget no longer hits the final training boundary on every seed."
+        ),
+        (
+            f"Current-budget configured-step validation energy delta vs identity mean: {current_summary['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"Longer-budget configured-step validation energy delta vs identity mean: {longer_summary['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"Current-budget validation/test accuracy means: {current_summary['val_accuracy']['mean']:.6f} / {current_summary['test_accuracy']['mean']:.6f}."
+        ),
+        (
+            f"Longer-budget validation/test accuracy means: {longer_summary['val_accuracy']['mean']:.6f} / {longer_summary['test_accuracy']['mean']:.6f}."
+        ),
+    ]
+
+
+def _stage05_v2_longer_training_does_not_support_lines(
+    *,
+    decision: dict[str, Any],
+) -> list[str]:
+    lines = [
+        "This validation does not reopen Stage 04 package-internal work.",
+        "This validation does not change the Stage 05 v2 transport family, objective family, or selection rule.",
+        "This validation does not claim that Stage 05 replaces the frozen Stage 04 bridge result on main.",
+    ]
+    if decision["recommended_next_move"] == "continue_with_budget":
+        lines.append(
+            "This validation does not yet justify opening a true Stage 05 v3 mechanism charter."
+        )
+    else:
+        lines.append("This validation does not imply any new Stage 04 replacement claim.")
+    return lines
+
+
+def _stage05_v2_longer_training_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    lines = [
+        "# Stage 05 V2 Longer-Training Validation",
+        "",
+        "## Protocol",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- shared shuffle_batches: `{protocol['shared_shuffle_batches']}`",
+        f"- current budget epochs: `{protocol['current_budget_reference']['epochs']}`",
+        f"- longer budget epochs: `{protocol['longer_training_candidate']['epochs']}`",
+        "",
+        "## Decision",
+        f"- `{STAGE05_V2_LONGER_TRAINING_DECISION_NAME}`: `{decision[STAGE05_V2_LONGER_TRAINING_DECISION_NAME]}`",
+        f"- `{STAGE05_V2_LONGER_TRAINING_ACCURACY_DECISION_NAME}`: `{decision[STAGE05_V2_LONGER_TRAINING_ACCURACY_DECISION_NAME]}`",
+        f"- longer budget still hits final training boundary on all seeds: `{decision['longer_budget_selection_hits_final_training_boundary_on_all_seeds']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Supports",
+    ]
+    for item in report["supports"]:
+        lines.append(f"- {item}")
+    lines.extend(["", "## Does Not Support"])
+    for item in report["does_not_support"]:
+        lines.append(f"- {item}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _stage05_v2_longer_training_suite_config_payload(
+    config: Stage05V2LongerTrainingValidationConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": "stage05_v2_longer_training_validation",
+        "comparison_protocol": _stage05_v2_longer_training_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
+def run_stage05_v2_longer_training_validation(
+    config: Stage05V2LongerTrainingValidationConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run a narrow longer-training validation on the existing Stage 05 v2 family."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v2_longer_training_suite_config_payload(config))
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+
+    for seed in config.seeds:
+        run_index += 1
+        current_config = _stage05_v2_budget_config(
+            config,
+            seed=seed,
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_CURRENT_BUDGET_METHOD_NAME,
+            epochs=int(config.current_stage05_epochs),
+        )
+        current_result = run_fmpc_ef_exploratory_probe(current_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=current_result,
+                config=current_config,
+                method_name=STAGE05_V2_CURRENT_BUDGET_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v2 Current Budget",
+            )
+        )
+
+        run_index += 1
+        longer_config = _stage05_v2_budget_config(
+            config,
+            seed=seed,
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_LONGER_TRAINING_METHOD_NAME,
+            epochs=int(config.longer_stage05_epochs),
+        )
+        longer_result = run_fmpc_ef_exploratory_probe(longer_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=longer_result,
+                config=longer_config,
+                method_name=STAGE05_V2_LONGER_TRAINING_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v2 Longer Training",
+            )
+        )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V2_CURRENT_BUDGET_METHOD_NAME)
+        ),
+        STAGE05_V2_LONGER_TRAINING_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V2_LONGER_TRAINING_METHOD_NAME)
+        ),
+    }
+    pairwise_longer_vs_current = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V2_LONGER_TRAINING_METHOD_NAME,
+        reference_method=STAGE05_V2_CURRENT_BUDGET_METHOD_NAME,
+    )
+    decision, decision_rationale = _stage05_v2_longer_training_decision(
+        rows=rows,
+        config=config,
+        by_method=by_method,
+    )
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": "stage05_v2_longer_training_validation",
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_longer_training_protocol_payload(config),
+        "by_method": by_method,
+        "pairwise_longer_budget_vs_current_budget": pairwise_longer_vs_current,
+        **decision,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_longer_training_protocol_payload(config),
+        "decision": {
+            **decision,
+            "decision_rationale": decision_rationale,
+        },
+        "supports": _stage05_v2_longer_training_supports_lines(
+            decision=decision,
+            by_method=by_method,
+        ),
+        "does_not_support": _stage05_v2_longer_training_does_not_support_lines(
+            decision=decision,
+        ),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v2_longer_training_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_longer_training_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

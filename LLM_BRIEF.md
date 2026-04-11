@@ -110,6 +110,7 @@ Current known state:
 - the refreshed frozen-bridge vs Stage 05 v2 comparison now exists
 - that refreshed comparison supports using Stage 05 v2 as the new exploratory reference
 - the dedicated Stage 05 v2 diagnostics now say the current narrow diagnosis is `likely_undertrained`
+- the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
@@ -117,7 +118,7 @@ Current known state:
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- if Stage 05 continues, test longer training / budget on the current v2 reference before inventing a new family
+- if Stage 05 continues, keep pushing budget on the current v2 reference before inventing a new family or opening a true v3 charter
 
 ## Current Code Entry Points
 
@@ -149,6 +150,8 @@ Current known state:
   - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
 - Stage 05 v2 diagnostics:
   - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
+- Stage 05 v2 longer-training validation:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
 
 ## History
 

@@ -139,13 +139,17 @@ Current interpretation:
   - configured-step mechanism metrics and validation accuracy still improve at the training boundary
   - the current low report-only accuracy is not primarily a selection-rule artifact
   - the current narrow diagnosis is `likely_undertrained`
+- the dedicated Stage 05 v2 longer-training validation now also says:
+  - a stronger same-family `24`-epoch budget materially improves configured-step mechanism magnitude
+  - the same stronger budget materially improves report-only validation and test accuracy
+  - the stronger budget still selects the final training epoch on every seed
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
 
 The next validation move is:
 
-- keep the current Stage 05 v2 transport family fixed and answer the longer-training / budget question before inventing a new Stage 05 family
+- keep the current Stage 05 v2 transport family fixed and continue pushing budget on the same v2 family before inventing a new Stage 05 family
 
 That next step should preserve:
 
@@ -171,6 +175,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
 - Stage 05 v2 diagnostics:
   - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
+- Stage 05 v2 longer-training validation:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
 
 ## Document Layering
 
