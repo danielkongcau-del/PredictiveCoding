@@ -1,0 +1,80 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "reference_budget": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 192,
+      "eval_steps": 15,
+      "configured_transport_steps": 2,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stronger_budget_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 384,
+      "eval_steps": 15,
+      "configured_transport_steps": 2,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "report_accuracy_improvement_threshold": 0.01,
+      "selection_rule_unchanged": true
+    }
+  },
+  "decision": {
+    "stage05_v2_budget_push_materially_improves_configured_step_mechanism": true,
+    "stage05_v2_budget_push_materially_improves_report_only_accuracy": true,
+    "configured_step_energy_gain_fraction": 0.897554520044786,
+    "configured_step_residual_gain_fraction": 0.7789446636288233,
+    "configured_step_energy_seed_improvement_rate": 1.0,
+    "configured_step_residual_seed_improvement_rate": 1.0,
+    "val_accuracy_gain": 0.05555555555555569,
+    "test_accuracy_gain": 0.06666666666666676,
+    "reference_budget_selection_hits_final_training_boundary_on_all_seeds": true,
+    "budget_push_selection_hits_final_training_boundary_on_all_seeds": true,
+    "budget_push_selection_hits_final_training_boundary_rate": 1.0,
+    "recommended_next_move": "continue_with_budget",
+    "decision_rationale": "The stronger Stage 05 v2 budget still selects the final training epoch on every seed, so the same-family budget line still looks boundary-limited."
+  },
+  "supports": [
+    "The stronger-budget Stage 05 v2 candidate materially improves configured-step mechanism magnitude over the 192-epoch reference.",
+    "The stronger-budget Stage 05 v2 candidate materially improves report-only accuracy over the 192-epoch reference.",
+    "The stronger budget still hits the final training boundary on every seed.",
+    "192-epoch reference configured-step validation energy delta vs identity mean: -0.001024608932.",
+    "384-epoch candidate configured-step validation energy delta vs identity mean: -0.001944251311.",
+    "192-epoch reference validation/test accuracy means: 0.724691 / 0.718519.",
+    "384-epoch candidate validation/test accuracy means: 0.780247 / 0.785185."
+  ],
+  "does_not_support": [
+    "This validation does not reopen Stage 04 package-internal work.",
+    "This validation does not change the Stage 05 v2 transport family, residual branch structure, corrected residual identity contract, or selection rule.",
+    "This validation does not claim that Stage 05 replaces the frozen Stage 04 bridge result on main.",
+    "This validation does not yet justify opening a true Stage 05 v3 mechanism charter."
+  ]
+}
