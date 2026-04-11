@@ -117,15 +117,16 @@ Current probe status:
 - the narrow Stage 05 v2 longer-training validation now exists under:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - the next narrow Stage 05 v2 budget-push validation now also exists under:
-  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768)
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536)
 - current budget-push result:
-  - the same v2 family with a stronger `768`-epoch budget materially improves configured-step mechanism magnitude over the current `384`-epoch reference
+  - the same v2 family with a stronger `1536`-epoch budget materially improves configured-step mechanism magnitude over the current `768`-epoch reference
   - the same stronger budget also materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
   - the explicit stop-rule layer still says:
     - `budget_line_still_looks_boundary_limited = true`
     - `budget_line_should_continue = true`
     - `budget_line_should_stop_and_open_v3 = false`
+    - `budget_line_interpretation = boundary_limited_mechanism_prototype`
   - the stronger budget now sits above the frozen Stage 04 bridge accuracy level in the diagnostic context, while remaining mixed relative to the standalone `digits_pc` baseline and below the standalone `digits_mlp` baseline
   - the budget question is therefore still not closed
 - Stage 05 evaluation remains mechanism-first:
@@ -187,4 +188,4 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
 - Stage 05 v2 longer-training validation artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - Stage 05 v2 budget-push validation artifact:
-  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768)
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536)

@@ -335,6 +335,7 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
     assert "budget_line_still_looks_boundary_limited" in summary
     assert "budget_line_should_continue" in summary
     assert "budget_line_should_stop_and_open_v3" in summary
+    assert "budget_line_interpretation" in summary
     assert "contextual_accuracy_note" in summary
     assert "recommended_next_move" in summary
     assert "decision_rationale" in summary
@@ -346,4 +347,5 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
     assert "stage05_v2_budget_push_materially_improves_configured_step_mechanism" in report["decision"]
     assert "configured_step_gain_fraction_vs_reference" in report["decision"]
     assert "budget_line_should_continue" in report["decision"]
+    assert "budget_line_interpretation" in report["decision"]
     assert "recommended_next_move" in report["decision"]

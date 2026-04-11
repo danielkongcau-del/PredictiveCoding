@@ -126,22 +126,11 @@ Relevant artifacts:
 
 Current formal validation:
 
-- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768/`
+- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536/`
 
 Current comparison result:
 
 - current Stage 05 v2 reference budget:
-  - mean configured-step validation energy delta vs identity:
-    - `-0.001944251310910398`
-  - mean configured-step validation fixed-point residual delta vs identity:
-    - `-5.647316885241508e-06`
-  - mean validation accuracy:
-    - `0.780246913580247`
-  - mean test accuracy:
-    - `0.7851851851851852`
-  - selected epoch:
-    - `384 / 384` on every seed
-- stronger same-family Stage 05 v2 budget:
   - mean configured-step validation energy delta vs identity:
     - `-0.0033615114119863454`
   - mean configured-step validation fixed-point residual delta vs identity:
@@ -152,6 +141,17 @@ Current comparison result:
     - `0.8382716049382717`
   - selected epoch:
     - `768 / 768` on every seed
+- stronger same-family Stage 05 v2 budget:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004980554368336933`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8451788412853327e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+  - selected epoch:
+    - `1536 / 1536` on every seed
 
 Current interpretation:
 
@@ -162,6 +162,7 @@ Current interpretation:
   - `budget_line_still_looks_boundary_limited = true`
   - `budget_line_should_continue = true`
   - `budget_line_should_stop_and_open_v3 = false`
+  - `budget_line_interpretation = boundary_limited_mechanism_prototype`
 - the diagnostic contextual note now says the stronger Stage 05 v2 budget is:
   - above the frozen Stage 04 bridge accuracy level
   - mixed relative to the standalone `digits_pc` baseline

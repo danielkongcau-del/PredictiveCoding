@@ -74,6 +74,8 @@ STAGE05_V2_BUDGET_PUSH_DECISION_NAME = (
 STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME = (
     "stage05_v2_budget_push_materially_improves_report_only_accuracy"
 )
+BOUNDARY_LIMITED_INTERPRETATION = "boundary_limited_mechanism_prototype"
+STRUCTURALLY_INEFFICIENT_INTERPRETATION = "structurally_inefficient_same_family_line"
 
 
 @dataclass
@@ -2632,6 +2634,11 @@ def _stage05_v2_budget_push_decision(
         and budget_line_still_looks_boundary_limited
     )
     budget_line_should_stop_and_open_v3 = bool(not budget_line_should_continue)
+    budget_line_interpretation = (
+        BOUNDARY_LIMITED_INTERPRETATION
+        if budget_line_should_continue
+        else STRUCTURALLY_INEFFICIENT_INTERPRETATION
+    )
     recommended_next_move = (
         "continue_with_budget"
         if budget_line_should_continue
@@ -2674,6 +2681,7 @@ def _stage05_v2_budget_push_decision(
         ),
         "budget_line_should_continue": bool(budget_line_should_continue),
         "budget_line_should_stop_and_open_v3": bool(budget_line_should_stop_and_open_v3),
+        "budget_line_interpretation": str(budget_line_interpretation),
         "configured_step_energy_gain_fraction": float(configured_energy_gain_fraction),
         "configured_step_residual_gain_fraction": float(configured_residual_gain_fraction),
         "configured_step_energy_seed_improvement_rate": float(energy_seed_improvement_rate),
@@ -2744,6 +2752,11 @@ def _stage05_v2_budget_push_supports_lines(
             f"{contextual_accuracy_snapshot['digits_mlp']['test_accuracy']:.6f}."
         ),
         str(contextual_note),
+        (
+            "Interpretation: the Stage 05 v2 line is still behaving like a boundary-limited mechanism prototype."
+            if decision["budget_line_interpretation"] == BOUNDARY_LIMITED_INTERPRETATION
+            else "Interpretation: the Stage 05 v2 line now looks structurally inefficient under same-family budget escalation and should stop before a true v3 charter."
+        ),
     ]
 
 
@@ -2788,6 +2801,7 @@ def _stage05_v2_budget_push_report_markdown(report: dict[str, Any]) -> str:
         f"- budget line still looks boundary-limited: `{decision['budget_line_still_looks_boundary_limited']}`",
         f"- budget line should continue: `{decision['budget_line_should_continue']}`",
         f"- budget line should stop and open v3: `{decision['budget_line_should_stop_and_open_v3']}`",
+        f"- budget line interpretation: `{decision['budget_line_interpretation']}`",
         f"- stronger budget still hits final training boundary on all seeds: `{decision['budget_push_selection_hits_final_training_boundary_on_all_seeds']}`",
         f"- recommended next move: `{decision['recommended_next_move']}`",
         f"- rationale: `{decision['decision_rationale']}`",

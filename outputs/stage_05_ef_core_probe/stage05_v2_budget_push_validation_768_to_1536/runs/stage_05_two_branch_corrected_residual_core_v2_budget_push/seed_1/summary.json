@@ -1,0 +1,141 @@
+{
+  "phase": "post_incremental_bridge_exploratory",
+  "stage": "ef_core_probe",
+  "teacher_free": true,
+  "uses_teacher_artifacts": false,
+  "transport_family": "two_branch_residual_meanflow_core",
+  "residual_identity_mode": "residual_corrected_meanflow",
+  "energy_substrate": "baseline_pc_energy",
+  "local_flow_definition": "exact_negative_hidden_state_gradient",
+  "direct_anchor_source": "self_bootstrap_local_field",
+  "psi_family": "two_branch_residual_local_flow_mlp",
+  "transport_scope": "train_only",
+  "transport_steps": 2,
+  "u_psi_input_contract": "u_psi = g_t + m_traj(concat([z_t, target_onehot, t, r])) + m_state(concat([g_t, e_out_t, F_t]))",
+  "residual_branch_structure": "two_branch",
+  "m_traj_input_contract": "concat([z_t, target_onehot, t, r])",
+  "m_state_input_contract": "concat([g_t, e_out_t, F_t])",
+  "bootstrap_target_contract": "m_boot = ((Phi_LF_r(z_t; c) - z_t) / r) - g_t",
+  "residual_identity_target_contract": "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state",
+  "identity_loss_weight": 0.1,
+  "tangent_epsilon": 0.001,
+  "lambda_id_warmup_epochs": 3,
+  "lambda_id_ramp_epochs": 3,
+  "use_two_branch_residual_core": true,
+  "uses_current_state_features": true,
+  "feature_aware_state_branch_tangents": true,
+  "selection_metric_source": "val_metric",
+  "report_metric_source": "test_metric",
+  "selection_metric_name": "val_configured_transported_final_energy",
+  "selection_metric_value": 0.21086030496595812,
+  "selection_metric_higher_is_better": false,
+  "selected_epoch": 1536,
+  "selected_epoch_stage": "hybrid",
+  "selected_epoch_lambda_id": 0.1,
+  "train_wall_time_seconds": 245.84360500000184,
+  "evaluation_wall_time_seconds": 0.026973400003043935,
+  "val_accuracy": 0.9148148148148149,
+  "test_accuracy": 0.8888888888888888,
+  "val_output_mse": 0.04329138819458572,
+  "test_output_mse": 0.04298385814833558,
+  "mechanism_acceptance": {
+    "one_step_energy_decrease_vs_identity": true,
+    "one_step_energy_decrease_vs_local_field_only": true,
+    "configured_steps_energy_decrease_vs_identity": true,
+    "configured_steps_fixed_point_residual_decrease_vs_identity": true,
+    "configured_steps_fixed_point_residual_decrease_vs_local_field_only": true
+  },
+  "mechanism_metrics": {
+    "one_step": {
+      "transport_steps": 1,
+      "initial_energy": 0.2164569409729286,
+      "identity_final_energy": 0.2164569409729286,
+      "local_field_only_final_energy": 0.21169941875473897,
+      "transported_final_energy": 0.21086517837965568,
+      "energy_delta_vs_identity": -0.005591762593272931,
+      "energy_delta_vs_local_field_only": -0.0008342403750832839,
+      "initial_fixed_point_residual_rms": 0.0010539551631067701,
+      "identity_final_fixed_point_residual_rms": 0.0010539551631067701,
+      "local_field_only_final_fixed_point_residual_rms": 0.0010358583078963939,
+      "transported_final_fixed_point_residual_rms": 0.0010333391162672808,
+      "fixed_point_residual_delta_vs_identity": -2.0616046839489312e-05,
+      "fixed_point_residual_delta_vs_local_field_only": -2.5191916291130573e-06
+    },
+    "configured_steps": {
+      "transport_steps": 2,
+      "initial_energy": 0.2164569409729286,
+      "identity_final_energy": 0.2164569409729286,
+      "local_field_only_final_energy": 0.21171965096128736,
+      "transported_final_energy": 0.21086030496595812,
+      "energy_delta_vs_identity": -0.005596636006970496,
+      "energy_delta_vs_local_field_only": -0.000859345995329247,
+      "initial_fixed_point_residual_rms": 0.0010539551631067701,
+      "identity_final_fixed_point_residual_rms": 0.0010539551631067701,
+      "local_field_only_final_fixed_point_residual_rms": 0.0010359420148546175,
+      "transported_final_fixed_point_residual_rms": 0.0010333102372641137,
+      "fixed_point_residual_delta_vs_identity": -2.0644925842656448e-05,
+      "fixed_point_residual_delta_vs_local_field_only": -2.631777590503823e-06
+    }
+  },
+  "test_mechanism_metrics": {
+    "one_step": {
+      "transport_steps": 1,
+      "initial_energy": 0.21491929074167793,
+      "identity_final_energy": 0.21491929074167793,
+      "local_field_only_final_energy": 0.21031456210859092,
+      "transported_final_energy": 0.20959171877900942,
+      "energy_delta_vs_identity": -0.005327571962668504,
+      "energy_delta_vs_local_field_only": -0.0007228433295815018,
+      "initial_fixed_point_residual_rms": 0.0010368249032971497,
+      "identity_final_fixed_point_residual_rms": 0.0010368249032971497,
+      "local_field_only_final_fixed_point_residual_rms": 0.0010192903818997314,
+      "transported_final_fixed_point_residual_rms": 0.001017283126524009,
+      "fixed_point_residual_delta_vs_identity": -1.954177677314069e-05,
+      "fixed_point_residual_delta_vs_local_field_only": -2.0072553757223555e-06
+    },
+    "configured_steps": {
+      "transport_steps": 2,
+      "initial_energy": 0.21491929074167793,
+      "identity_final_energy": 0.21491929074167793,
+      "local_field_only_final_energy": 0.21033385182815453,
+      "transported_final_energy": 0.209630931447887,
+      "energy_delta_vs_identity": -0.0052883592937909285,
+      "energy_delta_vs_local_field_only": -0.0007029203802675354,
+      "initial_fixed_point_residual_rms": 0.0010368249032971497,
+      "identity_final_fixed_point_residual_rms": 0.0010368249032971497,
+      "local_field_only_final_fixed_point_residual_rms": 0.0010193704577973666,
+      "transported_final_fixed_point_residual_rms": 0.0010174301566885202,
+      "fixed_point_residual_delta_vs_identity": -1.9394746608629573e-05,
+      "fixed_point_residual_delta_vs_local_field_only": -1.9403011088463783e-06
+    }
+  },
+  "identity_no_transport_baseline": {
+    "one_step": {
+      "final_energy": 0.2164569409729286,
+      "fixed_point_residual_rms": 0.0010539551631067701
+    },
+    "configured_steps": {
+      "final_energy": 0.2164569409729286,
+      "fixed_point_residual_rms": 0.0010539551631067701
+    }
+  },
+  "local_field_only_baseline": {
+    "one_step": {
+      "final_energy": 0.21169941875473897,
+      "fixed_point_residual_rms": 0.0010358583078963939
+    },
+    "configured_steps": {
+      "final_energy": 0.21171965096128736,
+      "fixed_point_residual_rms": 0.0010359420148546175
+    }
+  },
+  "deterministic_artifacts": true,
+  "acceptance_contract": "mechanism_first",
+  "task_accuracy_is_gate": false,
+  "no_teacher_dependency_in_target_construction": true,
+  "run_artifacts": {
+    "config_json": "config.json",
+    "epoch_metrics_csv": "epoch_metrics.csv",
+    "summary_json": "summary.json"
+  }
+}
