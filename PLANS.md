@@ -70,6 +70,9 @@ This exploratory line is allowed only because:
 - it is artifact-independent in target construction
 - it shows positive mechanism signal on energy and fixed-point residual
 - its task accuracy is still report-only and well below the frozen Stage 04 bridge result
+- the formal frozen-bridge vs corrected residual core comparison now exists
+- that comparison says the Stage 05 core has enough mechanism-first evidence to justify a narrow v2 charter
+- that same comparison does not support replacing the frozen Stage 04 bridge result on `main`
 
 ## Immediate Execution Queue
 
@@ -83,33 +86,33 @@ Files to preserve as current Stage 04 control:
 
 Success condition:
 
-- no semantic changes to the adopted Stage 04 bridge package while the Stage 05 comparison decision is pending
+- no semantic changes to the adopted Stage 04 bridge package while the Stage 05 v2 charter is being defined
 
-### 2. Run Frozen-Bridge Vs Exploratory-Core Comparison
+### 2. Comparison Is Now Complete
+
+Completed outcome:
+
+- the formal comparison entry now exists under `src/pc/stage_05_ef_core_probe/`
+- the comparison ran on shared `digits` data splits, shared seeds, and shared batch protocol
+- the resulting evidence says Stage 05 clears the multiseed mechanism-first rule for a v2 charter
+- the same evidence does not support replacing the frozen bridge result on `main`
+
+Key artifact:
+
+- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
+
+### 3. Draft Stage 05 V2 Charter
 
 Objective:
 
-- compare the frozen Stage 04 bridge result against the corrected residual MeanFlow Stage 05 core on a mechanism-first basis
+- define the next narrow Stage 05 step now that the corrected residual core has cleared the mechanism-first comparison gate
 
-Required comparison outputs:
+Required framing:
 
-- energy-side comparison
-- fixed-point residual comparison
-- deterministic artifact checks
-- report-only task metrics
-
-Primary decision question:
-
-- does the exploratory line have enough mechanism signal to justify a v2 charter?
-
-### 3. Decide Stage 05 V2 Charter
-
-Possible outcomes:
-
-- if comparison is favorable:
-  - draft a narrow Stage 05 v2 charter
-- if comparison is weak:
-  - keep Stage 04 frozen and stop new code until a different strategic path is chosen
+- keep Stage 04 frozen on `main`
+- do not reopen Stage 04 package-internal work
+- do not treat the comparison result as a default-replacement claim
+- keep Stage 05 mechanism-first
 
 ## Exploratory Acceptance Criteria
 

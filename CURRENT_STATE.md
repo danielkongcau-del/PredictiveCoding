@@ -73,16 +73,25 @@ Current probe status:
   - one-step validation energy improves vs identity
   - configured two-step validation energy improves vs identity
   - configured two-step fixed-point residual improves vs identity
+- the formal frozen-bridge vs corrected-core comparison now exists under:
+  - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison)
+- current comparison result:
+  - Stage 05 keeps one-step validation energy delta vs identity negative on all comparison seeds
+  - Stage 05 keeps configured-step validation energy delta vs identity negative on all comparison seeds
+  - Stage 05 keeps configured-step validation fixed-point residual delta vs identity negative on all comparison seeds
+  - Stage 05 remains far below the frozen Stage 04 bridge on report-only accuracy
+  - Stage 05 does not replace the frozen Stage 04 bridge result on `main`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
-- task accuracy remains report-only and is still well below the frozen Stage 04 bridge result
+- current interpretation:
+  - the corrected residual MeanFlow core now has enough mechanism-first comparison evidence to justify a narrow Stage 05 v2 charter
 
 ## Current Recommendation
 
 - Keep the Stage 04 bridge result frozen on `main`.
 - Do not open another package-internal Stage 04 diagnostic suite from this state.
-- Run the frozen-bridge vs corrected residual core comparison next.
-- Use that comparison to decide whether Stage 05 earns a v2 charter.
+- Do not use the current comparison as a claim that Stage 05 should replace the frozen bridge result on `main`.
+- Draft a narrow Stage 05 v2 charter next.
 
 ## Reopen Conditions
 
@@ -113,3 +122,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_04_incremental_bridge](/e:/CodeSpace/PredictiveCoding/outputs/stage_04_incremental_bridge)
 - Stage 05 exploratory probe artifact:
   - [outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe)
+- Stage 05 comparison artifact:
+  - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison)

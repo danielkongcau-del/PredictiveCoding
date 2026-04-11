@@ -106,11 +106,52 @@ Current interpretation:
 
 - the current corrected residual MeanFlow Stage 05 probe has positive mechanism signal
 - task accuracy is still report-only and remains well below the frozen Stage 04 bridge result
-- the current next question is whether frozen-bridge vs corrected residual core comparison justifies a Stage 05 v2 charter
 
 Relevant artifacts:
 
 - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
+
+## FMPC Stage 05 Frozen-Bridge Comparison Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
+
+Current comparison result:
+
+- Stage 04 frozen bridge:
+  - mean one-step validation energy delta vs identity:
+    - `0.0003669573859489221`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004070538730777469`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8072299104931235e-05`
+  - mean validation accuracy:
+    - `0.811111111111111`
+  - mean test accuracy:
+    - `0.8197530864197531`
+- Stage 05 corrected residual core:
+  - mean one-step validation energy delta vs identity:
+    - `-0.00015049783324024477`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.00015441938077428072`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-8.351992466021287e-07`
+  - mean validation accuracy:
+    - `0.2740740740740741`
+  - mean test accuracy:
+    - `0.2716049382716049`
+
+Current interpretation:
+
+- Stage 05 clears the current multiseed mechanism-first rule for a narrow v2 charter
+- Stage 05 does not replace the frozen bridge result on `main`
+- Stage 05 remains far below the frozen bridge on report-only accuracy
+- Stage 05 also remains weaker than the frozen bridge on configured-step mechanism magnitude in the current comparison
+
+Relevant artifacts:
+
+- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
 
 ## Where Detailed History Went
 

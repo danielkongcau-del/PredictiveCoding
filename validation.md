@@ -122,18 +122,19 @@ At the same time:
 
 Current interpretation:
 
-- the exploratory line has enough signal for comparison
-- it does not yet justify replacing the frozen bridge result
+- the exploratory line has enough multiseed mechanism-first signal to justify a narrow Stage 05 v2 charter
+- it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
 
 The next validation move is:
 
-- run the frozen-bridge vs corrected residual core comparison
+- draft the next narrow Stage 05 v2 charter from the completed comparison evidence
 
-That comparison should answer:
+That next step should preserve:
 
-- whether the Stage 05 line has enough mechanism advantage to justify a v2 charter
+- the frozen Stage 04 bridge result on `main`
+- the mechanism-first validation contract for Stage 05
 
 It should not be framed as:
 
@@ -146,6 +147,8 @@ It should not be framed as:
   - `outputs/stage_04_incremental_bridge/`
 - Stage 05 exploratory probe:
   - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
+- Stage 05 frozen-bridge comparison:
+  - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
 
 ## Document Layering
 

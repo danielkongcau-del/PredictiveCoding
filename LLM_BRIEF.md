@@ -103,13 +103,15 @@ Current known state:
 - the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
 - target construction is artifact-independent
 - the first probe shows positive mechanism signal on energy and fixed-point residual
+- the formal frozen-bridge vs corrected-core comparison now exists
+- that comparison justifies a narrow Stage 05 v2 charter on mechanism-first evidence
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
-- run the frozen-bridge vs corrected residual core comparison next
-- use that comparison to decide whether Stage 05 earns a v2 charter
+- do not treat the current comparison as a replacement claim against the frozen bridge result
+- draft a narrow Stage 05 v2 charter next
 
 ## Current Code Entry Points
 
@@ -135,6 +137,8 @@ Current known state:
   - `outputs/stage_04_incremental_bridge/`
 - Stage 05 exploratory probe:
   - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
+- Stage 05 comparison:
+  - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
 
 ## History
 

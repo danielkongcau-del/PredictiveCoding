@@ -28,7 +28,7 @@ Current working interpretation:
 - Stage 04 package-internal digging is treated as closed from the current state
 - the current open work is no longer another Stage 04 repair
 - the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
-- the next active question is whether a fresh frozen-bridge vs corrected-core comparison earns a v2 charter
+- the frozen-bridge vs corrected-core comparison now supports a narrow Stage 05 v2 charter
 
 ## Current Result Snapshot
 
@@ -38,6 +38,7 @@ Current working interpretation:
   - `toy_sine_regression`: MLP stays ahead
 - Phase 3 currently provides standalone `digits_mlp` and `digits_pc` baselines on `sklearn.datasets.load_digits`
 - the first Stage 05 exploratory probe has positive mechanism signal on energy and fixed-point residual, but its task accuracy remains report-only and well below the frozen Stage 04 bridge result
+- the formal frozen-bridge vs corrected-core comparison now says Stage 05 has enough mechanism-first evidence for a narrow v2 charter, but not enough to replace the frozen bridge result on `main`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 
