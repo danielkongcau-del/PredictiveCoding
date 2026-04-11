@@ -1,0 +1,59 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "frozen_bridge_vs_two_branch_corrected_residual_core_comparison",
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_04_control": {
+      "method_name": "stage_04_frozen_bridge",
+      "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+      "configured_transport_steps": 4,
+      "epochs": 60,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        64,
+        10
+      ]
+    },
+    "stage_05_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_identity_mode": "residual_corrected_meanflow",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_v2_artifact_checks": true,
+      "requires_stage05_v2_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "task_accuracy_is_report_only": true,
+      "replacement_claim_expected": false
+    }
+  },
+  "artifacts": {
+    "aggregate_runs_csv": "aggregate_runs.csv",
+    "aggregate_summary_json": "aggregate_summary.json",
+    "comparison_report_json": "comparison_report.json",
+    "comparison_report_md": "comparison_report.md"
+  }
+}

@@ -84,6 +84,8 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the frozen-bridge vs corrected-core comparison is now complete
 - the Stage 05 v1 vs v2 comparison is now complete
 - the current comparison result says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first grounds
+- the refreshed frozen-bridge vs Stage 05 v2 comparison is now complete
+- the refreshed comparison supports using Stage 05 v2 as the current exploratory reference
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -91,7 +93,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- refresh the frozen-bridge vs Stage 05 comparison with the v2 candidate next
+- draft the next narrow Stage 05 mechanism-first step from the v2 reference
 
 ## What Prompt Writers Must Not Reopen
 

@@ -98,6 +98,50 @@ class FrozenBridgeVsCorrectedCoreComparisonRunResult:
 
 
 @dataclass
+class FrozenBridgeVsStage05V2ComparisonConfig:
+    """Compare the frozen Stage 04 bridge against the Stage 05 v2 two-branch core."""
+
+    experiment_name: str = "frozen_bridge_vs_two_branch_corrected_core_comparison"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0, 1, 2)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    stage04_epochs: int = 60
+    stage04_eval_steps: int = 15
+    stage04_layer_dims: tuple[int, ...] = (64, 64, 10)
+    stage05_epochs: int = 12
+    stage05_eval_steps: int = 15
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The frozen-bridge vs Stage 05 v2 comparison currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.stage04_epochs <= 0 or self.stage05_epochs <= 0:
+            raise ValueError("stage04_epochs and stage05_epochs must be positive.")
+        if self.stage04_eval_steps <= 0 or self.stage05_eval_steps <= 0:
+            raise ValueError("stage04_eval_steps and stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
 class CorrectedResidualCoreV1VsV2ComparisonConfig:
     """Compare the Stage 05 corrected residual core v1 against the Stage 05 v2 two-branch core."""
 
@@ -379,6 +423,36 @@ def _stage05_v2_config(
     )
 
 
+def _stage05_v2_bridge_config(
+    config: FrozenBridgeVsStage05V2ComparisonConfig,
+    *,
+    seed: int,
+    output_root: Path,
+) -> FMPCEFExploratoryProbeConfig:
+    return build_fmpc_ef_exploratory_probe_config(
+        output_root=output_root,
+        experiment_name=STAGE05_V2_METHOD_NAME,
+        output_layout="run_id_subdir",
+        run_id=f"seed_{seed}",
+        run_seed=seed,
+        data_seed=seed,
+        model_init_seed=seed,
+        psi_init_seed=seed,
+        batch_order_seed=seed,
+        train_fraction=float(config.train_fraction),
+        val_fraction=float(config.val_fraction),
+        test_fraction=float(config.test_fraction),
+        batch_size=int(config.batch_size),
+        shuffle_batches=bool(config.shuffle_batches),
+        epochs=int(config.stage05_epochs),
+        eval_steps=int(config.stage05_eval_steps),
+        layer_dims=config.stage05_layer_dims,
+        transport_steps=int(config.stage05_transport_steps),
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+    )
+
+
 def _artifact_checks(
     run_dir: Path,
     *,
@@ -469,6 +543,8 @@ def _stage04_row(
         "run_id": str(result.run_dir.name),
         "run_config_path": _relative_posix(suite_run_dir, result.run_dir / "config.json"),
         "run_summary_path": _relative_posix(suite_run_dir, result.run_dir / "summary.json"),
+        "transport_family": "stage04_frozen_bridge_control",
+        "residual_branch_structure": "not_applicable",
         "configured_transport_steps": int(config.micro_steps),
         "one_step_energy_delta_vs_identity": float(val_one_step.energy_delta_vs_identity),
         "configured_step_energy_delta_vs_identity": float(val_configured.energy_delta_vs_identity),
@@ -973,6 +1049,385 @@ def run_frozen_bridge_vs_corrected_core_comparison(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _stage05_v2_vs_stage04_protocol_payload(
+    config: FrozenBridgeVsStage05V2ComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "stage_04_control": {
+            "method_name": STAGE04_METHOD_NAME,
+            "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+            "configured_transport_steps": 4,
+            "epochs": int(config.stage04_epochs),
+            "eval_steps": int(config.stage04_eval_steps),
+            "layer_dims": [int(value) for value in config.stage04_layer_dims],
+        },
+        "stage_05_candidate": {
+            "method_name": STAGE05_V2_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_identity_mode": "residual_corrected_meanflow",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "decision_rule": {
+            "primary_split": "validation",
+            "requires_all_stage05_v2_artifact_checks": True,
+            "requires_stage05_v2_one_step_energy_delta_vs_identity_negative_on_every_seed": True,
+            "requires_stage05_v2_configured_step_energy_delta_vs_identity_negative_on_every_seed": True,
+            "requires_stage05_v2_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": True,
+            "task_accuracy_is_report_only": True,
+            "replacement_claim_expected": False,
+        },
+    }
+
+
+def _mechanism_strength_label(
+    *,
+    candidate_energy_mean: float,
+    reference_energy_mean: float,
+    candidate_residual_mean: float | None = None,
+    reference_residual_mean: float | None = None,
+) -> str:
+    energy_better = float(candidate_energy_mean) < float(reference_energy_mean)
+    if candidate_residual_mean is None or reference_residual_mean is None:
+        return "stronger" if energy_better else "weaker"
+    residual_better = float(candidate_residual_mean) < float(reference_residual_mean)
+    return "stronger" if (energy_better and residual_better) else "weaker"
+
+
+def _report_accuracy_strength_label(
+    *,
+    candidate_val_accuracy_mean: float,
+    reference_val_accuracy_mean: float,
+    candidate_test_accuracy_mean: float,
+    reference_test_accuracy_mean: float,
+) -> str:
+    if (
+        float(candidate_val_accuracy_mean) >= float(reference_val_accuracy_mean)
+        and float(candidate_test_accuracy_mean) >= float(reference_test_accuracy_mean)
+    ):
+        return "stronger"
+    return "weaker"
+
+
+def _stage05_v2_vs_stage04_decision(
+    rows: list[dict[str, Any]],
+    *,
+    by_method: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, str]]:
+    stage05_rows = _method_rows(rows, STAGE05_V2_METHOD_NAME)
+    artifact_pass = all(bool(row["deterministic_artifact_checks_passed"]) for row in stage05_rows)
+    one_step_pass = all(float(row["one_step_energy_delta_vs_identity"]) < 0.0 for row in stage05_rows)
+    configured_energy_pass = all(
+        float(row["configured_step_energy_delta_vs_identity"]) < 0.0 for row in stage05_rows
+    )
+    configured_residual_pass = all(
+        float(row["configured_step_fixed_point_residual_delta_vs_identity"]) < 0.0
+        for row in stage05_rows
+    )
+    stage04 = by_method[STAGE04_METHOD_NAME]
+    stage05 = by_method[STAGE05_V2_METHOD_NAME]
+
+    one_step_strength = _mechanism_strength_label(
+        candidate_energy_mean=stage05["one_step_energy_delta_vs_identity"]["mean"],
+        reference_energy_mean=stage04["one_step_energy_delta_vs_identity"]["mean"],
+    )
+    configured_step_strength = _mechanism_strength_label(
+        candidate_energy_mean=stage05["configured_step_energy_delta_vs_identity"]["mean"],
+        reference_energy_mean=stage04["configured_step_energy_delta_vs_identity"]["mean"],
+        candidate_residual_mean=stage05["configured_step_fixed_point_residual_delta_vs_identity"]["mean"],
+        reference_residual_mean=stage04["configured_step_fixed_point_residual_delta_vs_identity"]["mean"],
+    )
+    accuracy_strength = _report_accuracy_strength_label(
+        candidate_val_accuracy_mean=stage05["val_accuracy"]["mean"],
+        reference_val_accuracy_mean=stage04["val_accuracy"]["mean"],
+        candidate_test_accuracy_mean=stage05["test_accuracy"]["mean"],
+        reference_test_accuracy_mean=stage04["test_accuracy"]["mean"],
+    )
+
+    justifies_continued_exploration = bool(
+        artifact_pass and one_step_pass and configured_energy_pass and configured_residual_pass
+    )
+    as_new_reference = bool(justifies_continued_exploration)
+    replaces_frozen_bridge = bool(
+        justifies_continued_exploration
+        and one_step_strength == "stronger"
+        and configured_step_strength == "stronger"
+        and accuracy_strength == "stronger"
+    )
+
+    decision = {
+        "stage05_v2_justifies_continued_exploration": bool(justifies_continued_exploration),
+        "stage05_v2_as_new_exploratory_reference": bool(as_new_reference),
+        "stage05_v2_replaces_frozen_bridge_on_main": bool(replaces_frozen_bridge),
+        "stage05_v2_decision_detail": {
+            "artifact_checks_all_pass": bool(artifact_pass),
+            "one_step_energy_delta_vs_identity_negative_on_every_seed": bool(one_step_pass),
+            "configured_step_energy_delta_vs_identity_negative_on_every_seed": bool(
+                configured_energy_pass
+            ),
+            "configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": bool(
+                configured_residual_pass
+            ),
+        },
+    }
+    comparisons = {
+        "one_step_mechanism_vs_stage04": one_step_strength,
+        "configured_step_mechanism_vs_stage04": configured_step_strength,
+        "report_only_accuracy_vs_stage04": accuracy_strength,
+    }
+    return decision, comparisons
+
+
+def _stage05_v2_vs_stage04_decision_rationale(
+    *,
+    decision: dict[str, Any],
+    comparisons: dict[str, str],
+) -> str:
+    if not bool(decision["stage05_v2_justifies_continued_exploration"]):
+        return "Stage 05 v2 keeps positive mechanism signal but does not clear the refreshed multiseed exploration rule."
+    if bool(decision["stage05_v2_replaces_frozen_bridge_on_main"]):
+        return "Stage 05 v2 clears the refreshed exploration rule and also clears the much stronger replacement rule."
+    return (
+        "Stage 05 v2 clears the refreshed mechanism-first exploration rule, "
+        f"is {comparisons['one_step_mechanism_vs_stage04']} on one-step mechanism, "
+        f"is {comparisons['configured_step_mechanism_vs_stage04']} on configured-step mechanism, "
+        f"and is {comparisons['report_only_accuracy_vs_stage04']} on report-only accuracy versus the frozen bridge."
+    )
+
+
+def _stage05_v2_vs_stage04_supports_lines(
+    *,
+    decision: dict[str, Any],
+    comparisons: dict[str, str],
+    by_method: dict[str, dict[str, Any]],
+) -> list[str]:
+    stage05 = by_method[STAGE05_V2_METHOD_NAME]
+    lines = [
+        (
+            "Stage 05 v2 artifacts are reproducible under the shared dataset/seed/batch protocol."
+            if decision["stage05_v2_decision_detail"]["artifact_checks_all_pass"]
+            else "Stage 05 v2 artifacts do not yet fully satisfy the shared artifact protocol."
+        ),
+        (
+            "Stage 05 v2 keeps one-step validation energy delta vs identity negative on every comparison seed."
+            if decision["stage05_v2_decision_detail"]["one_step_energy_delta_vs_identity_negative_on_every_seed"]
+            else "Stage 05 v2 does not keep one-step validation energy delta vs identity negative on every comparison seed."
+        ),
+        (
+            "Stage 05 v2 keeps configured-step validation energy delta vs identity negative on every comparison seed."
+            if decision["stage05_v2_decision_detail"]["configured_step_energy_delta_vs_identity_negative_on_every_seed"]
+            else "Stage 05 v2 does not keep configured-step validation energy delta vs identity negative on every comparison seed."
+        ),
+        (
+            "Stage 05 v2 keeps configured-step validation fixed-point residual delta vs identity negative on every comparison seed."
+            if decision["stage05_v2_decision_detail"]["configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed"]
+            else "Stage 05 v2 does not keep configured-step validation fixed-point residual delta vs identity negative on every comparison seed."
+        ),
+        f"Relative to the frozen bridge, Stage 05 v2 is {comparisons['one_step_mechanism_vs_stage04']} on one-step mechanism.",
+        f"Relative to the frozen bridge, Stage 05 v2 is {comparisons['configured_step_mechanism_vs_stage04']} on configured-step mechanism.",
+        f"Relative to the frozen bridge, Stage 05 v2 is {comparisons['report_only_accuracy_vs_stage04']} on report-only accuracy.",
+    ]
+    if bool(decision["stage05_v2_justifies_continued_exploration"]):
+        lines.append("The refreshed comparison supports continued Stage 05 mechanism-first exploration.")
+    if bool(decision["stage05_v2_as_new_exploratory_reference"]):
+        lines.append("The refreshed comparison supports using Stage 05 v2 as the new exploratory reference.")
+    lines.append(
+        f"Stage 05 v2 mean validation accuracy is {stage05['val_accuracy']['mean']:.6f}; accuracy remains report-only in this comparison."
+    )
+    return lines
+
+
+def _stage05_v2_vs_stage04_does_not_support_lines(
+    *,
+    decision: dict[str, Any],
+) -> list[str]:
+    lines = [
+        "This refreshed comparison supports keeping Stage 04 frozen on main.",
+        "This refreshed comparison supports keeping Stage 05 mechanism-first.",
+        "This refreshed comparison does not reopen any Stage 04 package-internal work.",
+        "This refreshed comparison does not promote task accuracy to the Stage 05 gate.",
+    ]
+    if not bool(decision["stage05_v2_replaces_frozen_bridge_on_main"]):
+        lines.append("This refreshed comparison does not support replacing the frozen Stage 04 bridge on main.")
+    return lines
+
+
+def _stage05_v2_vs_stage04_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    supports = report["supports"]
+    does_not_support = report["does_not_support"]
+    lines = [
+        "# Frozen Bridge vs Two-Branch Corrected Residual Core",
+        "",
+        "## Protocol",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- shared shuffle_batches: `{protocol['shared_shuffle_batches']}`",
+        "",
+        "## Decision",
+        f"- `stage05_v2_justifies_continued_exploration`: `{decision['stage05_v2_justifies_continued_exploration']}`",
+        f"- `stage05_v2_as_new_exploratory_reference`: `{decision['stage05_v2_as_new_exploratory_reference']}`",
+        f"- `stage05_v2_replaces_frozen_bridge_on_main`: `{decision['stage05_v2_replaces_frozen_bridge_on_main']}`",
+        f"- rationale: `{decision['stage05_v2_vs_stage04_decision_rationale']}`",
+        "",
+        "## Supports",
+    ]
+    for item in supports:
+        lines.append(f"- {item}")
+    lines.extend(["", "## Does Not Support"])
+    for item in does_not_support:
+        lines.append(f"- {item}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _stage05_v2_vs_stage04_suite_config_payload(
+    config: FrozenBridgeVsStage05V2ComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": "frozen_bridge_vs_two_branch_corrected_residual_core_comparison",
+        "comparison_protocol": _stage05_v2_vs_stage04_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
+def run_frozen_bridge_vs_stage05_v2_comparison(
+    config: FrozenBridgeVsStage05V2ComparisonConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run the refreshed frozen-bridge vs Stage 05 v2 comparison."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v2_vs_stage04_suite_config_payload(config))
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+
+    for seed in config.seeds:
+        run_index += 1
+        stage04_config = _stage04_config(config, seed=seed, output_root=runs_root)
+        stage04_result = run_fmpc_tf2_experiment(stage04_config)
+        rows.append(
+            _stage04_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=stage04_result,
+                config=stage04_config,
+            )
+        )
+
+        run_index += 1
+        stage05_config = _stage05_v2_bridge_config(config, seed=seed, output_root=runs_root)
+        stage05_result = run_fmpc_ef_exploratory_probe(stage05_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=stage05_result,
+                config=stage05_config,
+                method_name=STAGE05_V2_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v2",
+            )
+        )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE04_METHOD_NAME: _method_summary(_method_rows(rows, STAGE04_METHOD_NAME)),
+        STAGE05_V2_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V2_METHOD_NAME)),
+    }
+    pairwise_stage05_v2_vs_stage04 = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V2_METHOD_NAME,
+        reference_method=STAGE04_METHOD_NAME,
+    )
+    decision, comparisons = _stage05_v2_vs_stage04_decision(rows, by_method=by_method)
+    decision_rationale = _stage05_v2_vs_stage04_decision_rationale(
+        decision=decision,
+        comparisons=comparisons,
+    )
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": "frozen_bridge_vs_two_branch_corrected_residual_core_comparison",
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_vs_stage04_protocol_payload(config),
+        "by_method": by_method,
+        "pairwise_stage05_v2_vs_stage04": pairwise_stage05_v2_vs_stage04,
+        **decision,
+        **comparisons,
+        "stage05_v2_vs_stage04_decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_vs_stage04_protocol_payload(config),
+        "decision": {
+            **decision,
+            **comparisons,
+            "stage05_v2_vs_stage04_decision_rationale": decision_rationale,
+        },
+        "supports": _stage05_v2_vs_stage04_supports_lines(
+            decision=decision,
+            comparisons=comparisons,
+            by_method=by_method,
+        ),
+        "does_not_support": _stage05_v2_vs_stage04_does_not_support_lines(
+            decision=decision,
+        ),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v2_vs_stage04_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_vs_stage04_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

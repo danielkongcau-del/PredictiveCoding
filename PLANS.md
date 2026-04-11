@@ -122,15 +122,32 @@ Key artifacts:
 
 ### 4. Refresh Frozen-Bridge vs Stage 05 V2 Comparison
 
+Completed outcome:
+
+- the refreshed frozen-bridge comparison now exists for the Stage 05 v2 candidate
+- the refreshed comparison says:
+  - Stage 05 v2 justifies continued exploration
+  - Stage 05 v2 should be treated as the new exploratory reference
+  - Stage 05 v2 is stronger than the frozen bridge on one-step mechanism
+  - Stage 05 v2 is weaker than the frozen bridge on configured-step mechanism
+  - Stage 05 v2 is weaker than the frozen bridge on report-only accuracy
+  - Stage 05 v2 does not replace the frozen bridge result on `main`
+
+Key artifact:
+
+- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
+
+### 5. Next Narrow Stage 05 Step Should Start From V2
+
 Objective:
 
-- rerun the formal frozen-bridge comparison using the current Stage 05 v2 candidate rather than the older Stage 05 v1 baseline
+- define the next narrow Stage 05 mechanism-first step using the Stage 05 v2 two-branch core as the exploratory reference
 
 Required framing:
 
 - keep Stage 04 frozen on `main`
 - do not reopen Stage 04 package-internal work
-- do not treat the refreshed comparison as a replacement claim unless the evidence actually clears that much higher bar
+- do not treat the refreshed bridge comparison as a replacement claim
 - keep Stage 05 mechanism-first and keep task accuracy report-only
 
 ## Exploratory Acceptance Criteria

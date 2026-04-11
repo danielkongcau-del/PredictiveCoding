@@ -119,7 +119,7 @@ Relevant artifacts:
 
 Current formal comparison:
 
-- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
+- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
 
 Current comparison result:
 
@@ -134,28 +134,30 @@ Current comparison result:
     - `0.811111111111111`
   - mean test accuracy:
     - `0.8197530864197531`
-- Stage 05 corrected residual core:
+- Stage 05 two-branch corrected residual core v2:
   - mean one-step validation energy delta vs identity:
-    - `-0.00015049783324024477`
+    - `-0.00017276987415493217`
   - mean configured-step validation energy delta vs identity:
-    - `-0.00015441938077428072`
+    - `-0.0001763621381912032`
   - mean configured-step validation fixed-point residual delta vs identity:
-    - `-8.351992466021287e-07`
+    - `-9.455861891589161e-07`
   - mean validation accuracy:
-    - `0.2740740740740741`
+    - `0.27037037037037037`
   - mean test accuracy:
-    - `0.2716049382716049`
+    - `0.27283950617283953`
 
 Current interpretation:
 
-- Stage 05 clears the current multiseed mechanism-first rule for a narrow v2 charter
-- Stage 05 does not replace the frozen bridge result on `main`
-- Stage 05 remains far below the frozen bridge on report-only accuracy
-- Stage 05 also remains weaker than the frozen bridge on configured-step mechanism magnitude in the current comparison
+- Stage 05 v2 clears the refreshed multiseed mechanism-first exploration rule
+- Stage 05 v2 is stronger than the frozen bridge on one-step mechanism
+- Stage 05 v2 remains weaker than the frozen bridge on configured-step mechanism magnitude
+- Stage 05 v2 remains far below the frozen bridge on report-only accuracy
+- Stage 05 v2 does not replace the frozen bridge result on `main`
+- the refreshed comparison supports using Stage 05 v2 as the new exploratory reference
 
 Relevant artifacts:
 
-- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
+- `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
 
 ## FMPC Stage 05 V1 vs V2 Comparison Snapshot
 

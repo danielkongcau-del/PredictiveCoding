@@ -1,0 +1,85 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_04_control": {
+      "method_name": "stage_04_frozen_bridge",
+      "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+      "configured_transport_steps": 4,
+      "epochs": 60,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        64,
+        10
+      ]
+    },
+    "stage_05_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_identity_mode": "residual_corrected_meanflow",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_v2_artifact_checks": true,
+      "requires_stage05_v2_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "task_accuracy_is_report_only": true,
+      "replacement_claim_expected": false
+    }
+  },
+  "decision": {
+    "stage05_v2_justifies_continued_exploration": true,
+    "stage05_v2_as_new_exploratory_reference": true,
+    "stage05_v2_replaces_frozen_bridge_on_main": false,
+    "stage05_v2_decision_detail": {
+      "artifact_checks_all_pass": true,
+      "one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true
+    },
+    "one_step_mechanism_vs_stage04": "stronger",
+    "configured_step_mechanism_vs_stage04": "weaker",
+    "report_only_accuracy_vs_stage04": "weaker",
+    "stage05_v2_vs_stage04_decision_rationale": "Stage 05 v2 clears the refreshed mechanism-first exploration rule, is stronger on one-step mechanism, is weaker on configured-step mechanism, and is weaker on report-only accuracy versus the frozen bridge."
+  },
+  "supports": [
+    "Stage 05 v2 artifacts are reproducible under the shared dataset/seed/batch protocol.",
+    "Stage 05 v2 keeps one-step validation energy delta vs identity negative on every comparison seed.",
+    "Stage 05 v2 keeps configured-step validation energy delta vs identity negative on every comparison seed.",
+    "Stage 05 v2 keeps configured-step validation fixed-point residual delta vs identity negative on every comparison seed.",
+    "Relative to the frozen bridge, Stage 05 v2 is stronger on one-step mechanism.",
+    "Relative to the frozen bridge, Stage 05 v2 is weaker on configured-step mechanism.",
+    "Relative to the frozen bridge, Stage 05 v2 is weaker on report-only accuracy.",
+    "The refreshed comparison supports continued Stage 05 mechanism-first exploration.",
+    "The refreshed comparison supports using Stage 05 v2 as the new exploratory reference.",
+    "Stage 05 v2 mean validation accuracy is 0.270370; accuracy remains report-only in this comparison."
+  ],
+  "does_not_support": [
+    "This refreshed comparison supports keeping Stage 04 frozen on main.",
+    "This refreshed comparison supports keeping Stage 05 mechanism-first.",
+    "This refreshed comparison does not reopen any Stage 04 package-internal work.",
+    "This refreshed comparison does not promote task accuracy to the Stage 05 gate.",
+    "This refreshed comparison does not support replacing the frozen Stage 04 bridge on main."
+  ]
+}

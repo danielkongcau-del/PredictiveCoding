@@ -81,11 +81,8 @@ Current probe status:
 - the formal frozen-bridge vs corrected-core comparison now exists under:
   - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison)
 - current comparison result:
-  - Stage 05 keeps one-step validation energy delta vs identity negative on all comparison seeds
-  - Stage 05 keeps configured-step validation energy delta vs identity negative on all comparison seeds
-  - Stage 05 keeps configured-step validation fixed-point residual delta vs identity negative on all comparison seeds
-  - Stage 05 remains far below the frozen Stage 04 bridge on report-only accuracy
-  - Stage 05 does not replace the frozen Stage 04 bridge result on `main`
+  - the older frozen-bridge comparison used the Stage 05 v1 baseline
+  - it remains a valid bridge-vs-baseline reference artifact
 - the formal Stage 05 v1 vs v2 comparison now exists under:
   - [outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison)
 - current v1 vs v2 result:
@@ -94,11 +91,24 @@ Current probe status:
   - Stage 05 v2 keeps configured-step validation fixed-point residual delta vs identity negative on all comparison seeds
   - Stage 05 v2 improves mean configured-step validation energy delta vs identity over v1
   - Stage 05 v2 improves mean configured-step validation fixed-point residual delta vs identity over v1
+- the refreshed frozen-bridge vs Stage 05 v2 comparison now exists under:
+  - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison)
+- refreshed v2 vs frozen-bridge result:
+  - Stage 05 v2 keeps one-step validation energy delta vs identity negative on all comparison seeds
+  - Stage 05 v2 keeps configured-step validation energy delta vs identity negative on all comparison seeds
+  - Stage 05 v2 keeps configured-step validation fixed-point residual delta vs identity negative on all comparison seeds
+  - Stage 05 v2 is stronger than the frozen bridge on one-step mechanism
+  - Stage 05 v2 is weaker than the frozen bridge on configured-step mechanism
+  - Stage 05 v2 is weaker than the frozen bridge on report-only accuracy
+  - the refreshed comparison supports continued Stage 05 exploration
+  - the refreshed comparison supports using Stage 05 v2 as the new exploratory reference
+  - the refreshed comparison does not support replacing the frozen Stage 04 bridge result on `main`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
   - the two-branch corrected residual MeanFlow core is now the current narrow Stage 05 exploratory candidate
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
+  - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -107,7 +117,8 @@ Current probe status:
 - Do not open another package-internal Stage 04 diagnostic suite from this state.
 - Do not use any current Stage 05 comparison as a claim that Stage 05 should replace the frozen bridge result on `main`.
 - Use the current Stage 05 v2 candidate as the new exploratory reference.
-- Refresh the formal frozen-bridge vs Stage 05 comparison with the Stage 05 v2 candidate next.
+- Keep Stage 05 mechanism-first and task accuracy report-only.
+- Charter the next narrow Stage 05 step from the Stage 05 v2 reference rather than returning to the v1 baseline.
 
 ## Reopen Conditions
 
@@ -142,3 +153,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison)
 - Stage 05 v1 vs v2 comparison artifact:
   - [outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison)
+- Stage 05 refreshed bridge vs v2 comparison artifact:
+  - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison)

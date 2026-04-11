@@ -1,0 +1,207 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "frozen_bridge_vs_two_branch_corrected_residual_core_comparison",
+  "num_runs": 6,
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_04_control": {
+      "method_name": "stage_04_frozen_bridge",
+      "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+      "configured_transport_steps": 4,
+      "epochs": 60,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        64,
+        10
+      ]
+    },
+    "stage_05_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_identity_mode": "residual_corrected_meanflow",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_v2_artifact_checks": true,
+      "requires_stage05_v2_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "task_accuracy_is_report_only": true,
+      "replacement_claim_expected": false
+    }
+  },
+  "by_method": {
+    "stage_04_frozen_bridge": {
+      "num_runs": 3,
+      "configured_transport_steps": 4,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 0.6666666666666666,
+      "one_step_energy_delta_vs_identity": {
+        "mean": 0.0003669573859489221,
+        "std": 0.0009275947375724848
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.004070538730777469,
+        "std": 0.0014245919147429114
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.8072299104931235e-05,
+        "std": 2.5678412571680846e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": 0.001199319940873263,
+        "std": 0.0009440854790503557
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0032397953606488708,
+        "std": 0.001444790198580633
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -1.6930583478288714e-05,
+        "std": 2.5780692053074534e-06
+      },
+      "val_accuracy": {
+        "mean": 0.811111111111111,
+        "std": 0.03777051491550211
+      },
+      "test_accuracy": {
+        "mean": 0.8197530864197531,
+        "std": 0.01222159868717491
+      },
+      "val_output_mse": {
+        "mean": 0.06168984088904902,
+        "std": 0.002034026066822284
+      },
+      "test_output_mse": {
+        "mean": 0.061619460275610126,
+        "std": 0.0015642377535134405
+      },
+      "runtime_proxy_seconds": {
+        "mean": 18.68124003333408,
+        "std": 0.2140221074656177
+      }
+    },
+    "stage_05_two_branch_corrected_residual_core_v2": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.00017276987415493217,
+        "std": 9.132836521886515e-05
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0001763621381912032,
+        "std": 9.237365333805956e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -9.455861891589161e-07,
+        "std": 5.194668860413359e-07
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -4.0276632887044826e-05,
+        "std": 9.461469528471234e-05
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -4.40006805592826e-05,
+        "std": 9.564210925238694e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.474567376485018e-07,
+        "std": 5.233895648328784e-07
+      },
+      "val_accuracy": {
+        "mean": 0.27037037037037037,
+        "std": 0.008000914442478852
+      },
+      "test_accuracy": {
+        "mean": 0.27283950617283953,
+        "std": 0.0196757746302583
+      },
+      "val_output_mse": {
+        "mean": 0.08721944811927351,
+        "std": 0.0008829657805437381
+      },
+      "test_output_mse": {
+        "mean": 0.08720636930912906,
+        "std": 0.0009619787002150455
+      },
+      "runtime_proxy_seconds": {
+        "mean": 1.721769066665729,
+        "std": 0.018346246772306965
+      }
+    }
+  },
+  "pairwise_stage05_v2_vs_stage04": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0005397272601038542,
+      "std": 0.000928963421355786
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": 0.003894176592586266,
+      "std": 0.001375415653539275
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": 1.7126712915772316e-05,
+      "std": 2.4468083162669946e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": 0.0031957946800895884,
+      "std": 0.0013923005101499498
+    },
+    "val_accuracy_delta": {
+      "mean": -0.5407407407407407,
+      "std": 0.04265963590906422
+    },
+    "test_accuracy_delta": {
+      "mean": -0.5469135802469136,
+      "std": 0.0317646427907867
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -16.959470966668352,
+      "std": 0.21497773280271368
+    }
+  },
+  "stage05_v2_justifies_continued_exploration": true,
+  "stage05_v2_as_new_exploratory_reference": true,
+  "stage05_v2_replaces_frozen_bridge_on_main": false,
+  "stage05_v2_decision_detail": {
+    "artifact_checks_all_pass": true,
+    "one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+    "configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+    "configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true
+  },
+  "one_step_mechanism_vs_stage04": "stronger",
+  "configured_step_mechanism_vs_stage04": "weaker",
+  "report_only_accuracy_vs_stage04": "weaker",
+  "stage05_v2_vs_stage04_decision_rationale": "Stage 05 v2 clears the refreshed mechanism-first exploration rule, is stronger on one-step mechanism, is weaker on configured-step mechanism, and is weaker on report-only accuracy versus the frozen bridge.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}

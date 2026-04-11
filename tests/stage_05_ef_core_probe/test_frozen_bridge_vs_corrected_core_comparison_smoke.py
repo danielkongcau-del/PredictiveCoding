@@ -138,3 +138,73 @@ def test_stage05_v1_vs_v2_comparison_writes_expected_artifacts(tmp_path: Path) -
     assert "supports" in report
     assert "does_not_support" in report
     assert "stage05_v2_improves_mechanism_magnitude_over_v1" in report["decision"]
+
+
+def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="frozen_bridge_vs_stage05_v2_smoke",
+        comparison_variant="stage04_vs_stage05_v2",
+        seeds=(0,),
+        stage04_epochs=2,
+        stage04_eval_steps=5,
+        stage04_layer_dims=(64, 16, 10),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 2
+    method_names = {row["method_name"] for row in rows}
+    assert method_names == {
+        "stage_04_frozen_bridge",
+        "stage_05_two_branch_corrected_residual_core_v2",
+    }
+
+    first_row = rows[0]
+    assert "method_name" in first_row
+    assert "stage_name" in first_row
+    assert "configured_transport_steps" in first_row
+    assert "one_step_energy_delta_vs_identity" in first_row
+    assert "configured_step_energy_delta_vs_identity" in first_row
+    assert "configured_step_fixed_point_residual_delta_vs_identity" in first_row
+    assert "one_step_energy_delta_vs_local_field_only" in first_row
+    assert "configured_step_energy_delta_vs_local_field_only" in first_row
+    assert "configured_step_fixed_point_residual_delta_vs_local_field_only" in first_row
+    assert "val_accuracy" in first_row
+    assert "test_accuracy" in first_row
+    assert "val_output_mse" in first_row
+    assert "test_output_mse" in first_row
+    assert "runtime_proxy_seconds" in first_row
+    assert "deterministic_artifact_checks_passed" in first_row
+
+    assert summary["stage"] == "frozen_bridge_vs_two_branch_corrected_residual_core_comparison"
+    assert "comparison_protocol" in summary
+    assert "by_method" in summary
+    assert "pairwise_stage05_v2_vs_stage04" in summary
+    assert "stage05_v2_justifies_continued_exploration" in summary
+    assert "stage05_v2_replaces_frozen_bridge_on_main" in summary
+    assert "stage05_v2_as_new_exploratory_reference" in summary
+    assert "stage05_v2_vs_stage04_decision_rationale" in summary
+    assert "one_step_mechanism_vs_stage04" in summary
+    assert "configured_step_mechanism_vs_stage04" in summary
+    assert "report_only_accuracy_vs_stage04" in summary
+
+    assert "decision" in report
+    assert "supports" in report
+    assert "does_not_support" in report
+    assert "stage05_v2_justifies_continued_exploration" in report["decision"]
+    assert "stage05_v2_replaces_frozen_bridge_on_main" in report["decision"]
+    assert "stage05_v2_as_new_exploratory_reference" in report["decision"]
