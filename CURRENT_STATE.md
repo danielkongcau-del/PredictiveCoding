@@ -103,12 +103,24 @@ Current probe status:
   - the refreshed comparison supports continued Stage 05 exploration
   - the refreshed comparison supports using Stage 05 v2 as the new exploratory reference
   - the refreshed comparison does not support replacing the frozen Stage 04 bridge result on `main`
+- the dedicated Stage 05 v2 diagnostics now exist under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_diagnostics](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_diagnostics)
+- current v2 diagnostic result:
+  - all comparison seeds select the final training epoch
+  - configured-step mechanism metrics are still improving at the training boundary
+  - validation accuracy is also still improving at the training boundary
+  - the selected epoch is already the highest validation-accuracy epoch on every seed
+  - the forward state branch contribution is materially active rather than negligible
+  - the current low report-only accuracy is not primarily a selection-rule artifact
+  - the current narrow diagnosis is:
+    - `likely_undertrained`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
   - the two-branch corrected residual MeanFlow core is now the current narrow Stage 05 exploratory candidate
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
+  - the current evidence points first to training / budget limitation on the v2 reference, not to state-branch removal or selection-rule misalignment
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -118,7 +130,7 @@ Current probe status:
 - Do not use any current Stage 05 comparison as a claim that Stage 05 should replace the frozen bridge result on `main`.
 - Use the current Stage 05 v2 candidate as the new exploratory reference.
 - Keep Stage 05 mechanism-first and task accuracy report-only.
-- Charter the next narrow Stage 05 step from the Stage 05 v2 reference rather than returning to the v1 baseline.
+- If Stage 05 continues from the current state, target longer training / budget on the existing v2 reference before inventing a new mechanism family.
 
 ## Reopen Conditions
 
@@ -155,3 +167,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison)
 - Stage 05 refreshed bridge vs v2 comparison artifact:
   - [outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison)
+- Stage 05 v2 diagnostics artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_diagnostics](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_diagnostics)

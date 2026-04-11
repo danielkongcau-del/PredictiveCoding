@@ -149,6 +149,38 @@ Required framing:
 - do not reopen Stage 04 package-internal work
 - do not treat the refreshed bridge comparison as a replacement claim
 - keep Stage 05 mechanism-first and keep task accuracy report-only
+- use current diagnostics to decide whether the next issue is:
+  - training / budget
+  - branch utilization
+  - rollout accumulation
+  - or selection pressure
+
+### 6. Diagnose The Current Stage 05 V2 Reference Before Any V3 Charter
+
+Completed outcome:
+
+- the dedicated diagnostics now exist under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
+- all Stage 05 v2 comparison seeds select the final training epoch
+- configured-step mechanism metrics are still improving at the training boundary
+- validation accuracy is also still improving at the training boundary
+- the selected epoch is already the highest validation-accuracy epoch on every seed
+- the state branch is materially active in forward residual magnitude rather than negligible
+- the current narrow diagnosis is:
+  - `likely_undertrained`
+
+### 7. If Stage 05 Continues, Target Longer Training / Budget On V2 First
+
+Objective:
+
+- keep the current Stage 05 v2 transport family fixed and test whether a longer training / budget pass on the same reference closes more of the configured-step and report-only gap before inventing a new family
+
+Required framing:
+
+- keep Stage 04 frozen on `main`
+- do not reopen Stage 04 package-internal work
+- do not change the Stage 05 v2 transport family before the budget question is answered
+- do not treat any Stage 05 result as a default-replacement claim against the frozen bridge result
 
 ## Exploratory Acceptance Criteria
 

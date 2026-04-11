@@ -29,6 +29,7 @@ Current working interpretation:
 - the current open work is no longer another Stage 04 repair
 - the current narrow Stage 05 exploratory reference is the two-branch corrected residual MeanFlow v2 core
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
+- the dedicated Stage 05 v2 diagnostics currently point first to training / budget limitation on the v2 reference
 - the refreshed comparison does not support replacing the frozen bridge result on `main`
 
 ## Current Result Snapshot
@@ -41,6 +42,7 @@ Current working interpretation:
 - the first Stage 05 exploratory probe has positive mechanism signal on energy and fixed-point residual, but its task accuracy remains report-only and well below the frozen Stage 04 bridge result
 - the formal Stage 05 v1 vs v2 comparison says the two-branch Stage 05 v2 core improves mechanism magnitude over the v1 baseline
 - the refreshed frozen-bridge vs Stage 05 v2 comparison says Stage 05 v2 remains mechanism-positive and should be treated as the current exploratory reference, but not as a replacement for the frozen bridge result on `main`
+- the dedicated Stage 05 v2 diagnostics say the current narrow diagnosis is `likely_undertrained`, not primarily a selection-rule issue
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 

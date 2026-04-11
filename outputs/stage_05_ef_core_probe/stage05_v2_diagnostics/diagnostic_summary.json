@@ -1,0 +1,304 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_diagnostics",
+  "source_artifacts": {
+    "source_comparison_dir": "outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison",
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "training_boundary": {
+    "selected_epochs": [
+      12,
+      12,
+      12
+    ],
+    "total_epochs": [
+      12,
+      12,
+      12
+    ],
+    "selection_hits_final_boundary_on_all_seeds": true
+  },
+  "epoch_level": {
+    "configured_energy_still_improving_rate": 1.0,
+    "configured_residual_still_improving_rate": 1.0,
+    "val_accuracy_still_improving_rate": 1.0,
+    "aggregate": {
+      "final_epoch_train_total_loss_mean": 4.365413813112328e-06,
+      "final_epoch_train_boot_loss_mean": 3.6567778466050676e-06,
+      "final_epoch_train_identity_loss_mean": 7.086359665072602e-06,
+      "final_epoch_val_configured_step_energy_delta_vs_identity_mean": -0.0001763621381912032,
+      "final_epoch_val_configured_step_fixed_point_residual_delta_vs_identity_mean": -9.455861891589161e-07,
+      "final_epoch_val_accuracy_mean": 0.27037037037037037
+    }
+  },
+  "branch_contribution": {
+    "m_traj_rms_mean": 0.0016335934766490093,
+    "m_state_rms_mean": 0.001125972458653077,
+    "m_traj_mean_l2": 0.006449137150076541,
+    "m_state_mean_l2": 0.004408275428008213,
+    "state_over_traj_ratio_mean": 0.7036463187920736,
+    "state_over_traj_ratio_std": 0.13010229306996657,
+    "anchor_term_rms_mean": 5.239573604071156e-07,
+    "trajectory_term_rms_mean": 0.0012834573487482462,
+    "state_term_rms_mean": 1.9056984012333506e-07,
+    "state_term_over_trajectory_term_ratio_mean": 0.00015359618193483385,
+    "state_term_over_trajectory_term_ratio_std": 6.528956591276637e-05,
+    "state_branch_contribution_label_counts": {
+      "clearly_material": 3
+    },
+    "state_branch_contribution_label": "clearly_material",
+    "state_branch_forward_contribution_material_but_identity_term_small": true
+  },
+  "rollout_diagnosis": {
+    "one_step_energy_delta_vs_identity_mean": -0.00017276987415493217,
+    "configured_step_energy_delta_vs_identity_mean": -0.0001763621381912032,
+    "one_step_fixed_point_residual_delta_vs_identity_mean": -9.274869158642137e-07,
+    "configured_step_fixed_point_residual_delta_vs_identity_mean": -9.455861891589161e-07,
+    "incremental_configured_step_energy_gain_over_step1_mean": -8.16097868376701e-05,
+    "incremental_configured_step_residual_gain_over_step1_mean": -4.4036754402189925e-07,
+    "rollout_gap_label_counts": {
+      "meaningful_extra_gain_after_step1": 3
+    },
+    "rollout_gap_label": "meaningful_extra_gain_after_step1"
+  },
+  "selection_rule_diagnosis": {
+    "selected_vs_best_accuracy_gap_mean": 0.0,
+    "selected_vs_best_accuracy_gap_std": 0.0,
+    "best_accuracy_epoch_is_selected_epoch_rate": 1.0,
+    "sizable_accuracy_gap_rate": 0.0,
+    "best_accuracy_still_low_rate": 1.0,
+    "selection_rule_likely_primary_issue": false
+  },
+  "per_seed": [
+    {
+      "seed": 0,
+      "source_run_dir": "outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/runs/stage_05_two_branch_corrected_residual_core_v2/seed_0",
+      "selected_epoch": 12,
+      "total_epochs": 12,
+      "selection_hits_final_training_boundary": true,
+      "selected_epoch_stage": "hybrid",
+      "selected_epoch_lambda_id": 0.1,
+      "highest_val_accuracy_epoch": 12,
+      "highest_val_accuracy": 0.2814814814814815,
+      "selected_epoch_val_accuracy": 0.2814814814814815,
+      "selected_vs_best_accuracy_gap": 0.0,
+      "selected_epoch_val_configured_step_energy_delta_vs_identity": -0.00016242903310992318,
+      "selected_epoch_val_configured_step_fixed_point_residual_delta_vs_identity": -8.556770074017361e-07,
+      "selected_epoch_val_one_step_energy_delta_vs_identity": -0.00015786026169051226,
+      "near_final_trend": {
+        "window_epochs": [
+          10,
+          11,
+          12
+        ],
+        "train_total_loss_delta": -1.0808332348466085e-07,
+        "train_boot_loss_delta": -9.309668840358818e-08,
+        "train_identity_loss_delta": -1.4986635081073181e-07,
+        "val_configured_energy_delta_vs_identity_delta": -9.314960688178164e-06,
+        "val_configured_fixed_point_residual_delta_vs_identity_delta": -4.496727488720949e-08,
+        "val_accuracy_delta": 0.03703703703703706,
+        "configured_energy_still_improving": true,
+        "configured_residual_still_improving": true,
+        "val_accuracy_still_improving": true
+      },
+      "reproduction_match": {
+        "selected_epoch_matches_source": true,
+        "val_accuracy_matches_source": true,
+        "configured_step_energy_delta_matches_source": true
+      },
+      "branch_summary": {
+        "m_traj_rms_mean": 0.0014822250730872474,
+        "m_state_rms_mean": 0.001310210037356957,
+        "m_traj_mean_l2": 0.00585869867790444,
+        "m_state_mean_l2": 0.005034117993673092,
+        "state_over_traj_ratio_mean": 0.8671765790418842,
+        "anchor_term_rms_mean": 5.317039007004726e-07,
+        "trajectory_term_rms_mean": 0.0009519040929425333,
+        "state_term_rms_mean": 2.453469905117708e-07,
+        "anchor_term_mean_l2": 2.088469716732724e-06,
+        "trajectory_term_mean_l2": 0.003807616291974644,
+        "state_term_mean_l2": 9.308814530590473e-07,
+        "state_term_over_trajectory_term_ratio_mean": 0.00024437869714047356,
+        "step1_energy_delta_vs_identity": -8.745445523344886e-05,
+        "stepN_energy_delta_vs_identity": -0.00016242903310992318,
+        "step1_fixed_point_residual_delta_vs_identity": -4.583502595645176e-07,
+        "stepN_fixed_point_residual_delta_vs_identity": -8.556770074017361e-07,
+        "state_branch_contribution_label": "clearly_material"
+      },
+      "rollout_summary": {
+        "rollout_gap_label": "meaningful_extra_gain_after_step1",
+        "one_step_energy_delta_vs_identity": -0.00015786026169051226,
+        "configured_step_energy_delta_vs_identity": -0.00016242903310992318,
+        "one_step_fixed_point_residual_delta_vs_identity": -8.325290885253329e-07,
+        "configured_step_fixed_point_residual_delta_vs_identity": -8.556770074017361e-07,
+        "incremental_configured_step_energy_gain_over_step1": -7.497457787647432e-05,
+        "incremental_configured_step_residual_gain_over_step1": -3.973267478372185e-07
+      },
+      "selection_rule_summary": {
+        "selected_epoch": 12,
+        "best_accuracy_epoch": 12,
+        "best_accuracy_epoch_is_selected_epoch": true,
+        "accuracy_gap_vs_selected": 0.0,
+        "best_accuracy_still_low": true
+      }
+    },
+    {
+      "seed": 1,
+      "source_run_dir": "outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/runs/stage_05_two_branch_corrected_residual_core_v2/seed_1",
+      "selected_epoch": 12,
+      "total_epochs": 12,
+      "selection_hits_final_training_boundary": true,
+      "selected_epoch_stage": "hybrid",
+      "selected_epoch_lambda_id": 0.1,
+      "highest_val_accuracy_epoch": 12,
+      "highest_val_accuracy": 0.26666666666666666,
+      "selected_epoch_val_accuracy": 0.26666666666666666,
+      "selected_vs_best_accuracy_gap": 0.0,
+      "selected_epoch_val_configured_step_energy_delta_vs_identity": -0.00029581753099444663,
+      "selected_epoch_val_configured_step_fixed_point_residual_delta_vs_identity": -1.6219725046261895e-06,
+      "selected_epoch_val_one_step_energy_delta_vs_identity": -0.0002913308594792441,
+      "near_final_trend": {
+        "window_epochs": [
+          10,
+          11,
+          12
+        ],
+        "train_total_loss_delta": -2.0100118645748347e-07,
+        "train_boot_loss_delta": -1.7784181612936256e-07,
+        "train_identity_loss_delta": -2.3159370328120918e-07,
+        "val_configured_energy_delta_vs_identity_delta": -7.735160328370405e-07,
+        "val_configured_fixed_point_residual_delta_vs_identity_delta": -1.6161391008014808e-09,
+        "val_accuracy_delta": 0.033333333333333326,
+        "configured_energy_still_improving": true,
+        "configured_residual_still_improving": true,
+        "val_accuracy_still_improving": true
+      },
+      "reproduction_match": {
+        "selected_epoch_matches_source": true,
+        "val_accuracy_matches_source": true,
+        "configured_step_energy_delta_matches_source": true
+      },
+      "branch_summary": {
+        "m_traj_rms_mean": 0.001960829397723128,
+        "m_state_rms_mean": 0.0010633559230807839,
+        "m_traj_mean_l2": 0.00770952099266548,
+        "m_state_mean_l2": 0.004220518997577371,
+        "state_over_traj_ratio_mean": 0.5488517392644299,
+        "anchor_term_rms_mean": 5.171446510619028e-07,
+        "trajectory_term_rms_mean": 0.0016445229235751264,
+        "state_term_rms_mean": 1.6711076668104286e-07,
+        "anchor_term_mean_l2": 1.9945747055125692e-06,
+        "trajectory_term_mean_l2": 0.0065780916129433795,
+        "state_term_mean_l2": 6.166939601114021e-07,
+        "state_term_over_trajectory_term_ratio_mean": 9.361066774527598e-05,
+        "step1_energy_delta_vs_identity": -0.00015473626235146254,
+        "stepN_energy_delta_vs_identity": -0.00029581753099444663,
+        "step1_fixed_point_residual_delta_vs_identity": -8.441747024408623e-07,
+        "stepN_fixed_point_residual_delta_vs_identity": -1.6219725046261895e-06,
+        "state_branch_contribution_label": "clearly_material"
+      },
+      "rollout_summary": {
+        "rollout_gap_label": "meaningful_extra_gain_after_step1",
+        "one_step_energy_delta_vs_identity": -0.0002913308594792441,
+        "configured_step_energy_delta_vs_identity": -0.00029581753099444663,
+        "one_step_fixed_point_residual_delta_vs_identity": -1.5983477861117388e-06,
+        "configured_step_fixed_point_residual_delta_vs_identity": -1.6219725046261895e-06,
+        "incremental_configured_step_energy_gain_over_step1": -0.0001410812686429841,
+        "incremental_configured_step_residual_gain_over_step1": -7.777978021853273e-07
+      },
+      "selection_rule_summary": {
+        "selected_epoch": 12,
+        "best_accuracy_epoch": 12,
+        "best_accuracy_epoch_is_selected_epoch": true,
+        "accuracy_gap_vs_selected": 0.0,
+        "best_accuracy_still_low": true
+      }
+    },
+    {
+      "seed": 2,
+      "source_run_dir": "outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/runs/stage_05_two_branch_corrected_residual_core_v2/seed_2",
+      "selected_epoch": 12,
+      "total_epochs": 12,
+      "selection_hits_final_training_boundary": true,
+      "selected_epoch_stage": "hybrid",
+      "selected_epoch_lambda_id": 0.1,
+      "highest_val_accuracy_epoch": 12,
+      "highest_val_accuracy": 0.26296296296296295,
+      "selected_epoch_val_accuracy": 0.26296296296296295,
+      "selected_vs_best_accuracy_gap": 0.0,
+      "selected_epoch_val_configured_step_energy_delta_vs_identity": -7.08398504692398e-05,
+      "selected_epoch_val_configured_step_fixed_point_residual_delta_vs_identity": -3.5910905544882243e-07,
+      "selected_epoch_val_one_step_energy_delta_vs_identity": -6.911850129504016e-05,
+      "near_final_trend": {
+        "window_epochs": [
+          10,
+          11,
+          12
+        ],
+        "train_total_loss_delta": -1.6352240025619628e-07,
+        "train_boot_loss_delta": -1.3880411656140746e-07,
+        "train_identity_loss_delta": -2.471828369478967e-07,
+        "val_configured_energy_delta_vs_identity_delta": -2.4303194967045805e-06,
+        "val_configured_fixed_point_residual_delta_vs_identity_delta": -9.794304732508143e-09,
+        "val_accuracy_delta": 0.007407407407407418,
+        "configured_energy_still_improving": true,
+        "configured_residual_still_improving": true,
+        "val_accuracy_still_improving": true
+      },
+      "reproduction_match": {
+        "selected_epoch_matches_source": true,
+        "val_accuracy_matches_source": true,
+        "configured_step_energy_delta_matches_source": true
+      },
+      "branch_summary": {
+        "m_traj_rms_mean": 0.001457725959136653,
+        "m_state_rms_mean": 0.0010043514155214897,
+        "m_traj_mean_l2": 0.005779191779659703,
+        "m_state_mean_l2": 0.0039701892927741745,
+        "state_over_traj_ratio_mean": 0.694910638069907,
+        "anchor_term_rms_mean": 5.230235294589714e-07,
+        "trajectory_term_rms_mean": 0.0012539450297270787,
+        "state_term_rms_mean": 1.5925176317719155e-07,
+        "anchor_term_mean_l2": 2.063080096767896e-06,
+        "trajectory_term_mean_l2": 0.005015780002713707,
+        "state_term_mean_l2": 6.16328469911451e-07,
+        "state_term_over_trajectory_term_ratio_mean": 0.00012279918091875208,
+        "step1_energy_delta_vs_identity": -4.2066336475687915e-05,
+        "stepN_energy_delta_vs_identity": -7.08398504692398e-05,
+        "step1_fixed_point_residual_delta_vs_identity": -2.1313097340567048e-07,
+        "stepN_fixed_point_residual_delta_vs_identity": -3.5910905544882243e-07,
+        "state_branch_contribution_label": "clearly_material"
+      },
+      "rollout_summary": {
+        "rollout_gap_label": "meaningful_extra_gain_after_step1",
+        "one_step_energy_delta_vs_identity": -6.911850129504016e-05,
+        "configured_step_energy_delta_vs_identity": -7.08398504692398e-05,
+        "one_step_fixed_point_residual_delta_vs_identity": -3.515838729555693e-07,
+        "configured_step_fixed_point_residual_delta_vs_identity": -3.5910905544882243e-07,
+        "incremental_configured_step_energy_gain_over_step1": -2.877351399355188e-05,
+        "incremental_configured_step_residual_gain_over_step1": -1.4597808204315195e-07
+      },
+      "selection_rule_summary": {
+        "selected_epoch": 12,
+        "best_accuracy_epoch": 12,
+        "best_accuracy_epoch_is_selected_epoch": true,
+        "accuracy_gap_vs_selected": 0.0,
+        "best_accuracy_still_low": true
+      }
+    }
+  ],
+  "selected_diagnosis_label": "likely_undertrained",
+  "diagnosis_rationale": "All Stage 05 v2 seeds select the final training epoch and configured-step mechanism plus validation accuracy are still improving at the training boundary.",
+  "recommended_next_stage05_v3_target": "longer_training_or_budget",
+  "artifacts": {
+    "config_json": "config.json",
+    "diagnostic_summary_json": "diagnostic_summary.json",
+    "diagnostic_report_md": "diagnostic_report.md",
+    "epoch_diagnostics_csv": "epoch_diagnostics.csv",
+    "branch_diagnostics_csv": "branch_diagnostics.csv"
+  }
+}

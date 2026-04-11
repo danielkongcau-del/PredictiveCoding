@@ -134,13 +134,18 @@ Current interpretation:
 - the exploratory line has now cleared the narrow v1 to v2 mechanism-improvement check
 - the two-branch Stage 05 v2 core is now the current exploratory candidate
 - the refreshed frozen-bridge comparison also supports treating Stage 05 v2 as the new exploratory reference
+- the dedicated Stage 05 v2 diagnostics now also say:
+  - all comparison seeds select the final training epoch
+  - configured-step mechanism metrics and validation accuracy still improve at the training boundary
+  - the current low report-only accuracy is not primarily a selection-rule artifact
+  - the current narrow diagnosis is `likely_undertrained`
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
 
 The next validation move is:
 
-- define the next narrow Stage 05 mechanism-first step from the current Stage 05 v2 reference
+- keep the current Stage 05 v2 transport family fixed and answer the longer-training / budget question before inventing a new Stage 05 family
 
 That next step should preserve:
 
@@ -164,6 +169,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 - Stage 05 refreshed bridge vs v2 comparison:
   - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
+- Stage 05 v2 diagnostics:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
 
 ## Document Layering
 

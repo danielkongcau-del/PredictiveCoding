@@ -86,6 +86,9 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the current comparison result says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first grounds
 - the refreshed frozen-bridge vs Stage 05 v2 comparison is now complete
 - the refreshed comparison supports using Stage 05 v2 as the current exploratory reference
+- the dedicated Stage 05 v2 diagnostics now conclude:
+  - `likely_undertrained`
+  - the current low report-only accuracy is not primarily a selection-rule artifact
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -93,7 +96,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- draft the next narrow Stage 05 mechanism-first step from the v2 reference
+- if Stage 05 continues, draft the next narrow step as a longer-training / budget test on the current v2 reference before inventing a new family
 
 ## What Prompt Writers Must Not Reopen
 

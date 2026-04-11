@@ -109,6 +109,7 @@ Current known state:
 - that comparison says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first evidence
 - the refreshed frozen-bridge vs Stage 05 v2 comparison now exists
 - that refreshed comparison supports using Stage 05 v2 as the new exploratory reference
+- the dedicated Stage 05 v2 diagnostics now say the current narrow diagnosis is `likely_undertrained`
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
@@ -116,7 +117,7 @@ Current known state:
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- define the next narrow Stage 05 mechanism-first step from the v2 reference
+- if Stage 05 continues, test longer training / budget on the current v2 reference before inventing a new family
 
 ## Current Code Entry Points
 
@@ -146,6 +147,8 @@ Current known state:
   - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
 - Stage 05 refreshed bridge vs v2 comparison:
   - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
+- Stage 05 v2 diagnostics:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
 
 ## History
 

@@ -109,11 +109,18 @@ Current interpretation:
 - the current Stage 05 v2 two-branch corrected residual MeanFlow probe has positive mechanism signal
 - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
 - task accuracy is still report-only and remains well below the frozen Stage 04 bridge result
+- the dedicated Stage 05 v2 diagnostics also show:
+  - all comparison seeds select the final training epoch
+  - configured-step mechanism metrics are still improving at the boundary
+  - validation accuracy is also still improving at the boundary
+  - the selected epoch is already the highest validation-accuracy epoch on every seed
+  - the current narrow diagnosis is `likely_undertrained`
 
 Relevant artifacts:
 
 - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
 - `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
+- `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
 
 ## FMPC Stage 05 Frozen-Bridge Comparison Snapshot
 
@@ -154,6 +161,7 @@ Current interpretation:
 - Stage 05 v2 remains far below the frozen bridge on report-only accuracy
 - Stage 05 v2 does not replace the frozen bridge result on `main`
 - the refreshed comparison supports using Stage 05 v2 as the new exploratory reference
+- the newer v2 diagnostics point first to training / budget limitation on the v2 reference, not to a selection-rule artifact
 
 Relevant artifacts:
 

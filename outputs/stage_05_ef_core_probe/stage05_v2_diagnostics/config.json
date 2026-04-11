@@ -1,0 +1,21 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_diagnostics",
+  "source_comparison_dir": "outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "near_final_window": 3,
+  "selection_accuracy_gap_threshold": 0.05,
+  "state_branch_material_ratio_threshold": 0.25,
+  "state_branch_weak_ratio_threshold": 0.05,
+  "rollout_extra_gain_fraction_threshold": 0.2,
+  "artifacts": {
+    "diagnostic_summary_json": "diagnostic_summary.json",
+    "diagnostic_report_md": "diagnostic_report.md",
+    "epoch_diagnostics_csv": "epoch_diagnostics.csv",
+    "branch_diagnostics_csv": "branch_diagnostics.csv"
+  }
+}
