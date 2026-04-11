@@ -31,9 +31,8 @@ For the full numbered stage map and directory layout, use [README.md](/e:/CodeSp
 - Stage 04 bridge math:
   - [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md)
   - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
-- Current Stage 05 note:
-  - there is no separate Stage 05 math addendum yet
-  - the current probe reuses the baseline substrate plus the Stage 03 average-velocity transport contract where applicable
+- Stage 05 exploratory math:
+  - [specs/stage_05_ef_core_probe.md](/e:/CodeSpace/PredictiveCoding/specs/stage_05_ef_core_probe.md)
 
 ## Stage 04 Status
 
@@ -65,6 +64,10 @@ Current probe status:
 
 - implementation exists under:
   - [src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py)
+- the current v1 contract is a corrected residual MeanFlow core:
+  - residual transport family on top of the exact local flow
+  - bootstrap residual supervision
+  - corrected residual identity curriculum
 - target construction remains artifact-independent
 - the first canonical probe shows positive mechanism signal:
   - one-step validation energy improves vs identity
@@ -78,7 +81,7 @@ Current probe status:
 
 - Keep the Stage 04 bridge result frozen on `main`.
 - Do not open another package-internal Stage 04 diagnostic suite from this state.
-- Run the frozen-bridge vs exploratory-core comparison next.
+- Run the frozen-bridge vs corrected residual core comparison next.
 - Use that comparison to decide whether Stage 05 earns a v2 charter.
 
 ## Reopen Conditions

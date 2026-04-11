@@ -1,0 +1,194 @@
+# FMPC Stage 05 EF Core Probe Addendum
+
+This file extends the baseline math in [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+and the Stage 03 transport addendum in
+[specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md).
+
+To build a complete mathematical understanding for Stage 05 work, read in this order:
+
+1. [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
+2. [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md)
+3. this addendum
+
+Scope and precedence:
+
+- this addendum overrides the Stage 03 addendum only inside the explicit Stage 05 EF Core Probe scope
+- outside that scope, the baseline and Stage 03 addendum remain authoritative
+- this addendum does not silently redefine the baseline predictive-coding energy, the baseline hidden-state gradient, the baseline local parameter-update equations, or the slow iterative predict/eval path
+
+## 18. Stage 05 EF Core Probe addendum
+
+This addendum defines the first post-bridge, mechanism-first residual MeanFlow core validation stage.
+
+Stage 05 is:
+
+- a post-bridge theory-completion stage
+- a residual average-velocity core validation stage
+- teacher-free in target construction
+- mechanism-first in evaluation
+
+Stage 05 is not:
+
+- a reopening of Stage 04 package-internal stabilizer work
+- a migration of terminal angle clipping, row-space splitting, or transported-output alignment into the new core family
+- a scaling or topology stage
+- a teacher-target stage
+
+### 18.1 Scope
+
+Stage 05 stays on the current layered predictive-coding substrate.
+
+- it does not define a new substrate class
+- it does not redefine predict-mode inference
+- it does not introduce teacher trajectories, teacher fixed points, or teacher-generated regression targets
+- it does not promote a new task-accuracy gate at this exploratory stage
+
+### 18.2 Training context and hidden latent
+
+Stage 05 uses the same supervised training context as Stage 03:
+
+- `c = (x, y)`
+- `x^0 = x` remains clamped
+- `x^L = y` remains clamped
+
+The hidden latent remains:
+
+- `z = flatten(x^1, ..., x^(L-1))`
+
+Only the free hidden layers are included in `z`.
+
+### 18.3 Exact local flow
+
+Stage 05 reuses the exact local flow:
+
+- `g_theta(z_t; c) = -∇_z E_theta(z_t; c)`
+
+where `E_theta` is still the baseline predictive-coding energy reconstructed from the layered state list.
+
+### 18.4 Residual MeanFlow transport family
+
+Stage 05 uses a residual average-velocity family:
+
+- `u_psi(z_t, r, t; c) = g_t + m_psi(z_t, r, t; c)`
+
+where:
+
+- `g_t := g_theta(z_t; c)`
+- `m_psi` is the learned residual average-velocity correction
+
+The minimal residual input contract is fixed to:
+
+- `m_psi_input = concat([z_t, target_onehot, t, r])`
+
+Stage 05 keeps this minimal contract in v1:
+
+- no appended current-state feature blocks
+- no Stage 04 stabilizer family
+- no scaling/topology extension
+
+### 18.5 Bootstrap residual target
+
+Stage 05 keeps the Stage 03 local self-bootstrap average-velocity anchor:
+
+- `u_boot(z_t, r, t; c) = (Phi_LF_r(z_t; c) - z_t) / r`
+
+The residual bootstrap target is:
+
+- `m_boot = u_boot - g_t`
+
+This target remains teacher-free and artifact-independent.
+
+### 18.6 Corrected residual fixed-terminal-time identity
+
+Stage 03 uses the fixed-terminal-time identity:
+
+- `u ≈ g_t + r * D_T u`
+
+For the residual family `u = g + m`, Stage 05 rewrites this as:
+
+- `m ≈ r * D_T g_t + r * D_T m`
+
+Stage 05 therefore defines the residual identity target as:
+
+- `m_id = r * D_T g_t + r * D_T m_psi`
+
+This is the normative Stage 05 correction relative to a residual-only JVP approximation.
+
+### 18.6.1 Stage 05 directional-derivative approximations
+
+Under the current minimal input contract:
+
+- `g_t` does not explicitly depend on `t` or `r`
+- `m_psi` depends on `z_t`, `target_onehot`, `t`, and `r`
+
+Stage 05 approximates the two derivative terms as follows.
+
+Anchor derivative:
+
+- `D_T g_t ≈ [g(z_t + eps * g_t) - g(z_t - eps * g_t)] / (2 * eps)`
+
+Residual-network derivative:
+
+- `D_T m_psi` is approximated by a residual-network JVP with input tangent
+- `[g_t, 0_target, +1_t, -1_r]`
+
+The Stage 05 corrected residual identity target is then:
+
+- `m_id = r * D_T g_t + r * D_T m_psi`
+
+### 18.7 Stage 05 v1 training objective
+
+Stage 05 v1 uses:
+
+- `L_boot = ||m_psi - m_boot||^2`
+- `L_id = ||m_psi - m_id||^2`
+- `L_total(k) = L_boot + lambda_id(k) * L_id`
+
+This keeps the bootstrap anchor and the corrected residual identity inside one residual-output family.
+
+### 18.8 Curriculum and training schedule
+
+Stage 05 v1 uses a three-phase training schedule:
+
+- `warmup`
+  - `lambda_id = 0`
+  - theta update still uses the local-field rollout
+- `transition`
+  - theta update switches to the learned rollout
+  - `lambda_id` follows a deterministic sigmoid ramp toward `lambda_id_max`
+- `hybrid`
+  - theta update continues to use the learned rollout
+  - `lambda_id = lambda_id_max`
+
+This adopts only the curriculum idea, not the full AlphaFlow time formula.
+
+### 18.9 Parameter updates after transport
+
+Stage 05 still changes only the training-time hidden-state transport path.
+
+After transport produces a terminal hidden state `z_hat`, the repository still applies the same local parameter-update rule already defined in the baseline:
+
+1. reconstruct the full state list from `z_hat` and the clamped context
+2. recompute cache terms
+3. compute baseline local parameter gradients
+4. apply the same explicit parameter descent update
+
+Stage 05 does not redefine the slow iterative predict/eval path.
+
+### 18.10 Evaluation contract
+
+Stage 05 remains mechanism-first.
+
+Primary acceptance signals:
+
+- one-step energy decrease relative to identity / no-transport
+- few-step fixed-point residual decrease relative to identity / no-transport
+- deterministic artifact generation
+- no teacher dependency in target construction
+
+Secondary report-only signals:
+
+- validation accuracy
+- test accuracy
+
+Task accuracy is not the gate for Stage 05 v1.

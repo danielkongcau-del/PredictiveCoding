@@ -84,15 +84,19 @@ Relevant artifacts:
 Current probe:
 
 - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+- current core contract:
+  - corrected residual MeanFlow v1
+  - bootstrap residual supervision
+  - corrected residual identity curriculum
 
 Current mechanism-level result:
 
 - one-step validation energy delta vs identity:
-  - `-0.00014583767789805302`
+  - `-0.0001462306001205338`
 - configured two-step validation energy delta vs identity:
-  - `-0.00015002884029463592`
+  - `-0.0001503257951186998`
 - configured two-step validation fixed-point residual delta vs identity:
-  - `-7.992706272825232e-07`
+  - `-8.007742858070393e-07`
 - validation accuracy:
   - `0.28888888888888886`
 - test accuracy:
@@ -100,9 +104,9 @@ Current mechanism-level result:
 
 Current interpretation:
 
-- the first Stage 05 probe has positive mechanism signal
+- the current corrected residual MeanFlow Stage 05 probe has positive mechanism signal
 - task accuracy is still report-only and remains well below the frozen Stage 04 bridge result
-- the current next question is whether frozen-bridge vs exploratory-core comparison justifies a Stage 05 v2 charter
+- the current next question is whether frozen-bridge vs corrected residual core comparison justifies a Stage 05 v2 charter
 
 Relevant artifacts:
 

@@ -57,6 +57,13 @@ Condensed evidence summary:
 
 Stage 05 is mechanism-first.
 
+Current Stage 05 core contract:
+
+- corrected residual MeanFlow transport family
+- bootstrap residual supervision
+- corrected residual identity curriculum
+- no teacher dependency in target construction
+
 Primary acceptance metrics:
 
 - one-step energy decrease relative to identity or no-transport
@@ -86,11 +93,14 @@ Current canonical exploratory runs should produce:
 Summary fields should continue to make these items explicit:
 
 - stage identity
+- transport family
+- residual identity mode
 - whether target construction is artifact-independent
 - local flow definition
 - direct anchor source
 - transport scope
 - transport steps
+- bootstrap target contract
 - selection-metric source
 - report-metric source
 - mechanism metrics such as energy and residual deltas
@@ -119,7 +129,7 @@ Current interpretation:
 
 The next validation move is:
 
-- run the frozen-bridge vs exploratory-core comparison
+- run the frozen-bridge vs corrected residual core comparison
 
 That comparison should answer:
 

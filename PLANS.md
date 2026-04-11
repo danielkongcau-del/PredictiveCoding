@@ -46,7 +46,7 @@ That means:
 
 ### Objective
 
-Evaluate whether the post-bridge exploratory core has enough mechanism signal to justify a v2 charter outside the saturated Stage 04 package.
+Evaluate whether the post-bridge corrected residual MeanFlow core has enough mechanism signal to justify a v2 charter outside the saturated Stage 04 package.
 
 ### Why This Line Leaves Stage 04
 
@@ -66,6 +66,7 @@ This exploratory line is allowed only because:
 ### Current Known State
 
 - the first Stage 05 exploratory probe already exists
+- the Stage 05 addendum now exists for the corrected residual MeanFlow core v1 contract
 - it is artifact-independent in target construction
 - it shows positive mechanism signal on energy and fixed-point residual
 - its task accuracy is still report-only and well below the frozen Stage 04 bridge result
@@ -88,7 +89,7 @@ Success condition:
 
 Objective:
 
-- compare the frozen Stage 04 bridge result against the Stage 05 exploratory core on a mechanism-first basis
+- compare the frozen Stage 04 bridge result against the corrected residual MeanFlow Stage 05 core on a mechanism-first basis
 
 Required comparison outputs:
 
@@ -138,6 +139,7 @@ Stage 05 should not be promoted merely because of a small task-metric fluctuatio
   - [spec_math.md](/e:/CodeSpace/PredictiveCoding/spec_math.md)
   - [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md)
   - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
+  - [specs/stage_05_ef_core_probe.md](/e:/CodeSpace/PredictiveCoding/specs/stage_05_ef_core_probe.md)
 - current frozen result summary:
   - [RESULTS.md](/e:/CodeSpace/PredictiveCoding/RESULTS.md)
 - current validation contract:

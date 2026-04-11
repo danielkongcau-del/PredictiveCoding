@@ -27,7 +27,8 @@ Current working interpretation:
 - Stage 04 is frozen as the current bridge result on `main`
 - Stage 04 package-internal digging is treated as closed from the current state
 - the current open work is no longer another Stage 04 repair
-- the next active question is whether the Stage 05 exploratory line earns a v2 charter
+- the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
+- the next active question is whether a fresh frozen-bridge vs corrected-core comparison earns a v2 charter
 
 ## Current Result Snapshot
 
@@ -204,6 +205,7 @@ Important lookup rules:
 - stage-specific mathematical addenda live under:
   - `specs/stage_03_transport_core_v1.md`
   - `specs/stage_04_incremental_bridge.md`
+  - `specs/stage_05_ef_core_probe.md`
 - matching stage experiment entry points live under:
   - `experiments/stage_04_incremental_bridge/`
   - `experiments/stage_05_ef_core_probe/`

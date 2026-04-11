@@ -11,6 +11,7 @@ from typing import Any, Literal
 
 import numpy as np
 
+from ..activations import get_activation
 from ..datasets import load_digits_split
 from ..energy import compute_cache, total_energy
 from ..stage_03_transport_core_v1.fmpc_tf1_flow import (
@@ -21,8 +22,9 @@ from ..stage_03_transport_core_v1.fmpc_tf1_flow import (
     hidden_local_flow,
     hidden_states_from_state,
     rollout_hidden_transport,
+    validate_tf1_time_pair,
 )
-from ..stage_03_transport_core_v1.fmpc_tf1_jvp import build_tf1_input
+from ..stage_03_transport_core_v1.fmpc_tf1_jvp import build_tf1_input, forward_tf1_mlp_with_jvp
 from ..layers import init_mlp_layers
 from ..metrics import classification_accuracy
 from ..minibatch import iter_minibatches
@@ -31,8 +33,15 @@ from ..models import PCNetwork
 from ..training import apply_parameter_updates, parameter_gradients
 from ..utils import ensure_finite_array, set_seed
 
-ProbeStage = Literal["warmup", "hybrid"]
+ProbeStage = Literal["warmup", "transition", "hybrid"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
+ResidualIdentityMode = Literal["residual_corrected_meanflow"]
+
+RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "residual_meanflow_core"
+RESIDUAL_IDENTITY_MODE = "residual_corrected_meanflow"
+U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
+BOOTSTRAP_TARGET_CONTRACT = "m_boot = ((Phi_LF_r(z_t; c) - z_t) / r) - g_t"
+RESIDUAL_IDENTITY_TARGET_CONTRACT = "m_id = r * D_T g_t + r * D_T m_psi"
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -44,7 +53,7 @@ def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
 
 @dataclass
 class FMPCEFExploratoryProbeConfig:
-    """Configuration for the first post-bridge teacher-free exploratory core probe."""
+    """Configuration for the Stage 05 corrected residual MeanFlow core probe."""
 
     experiment_name: str = "fmpc_ef_exploratory_probe"
     dataset_name: str = "digits"
@@ -73,7 +82,12 @@ class FMPCEFExploratoryProbeConfig:
     batch_size: int = 128
     shuffle_batches: bool = True
     transport_steps: int = 2
-    warmup_epochs: int = 3
+    warmup_epochs: int | None = None
+    lambda_id_warmup_epochs: int = 3
+    lambda_id_ramp_epochs: int = 3
+    identity_loss_weight: float = 0.1
+    tangent_epsilon: float = 1e-3
+    identity_mode: ResidualIdentityMode = RESIDUAL_IDENTITY_MODE
     psi_hidden_dims: tuple[int, ...] = (128,)
     psi_weight_scale: float = 0.01
     psi_eta_w: float = 0.01
@@ -85,6 +99,8 @@ class FMPCEFExploratoryProbeConfig:
     )
 
     def __post_init__(self) -> None:
+        if self.warmup_epochs is not None:
+            object.__setattr__(self, "lambda_id_warmup_epochs", int(self.warmup_epochs))
         if self.dataset_name != "digits":
             raise ValueError("The first exploratory probe currently supports digits only.")
         if len(self.layer_dims) < 3:
@@ -97,8 +113,18 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError("batch_size must be positive.")
         if self.bootstrap_substeps <= 0:
             raise ValueError("bootstrap_substeps must be positive.")
-        if self.warmup_epochs < 0:
-            raise ValueError("warmup_epochs must be non-negative.")
+        if self.lambda_id_warmup_epochs < 0:
+            raise ValueError("lambda_id_warmup_epochs must be non-negative.")
+        if self.lambda_id_ramp_epochs < 0:
+            raise ValueError("lambda_id_ramp_epochs must be non-negative.")
+        if self.identity_loss_weight < 0.0:
+            raise ValueError("identity_loss_weight must be non-negative.")
+        if self.tangent_epsilon <= 0.0:
+            raise ValueError("tangent_epsilon must be positive.")
+        if self.identity_mode != RESIDUAL_IDENTITY_MODE:
+            raise ValueError(
+                f"Stage 05 currently supports identity_mode='{RESIDUAL_IDENTITY_MODE}' only."
+            )
         if self.selection_metric != "val_configured_transported_final_energy":
             raise ValueError("Only val_configured_transported_final_energy is supported.")
 
@@ -127,10 +153,43 @@ class ProbeMechanismMetrics:
 
 
 @dataclass(frozen=True)
+class CorrectedResidualIdentityTarget:
+    """Corrected residual identity target and its explicit constituent terms."""
+
+    target: np.ndarray
+    anchor_derivative: np.ndarray
+    residual_jvp: np.ndarray
+    anchor_term: np.ndarray
+    residual_term: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "target", _as_batch_first("target", self.target))
+        object.__setattr__(
+            self,
+            "anchor_derivative",
+            _as_batch_first("anchor_derivative", self.anchor_derivative),
+        )
+        object.__setattr__(self, "residual_jvp", _as_batch_first("residual_jvp", self.residual_jvp))
+        object.__setattr__(self, "anchor_term", _as_batch_first("anchor_term", self.anchor_term))
+        object.__setattr__(self, "residual_term", _as_batch_first("residual_term", self.residual_term))
+        if self.target.shape != self.anchor_derivative.shape:
+            raise ValueError("target and anchor_derivative must share the same shape.")
+        if self.target.shape != self.residual_jvp.shape:
+            raise ValueError("target and residual_jvp must share the same shape.")
+        if self.target.shape != self.anchor_term.shape:
+            raise ValueError("target and anchor_term must share the same shape.")
+        if self.target.shape != self.residual_term.shape:
+            raise ValueError("target and residual_term must share the same shape.")
+
+
+@dataclass(frozen=True)
 class FMPCEFExploratoryProbeEpochMetrics:
     epoch: int
     stage: str
+    lambda_id: float
+    train_total_loss: float
     train_boot_loss: float
+    train_identity_loss: float
     train_transported_final_energy: float
     val_one_step_transported_final_energy: float
     val_one_step_energy_delta_vs_identity: float
@@ -162,12 +221,16 @@ class FMPCEFExploratoryProbeRunResult:
 def build_fmpc_ef_exploratory_probe_config(
     **overrides: Any,
 ) -> FMPCEFExploratoryProbeConfig:
-    """Return the canonical minimal exploratory probe config."""
+    """Return the canonical Stage 05 corrected residual MeanFlow config."""
 
     payload: dict[str, Any] = {
         "layer_dims": (64, 16, 10),
         "transport_steps": 2,
-        "warmup_epochs": 3,
+        "lambda_id_warmup_epochs": 3,
+        "lambda_id_ramp_epochs": 3,
+        "identity_loss_weight": 0.1,
+        "tangent_epsilon": 1e-3,
+        "identity_mode": RESIDUAL_IDENTITY_MODE,
         "epochs": 12,
         "batch_size": 128,
         "eval_steps": 15,
@@ -303,8 +366,169 @@ def _make_psi_network(config: FMPCEFExploratoryProbeConfig) -> MLPNetwork:
     )
 
 
+def _sigmoid_unit_interval(progress: float) -> float:
+    clipped = float(np.clip(progress, 0.0, 1.0))
+    lo = 1.0 / (1.0 + np.exp(6.0))
+    hi = 1.0 / (1.0 + np.exp(-6.0))
+    raw = 1.0 / (1.0 + np.exp(-(12.0 * clipped - 6.0)))
+    return float((raw - lo) / (hi - lo))
+
+
+def lambda_id_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> float:
+    if epoch_index < config.lambda_id_warmup_epochs:
+        return 0.0
+    if config.identity_loss_weight <= 0.0:
+        return 0.0
+    if config.lambda_id_ramp_epochs <= 0:
+        return float(config.identity_loss_weight)
+    progress = (epoch_index - config.lambda_id_warmup_epochs + 1) / float(
+        config.lambda_id_ramp_epochs
+    )
+    return float(config.identity_loss_weight) * _sigmoid_unit_interval(progress)
+
+
 def _stage_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> ProbeStage:
-    return "warmup" if epoch_index < config.warmup_epochs else "hybrid"
+    if epoch_index < config.lambda_id_warmup_epochs:
+        return "warmup"
+    if config.lambda_id_ramp_epochs > 0 and epoch_index < (
+        config.lambda_id_warmup_epochs + config.lambda_id_ramp_epochs
+    ):
+        return "transition"
+    return "hybrid"
+
+
+def _forward_mlp(
+    network: MLPNetwork,
+    inputs: np.ndarray,
+) -> tuple[list[np.ndarray], list[np.ndarray | None]]:
+    activations: list[np.ndarray] = [_as_batch_first("inputs", inputs)]
+    pre_activations: list[np.ndarray | None] = [None]
+    current = activations[0]
+    for layer_index, layer in enumerate(network.layers, start=1):
+        activation_fn, _ = get_activation(layer.activation_name)
+        pre_activation = current @ layer.weight.T + layer.bias
+        current = activation_fn(pre_activation)
+        ensure_finite_array(pre_activation, f"stage05_pre_activation[{layer_index}]")
+        ensure_finite_array(current, f"stage05_activation[{layer_index}]")
+        pre_activations.append(pre_activation)
+        activations.append(current)
+    return activations, pre_activations
+
+
+def _weighted_mse_step(
+    network: MLPNetwork,
+    inputs: np.ndarray,
+    target: np.ndarray,
+    *,
+    loss_scale: float,
+) -> None:
+    activations, pre_activations = _forward_mlp(network, inputs)
+    predictions = activations[-1]
+    targets = _as_batch_first("target", target)
+    if predictions.shape != targets.shape:
+        raise ValueError("predictions and targets must share the same shape.")
+    if loss_scale <= 0.0:
+        raise ValueError("loss_scale must be positive.")
+
+    output_size = float(predictions.size)
+    delta = (2.0 * float(loss_scale) / output_size) * (predictions - targets)
+    for layer_index in range(len(network.layers) - 1, -1, -1):
+        layer = network.layers[layer_index]
+        pre_activation = pre_activations[layer_index + 1]
+        if pre_activation is None:
+            raise ValueError("pre_activations must be present for every layer.")
+        _, activation_prime = get_activation(layer.activation_name)
+        local_delta = delta * activation_prime(pre_activation)
+        grad_w = local_delta.T @ activations[layer_index]
+        grad_b = np.sum(local_delta, axis=0)
+        next_delta = local_delta @ layer.weight if layer_index > 0 else None
+        layer.weight = layer.weight - network.eta_w * grad_w
+        layer.bias = layer.bias - network.eta_b * grad_b
+        ensure_finite_array(layer.weight, f"stage05_weight[{layer_index + 1}]")
+        ensure_finite_array(layer.bias, f"stage05_bias[{layer_index + 1}]")
+        if next_delta is not None:
+            delta = next_delta
+
+
+def build_residual_input_tangent(
+    g_t: np.ndarray,
+    *,
+    target_dim: int,
+) -> np.ndarray:
+    """Return the Stage 05 fixed-terminal-time residual input tangent."""
+
+    g_array = _as_batch_first("g_t", g_t)
+    batch_size = int(g_array.shape[0])
+    target_tangent = np.zeros((batch_size, int(target_dim)), dtype=np.float64)
+    t_tangent = np.full((batch_size, 1), 1.0, dtype=np.float64)
+    r_tangent = np.full((batch_size, 1), -1.0, dtype=np.float64)
+    return np.concatenate([g_array, target_tangent, t_tangent, r_tangent], axis=1).astype(
+        np.float64,
+        copy=False,
+    )
+
+
+def approximate_anchor_directional_derivative(
+    context: FMPCTF1Context,
+    z_t: np.ndarray,
+    *,
+    epsilon: float,
+) -> np.ndarray:
+    """Approximate `D_T g_t` along the current exact local-flow direction."""
+
+    if epsilon <= 0.0:
+        raise ValueError("epsilon must be positive.")
+    z_array = _as_batch_first("z_t", z_t)
+    if z_array.shape[1] == 0:
+        return np.zeros_like(z_array)
+    g_t = hidden_local_flow(context, z_array)
+    z_plus = z_array + float(epsilon) * g_t
+    z_minus = z_array - float(epsilon) * g_t
+    g_plus = hidden_local_flow(context, z_plus)
+    g_minus = hidden_local_flow(context, z_minus)
+    derivative = (g_plus - g_minus) / (2.0 * float(epsilon))
+    ensure_finite_array(derivative, "stage05_anchor_directional_derivative")
+    return derivative
+
+
+def build_corrected_residual_identity_target(
+    context: FMPCTF1Context,
+    psi_network: MLPNetwork,
+    z_t: np.ndarray,
+    target_onehot: np.ndarray,
+    *,
+    t: float,
+    r: float,
+    tangent_epsilon: float,
+) -> CorrectedResidualIdentityTarget:
+    """Return the Stage 05 corrected residual identity target.
+
+    The target is `m_id = r * D_T g_t + r * D_T m_psi`.
+    """
+
+    validate_tf1_time_pair(t, r)
+    z_array = _as_batch_first("z_t", z_t)
+    target_array = _as_batch_first("target_onehot", target_onehot)
+    if z_array.shape[0] != target_array.shape[0]:
+        raise ValueError("z_t and target_onehot must share the same batch size.")
+    g_t = hidden_local_flow(context, z_array)
+    inputs = build_exploratory_probe_input(z_array, target_array, t=t, r=r)
+    input_tangent = build_residual_input_tangent(g_t, target_dim=target_array.shape[1])
+    residual_jvp = forward_tf1_mlp_with_jvp(psi_network, inputs, input_tangent).jvp
+    anchor_derivative = approximate_anchor_directional_derivative(
+        context,
+        z_array,
+        epsilon=tangent_epsilon,
+    )
+    anchor_term = float(r) * anchor_derivative
+    residual_term = float(r) * residual_jvp
+    return CorrectedResidualIdentityTarget(
+        target=anchor_term + residual_term,
+        anchor_derivative=anchor_derivative,
+        residual_jvp=residual_jvp,
+        anchor_term=anchor_term,
+        residual_term=residual_term,
+    )
 
 
 def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
@@ -333,18 +557,26 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
         "transport": {
             "teacher_free": True,
             "uses_teacher_artifacts": False,
+            "transport_family": RESIDUAL_MEANFLOW_TRANSPORT_FAMILY,
+            "residual_identity_mode": config.identity_mode,
             "energy_substrate": "baseline_pc_energy",
             "local_flow_definition": "exact_negative_hidden_state_gradient",
             "direct_anchor_source": "self_bootstrap_local_field",
             "psi_family": "residual_local_flow_mlp",
             "velocity_parameterization": "u_psi = g_theta + residual_mlp(z_t, target_onehot, t, r)",
-            "u_psi_input_contract": "concat([z_t, target_onehot, t, r])",
+            "u_psi_input_contract": U_PSI_INPUT_CONTRACT,
+            "bootstrap_target_contract": BOOTSTRAP_TARGET_CONTRACT,
+            "residual_identity_target_contract": RESIDUAL_IDENTITY_TARGET_CONTRACT,
+            "identity_loss_weight": float(config.identity_loss_weight),
+            "tangent_epsilon": float(config.tangent_epsilon),
+            "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
+            "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
+            "no_teacher_dependency_in_target_construction": True,
             "use_teacher_free_features": False,
             "transport_scope": "train_only",
             "transport_steps": int(config.transport_steps),
             "bootstrap_integrator": config.bootstrap_integrator,
             "bootstrap_substeps": int(config.bootstrap_substeps),
-            "warmup_epochs": int(config.warmup_epochs),
             "selection_metric": config.selection_metric,
             "selection_metric_source": "val_metric",
             "report_metric_source": "test_metric",
@@ -369,15 +601,17 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
     }
 
 
-def _collect_bootstrap_supervision(
+def _collect_residual_supervision(
     context: FMPCTF1Context,
+    psi_network: MLPNetwork,
     config: FMPCEFExploratoryProbeConfig,
     *,
     z_knots: list[np.ndarray],
     knot_times: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     input_blocks: list[np.ndarray] = []
     boot_targets: list[np.ndarray] = []
+    identity_targets: list[np.ndarray] = []
     for knot_index, t_k in enumerate(knot_times[:-1]):
         z_t = z_knots[knot_index]
         t_float = float(t_k)
@@ -397,11 +631,22 @@ def _collect_bootstrap_supervision(
             substeps=config.bootstrap_substeps,
         )
         g_t = hidden_local_flow(context, z_t)
+        corrected_identity = build_corrected_residual_identity_target(
+            context,
+            psi_network,
+            z_t,
+            context.targets,
+            t=t_float,
+            r=r_k,
+            tangent_epsilon=config.tangent_epsilon,
+        )
         input_blocks.append(inputs)
         boot_targets.append(u_boot - g_t)
+        identity_targets.append(corrected_identity.target)
     return (
         np.concatenate(input_blocks, axis=0).astype(np.float64, copy=False),
         np.concatenate(boot_targets, axis=0).astype(np.float64, copy=False),
+        np.concatenate(identity_targets, axis=0).astype(np.float64, copy=False),
     )
 
 
@@ -527,8 +772,9 @@ def _train_one_batch(
     x_batch: np.ndarray,
     y_batch: np.ndarray,
     *,
+    lambda_id: float,
     stage: ProbeStage,
-) -> tuple[float, float]:
+) -> tuple[float, float, float, float]:
     context = build_tf1_context(model, x_batch, y_batch)
     source_rollout = rollout_hidden_transport(
         context,
@@ -536,15 +782,24 @@ def _train_one_batch(
         transport_steps=config.transport_steps,
         mode="local_field_only",
     )
-    psi_inputs, boot_targets = _collect_bootstrap_supervision(
+    psi_inputs, boot_targets, identity_targets = _collect_residual_supervision(
         context,
+        psi_network,
         config,
         z_knots=source_rollout.z_knots,
         knot_times=source_rollout.knot_times,
     )
     psi_predictions = psi_network.predict(psi_inputs)
     boot_loss = float(np.mean((psi_predictions - boot_targets) ** 2))
-    psi_network.train_batch(psi_inputs, boot_targets)
+    identity_loss = float(np.mean((psi_predictions - identity_targets) ** 2))
+    if lambda_id > 0.0:
+        combined_target = (boot_targets + (lambda_id * identity_targets)) / (1.0 + lambda_id)
+        loss_scale = 1.0 + lambda_id
+    else:
+        combined_target = boot_targets
+        loss_scale = 1.0
+    total_loss = boot_loss + (lambda_id * identity_loss)
+    _weighted_mse_step(psi_network, psi_inputs, combined_target, loss_scale=loss_scale)
 
     if stage == "warmup":
         theta_rollout = source_rollout
@@ -562,7 +817,7 @@ def _train_one_batch(
         context,
         theta_rollout.z_knots[-1],
     )
-    return boot_loss, transported_energy
+    return total_loss, boot_loss, identity_loss, transported_energy
 
 
 def run_fmpc_ef_exploratory_probe(
@@ -596,7 +851,10 @@ def run_fmpc_ef_exploratory_probe(
     train_start = perf_counter()
     for epoch_index in range(config.epochs):
         stage = _stage_for_epoch(config, epoch_index)
+        lambda_id = lambda_id_for_epoch(config, epoch_index)
+        batch_total_losses: list[float] = []
         batch_boot_losses: list[float] = []
+        batch_identity_losses: list[float] = []
         batch_transport_energies: list[float] = []
         batch_seed = config.batch_order_seed + epoch_index
         for x_batch, y_batch in iter_minibatches(
@@ -606,15 +864,18 @@ def run_fmpc_ef_exploratory_probe(
             shuffle=config.shuffle_batches,
             seed=batch_seed,
         ):
-            boot_loss, transported_energy = _train_one_batch(
+            total_loss, boot_loss, identity_loss, transported_energy = _train_one_batch(
                 model,
                 psi_network,
                 config,
                 x_batch,
                 y_batch,
+                lambda_id=lambda_id,
                 stage=stage,
             )
+            batch_total_losses.append(total_loss)
             batch_boot_losses.append(boot_loss)
+            batch_identity_losses.append(identity_loss)
             batch_transport_energies.append(transported_energy)
 
         val_one_step = _evaluate_mechanism_metrics(
@@ -639,7 +900,10 @@ def run_fmpc_ef_exploratory_probe(
             FMPCEFExploratoryProbeEpochMetrics(
                 epoch=epoch_index + 1,
                 stage=stage,
+                lambda_id=float(lambda_id),
+                train_total_loss=float(np.mean(batch_total_losses)),
                 train_boot_loss=float(np.mean(batch_boot_losses)),
+                train_identity_loss=float(np.mean(batch_identity_losses)),
                 train_transported_final_energy=float(np.mean(batch_transport_energies)),
                 val_one_step_transported_final_energy=val_one_step.transported_final_energy,
                 val_one_step_energy_delta_vs_identity=val_one_step.energy_delta_vs_identity,
@@ -730,18 +994,29 @@ def run_fmpc_ef_exploratory_probe(
         "stage": "ef_core_probe",
         "teacher_free": True,
         "uses_teacher_artifacts": False,
+        "transport_family": RESIDUAL_MEANFLOW_TRANSPORT_FAMILY,
+        "residual_identity_mode": config.identity_mode,
         "energy_substrate": "baseline_pc_energy",
         "local_flow_definition": "exact_negative_hidden_state_gradient",
         "direct_anchor_source": "self_bootstrap_local_field",
         "psi_family": "residual_local_flow_mlp",
         "transport_scope": "train_only",
         "transport_steps": int(config.transport_steps),
+        "u_psi_input_contract": U_PSI_INPUT_CONTRACT,
+        "bootstrap_target_contract": BOOTSTRAP_TARGET_CONTRACT,
+        "residual_identity_target_contract": RESIDUAL_IDENTITY_TARGET_CONTRACT,
+        "identity_loss_weight": float(config.identity_loss_weight),
+        "tangent_epsilon": float(config.tangent_epsilon),
+        "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
+        "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
         "selection_metric_source": "val_metric",
         "report_metric_source": "test_metric",
         "selection_metric_name": config.selection_metric,
         "selection_metric_value": float(val_configured.transported_final_energy),
         "selection_metric_higher_is_better": False,
         "selected_epoch": int(selected_epoch),
+        "selected_epoch_stage": str(best_row["stage"]),
+        "selected_epoch_lambda_id": float(best_row["lambda_id"]),
         "train_wall_time_seconds": train_wall_time_seconds,
         "evaluation_wall_time_seconds": evaluation_wall_time_seconds,
         "val_accuracy": float(val_accuracy),

@@ -100,6 +100,7 @@ The current open work is:
 Current known state:
 
 - implementation exists
+- the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
 - target construction is artifact-independent
 - the first probe shows positive mechanism signal on energy and fixed-point residual
 - task accuracy is still low and remains report-only
@@ -107,7 +108,7 @@ Current known state:
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
-- run the frozen-bridge vs exploratory-core comparison next
+- run the frozen-bridge vs corrected residual core comparison next
 - use that comparison to decide whether Stage 05 earns a v2 charter
 
 ## Current Code Entry Points
@@ -125,9 +126,8 @@ Current known state:
   - `specs/stage_03_transport_core_v1.md`
 - Stage 04 bridge addendum:
   - `specs/stage_04_incremental_bridge.md`
-- current Stage 05 note:
-  - there is no separate Stage 05 math addendum yet
-  - the current probe reuses the baseline substrate plus the Stage 03 average-velocity contract where applicable
+- Stage 05 corrected residual MeanFlow addendum:
+  - `specs/stage_05_ef_core_probe.md`
 
 ## Current Artifact Roots
 

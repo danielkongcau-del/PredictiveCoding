@@ -20,7 +20,7 @@ def run(
     run_id: str | None = None,
     **overrides: object,
 ) -> FMPCEFExploratoryProbeRunResult:
-    """Run the first post-bridge teacher-free exploratory core probe on digits."""
+    """Run the Stage 05 corrected residual MeanFlow core probe on digits."""
 
     config = build_fmpc_ef_exploratory_probe_config(
         output_root=output_root,
@@ -32,7 +32,7 @@ def run(
 
 def main() -> None:
     result = run()
-    print("Post-bridge teacher-free exploratory probe completed.")
+    print("Stage 05 corrected residual MeanFlow core probe completed.")
     print(f"Run directory: {result.run_dir}")
     print(f"Summary: {result.run_dir / 'summary.json'}")
 

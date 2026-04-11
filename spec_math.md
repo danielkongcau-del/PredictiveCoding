@@ -23,10 +23,11 @@ To build a complete mathematical understanding, read in this order:
 
 Current Stage 05 note:
 
-- `stage_05_ef_core_probe/` does **not** yet have a separate normative math addendum
-- the current probe reuses the baseline predictive-coding substrate from this file
-  and the average-velocity transport contract from the Stage 03 addendum where
-  applicable
+- `stage_05_ef_core_probe/` now has a separate normative math addendum:
+  - [specs/stage_05_ef_core_probe.md](/e:/CodeSpace/PredictiveCoding/specs/stage_05_ef_core_probe.md)
+- Stage 05 reuses the baseline predictive-coding substrate from this file and
+  the Stage 03 transport contract except where the Stage 05 addendum explicitly
+  defines the residual MeanFlow core scope
 
 Math-layer precedence:
 
@@ -421,6 +422,8 @@ Current addenda:
   - [specs/stage_03_transport_core_v1.md](/e:/CodeSpace/PredictiveCoding/specs/stage_03_transport_core_v1.md)
 - Stage 04 bridge scheduling and stabilization contract:
   - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
+- Stage 05 corrected residual MeanFlow core contract:
+  - [specs/stage_05_ef_core_probe.md](/e:/CodeSpace/PredictiveCoding/specs/stage_05_ef_core_probe.md)
 
 Reading rule:
 
@@ -429,8 +432,7 @@ Reading rule:
 - for Stage 04 work:
   - read this baseline file, then the Stage 03 addendum, then the Stage 04 addendum
 - for Stage 05 exploratory work:
-  - read this baseline file and the Stage 03 addendum unless a later Stage 05
-    addendum is explicitly introduced
+  - read this baseline file, then the Stage 03 addendum, then the Stage 05 addendum
 
 Addenda extend the baseline only inside their declared scope. They do not silently
 replace the rest of the baseline math.

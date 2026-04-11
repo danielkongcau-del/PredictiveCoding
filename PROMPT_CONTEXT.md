@@ -79,13 +79,14 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 
 - Stage 04 package-internal digging is closed from the current state
 - Stage 04 is treated as the frozen bridge result on `main`
-- the current open question is whether Stage 05 earns a v2 charter
+- the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
+- the current open question is whether a fresh frozen-bridge vs corrected-core comparison earns a v2 charter
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
-- run the frozen-bridge vs exploratory-core comparison next
+- run the frozen-bridge vs corrected residual core comparison next
 - use that comparison to decide whether Stage 05 earns a v2 charter
 
 ## What Prompt Writers Must Not Reopen
@@ -116,9 +117,8 @@ Also do not casually open:
   - `specs/stage_03_transport_core_v1.md`
 - Stage 04 bridge addendum:
   - `specs/stage_04_incremental_bridge.md`
-- current Stage 05 note:
-  - no separate Stage 05 addendum exists yet
-  - the current probe reuses the baseline substrate plus the Stage 03 average-velocity contract where applicable
+- Stage 05 corrected residual MeanFlow addendum:
+  - `specs/stage_05_ef_core_probe.md`
 
 ## Current Prompt-Writing Style
 
