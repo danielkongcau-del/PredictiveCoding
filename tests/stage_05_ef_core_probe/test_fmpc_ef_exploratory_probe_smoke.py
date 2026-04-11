@@ -16,11 +16,16 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from pc.datasets import load_digits_split
-from pc.stage_03_transport_core_v1.fmpc_tf1_flow import build_tf1_context
+from pc.stage_03_transport_core_v1.fmpc_tf1_flow import (
+    build_tf1_context,
+    teacher_free_feature_tangents,
+    teacher_free_state_features,
+)
 from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     _make_pc_model,
     _make_psi_network,
     build_corrected_residual_identity_target,
+    build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
     lambda_id_for_epoch,
 )
@@ -74,6 +79,9 @@ def test_exploratory_probe_writes_expected_teacher_free_artifacts(tmp_path: Path
     assert summary["transport_scope"] == "train_only"
     assert summary["transport_steps"] == 2
     assert summary["u_psi_input_contract"] == "concat([z_t, target_onehot, t, r])"
+    assert summary["residual_branch_structure"] == "single_branch"
+    assert summary["m_traj_input_contract"] == "concat([z_t, target_onehot, t, r])"
+    assert summary["m_state_input_contract"] is None
     assert summary["bootstrap_target_contract"] == "m_boot = ((Phi_LF_r(z_t; c) - z_t) / r) - g_t"
     assert summary["residual_identity_target_contract"] == "m_id = r * D_T g_t + r * D_T m_psi"
     assert summary["selection_metric_source"] == "val_metric"
@@ -81,20 +89,67 @@ def test_exploratory_probe_writes_expected_teacher_free_artifacts(tmp_path: Path
     assert summary["acceptance_contract"] == "mechanism_first"
     assert summary["task_accuracy_is_gate"] is False
     assert summary["no_teacher_dependency_in_target_construction"] is True
+    assert summary["use_two_branch_residual_core"] is False
+    assert summary["uses_current_state_features"] is False
     assert summary["deterministic_artifacts"] is True
     assert config["transport"]["transport_family"] == "residual_meanflow_core"
     assert config["transport"]["residual_identity_mode"] == "residual_corrected_meanflow"
     assert config["transport"]["u_psi_input_contract"] == "concat([z_t, target_onehot, t, r])"
+    assert config["transport"]["residual_branch_structure"] == "single_branch"
+    assert config["transport"]["m_traj_input_contract"] == "concat([z_t, target_onehot, t, r])"
+    assert config["transport"]["m_state_input_contract"] is None
     assert config["transport"]["bootstrap_target_contract"] == "m_boot = ((Phi_LF_r(z_t; c) - z_t) / r) - g_t"
     assert config["transport"]["residual_identity_target_contract"] == "m_id = r * D_T g_t + r * D_T m_psi"
     assert config["transport"]["no_teacher_dependency_in_target_construction"] is True
     assert config["transport"]["use_teacher_free_features"] is False
+    assert config["transport"]["use_two_branch_residual_core"] is False
+    assert config["transport"]["feature_aware_state_branch_tangents"] is False
     assert len(epoch_rows) == 6
     assert "lambda_id" in epoch_rows[0]
     assert "train_total_loss" in epoch_rows[0]
     assert "train_identity_loss" in epoch_rows[0]
     assert "val_one_step_energy_delta_vs_identity" in epoch_rows[0]
     assert "val_configured_fixed_point_residual_delta_vs_identity" in epoch_rows[0]
+
+
+def test_two_branch_probe_writes_expected_v2_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v2_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+
+    assert summary["transport_family"] == "two_branch_residual_meanflow_core"
+    assert summary["residual_branch_structure"] == "two_branch"
+    assert summary["m_traj_input_contract"] == "concat([z_t, target_onehot, t, r])"
+    assert summary["m_state_input_contract"] == "concat([g_t, e_out_t, F_t])"
+    assert summary["residual_identity_target_contract"] == (
+        "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state"
+    )
+    assert summary["use_two_branch_residual_core"] is True
+    assert summary["feature_aware_state_branch_tangents"] is True
+    assert summary["uses_current_state_features"] is True
+
+    assert config["transport"]["transport_family"] == "two_branch_residual_meanflow_core"
+    assert config["transport"]["residual_branch_structure"] == "two_branch"
+    assert config["transport"]["m_traj_input_contract"] == "concat([z_t, target_onehot, t, r])"
+    assert config["transport"]["m_state_input_contract"] == "concat([g_t, e_out_t, F_t])"
+    assert config["transport"]["residual_identity_target_contract"] == (
+        "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state"
+    )
+    assert config["transport"]["use_two_branch_residual_core"] is True
+    assert config["transport"]["feature_aware_state_branch_tangents"] is True
+    assert config["transport"]["use_teacher_free_features"] is True
 
 
 def test_corrected_residual_identity_target_includes_anchor_derivative_term() -> None:
@@ -142,6 +197,93 @@ def test_corrected_residual_identity_target_includes_anchor_derivative_term() ->
     )
     assert np.linalg.norm(corrected.anchor_term) > 1e-12
     assert not np.allclose(corrected.target, corrected.residual_term)
+
+
+def test_two_branch_identity_target_is_anchor_plus_traj_plus_state() -> None:
+    config = build_fmpc_ef_exploratory_probe_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+        tangent_epsilon=1e-3,
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    psi_network = _make_psi_network(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    corrected = build_corrected_residual_identity_target(
+        context,
+        psi_network,
+        context.z0,
+        context.targets,
+        t=0.25,
+        r=0.75,
+        tangent_epsilon=config.tangent_epsilon,
+        feature_aware_state_branch_tangents=True,
+    )
+
+    np.testing.assert_allclose(
+        corrected.target,
+        corrected.anchor_term + corrected.trajectory_term + corrected.state_term,
+        atol=1e-12,
+        rtol=1e-12,
+    )
+    np.testing.assert_allclose(
+        corrected.residual_term,
+        corrected.trajectory_term + corrected.state_term,
+        atol=1e-12,
+        rtol=1e-12,
+    )
+    assert np.linalg.norm(corrected.trajectory_term) > 1e-12
+    assert np.linalg.norm(corrected.state_term) > 1e-12
+
+
+def test_two_branch_state_tangent_is_not_zero_when_feature_aware_mode_is_enabled() -> None:
+    config = build_fmpc_ef_exploratory_probe_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+        tangent_epsilon=1e-3,
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+    features = teacher_free_state_features(context, context.z0)
+    tangents = teacher_free_feature_tangents(
+        context,
+        context.z0,
+        epsilon=config.tangent_epsilon,
+    )
+
+    state_tangent = build_state_branch_input_tangent(
+        features,
+        feature_aware_state_branch_tangents=True,
+        feature_tangents=tangents,
+    )
+
+    assert np.linalg.norm(state_tangent) > 1e-12
 
 
 def test_lambda_id_schedule_has_zero_warmup_and_positive_ramp() -> None:

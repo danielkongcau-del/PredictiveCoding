@@ -100,18 +100,21 @@ The current open work is:
 Current known state:
 
 - implementation exists
-- the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
+- the current Stage 05 baseline contract is the corrected residual MeanFlow v1 probe
+- the current narrow Stage 05 candidate is the two-branch corrected residual MeanFlow v2 core
 - target construction is artifact-independent
 - the first probe shows positive mechanism signal on energy and fixed-point residual
 - the formal frozen-bridge vs corrected-core comparison now exists
-- that comparison justifies a narrow Stage 05 v2 charter on mechanism-first evidence
+- the formal Stage 05 v1 vs v2 comparison now exists
+- that comparison says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first evidence
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
-- do not treat the current comparison as a replacement claim against the frozen bridge result
-- draft a narrow Stage 05 v2 charter next
+- do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
+- use the Stage 05 v2 two-branch core as the current exploratory reference
+- refresh the frozen-bridge vs Stage 05 comparison with the v2 candidate next
 
 ## Current Code Entry Points
 

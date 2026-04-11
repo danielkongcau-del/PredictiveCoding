@@ -24,7 +24,7 @@ Stage 05 is:
 
 - a post-bridge theory-completion stage
 - a residual average-velocity core validation stage
-- teacher-free in target construction
+- artifact-independent in target construction
 - mechanism-first in evaluation
 
 Stage 05 is not:
@@ -86,6 +86,33 @@ Stage 05 keeps this minimal contract in v1:
 - no Stage 04 stabilizer family
 - no scaling/topology extension
 
+### 18.4.1 Stage 05 v2 two-branch residual core
+
+Stage 05 v2 keeps the same residual MeanFlow family but replaces the single residual head with
+an explicit two-branch decomposition:
+
+- `m_psi = m_traj + m_state`
+
+The two branch input contracts are:
+
+- `m_traj_input = concat([z_t, target_onehot, t, r])`
+- `m_state_input = concat([g_t, e_out_t, F_t])`
+
+Interpretation:
+
+- `m_traj` handles transport-coordinate prediction
+- `m_state` handles current-state geometric correction
+
+The transported average velocity remains:
+
+- `u_psi(z_t, r, t; c) = g_t + m_traj(z_t, target_onehot, t, r; c) + m_state(g_t, e_out_t, F_t; c)`
+
+This is still a Stage 05 residual MeanFlow core:
+
+- it is not a new training family
+- it does not migrate Stage 04 stabilizers
+- it does not challenge the frozen Stage 04 bridge result on `main`
+
 ### 18.5 Bootstrap residual target
 
 Stage 05 keeps the Stage 03 local self-bootstrap average-velocity anchor:
@@ -96,7 +123,7 @@ The residual bootstrap target is:
 
 - `m_boot = u_boot - g_t`
 
-This target remains teacher-free and artifact-independent.
+This target remains artifact-independent.
 
 ### 18.6 Corrected residual fixed-terminal-time identity
 
@@ -136,6 +163,40 @@ The Stage 05 corrected residual identity target is then:
 
 - `m_id = r * D_T g_t + r * D_T m_psi`
 
+### 18.6.2 Stage 05 v2 branchwise corrected identity
+
+Stage 05 v2 keeps the anchor derivative explicit and keeps the residual decomposition explicit.
+
+For the two-branch residual core:
+
+- `m_psi = m_traj + m_state`
+
+the corrected residual identity is defined branchwise as:
+
+- `m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state`
+
+The required directional-derivative approximations are:
+
+- anchor derivative:
+  - `D_T g_t`
+  - keep the centered finite-difference approximation along `g_t`
+- trajectory-branch derivative:
+  - `D_T m_traj`
+  - compute by JVP on `m_traj_input = concat([z_t, target_onehot, t, r])`
+  - use tangent `[g_t, 0_target, +1_t, -1_r]`
+- current-state branch derivative:
+  - `D_T m_state`
+  - compute by JVP on `m_state_input = concat([g_t, e_out_t, F_t])`
+  - use tangent `[D_T g_t, D_T e_out_t, D_T F_t]`
+
+This keeps the Stage 05 v2 identity target mathematically explicit:
+
+- anchor term
+- trajectory term
+- state term
+
+The implementation must not silently collapse those three terms back into one opaque residual-only derivative.
+
 ### 18.7 Stage 05 v1 training objective
 
 Stage 05 v1 uses:
@@ -148,7 +209,7 @@ This keeps the bootstrap anchor and the corrected residual identity inside one r
 
 ### 18.8 Curriculum and training schedule
 
-Stage 05 v1 uses a three-phase training schedule:
+Stage 05 uses a three-phase training schedule:
 
 - `warmup`
   - `lambda_id = 0`
@@ -192,3 +253,5 @@ Secondary report-only signals:
 - test accuracy
 
 Task accuracy is not the gate for Stage 05 v1.
+
+The same mechanism-first evaluation contract remains in force for Stage 05 v2.

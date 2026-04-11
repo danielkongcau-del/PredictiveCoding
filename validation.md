@@ -64,6 +64,15 @@ Current Stage 05 core contract:
 - corrected residual identity curriculum
 - no teacher dependency in target construction
 
+Current Stage 05 implementation status:
+
+- the v1 single-branch corrected residual core remains the backward-compatible baseline
+- the v2 two-branch corrected residual core now also exists
+- the v2 branch structure is:
+  - `m_psi = m_traj + m_state`
+  - `m_traj_input = concat([z_t, target_onehot, t, r])`
+  - `m_state_input = concat([g_t, e_out_t, F_t])`
+
 Primary acceptance metrics:
 
 - one-step energy decrease relative to identity or no-transport
@@ -122,14 +131,15 @@ At the same time:
 
 Current interpretation:
 
-- the exploratory line has enough multiseed mechanism-first signal to justify a narrow Stage 05 v2 charter
+- the exploratory line has now cleared the narrow v1 to v2 mechanism-improvement check
+- the two-branch Stage 05 v2 core is now the current exploratory candidate
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
 
 The next validation move is:
 
-- draft the next narrow Stage 05 v2 charter from the completed comparison evidence
+- refresh the formal frozen-bridge comparison with the current Stage 05 v2 candidate
 
 That next step should preserve:
 
@@ -149,6 +159,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
 - Stage 05 frozen-bridge comparison:
   - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
+- Stage 05 v1 vs v2 comparison:
+  - `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 
 ## Document Layering
 

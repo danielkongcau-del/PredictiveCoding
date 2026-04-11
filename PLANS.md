@@ -46,7 +46,7 @@ That means:
 
 ### Objective
 
-Evaluate whether the post-bridge corrected residual MeanFlow core has enough mechanism signal to justify a v2 charter outside the saturated Stage 04 package.
+Evaluate whether the post-bridge corrected residual MeanFlow core can be strengthened in a narrow, mechanism-first way outside the saturated Stage 04 package.
 
 ### Why This Line Leaves Stage 04
 
@@ -73,6 +73,10 @@ This exploratory line is allowed only because:
 - the formal frozen-bridge vs corrected residual core comparison now exists
 - that comparison says the Stage 05 core has enough mechanism-first evidence to justify a narrow v2 charter
 - that same comparison does not support replacing the frozen Stage 04 bridge result on `main`
+- the Stage 05 v2 two-branch residual core now exists in the main Stage 05 probe implementation
+- the formal Stage 05 v1 vs v2 comparison now exists
+- that comparison says the Stage 05 v2 two-branch residual core improves mechanism magnitude over v1 under the current multiseed rule
+- that same comparison still does not support any replacement claim against the frozen Stage 04 bridge result on `main`
 
 ## Immediate Execution Queue
 
@@ -86,7 +90,7 @@ Files to preserve as current Stage 04 control:
 
 Success condition:
 
-- no semantic changes to the adopted Stage 04 bridge package while the Stage 05 v2 charter is being defined
+- no semantic changes to the adopted Stage 04 bridge package while the current Stage 05 exploratory follow-up is running
 
 ### 2. Comparison Is Now Complete
 
@@ -101,18 +105,33 @@ Key artifact:
 
 - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
 
-### 3. Draft Stage 05 V2 Charter
+### 3. Stage 05 V2 Implementation Is Complete
+
+Completed outcome:
+
+- the Stage 05 addendum now documents the two-branch residual decomposition
+- the Stage 05 probe now supports both:
+  - v1 corrected residual MeanFlow baseline
+  - v2 two-branch corrected residual MeanFlow candidate
+- the Stage 05 smoke/unit test subset passes
+- the formal Stage 05 v1 vs v2 comparison now exists and favors v2 on mechanism magnitude
+
+Key artifacts:
+
+- `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
+
+### 4. Refresh Frozen-Bridge vs Stage 05 V2 Comparison
 
 Objective:
 
-- define the next narrow Stage 05 step now that the corrected residual core has cleared the mechanism-first comparison gate
+- rerun the formal frozen-bridge comparison using the current Stage 05 v2 candidate rather than the older Stage 05 v1 baseline
 
 Required framing:
 
 - keep Stage 04 frozen on `main`
 - do not reopen Stage 04 package-internal work
-- do not treat the comparison result as a default-replacement claim
-- keep Stage 05 mechanism-first
+- do not treat the refreshed comparison as a replacement claim unless the evidence actually clears that much higher bar
+- keep Stage 05 mechanism-first and keep task accuracy report-only
 
 ## Exploratory Acceptance Criteria
 

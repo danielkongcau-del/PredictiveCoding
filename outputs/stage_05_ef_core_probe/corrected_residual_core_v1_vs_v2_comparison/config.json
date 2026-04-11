@@ -1,0 +1,60 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "corrected_residual_core_v1_vs_v2_comparison",
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v1_reference": {
+      "method_name": "stage_05_corrected_residual_core_v1",
+      "transport_family": "residual_meanflow_core",
+      "residual_branch_structure": "single_branch",
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v2_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ],
+      "feature_aware_state_branch_tangents": true
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_v2_artifact_checks": true,
+      "requires_stage05_v2_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_mean_configured_step_energy_delta_vs_identity_more_negative_than_v1": true,
+      "requires_stage05_v2_mean_configured_step_fixed_point_residual_delta_vs_identity_more_negative_than_v1": true,
+      "task_accuracy_is_report_only": true
+    }
+  },
+  "artifacts": {
+    "aggregate_runs_csv": "aggregate_runs.csv",
+    "aggregate_summary_json": "aggregate_summary.json",
+    "comparison_report_json": "comparison_report.json",
+    "comparison_report_md": "comparison_report.md"
+  }
+}

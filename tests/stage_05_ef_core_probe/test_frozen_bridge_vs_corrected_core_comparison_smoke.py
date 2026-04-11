@@ -85,3 +85,56 @@ def test_frozen_bridge_vs_corrected_core_comparison_writes_expected_artifacts(
     assert "supports" in report
     assert "does_not_support" in report
     assert "stage05_corrected_residual_core_justifies_v2_charter" in report["decision"]
+
+
+def test_stage05_v1_vs_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="corrected_core_v1_vs_v2_smoke",
+        comparison_variant="stage05_v1_vs_v2",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 2
+    method_names = {row["method_name"] for row in rows}
+    assert method_names == {
+        "stage_05_corrected_residual_core_v1",
+        "stage_05_two_branch_corrected_residual_core_v2",
+    }
+
+    first_row = rows[0]
+    assert "transport_family" in first_row
+    assert "residual_branch_structure" in first_row
+    assert "one_step_energy_delta_vs_identity" in first_row
+    assert "configured_step_energy_delta_vs_identity" in first_row
+    assert "configured_step_fixed_point_residual_delta_vs_identity" in first_row
+    assert "deterministic_artifact_checks_passed" in first_row
+
+    assert summary["stage"] == "corrected_residual_core_v1_vs_v2_comparison"
+    assert "comparison_protocol" in summary
+    assert "by_method" in summary
+    assert "pairwise_stage05_v2_vs_v1" in summary
+    assert "stage05_v2_improves_mechanism_magnitude_over_v1" in summary
+    assert "stage05_v2_vs_v1_decision_detail" in summary
+    assert summary["comparison_report_json_path"] == "comparison_report.json"
+    assert summary["comparison_report_md_path"] == "comparison_report.md"
+
+    assert "decision" in report
+    assert "supports" in report
+    assert "does_not_support" in report
+    assert "stage05_v2_improves_mechanism_magnitude_over_v1" in report["decision"]

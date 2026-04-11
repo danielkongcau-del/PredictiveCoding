@@ -16,12 +16,16 @@ from ..datasets import load_digits_split
 from ..energy import compute_cache, total_energy
 from ..stage_03_transport_core_v1.fmpc_tf1_flow import (
     FMPCTF1Context,
+    FMPCTF1StateFeatures,
+    FMPCTF1StateFeatureTangents,
     bootstrap_average_velocity_target,
     build_tf1_context,
     hidden_energy_from_state,
     hidden_local_flow,
     hidden_states_from_state,
     rollout_hidden_transport,
+    teacher_free_feature_tangents,
+    teacher_free_state_features,
     validate_tf1_time_pair,
 )
 from ..stage_03_transport_core_v1.fmpc_tf1_jvp import build_tf1_input, forward_tf1_mlp_with_jvp
@@ -38,10 +42,16 @@ OutputLayout = Literal["single_dir", "run_id_subdir"]
 ResidualIdentityMode = Literal["residual_corrected_meanflow"]
 
 RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "residual_meanflow_core"
+TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "two_branch_residual_meanflow_core"
 RESIDUAL_IDENTITY_MODE = "residual_corrected_meanflow"
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
+M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
+M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
 BOOTSTRAP_TARGET_CONTRACT = "m_boot = ((Phi_LF_r(z_t; c) - z_t) / r) - g_t"
 RESIDUAL_IDENTITY_TARGET_CONTRACT = "m_id = r * D_T g_t + r * D_T m_psi"
+TWO_BRANCH_RESIDUAL_IDENTITY_TARGET_CONTRACT = (
+    "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state"
+)
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -88,6 +98,8 @@ class FMPCEFExploratoryProbeConfig:
     identity_loss_weight: float = 0.1
     tangent_epsilon: float = 1e-3
     identity_mode: ResidualIdentityMode = RESIDUAL_IDENTITY_MODE
+    use_two_branch_residual_core: bool = False
+    feature_aware_state_branch_tangents: bool = False
     psi_hidden_dims: tuple[int, ...] = (128,)
     psi_weight_scale: float = 0.01
     psi_eta_w: float = 0.01
@@ -152,6 +164,47 @@ class ProbeMechanismMetrics:
     fixed_point_residual_delta_vs_local_field_only: float
 
 
+@dataclass
+class Stage05ResidualCoreNetworks:
+    """Stage 05 residual transport head.
+
+    v1 uses the trajectory branch only.
+    v2 adds a current-state correction branch.
+    """
+
+    trajectory_network: MLPNetwork
+    state_network: MLPNetwork | None = None
+
+    @property
+    def uses_two_branch_residual_core(self) -> bool:
+        return self.state_network is not None
+
+
+@dataclass(frozen=True)
+class Stage05ResidualCorePredictions:
+    """Explicit Stage 05 residual decomposition at one `(z_t, t, r)` point."""
+
+    trajectory_input: np.ndarray
+    state_input: np.ndarray | None
+    trajectory_residual: np.ndarray
+    state_residual: np.ndarray
+    total_residual: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "trajectory_input", _as_batch_first("trajectory_input", self.trajectory_input)
+        )
+        if self.state_input is not None:
+            object.__setattr__(self, "state_input", _as_batch_first("state_input", self.state_input))
+        object.__setattr__(
+            self,
+            "trajectory_residual",
+            _as_batch_first("trajectory_residual", self.trajectory_residual),
+        )
+        object.__setattr__(self, "state_residual", _as_batch_first("state_residual", self.state_residual))
+        object.__setattr__(self, "total_residual", _as_batch_first("total_residual", self.total_residual))
+
+
 @dataclass(frozen=True)
 class CorrectedResidualIdentityTarget:
     """Corrected residual identity target and its explicit constituent terms."""
@@ -161,6 +214,10 @@ class CorrectedResidualIdentityTarget:
     residual_jvp: np.ndarray
     anchor_term: np.ndarray
     residual_term: np.ndarray
+    trajectory_jvp: np.ndarray
+    trajectory_term: np.ndarray
+    state_jvp: np.ndarray
+    state_term: np.ndarray
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "target", _as_batch_first("target", self.target))
@@ -172,6 +229,14 @@ class CorrectedResidualIdentityTarget:
         object.__setattr__(self, "residual_jvp", _as_batch_first("residual_jvp", self.residual_jvp))
         object.__setattr__(self, "anchor_term", _as_batch_first("anchor_term", self.anchor_term))
         object.__setattr__(self, "residual_term", _as_batch_first("residual_term", self.residual_term))
+        object.__setattr__(
+            self, "trajectory_jvp", _as_batch_first("trajectory_jvp", self.trajectory_jvp)
+        )
+        object.__setattr__(
+            self, "trajectory_term", _as_batch_first("trajectory_term", self.trajectory_term)
+        )
+        object.__setattr__(self, "state_jvp", _as_batch_first("state_jvp", self.state_jvp))
+        object.__setattr__(self, "state_term", _as_batch_first("state_term", self.state_term))
         if self.target.shape != self.anchor_derivative.shape:
             raise ValueError("target and anchor_derivative must share the same shape.")
         if self.target.shape != self.residual_jvp.shape:
@@ -180,6 +245,41 @@ class CorrectedResidualIdentityTarget:
             raise ValueError("target and anchor_term must share the same shape.")
         if self.target.shape != self.residual_term.shape:
             raise ValueError("target and residual_term must share the same shape.")
+        if self.target.shape != self.trajectory_jvp.shape:
+            raise ValueError("target and trajectory_jvp must share the same shape.")
+        if self.target.shape != self.trajectory_term.shape:
+            raise ValueError("target and trajectory_term must share the same shape.")
+        if self.target.shape != self.state_jvp.shape:
+            raise ValueError("target and state_jvp must share the same shape.")
+        if self.target.shape != self.state_term.shape:
+            raise ValueError("target and state_term must share the same shape.")
+
+
+@dataclass(frozen=True)
+class ResidualSupervisionBatch:
+    """Stage 05 supervision tensors, with optional v2 state-branch inputs."""
+
+    trajectory_inputs: np.ndarray
+    state_inputs: np.ndarray | None
+    boot_targets: np.ndarray
+    identity_targets: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "trajectory_inputs", _as_batch_first("trajectory_inputs", self.trajectory_inputs)
+        )
+        if self.state_inputs is not None:
+            object.__setattr__(self, "state_inputs", _as_batch_first("state_inputs", self.state_inputs))
+        object.__setattr__(self, "boot_targets", _as_batch_first("boot_targets", self.boot_targets))
+        object.__setattr__(
+            self, "identity_targets", _as_batch_first("identity_targets", self.identity_targets)
+        )
+        if self.trajectory_inputs.shape[0] != self.boot_targets.shape[0]:
+            raise ValueError("trajectory_inputs and boot_targets must share the same batch size.")
+        if self.trajectory_inputs.shape[0] != self.identity_targets.shape[0]:
+            raise ValueError("trajectory_inputs and identity_targets must share the same batch size.")
+        if self.state_inputs is not None and self.state_inputs.shape[0] != self.trajectory_inputs.shape[0]:
+            raise ValueError("state_inputs and trajectory_inputs must share the same batch size.")
 
 
 @dataclass(frozen=True)
@@ -205,7 +305,7 @@ class FMPCEFExploratoryProbeEpochMetrics:
 class FMPCEFExploratoryProbeEpochSnapshot:
     epoch: int
     model_snapshot: list[tuple[np.ndarray, np.ndarray]]
-    psi_snapshot: list[tuple[np.ndarray, np.ndarray]]
+    psi_snapshot: dict[str, list[tuple[np.ndarray, np.ndarray]] | None]
 
 
 @dataclass
@@ -215,7 +315,7 @@ class FMPCEFExploratoryProbeRunResult:
     epoch_metrics: list[dict[str, Any]]
     summary: dict[str, Any]
     model: PCNetwork | None = None
-    psi_network: MLPNetwork | None = None
+    psi_network: Stage05ResidualCoreNetworks | None = None
 
 
 def build_fmpc_ef_exploratory_probe_config(
@@ -241,6 +341,48 @@ def build_fmpc_ef_exploratory_probe_config(
     return FMPCEFExploratoryProbeConfig(**payload)
 
 
+def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_two_branch_residual_core:
+        return TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY
+    return RESIDUAL_MEANFLOW_TRANSPORT_FAMILY
+
+
+def _residual_branch_structure(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_two_branch_residual_core:
+        return "two_branch"
+    return "single_branch"
+
+
+def _psi_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_two_branch_residual_core:
+        return "two_branch_residual_local_flow_mlp"
+    return "residual_local_flow_mlp"
+
+
+def _velocity_parameterization(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_two_branch_residual_core:
+        return (
+            "u_psi = g_theta + m_traj(z_t, target_onehot, t, r) + "
+            "m_state(g_t, e_out_t, F_t)"
+        )
+    return "u_psi = g_theta + residual_mlp(z_t, target_onehot, t, r)"
+
+
+def _u_psi_input_contract(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_two_branch_residual_core:
+        return (
+            "u_psi = g_t + m_traj(concat([z_t, target_onehot, t, r])) + "
+            "m_state(concat([g_t, e_out_t, F_t]))"
+        )
+    return U_PSI_INPUT_CONTRACT
+
+
+def _residual_identity_target_contract(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_two_branch_residual_core:
+        return TWO_BRANCH_RESIDUAL_IDENTITY_TARGET_CONTRACT
+    return RESIDUAL_IDENTITY_TARGET_CONTRACT
+
+
 def build_exploratory_probe_input(
     z_t: np.ndarray,
     target_onehot: np.ndarray,
@@ -257,6 +399,47 @@ def build_exploratory_probe_input(
         r=r,
         use_teacher_free_features=False,
     )
+
+
+def build_state_branch_input(
+    features: FMPCTF1StateFeatures,
+) -> np.ndarray:
+    """Return the v2 current-state branch input block `(g_t, e_out_t, F_t)`."""
+
+    return np.concatenate(
+        [features.g_t, features.e_out_t, features.F_t],
+        axis=1,
+    ).astype(np.float64, copy=False)
+
+
+def build_state_branch_input_tangent(
+    features: FMPCTF1StateFeatures,
+    *,
+    feature_aware_state_branch_tangents: bool,
+    feature_tangents: FMPCTF1StateFeatureTangents | None = None,
+) -> np.ndarray:
+    """Return the v2 current-state branch tangent block.
+
+    When feature-aware tangents are disabled, the state branch is treated as frozen
+    side information for the identity JVP and therefore receives a zero tangent.
+    """
+
+    batch_size = int(features.g_t.shape[0])
+    if feature_aware_state_branch_tangents:
+        if feature_tangents is None:
+            raise ValueError(
+                "feature_tangents must be provided when feature_aware_state_branch_tangents=True."
+            )
+        return np.concatenate(
+            [
+                feature_tangents.Dg_g_t,
+                feature_tangents.Dg_e_out_t,
+                feature_tangents.Dg_F_t,
+            ],
+            axis=1,
+        ).astype(np.float64, copy=False)
+    feature_dim = int(features.g_t.shape[1]) + int(features.e_out_t.shape[1]) + int(features.F_t.shape[1])
+    return np.zeros((batch_size, feature_dim), dtype=np.float64)
 
 
 def _resolve_run_dir(
@@ -349,13 +532,42 @@ def _make_pc_model(config: FMPCEFExploratoryProbeConfig) -> PCNetwork:
     )
 
 
-def _make_psi_network(config: FMPCEFExploratoryProbeConfig) -> MLPNetwork:
+def _snapshot_residual_core_parameters(
+    residual_core: Stage05ResidualCoreNetworks,
+) -> dict[str, list[tuple[np.ndarray, np.ndarray]] | None]:
+    return {
+        "trajectory": _snapshot_mlp_parameters(residual_core.trajectory_network),
+        "state": (
+            _snapshot_mlp_parameters(residual_core.state_network)
+            if residual_core.state_network is not None
+            else None
+        ),
+    }
+
+
+def _restore_residual_core_parameters(
+    residual_core: Stage05ResidualCoreNetworks,
+    snapshot: dict[str, list[tuple[np.ndarray, np.ndarray]] | None],
+) -> None:
+    trajectory_snapshot = snapshot.get("trajectory")
+    if trajectory_snapshot is None:
+        raise ValueError("Residual-core trajectory snapshot is required.")
+    _restore_mlp_parameters(residual_core.trajectory_network, trajectory_snapshot)
+    if residual_core.state_network is None:
+        return
+    state_snapshot = snapshot.get("state")
+    if state_snapshot is None:
+        raise ValueError("Residual-core state snapshot is required for two-branch mode.")
+    _restore_mlp_parameters(residual_core.state_network, state_snapshot)
+
+
+def _make_psi_network(config: FMPCEFExploratoryProbeConfig) -> Stage05ResidualCoreNetworks:
     hidden_dim = int(sum(config.layer_dims[1:-1]))
     target_dim = int(config.layer_dims[-1])
-    layer_dims = [hidden_dim + target_dim + 2, *config.psi_hidden_dims, hidden_dim]
-    return MLPNetwork(
+    trajectory_dims = [hidden_dim + target_dim + 2, *config.psi_hidden_dims, hidden_dim]
+    trajectory_network = MLPNetwork(
         layers=init_mlp_baseline_layers(
-            layer_dims,
+            trajectory_dims,
             hidden_activation="tanh",
             output_activation="identity",
             weight_scale=config.psi_weight_scale,
@@ -363,6 +575,24 @@ def _make_psi_network(config: FMPCEFExploratoryProbeConfig) -> MLPNetwork:
         ),
         eta_w=config.psi_eta_w,
         eta_b=config.psi_eta_b,
+    )
+    state_network: MLPNetwork | None = None
+    if config.use_two_branch_residual_core:
+        state_dims = [hidden_dim + target_dim + 1, *config.psi_hidden_dims, hidden_dim]
+        state_network = MLPNetwork(
+            layers=init_mlp_baseline_layers(
+                state_dims,
+                hidden_activation="tanh",
+                output_activation="identity",
+                weight_scale=config.psi_weight_scale,
+                seed=config.psi_init_seed + 1,
+            ),
+            eta_w=config.psi_eta_w,
+            eta_b=config.psi_eta_b,
+        )
+    return Stage05ResidualCoreNetworks(
+        trajectory_network=trajectory_network,
+        state_network=state_network,
     )
 
 
@@ -450,6 +680,63 @@ def _weighted_mse_step(
             delta = next_delta
 
 
+def _predict_residual_from_inputs(
+    residual_core: Stage05ResidualCoreNetworks,
+    trajectory_inputs: np.ndarray,
+    *,
+    state_inputs: np.ndarray | None = None,
+) -> Stage05ResidualCorePredictions:
+    trajectory_predictions = _as_batch_first(
+        "trajectory_residual",
+        residual_core.trajectory_network.predict(trajectory_inputs),
+    )
+    state_predictions = np.zeros_like(trajectory_predictions)
+    if residual_core.state_network is not None:
+        if state_inputs is None:
+            raise ValueError("state_inputs are required for the two-branch residual core.")
+        state_predictions = _as_batch_first(
+            "state_residual",
+            residual_core.state_network.predict(state_inputs),
+        )
+    total_predictions = trajectory_predictions + state_predictions
+    return Stage05ResidualCorePredictions(
+        trajectory_input=trajectory_inputs,
+        state_input=state_inputs,
+        trajectory_residual=trajectory_predictions,
+        state_residual=state_predictions,
+        total_residual=total_predictions,
+    )
+
+
+def _weighted_two_branch_mse_step(
+    residual_core: Stage05ResidualCoreNetworks,
+    trajectory_inputs: np.ndarray,
+    state_inputs: np.ndarray,
+    target: np.ndarray,
+    *,
+    loss_scale: float,
+) -> None:
+    if residual_core.state_network is None:
+        raise ValueError("Two-branch update requires state_network.")
+    predictions = _predict_residual_from_inputs(
+        residual_core,
+        trajectory_inputs,
+        state_inputs=state_inputs,
+    )
+    _weighted_mse_step(
+        residual_core.trajectory_network,
+        trajectory_inputs,
+        target - predictions.state_residual,
+        loss_scale=loss_scale,
+    )
+    _weighted_mse_step(
+        residual_core.state_network,
+        state_inputs,
+        target - predictions.trajectory_residual,
+        loss_scale=loss_scale,
+    )
+
+
 def build_residual_input_tangent(
     g_t: np.ndarray,
     *,
@@ -466,6 +753,28 @@ def build_residual_input_tangent(
         np.float64,
         copy=False,
     )
+
+
+def _residual_core_inputs_for_state(
+    context: FMPCTF1Context,
+    config: FMPCEFExploratoryProbeConfig,
+    z_t: np.ndarray,
+    target_onehot: np.ndarray,
+    *,
+    t: float,
+    r: float,
+) -> tuple[np.ndarray, np.ndarray | None, FMPCTF1StateFeatures | None]:
+    trajectory_input = build_exploratory_probe_input(
+        z_t,
+        target_onehot,
+        t=t,
+        r=r,
+    )
+    if not config.use_two_branch_residual_core:
+        return trajectory_input, None, None
+    features = teacher_free_state_features(context, z_t)
+    state_input = build_state_branch_input(features)
+    return trajectory_input, state_input, features
 
 
 def approximate_anchor_directional_derivative(
@@ -493,17 +802,19 @@ def approximate_anchor_directional_derivative(
 
 def build_corrected_residual_identity_target(
     context: FMPCTF1Context,
-    psi_network: MLPNetwork,
+    psi_network: Stage05ResidualCoreNetworks,
     z_t: np.ndarray,
     target_onehot: np.ndarray,
     *,
     t: float,
     r: float,
     tangent_epsilon: float,
+    feature_aware_state_branch_tangents: bool = False,
 ) -> CorrectedResidualIdentityTarget:
     """Return the Stage 05 corrected residual identity target.
 
-    The target is `m_id = r * D_T g_t + r * D_T m_psi`.
+    The v1 target is `m_id = r * D_T g_t + r * D_T m_psi`.
+    The v2 target is `m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state`.
     """
 
     validate_tf1_time_pair(t, r)
@@ -512,22 +823,54 @@ def build_corrected_residual_identity_target(
     if z_array.shape[0] != target_array.shape[0]:
         raise ValueError("z_t and target_onehot must share the same batch size.")
     g_t = hidden_local_flow(context, z_array)
-    inputs = build_exploratory_probe_input(z_array, target_array, t=t, r=r)
-    input_tangent = build_residual_input_tangent(g_t, target_dim=target_array.shape[1])
-    residual_jvp = forward_tf1_mlp_with_jvp(psi_network, inputs, input_tangent).jvp
+    trajectory_input = build_exploratory_probe_input(z_array, target_array, t=t, r=r)
+    trajectory_input_tangent = build_residual_input_tangent(g_t, target_dim=target_array.shape[1])
+    trajectory_jvp = forward_tf1_mlp_with_jvp(
+        psi_network.trajectory_network,
+        trajectory_input,
+        trajectory_input_tangent,
+    ).jvp
     anchor_derivative = approximate_anchor_directional_derivative(
         context,
         z_array,
         epsilon=tangent_epsilon,
     )
+    state_jvp = np.zeros_like(trajectory_jvp)
+    if psi_network.state_network is not None:
+        features = teacher_free_state_features(context, z_array)
+        feature_tangents = None
+        if feature_aware_state_branch_tangents:
+            feature_tangents = teacher_free_feature_tangents(
+                context,
+                z_array,
+                epsilon=tangent_epsilon,
+            )
+        state_input = build_state_branch_input(features)
+        state_input_tangent = build_state_branch_input_tangent(
+            features,
+            feature_aware_state_branch_tangents=feature_aware_state_branch_tangents,
+            feature_tangents=feature_tangents,
+        )
+        state_jvp = forward_tf1_mlp_with_jvp(
+            psi_network.state_network,
+            state_input,
+            state_input_tangent,
+        ).jvp
+    residual_jvp = trajectory_jvp + state_jvp
     anchor_term = float(r) * anchor_derivative
-    residual_term = float(r) * residual_jvp
+    trajectory_term = float(r) * trajectory_jvp
+    state_term = float(r) * state_jvp
+    residual_term = trajectory_term + state_term
     return CorrectedResidualIdentityTarget(
         target=anchor_term + residual_term,
         anchor_derivative=anchor_derivative,
         residual_jvp=residual_jvp,
         anchor_term=anchor_term,
         residual_term=residual_term,
+        trajectory_jvp=trajectory_jvp,
+        trajectory_term=trajectory_term,
+        state_jvp=state_jvp,
+        state_term=state_term,
     )
 
 
@@ -557,22 +900,32 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
         "transport": {
             "teacher_free": True,
             "uses_teacher_artifacts": False,
-            "transport_family": RESIDUAL_MEANFLOW_TRANSPORT_FAMILY,
+            "transport_family": _transport_family_name(config),
             "residual_identity_mode": config.identity_mode,
             "energy_substrate": "baseline_pc_energy",
             "local_flow_definition": "exact_negative_hidden_state_gradient",
             "direct_anchor_source": "self_bootstrap_local_field",
-            "psi_family": "residual_local_flow_mlp",
-            "velocity_parameterization": "u_psi = g_theta + residual_mlp(z_t, target_onehot, t, r)",
-            "u_psi_input_contract": U_PSI_INPUT_CONTRACT,
+            "psi_family": _psi_family_name(config),
+            "velocity_parameterization": _velocity_parameterization(config),
+            "u_psi_input_contract": _u_psi_input_contract(config),
+            "residual_branch_structure": _residual_branch_structure(config),
+            "m_traj_input_contract": M_TRAJ_INPUT_CONTRACT,
+            "m_state_input_contract": (
+                M_STATE_INPUT_CONTRACT if config.use_two_branch_residual_core else None
+            ),
             "bootstrap_target_contract": BOOTSTRAP_TARGET_CONTRACT,
-            "residual_identity_target_contract": RESIDUAL_IDENTITY_TARGET_CONTRACT,
+            "residual_identity_target_contract": _residual_identity_target_contract(config),
             "identity_loss_weight": float(config.identity_loss_weight),
             "tangent_epsilon": float(config.tangent_epsilon),
             "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
             "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
             "no_teacher_dependency_in_target_construction": True,
-            "use_teacher_free_features": False,
+            "use_teacher_free_features": bool(config.use_two_branch_residual_core),
+            "uses_current_state_features": bool(config.use_two_branch_residual_core),
+            "use_two_branch_residual_core": bool(config.use_two_branch_residual_core),
+            "feature_aware_state_branch_tangents": bool(
+                config.feature_aware_state_branch_tangents
+            ),
             "transport_scope": "train_only",
             "transport_steps": int(config.transport_steps),
             "bootstrap_integrator": config.bootstrap_integrator,
@@ -603,20 +956,23 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
 
 def _collect_residual_supervision(
     context: FMPCTF1Context,
-    psi_network: MLPNetwork,
+    psi_network: Stage05ResidualCoreNetworks,
     config: FMPCEFExploratoryProbeConfig,
     *,
     z_knots: list[np.ndarray],
     knot_times: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    input_blocks: list[np.ndarray] = []
+) -> ResidualSupervisionBatch:
+    trajectory_input_blocks: list[np.ndarray] = []
+    state_input_blocks: list[np.ndarray] = []
     boot_targets: list[np.ndarray] = []
     identity_targets: list[np.ndarray] = []
     for knot_index, t_k in enumerate(knot_times[:-1]):
         z_t = z_knots[knot_index]
         t_float = float(t_k)
         r_k = 1.0 - t_float
-        inputs = build_exploratory_probe_input(
+        trajectory_input, state_input, _ = _residual_core_inputs_for_state(
+            context,
+            config,
             z_t,
             context.targets,
             t=t_float,
@@ -639,30 +995,49 @@ def _collect_residual_supervision(
             t=t_float,
             r=r_k,
             tangent_epsilon=config.tangent_epsilon,
+            feature_aware_state_branch_tangents=config.feature_aware_state_branch_tangents,
         )
-        input_blocks.append(inputs)
+        trajectory_input_blocks.append(trajectory_input)
+        if state_input is not None:
+            state_input_blocks.append(state_input)
         boot_targets.append(u_boot - g_t)
         identity_targets.append(corrected_identity.target)
-    return (
-        np.concatenate(input_blocks, axis=0).astype(np.float64, copy=False),
-        np.concatenate(boot_targets, axis=0).astype(np.float64, copy=False),
-        np.concatenate(identity_targets, axis=0).astype(np.float64, copy=False),
+    return ResidualSupervisionBatch(
+        trajectory_inputs=np.concatenate(trajectory_input_blocks, axis=0).astype(
+            np.float64,
+            copy=False,
+        ),
+        state_inputs=(
+            np.concatenate(state_input_blocks, axis=0).astype(np.float64, copy=False)
+            if state_input_blocks
+            else None
+        ),
+        boot_targets=np.concatenate(boot_targets, axis=0).astype(np.float64, copy=False),
+        identity_targets=np.concatenate(identity_targets, axis=0).astype(np.float64, copy=False),
     )
 
 
 def _learned_velocity_fn(
     context: FMPCTF1Context,
-    psi_network: MLPNetwork,
+    psi_network: Stage05ResidualCoreNetworks,
+    config: FMPCEFExploratoryProbeConfig,
 ):
     def _velocity(z_t: np.ndarray, t_k: float, r_k: float) -> np.ndarray:
         z_array = _as_batch_first("z_t", z_t)
-        inputs = build_exploratory_probe_input(
+        trajectory_input, state_input, _ = _residual_core_inputs_for_state(
+            context,
+            config,
             z_array,
             context.targets,
             t=t_k,
             r=r_k,
         )
-        residual = _as_batch_first("residual_velocity", psi_network.predict(inputs))
+        residual_predictions = _predict_residual_from_inputs(
+            psi_network,
+            trajectory_input,
+            state_inputs=state_input,
+        )
+        residual = residual_predictions.total_residual
         velocity = hidden_local_flow(context, z_array) + residual
         return _as_batch_first("velocity", velocity)
 
@@ -722,7 +1097,7 @@ def _evaluate_mechanism_metrics(
         context.z0,
         transport_steps=transport_steps,
         mode="learned",
-        velocity_fn=_learned_velocity_fn(context, psi_network),
+        velocity_fn=_learned_velocity_fn(context, psi_network, config),
     )
     identity_residual = _hidden_residual_rms(context, identity.z_knots[-1])
     local_field_residual = _hidden_residual_rms(context, local_field.z_knots[-1])
@@ -767,7 +1142,7 @@ def _snapshot_for_epoch(
 
 def _train_one_batch(
     model: PCNetwork,
-    psi_network: MLPNetwork,
+    psi_network: Stage05ResidualCoreNetworks,
     config: FMPCEFExploratoryProbeConfig,
     x_batch: np.ndarray,
     y_batch: np.ndarray,
@@ -782,24 +1157,45 @@ def _train_one_batch(
         transport_steps=config.transport_steps,
         mode="local_field_only",
     )
-    psi_inputs, boot_targets, identity_targets = _collect_residual_supervision(
+    supervision = _collect_residual_supervision(
         context,
         psi_network,
         config,
         z_knots=source_rollout.z_knots,
         knot_times=source_rollout.knot_times,
     )
-    psi_predictions = psi_network.predict(psi_inputs)
-    boot_loss = float(np.mean((psi_predictions - boot_targets) ** 2))
-    identity_loss = float(np.mean((psi_predictions - identity_targets) ** 2))
+    predictions = _predict_residual_from_inputs(
+        psi_network,
+        supervision.trajectory_inputs,
+        state_inputs=supervision.state_inputs,
+    )
+    psi_predictions = predictions.total_residual
+    boot_loss = float(np.mean((psi_predictions - supervision.boot_targets) ** 2))
+    identity_loss = float(np.mean((psi_predictions - supervision.identity_targets) ** 2))
     if lambda_id > 0.0:
-        combined_target = (boot_targets + (lambda_id * identity_targets)) / (1.0 + lambda_id)
+        combined_target = (
+            supervision.boot_targets + (lambda_id * supervision.identity_targets)
+        ) / (1.0 + lambda_id)
         loss_scale = 1.0 + lambda_id
     else:
-        combined_target = boot_targets
+        combined_target = supervision.boot_targets
         loss_scale = 1.0
     total_loss = boot_loss + (lambda_id * identity_loss)
-    _weighted_mse_step(psi_network, psi_inputs, combined_target, loss_scale=loss_scale)
+    if supervision.state_inputs is None:
+        _weighted_mse_step(
+            psi_network.trajectory_network,
+            supervision.trajectory_inputs,
+            combined_target,
+            loss_scale=loss_scale,
+        )
+    else:
+        _weighted_two_branch_mse_step(
+            psi_network,
+            supervision.trajectory_inputs,
+            supervision.state_inputs,
+            combined_target,
+            loss_scale=loss_scale,
+        )
 
     if stage == "warmup":
         theta_rollout = source_rollout
@@ -809,7 +1205,7 @@ def _train_one_batch(
             context.z0,
             transport_steps=config.transport_steps,
             mode="learned",
-            velocity_fn=_learned_velocity_fn(context, psi_network),
+            velocity_fn=_learned_velocity_fn(context, psi_network, config),
         )
 
     transported_energy = _theta_update_from_transported_state(
@@ -924,7 +1320,7 @@ def run_fmpc_ef_exploratory_probe(
             FMPCEFExploratoryProbeEpochSnapshot(
                 epoch=epoch_index + 1,
                 model_snapshot=_snapshot_pc_parameters(model),
-                psi_snapshot=_snapshot_mlp_parameters(psi_network),
+                psi_snapshot=_snapshot_residual_core_parameters(psi_network),
             )
         )
 
@@ -934,7 +1330,7 @@ def run_fmpc_ef_exploratory_probe(
     selected_epoch = int(best_row["epoch"])
     selected_snapshot = _snapshot_for_epoch(epoch_snapshots, selected_epoch)
     _restore_pc_parameters(model, selected_snapshot.model_snapshot)
-    _restore_mlp_parameters(psi_network, selected_snapshot.psi_snapshot)
+    _restore_residual_core_parameters(psi_network, selected_snapshot.psi_snapshot)
 
     evaluation_start = perf_counter()
     val_one_step = _evaluate_mechanism_metrics(
@@ -994,21 +1390,31 @@ def run_fmpc_ef_exploratory_probe(
         "stage": "ef_core_probe",
         "teacher_free": True,
         "uses_teacher_artifacts": False,
-        "transport_family": RESIDUAL_MEANFLOW_TRANSPORT_FAMILY,
+        "transport_family": _transport_family_name(config),
         "residual_identity_mode": config.identity_mode,
         "energy_substrate": "baseline_pc_energy",
         "local_flow_definition": "exact_negative_hidden_state_gradient",
         "direct_anchor_source": "self_bootstrap_local_field",
-        "psi_family": "residual_local_flow_mlp",
+        "psi_family": _psi_family_name(config),
         "transport_scope": "train_only",
         "transport_steps": int(config.transport_steps),
-        "u_psi_input_contract": U_PSI_INPUT_CONTRACT,
+        "u_psi_input_contract": _u_psi_input_contract(config),
+        "residual_branch_structure": _residual_branch_structure(config),
+        "m_traj_input_contract": M_TRAJ_INPUT_CONTRACT,
+        "m_state_input_contract": (
+            M_STATE_INPUT_CONTRACT if config.use_two_branch_residual_core else None
+        ),
         "bootstrap_target_contract": BOOTSTRAP_TARGET_CONTRACT,
-        "residual_identity_target_contract": RESIDUAL_IDENTITY_TARGET_CONTRACT,
+        "residual_identity_target_contract": _residual_identity_target_contract(config),
         "identity_loss_weight": float(config.identity_loss_weight),
         "tangent_epsilon": float(config.tangent_epsilon),
         "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
         "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
+        "use_two_branch_residual_core": bool(config.use_two_branch_residual_core),
+        "uses_current_state_features": bool(config.use_two_branch_residual_core),
+        "feature_aware_state_branch_tangents": bool(
+            config.feature_aware_state_branch_tangents
+        ),
         "selection_metric_source": "val_metric",
         "report_metric_source": "test_metric",
         "selection_metric_name": config.selection_metric,

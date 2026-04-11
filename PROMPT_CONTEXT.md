@@ -79,16 +79,19 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 
 - Stage 04 package-internal digging is closed from the current state
 - Stage 04 is treated as the frozen bridge result on `main`
-- the current Stage 05 core contract is the corrected residual MeanFlow v1 probe
+- the current Stage 05 baseline contract is the corrected residual MeanFlow v1 probe
+- the current narrow Stage 05 candidate is the two-branch corrected residual MeanFlow v2 core
 - the frozen-bridge vs corrected-core comparison is now complete
-- the current comparison result supports a narrow Stage 05 v2 charter on mechanism-first grounds
+- the Stage 05 v1 vs v2 comparison is now complete
+- the current comparison result says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first grounds
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
-- do not write prompts that treat the current comparison as a default-replacement claim
-- draft a narrow Stage 05 v2 charter next
+- do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
+- use the Stage 05 v2 two-branch core as the current exploratory reference
+- refresh the frozen-bridge vs Stage 05 comparison with the v2 candidate next
 
 ## What Prompt Writers Must Not Reopen
 

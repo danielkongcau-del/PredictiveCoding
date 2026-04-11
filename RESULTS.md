@@ -84,32 +84,36 @@ Relevant artifacts:
 Current probe:
 
 - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
-- current core contract:
+- current implemented contracts:
   - corrected residual MeanFlow v1
+  - corrected residual MeanFlow v2 two-branch residual core
   - bootstrap residual supervision
   - corrected residual identity curriculum
 
 Current mechanism-level result:
 
-- one-step validation energy delta vs identity:
-  - `-0.0001462306001205338`
-- configured two-step validation energy delta vs identity:
-  - `-0.0001503257951186998`
-- configured two-step validation fixed-point residual delta vs identity:
-  - `-8.007742858070393e-07`
-- validation accuracy:
-  - `0.28888888888888886`
-- test accuracy:
-  - `0.3`
+- current Stage 05 v2 multiseed snapshot:
+  - mean one-step validation energy delta vs identity:
+    - `-0.00017276987415493217`
+  - mean configured two-step validation energy delta vs identity:
+    - `-0.0001763621381912032`
+  - mean configured two-step validation fixed-point residual delta vs identity:
+    - `-9.455861891589161e-07`
+  - mean validation accuracy:
+    - `0.27037037037037037`
+  - mean test accuracy:
+    - `0.27283950617283953`
 
 Current interpretation:
 
-- the current corrected residual MeanFlow Stage 05 probe has positive mechanism signal
+- the current Stage 05 v2 two-branch corrected residual MeanFlow probe has positive mechanism signal
+- it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
 - task accuracy is still report-only and remains well below the frozen Stage 04 bridge result
 
 Relevant artifacts:
 
 - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
+- `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 
 ## FMPC Stage 05 Frozen-Bridge Comparison Snapshot
 
@@ -152,6 +156,48 @@ Current interpretation:
 Relevant artifacts:
 
 - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
+
+## FMPC Stage 05 V1 vs V2 Comparison Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
+
+Current comparison result:
+
+- Stage 05 corrected residual core v1:
+  - mean one-step validation energy delta vs identity:
+    - `-0.00015049783324024477`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.00015441938077428072`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-8.351992466021287e-07`
+  - mean validation accuracy:
+    - `0.2740740740740741`
+  - mean test accuracy:
+    - `0.2716049382716049`
+- Stage 05 corrected residual core v2:
+  - mean one-step validation energy delta vs identity:
+    - `-0.00017276987415493217`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0001763621381912032`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-9.455861891589161e-07`
+  - mean validation accuracy:
+    - `0.27037037037037037`
+  - mean test accuracy:
+    - `0.27283950617283953`
+
+Current interpretation:
+
+- Stage 05 v2 improves mean configured-step mechanism magnitude over v1
+- Stage 05 v2 keeps all required multiseed mechanism-first checks negative vs identity
+- task accuracy remains report-only in this comparison
+- this comparison does not claim that Stage 05 replaces the frozen Stage 04 bridge result on `main`
+
+Relevant artifacts:
+
+- `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 
 ## Where Detailed History Went
 

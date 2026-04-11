@@ -1,0 +1,78 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v1_reference": {
+      "method_name": "stage_05_corrected_residual_core_v1",
+      "transport_family": "residual_meanflow_core",
+      "residual_branch_structure": "single_branch",
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v2_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ],
+      "feature_aware_state_branch_tangents": true
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_v2_artifact_checks": true,
+      "requires_stage05_v2_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_v2_mean_configured_step_energy_delta_vs_identity_more_negative_than_v1": true,
+      "requires_stage05_v2_mean_configured_step_fixed_point_residual_delta_vs_identity_more_negative_than_v1": true,
+      "task_accuracy_is_report_only": true
+    }
+  },
+  "decision": {
+    "stage05_v2_improves_mechanism_magnitude_over_v1": true,
+    "decision_detail": {
+      "artifact_checks_all_pass": true,
+      "one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "mean_configured_step_energy_delta_vs_identity_more_negative_than_v1": true,
+      "mean_configured_step_fixed_point_residual_delta_vs_identity_more_negative_than_v1": true
+    },
+    "decision_rationale": "Stage 05 v2 improves mechanism magnitude over v1 under the narrow multiseed rule."
+  },
+  "supports": [
+    "Stage 05 v2 artifacts are reproducible under the shared dataset/seed/batch protocol.",
+    "Stage 05 v2 keeps one-step validation energy delta vs identity negative on every comparison seed.",
+    "Stage 05 v2 keeps configured-step validation fixed-point residual delta vs identity negative on every comparison seed.",
+    "Stage 05 v2 improves mean configured-step validation energy delta vs identity over v1.",
+    "Stage 05 v2 improves mean configured-step validation fixed-point residual delta vs identity over v1.",
+    "The two-branch corrected residual core is favorable on mechanism-first grounds for the next narrow Stage 05 step.",
+    "Stage 05 v1 mean validation accuracy is 0.274074 and Stage 05 v2 mean validation accuracy is 0.270370; accuracy remains report-only."
+  ],
+  "does_not_support": [
+    "This comparison does not claim that Stage 05 replaces the frozen Stage 04 bridge result on main.",
+    "This comparison does not reopen any Stage 04 package-internal work.",
+    "This comparison does not promote task accuracy to a gate."
+  ]
+}
