@@ -154,6 +154,8 @@ Current interpretation:
 The next validation move is:
 
 - keep the current Stage 05 v2 transport family fixed and continue pushing budget on the same v2 family before inventing a new Stage 05 family
+- the latest same-family budget reference is now the `48 -> 96 epochs` validation under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96/`
 
 That next step should preserve:
 
@@ -182,7 +184,7 @@ It should not be framed as:
 - Stage 05 v2 longer-training validation:
   - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
 - Stage 05 v2 budget-push validation:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation/`
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96/`
 
 ## Document Layering
 

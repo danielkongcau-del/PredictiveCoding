@@ -2654,7 +2654,7 @@ def _stage05_v2_budget_push_suite_config_payload(
 ) -> dict[str, Any]:
     return {
         "phase": "FMPC Stage 05 EF Core Probe",
-        "stage": "stage05_v2_budget_push_validation",
+        "stage": str(config.experiment_name),
         "comparison_protocol": _stage05_v2_budget_push_protocol_payload(config),
         "artifacts": {
             "aggregate_runs_csv": "aggregate_runs.csv",
@@ -2766,7 +2766,7 @@ def run_stage05_v2_budget_push_validation(
 
     summary = {
         "phase": "FMPC Stage 05 EF Core Probe",
-        "stage": "stage05_v2_budget_push_validation",
+        "stage": str(config.experiment_name),
         "num_runs": int(len(rows)),
         "comparison_protocol": _stage05_v2_budget_push_protocol_payload(config),
         "by_method": by_method,

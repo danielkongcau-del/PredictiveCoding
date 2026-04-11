@@ -117,9 +117,9 @@ Current probe status:
 - the narrow Stage 05 v2 longer-training validation now exists under:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - the next narrow Stage 05 v2 budget-push validation now also exists under:
-  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation)
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96)
 - current budget-push result:
-  - the same v2 family with a stronger `48`-epoch budget materially improves configured-step mechanism magnitude over the current `24`-epoch reference
+  - the same v2 family with a stronger `96`-epoch budget materially improves configured-step mechanism magnitude over the current `48`-epoch reference
   - the same stronger budget also materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
   - the budget question is therefore still not closed
@@ -130,7 +130,7 @@ Current probe status:
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - the current evidence points first to training / budget limitation on the v2 reference, not to state-branch removal or selection-rule misalignment
-  - the completed longer-training validation strengthens that interpretation rather than closing it
+  - the completed longer-training and budget-push validations both strengthen that interpretation rather than closing it
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -182,4 +182,4 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
 - Stage 05 v2 longer-training validation artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - Stage 05 v2 budget-push validation artifact:
-  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation)
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96)

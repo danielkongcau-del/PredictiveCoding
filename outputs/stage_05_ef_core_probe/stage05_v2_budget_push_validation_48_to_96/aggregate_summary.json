@@ -1,0 +1,218 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_budget_push_validation_48_to_96",
+  "num_runs": 6,
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "reference_budget": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 48,
+      "eval_steps": 15,
+      "configured_transport_steps": 2,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stronger_budget_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 96,
+      "eval_steps": 15,
+      "configured_transport_steps": 2,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "report_accuracy_improvement_threshold": 0.01,
+      "selection_rule_unchanged": true
+    }
+  },
+  "by_method": {
+    "stage_05_two_branch_corrected_residual_core_v2_budget_reference": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 48,
+      "selected_epoch": {
+        "mean": 48.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.0002899408084212814,
+        "std": 8.178107884423678e-05
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0002906233051726363,
+        "std": 8.253402448076286e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.2817411134451841e-06,
+        "std": 4.1653025419034213e-07
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -6.050123702805443e-05,
+        "std": 9.556364127505954e-05
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -6.142739000186692e-05,
+        "std": 9.607832243905707e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -3.0333645663354133e-07,
+        "std": 4.529978793874164e-07
+      },
+      "val_accuracy": {
+        "mean": 0.562962962962963,
+        "std": 0.03487517751068031
+      },
+      "test_accuracy": {
+        "mean": 0.5444444444444444,
+        "std": 0.056494129326654555
+      },
+      "val_output_mse": {
+        "mean": 0.08038255385742464,
+        "std": 0.002084875255342323
+      },
+      "test_output_mse": {
+        "mean": 0.08039420241656477,
+        "std": 0.0024778009273058697
+      },
+      "runtime_proxy_seconds": {
+        "mean": 5.9373751666668495,
+        "std": 0.04851245602124984
+      }
+    },
+    "stage_05_two_branch_corrected_residual_core_v2_budget_push": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 96,
+      "selected_epoch": {
+        "mean": 96.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.0005203812678958494,
+        "std": 9.011103523346363e-05
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0005190029255881708,
+        "std": 9.150451725787848e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.878270420235636e-06,
+        "std": 3.7028198717219323e-07
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -8.260895045116474e-05,
+        "std": 8.835957554749398e-05
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -8.176091450369978e-05,
+        "std": 8.97320011111153e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -3.3757286034666366e-07,
+        "std": 3.9141626039112893e-07
+      },
+      "val_accuracy": {
+        "mean": 0.6481481481481481,
+        "std": 0.034346735168502625
+      },
+      "test_accuracy": {
+        "mean": 0.6555555555555556,
+        "std": 0.07149843079293956
+      },
+      "val_output_mse": {
+        "mean": 0.07405922701662268,
+        "std": 0.0026587284817147527
+      },
+      "test_output_mse": {
+        "mean": 0.07414536946385716,
+        "std": 0.00334495355277505
+      },
+      "runtime_proxy_seconds": {
+        "mean": 12.01716559999962,
+        "std": 0.15774011923645923
+      }
+    }
+  },
+  "pairwise_budget_push_vs_reference_budget": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.00023044045947456793,
+      "std": 5.3811521653136123e-05
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.00022837962041553453,
+      "std": 5.3454686180521935e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -5.965293067904518e-07,
+      "std": 1.8930761013066786e-07
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -2.0333524501832862e-05,
+      "std": 2.7544084307035832e-05
+    },
+    "val_accuracy_delta": {
+      "mean": 0.08518518518518518,
+      "std": 0.010903408476947912
+    },
+    "test_accuracy_delta": {
+      "mean": 0.1111111111111111,
+      "std": 0.02116842987590404
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 6.079790433332771,
+      "std": 0.12944061352284233
+    }
+  },
+  "stage05_v2_budget_push_materially_improves_configured_step_mechanism": true,
+  "stage05_v2_budget_push_materially_improves_report_only_accuracy": true,
+  "configured_step_energy_gain_fraction": 0.7858269324955627,
+  "configured_step_residual_gain_fraction": 0.46540545554245694,
+  "configured_step_energy_seed_improvement_rate": 1.0,
+  "configured_step_residual_seed_improvement_rate": 1.0,
+  "val_accuracy_gain": 0.08518518518518514,
+  "test_accuracy_gain": 0.11111111111111116,
+  "reference_budget_selection_hits_final_training_boundary_on_all_seeds": true,
+  "budget_push_selection_hits_final_training_boundary_on_all_seeds": true,
+  "budget_push_selection_hits_final_training_boundary_rate": 1.0,
+  "recommended_next_move": "continue_with_budget",
+  "decision_rationale": "The stronger Stage 05 v2 budget still selects the final training epoch on every seed, so the same-family budget line still looks boundary-limited.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}

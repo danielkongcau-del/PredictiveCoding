@@ -285,6 +285,7 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
         output_root=tmp_path,
         run_id="stage05_v2_budget_push_smoke",
         comparison_variant="stage05_v2_budget_push_validation",
+        experiment_name="stage05_v2_budget_push_validation_smoke_custom",
         seeds=(0,),
         reference_stage05_epochs=4,
         stronger_stage05_epochs=6,
@@ -294,6 +295,7 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
     )
 
     run_dir = result.run_dir
+    assert run_dir.name == "stage05_v2_budget_push_validation_smoke_custom"
     assert (run_dir / "config.json").exists()
     assert (run_dir / "aggregate_runs.csv").exists()
     assert (run_dir / "aggregate_summary.json").exists()
@@ -321,7 +323,7 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
     assert "test_accuracy" in first_row
     assert "runtime_proxy_seconds" in first_row
 
-    assert summary["stage"] == "stage05_v2_budget_push_validation"
+    assert summary["stage"] == "stage05_v2_budget_push_validation_smoke_custom"
     assert "comparison_protocol" in summary
     assert "by_method" in summary
     assert "pairwise_budget_push_vs_reference_budget" in summary

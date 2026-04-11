@@ -126,22 +126,11 @@ Relevant artifacts:
 
 Current formal validation:
 
-- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation/`
+- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_48_to_96/`
 
 Current comparison result:
 
 - current Stage 05 v2 reference budget:
-  - mean configured-step validation energy delta vs identity:
-    - `-0.0002055564608433036`
-  - mean configured-step validation fixed-point residual delta vs identity:
-    - `-1.0470158476959545e-06`
-  - mean validation accuracy:
-    - `0.417283950617284`
-  - mean test accuracy:
-    - `0.39999999999999997`
-  - selected epoch:
-    - `24 / 24` on every seed
-- stronger same-family Stage 05 v2 budget:
   - mean configured-step validation energy delta vs identity:
     - `-0.0002906233051726363`
   - mean configured-step validation fixed-point residual delta vs identity:
@@ -152,6 +141,17 @@ Current comparison result:
     - `0.5444444444444444`
   - selected epoch:
     - `48 / 48` on every seed
+- stronger same-family Stage 05 v2 budget:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0005190029255881708`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.878270420235636e-06`
+  - mean validation accuracy:
+    - `0.6481481481481481`
+  - mean test accuracy:
+    - `0.6555555555555556`
+  - selected epoch:
+    - `96 / 96` on every seed
 
 Current interpretation:
 
