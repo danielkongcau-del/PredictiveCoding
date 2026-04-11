@@ -1,0 +1,162 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_psi_expressivity_suite",
+  "offline_dataset_artifacts": {
+    "train_npz_path": "offline_train_samples.npz",
+    "val_npz_path": "offline_val_samples.npz",
+    "identity_tangent_mode": "feature_frozen_truncated_identity_approx"
+  },
+  "family_stage_offline_metrics": {
+    "baseline_plain_raw": {
+      "psi_family": "baseline_plain",
+      "psi_hidden_dims": [
+        128
+      ],
+      "time_encoding_variant": "raw",
+      "parameter_count": 27712,
+      "val_bootstrap_target_mse": 0.015123059055133597,
+      "val_relative_bootstrap_target_mse": 100999.36302075617,
+      "val_bootstrap_cosine_similarity": -0.018014846689568945,
+      "val_identity_target_mse": 0.015971087703489303,
+      "val_identity_residual_error": 0.9741167262889722,
+      "val_hybrid_loss": 0.017738097213974506,
+      "runtime_per_batch_seconds": 0.024119048000235732
+    },
+    "wider_plain_raw": {
+      "psi_family": "baseline_plain",
+      "psi_hidden_dims": [
+        256
+      ],
+      "time_encoding_variant": "raw",
+      "parameter_count": 55360,
+      "val_bootstrap_target_mse": 0.021842888454540153,
+      "val_relative_bootstrap_target_mse": 145877.74949494144,
+      "val_bootstrap_cosine_similarity": -0.0026077943822729313,
+      "val_identity_target_mse": 0.022421179167574155,
+      "val_identity_residual_error": 1.166793167143537,
+      "val_hybrid_loss": 0.025360999484620384,
+      "runtime_per_batch_seconds": 0.04278416133330514
+    },
+    "residualized_local_field_raw": {
+      "psi_family": "residualized_local_field",
+      "psi_hidden_dims": [
+        128
+      ],
+      "time_encoding_variant": "raw",
+      "parameter_count": 27712,
+      "val_bootstrap_target_mse": 0.015121749782206737,
+      "val_relative_bootstrap_target_mse": 100990.61904037818,
+      "val_bootstrap_cosine_similarity": -0.014427091824796295,
+      "val_identity_target_mse": 0.015969768198319287,
+      "val_identity_residual_error": 0.9740618237337154,
+      "val_hybrid_loss": 0.01773671408841931,
+      "runtime_per_batch_seconds": 0.023974886666595314
+    }
+  },
+  "encoding_stage_offline_metrics": {
+    "residualized_local_field_raw": {
+      "psi_family": "residualized_local_field",
+      "psi_hidden_dims": [
+        128
+      ],
+      "time_encoding_variant": "raw",
+      "parameter_count": 27712,
+      "val_bootstrap_target_mse": 0.015121749782206737,
+      "val_relative_bootstrap_target_mse": 100990.61904037818,
+      "val_bootstrap_cosine_similarity": -0.014427091824796295,
+      "val_identity_target_mse": 0.015969768198319287,
+      "val_identity_residual_error": 0.9740618237337154,
+      "val_hybrid_loss": 0.01773671408841931,
+      "runtime_per_batch_seconds": 0.023974886666595314
+    },
+    "residualized_local_field_poly_rt2": {
+      "psi_family": "residualized_local_field",
+      "psi_hidden_dims": [
+        128
+      ],
+      "time_encoding_variant": "poly_rt2",
+      "parameter_count": 28096,
+      "val_bootstrap_target_mse": 0.01295547338075947,
+      "val_relative_bootstrap_target_mse": 86523.14021381103,
+      "val_bootstrap_cosine_similarity": 0.03107267766426632,
+      "val_identity_target_mse": 0.013054691057798445,
+      "val_identity_residual_error": 0.8843387622637927,
+      "val_hybrid_loss": 0.015049993477422918,
+      "runtime_per_batch_seconds": 0.02425360933334256
+    }
+  },
+  "stage1_winner": "residualized_local_field_raw",
+  "selected_end_to_end_challengers": [
+    "residualized_local_field_poly_rt2"
+  ],
+  "primary_gate_passed_candidates": [
+    "residualized_local_field_poly_rt2"
+  ],
+  "fallback_challenger": null,
+  "capacity_bottleneck_signal": false,
+  "input_representation_bottleneck_signal": true,
+  "output_parameterization_bottleneck_signal": true,
+  "mean_std_val_accuracy_by_candidate": {
+    "baseline_plain_raw": {
+      "mean": 0.8246913580246913,
+      "std": 0.028741843769932898
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean": 0.7592592592592592,
+      "std": 0.026363156177855077
+    }
+  },
+  "mean_std_test_accuracy_by_candidate": {
+    "baseline_plain_raw": {
+      "mean": 0.8197530864197531,
+      "std": 0.027104319012469347
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean": 0.780246913580247,
+      "std": 0.015220775315972804
+    }
+  },
+  "mean_gate_passing_epoch_count_by_candidate": {
+    "baseline_plain_raw": 27.666666666666668,
+    "residualized_local_field_poly_rt2": 26.333333333333332
+  },
+  "mean_val_transported_final_energy_by_candidate": {
+    "baseline_plain_raw": 0.3070547870776022,
+    "residualized_local_field_poly_rt2": 0.30582114546803274
+  },
+  "mean_wall_clock_runtime_by_candidate": {
+    "baseline_plain_raw": {
+      "mean_total_wall_time_seconds": 18.996260766657844,
+      "std_total_wall_time_seconds": 0.16986135884456574
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_total_wall_time_seconds": 19.583919666649308,
+      "std_total_wall_time_seconds": 0.35096724441664356
+    }
+  },
+  "gap_to_canonical_slow_pc_by_candidate": {
+    "baseline_plain_raw": {
+      "mean_test_accuracy_gap": -0.07654320987654321
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_test_accuracy_gap": -0.11604938271604937
+    }
+  },
+  "pairwise_delta_vs_current_corrective_default": {
+    "residualized_local_field_poly_rt2": {
+      "mean_val_accuracy_delta": -0.0654320987654321,
+      "mean_test_accuracy_delta": -0.03950617283950608,
+      "mean_gate_passing_epoch_count_delta": -1.3333333333333357,
+      "mean_val_transported_final_energy_delta": -0.001233641609569458,
+      "mean_total_wall_time_seconds_delta": 0.5876588999914638,
+      "mean_test_gap_to_slow_pc_delta": -0.03950617283950615
+    }
+  },
+  "decision_logic_outcome": "offline_fit_improves_but_end_to_end_does_not_so_downstream_coupling_more_likely",
+  "is_psi_expressivity_a_real_limiter": false,
+  "best_material_end_to_end_candidate": null,
+  "next_single_narrow_research_move": "if no offline fit gain appears, move away from psi expressivity; if offline fit gains fail to transfer, target downstream coupling rather than target construction again",
+  "offline_family_csv_path": "offline_family_metrics.csv",
+  "offline_encoding_csv_path": "offline_encoding_metrics.csv",
+  "end_to_end_csv_path": "end_to_end_runs.csv"
+}

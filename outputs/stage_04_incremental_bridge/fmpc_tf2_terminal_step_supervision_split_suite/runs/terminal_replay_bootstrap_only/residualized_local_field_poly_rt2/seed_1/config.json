@@ -1,0 +1,75 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage",
+  "preset_name": "tf2_corrective_transport_default",
+  "dataset": {
+    "dataset_name": "digits",
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "data_seed": 1
+  },
+  "model": {
+    "layer_dims": [
+      64,
+      64,
+      10
+    ],
+    "hidden_activation": "tanh",
+    "output_activation": "identity",
+    "weight_scale": 0.05,
+    "sigma2": 1.0,
+    "eta_x": 0.1,
+    "eta_w": 0.02,
+    "eta_b": 0.02,
+    "eval_steps": 15,
+    "state_init": "forward"
+  },
+  "transport": {
+    "family_lineage": "tf1_mlp_aug",
+    "use_teacher_free_features": true,
+    "feature_aware_tangents": false,
+    "identity_tangent_mode": "feature_frozen_truncated_identity_approx",
+    "tangent_epsilon": 0.001,
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_budget": "matched",
+    "theta_update_cadence": "terminal_only",
+    "onpolicy_mix_ratio": 0.0,
+    "interleaving_start": "epoch_0",
+    "theta_micro_lr": 0.02,
+    "theta_micro_bias_lr": 0.02,
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "identity_loss_weight": 0.2,
+    "warmup_epochs": 5,
+    "hybrid_ramp_epochs": 10,
+    "selection_metric": "val_transported_final_energy",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "selection_metric_source": "val_metric",
+    "report_metric_source": "test_metric"
+  },
+  "psi_network": {
+    "hidden_dims": [
+      128
+    ],
+    "weight_scale": 0.05,
+    "eta_w": 0.01,
+    "eta_b": 0.01,
+    "psi_init_seed": 1
+  },
+  "run": {
+    "run_seed": 1,
+    "model_init_seed": 1,
+    "batch_order_seed": 1,
+    "epochs": 60,
+    "batch_size": 128,
+    "shuffle_batches": true,
+    "output_layout": "single_dir"
+  },
+  "handoff_mode": "terminal_replay_bootstrap_only",
+  "replay_prefix_steps": 3,
+  "terminal_bundle_mode": "replay_bootstrap_only",
+  "diagnostic_only": true
+}

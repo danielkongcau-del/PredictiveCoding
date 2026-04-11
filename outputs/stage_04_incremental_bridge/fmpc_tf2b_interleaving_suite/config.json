@@ -1,0 +1,34 @@
+{
+  "phase": "Phase TF2B",
+  "stage": "interleaving_rescue_suite",
+  "anchor_preset": "tf2_corrective_transport_default",
+  "theta_update_cadences": [
+    "terminal_only",
+    "every_2_micro_steps",
+    "every_micro_step"
+  ],
+  "onpolicy_mix_ratios": [
+    0.0,
+    0.25,
+    0.5
+  ],
+  "interleaving_start_options": [
+    "epoch_0",
+    "after_warmup"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "fixed": {
+    "preset_name": "tf2_corrective_transport_default",
+    "micro_steps": 4,
+    "theta_update_budget": "matched",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "family_lineage": "tf1_mlp_aug",
+    "feature_aware_tangents": false
+  },
+  "slow_pc_reference_runs_path": "outputs/fmpc_tf1_external_comparison_suite/aggregate_runs.csv",
+  "slow_pc_reference_method_name": "canonical_slow_pc_digits_baseline"
+}

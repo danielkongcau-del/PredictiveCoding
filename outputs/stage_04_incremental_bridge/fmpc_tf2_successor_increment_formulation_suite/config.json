@@ -1,0 +1,103 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_successor_increment_formulation_source_localization",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "formulation_mode": "live_increment_formulation"
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Higher-gain unstable reference: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps with the fully live successor-increment formulation.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "formulation_mode": "live_increment_formulation"
+    },
+    {
+      "case_name": "live_anchor_cached_residual",
+      "description": "Formulation-local substitution: keep the live detached local-field anchor term and swap only the learned residual term to its cached analogue before the preterminal angle clip.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "formulation_mode": "live_anchor_cached_residual"
+    },
+    {
+      "case_name": "cached_anchor_live_residual",
+      "description": "Formulation-local substitution: swap only the detached local-field anchor term to its cached analogue while keeping the learned residual term live before the preterminal angle clip.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "formulation_mode": "cached_anchor_live_residual"
+    }
+  ],
+  "increment_formulation_component_table": [
+    {
+      "component_name": "g_t_live",
+      "where_produced": "_single_source_supervision: teacher_free_state_features(context, z_on_k_live).g_t",
+      "source_type": "live_on_policy",
+      "used_for": "detached local-field anchor term inside the raw preterminal live successor velocity"
+    },
+    {
+      "component_name": "u_res_live",
+      "where_produced": "_single_source_supervision residualized_local_field path: u_on_live - g_t_live",
+      "source_type": "live_on_policy",
+      "used_for": "learned residual correction added on top of the live detached local-field anchor"
+    },
+    {
+      "component_name": "u_on_live",
+      "where_produced": "_plan_tf2_micro_step raw on-policy velocity before the angle clip",
+      "source_type": "live_on_policy",
+      "used_for": "raw preterminal live successor velocity where u_on_live = g_t_live + u_res_live"
+    },
+    {
+      "component_name": "delta_on_live_raw",
+      "where_produced": "derived as dt * u_on_live before any preterminal angle clip",
+      "source_type": "live_on_policy",
+      "used_for": "raw live preterminal successor increment under formulation-level decomposition"
+    },
+    {
+      "component_name": "g_t_cached",
+      "where_produced": "_build_cached_plan(...).features.g_t",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached detached local-field anchor analogue"
+    },
+    {
+      "component_name": "u_res_cached",
+      "where_produced": "derived as u_on_cached - g_t_cached from the cached preterminal plan",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached learned residual analogue"
+    },
+    {
+      "component_name": "u_on_cached",
+      "where_produced": "derived from the cached preterminal successor value as (z_on_next_cached - z_on_k_cached) / dt",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached raw successor velocity analogue where u_on_cached = g_t_cached + u_res_cached"
+    },
+    {
+      "component_name": "delta_on_cached_raw",
+      "where_produced": "derived as dt * u_on_cached from the cached preterminal plan",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached raw successor increment analogue"
+    }
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true,
+  "localization_dominance_margin": 0.25,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ]
+}

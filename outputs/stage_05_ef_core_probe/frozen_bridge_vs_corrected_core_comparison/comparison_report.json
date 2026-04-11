@@ -1,0 +1,73 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_04_control": {
+      "method_name": "stage_04_frozen_bridge",
+      "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+      "configured_transport_steps": 4,
+      "epochs": 60,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        64,
+        10
+      ]
+    },
+    "stage_05_candidate": {
+      "method_name": "stage_05_corrected_residual_core",
+      "transport_family": "residual_meanflow_core",
+      "residual_identity_mode": "residual_corrected_meanflow",
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_artifact_checks": true,
+      "requires_stage05_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "task_accuracy_is_report_only": true
+    }
+  },
+  "decision": {
+    "stage05_corrected_residual_core_justifies_v2_charter": true,
+    "decision_detail": {
+      "artifact_checks_all_pass": true,
+      "one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true
+    },
+    "decision_rationale": "Stage 05 clears the multiseed mechanism-first comparison rule."
+  },
+  "supports": [
+    "Stage 05 comparison artifacts are reproducible under the shared dataset/seed/batch protocol.",
+    "Stage 05 shows stable negative validation one-step energy delta vs identity across all comparison seeds.",
+    "Stage 05 keeps configured-step validation fixed-point residual delta vs identity negative across all comparison seeds.",
+    "The corrected residual core has enough mechanism-first signal to justify a Stage 05 v2 charter.",
+    "Stage 05 report-only accuracy remains a contextual metric, not the gate, in this comparison.",
+    "Stage 05 mean validation accuracy is 0.274074, which is reported but not used as the charter gate."
+  ],
+  "does_not_support": [
+    "This comparison does not promote Stage 05 to replace the frozen Stage 04 bridge on main.",
+    "This comparison does not reopen any Stage 04 package-internal stabilizer search.",
+    "This comparison does not claim that Stage 05 has solved the task-accuracy gap to the frozen bridge.",
+    "Stage 05 remains below the frozen bridge on report-only test accuracy in the current comparison.",
+    "Stage 05 does not outperform the frozen bridge on configured-step energy delta vs identity in this comparison."
+  ]
+}

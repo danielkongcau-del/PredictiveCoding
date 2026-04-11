@@ -1,0 +1,47 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage",
+  "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "suite_case_name": "adopted_control_terminal_only",
+  "increment_mode": "live_successor_increment",
+  "teacher_free": true,
+  "uses_teacher_artifacts": false,
+  "jpc_runtime_dependency": false,
+  "family_lineage": "tf1_mlp_aug",
+  "feature_aware_tangents": false,
+  "psi_family": "residualized_local_field",
+  "time_encoding_variant": "poly_rt2",
+  "terminal_local_field_direction_intervention": "local_field_direction_angle_clip_keep_live_norm",
+  "terminal_local_field_angle_clip_degrees": 30.0,
+  "terminal_local_field_intervention_step_offsets": [
+    -1
+  ],
+  "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+  "selection_metric_source": "val_metric",
+  "report_metric_source": "test_metric",
+  "best_epoch": 60,
+  "selected_epoch_passes_gate": true,
+  "gate_passing_epoch_count": 19,
+  "selector_fallback_used": false,
+  "selected_epoch_selection_reason": "selected highest validation accuracy among gate-passing epochs",
+  "val_transported_final_energy": 0.286513578402705,
+  "test_transported_final_energy": 0.28374930970998746,
+  "val_energy_delta_vs_identity": -0.008451062185659775,
+  "val_energy_delta_vs_local_field_only": -0.007572773336279093,
+  "val_accuracy": 0.8740740740740741,
+  "test_accuracy": 0.8592592592592593,
+  "val_loss": 0.058992928117672955,
+  "test_loss": 0.05840439044333632,
+  "val_baseline_accuracy": 0.1037037037037037,
+  "val_terminal_rowspace_rms": 0.1481421455651277,
+  "val_terminal_rowspace_fraction": 0.5543285665615998,
+  "timing": {
+    "train_wall_time_seconds": 20.458531800002675,
+    "final_evaluation_wall_time_seconds": 0.029724499996518716
+  },
+  "validation_gate": {
+    "passes_identity_comparison": true,
+    "passes_local_field_only_comparison": true,
+    "passes_majority_baseline_accuracy": true
+  }
+}

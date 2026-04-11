@@ -1,0 +1,77 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_update_source_localization",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "live_onpolicy"
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Diagnostic anchor: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "live_onpolicy"
+    },
+    {
+      "case_name": "preterminal_onpolicy_local_field_source_only",
+      "description": "Penultimate plus terminal control, but swap only the preterminal direction source from detached local-field-only anchor to on-policy live local field.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "direction_source_mode": "onpolicy_live_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "live_onpolicy"
+    },
+    {
+      "case_name": "preterminal_anchor_norm_only",
+      "description": "Penultimate plus terminal control, but swap only the preterminal norm handling from keep-live-norm to anchor-norm.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "use_anchor_norm",
+      "handoff_mode": "live_onpolicy"
+    },
+    {
+      "case_name": "preterminal_cached_onpolicy_handoff_only",
+      "description": "Penultimate plus terminal control, but swap only the preterminal on-policy handoff state to the cached batch-start on-policy successor.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "cached_onpolicy_handoff"
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true,
+  "thresholds": {
+    "primary_seed_gate_positive_rate_threshold": 0.6,
+    "primary_selected_gate_rate_threshold": 0.6,
+    "primary_gate_count_margin": 2.0,
+    "primary_rate_margin": 0.2
+  }
+}

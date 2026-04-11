@@ -1,0 +1,39 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_smooth_unified_cone_diagnostic",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control",
+      "description": "Current adopted hard 30 degree full-vector terminal angle clip.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm",
+      "full_angle_clip_degrees": 30.0
+    },
+    {
+      "case_name": "smooth_unified_cone_projection_30",
+      "description": "Smooth full-space unified cone projection anchored to the same local-field direction.",
+      "terminal_intervention": "local_field_direction_smooth_unified_cone_projection_keep_live_norm",
+      "full_angle_clip_degrees": 30.0
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "diagnostics": {
+    "terminal_action_geometry": true,
+    "smooth_unified_full_space_cone_comparison": true,
+    "validation_only_terminal_geometry_selection_view": true,
+    "previous_hard_20_reference_used": true
+  },
+  "thresholds": {
+    "material_test_gain_threshold": 0.005,
+    "min_gate_count_recovery_vs_hard20": 2.0,
+    "min_selected_gate_rate_recovery_vs_hard20": 0.2,
+    "max_selector_fallback_rate": 0.0
+  }
+}

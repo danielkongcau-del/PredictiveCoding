@@ -1,0 +1,105 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage",
+  "teacher_free": true,
+  "uses_teacher_artifacts": false,
+  "jpc_runtime_dependency": false,
+  "preset_name": "tf2_corrective_transport_default",
+  "family_lineage": "tf1_mlp_aug",
+  "use_teacher_free_features": true,
+  "feature_aware_tangents": false,
+  "tangent_epsilon": 0.001,
+  "incremental_weight_updates": false,
+  "supervision_policy": "local_only",
+  "micro_steps": 4,
+  "theta_update_budget": "matched",
+  "theta_update_cadence": "terminal_only",
+  "onpolicy_mix_ratio": 0.0,
+  "interleaving_start": "after_warmup",
+  "theta_micro_lr": 0.005,
+  "theta_micro_bias_lr": 0.005,
+  "bootstrap_integrator": "rk2",
+  "bootstrap_substeps": 4,
+  "identity_loss_weight": 0.2,
+  "warmup_epochs": 5,
+  "hybrid_ramp_epochs": 10,
+  "selection_metric": "val_transported_final_energy",
+  "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+  "selection_metric_source": "val_metric",
+  "report_metric_source": "test_metric",
+  "best_epoch": 55,
+  "selected_epoch_passes_gate": true,
+  "gate_passing_epoch_count": 30,
+  "selector_fallback_used": false,
+  "selected_epoch_selection_reason": "selected highest validation accuracy among gate-passing epochs",
+  "val_transported_final_energy": 0.30119296966554254,
+  "test_transported_final_energy": 0.2985472218119797,
+  "val_energy_delta_vs_identity": -0.00945088294122487,
+  "test_energy_delta_vs_identity": -0.007731903070827162,
+  "val_energy_delta_vs_local_field_only": -0.008724043704374518,
+  "test_energy_delta_vs_local_field_only": -0.007020057257576484,
+  "val_accuracy": 0.7888888888888889,
+  "test_accuracy": 0.8407407407407408,
+  "val_loss": 0.06212877052135348,
+  "test_loss": 0.061255824976561374,
+  "val_baseline_accuracy": 0.1037037037037037,
+  "test_baseline_accuracy": 0.1037037037037037,
+  "rollout_knots": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "selection_diagnostics_artifact": "selection_diagnostics.json",
+  "forward_init_stability_metrics": {
+    "hidden_layer_stats": [
+      {
+        "layer_index": 1,
+        "feature_dim": 64,
+        "rms": 0.19354658097690547,
+        "mean_l2_norm": 1.542022286164281
+      }
+    ],
+    "initial_target_clamped_energy": 0.5211936938331945,
+    "initial_hidden_gradient_rms": 0.00039953637452119973,
+    "initial_hidden_gradient_mean_l2_norm": 0.0031756089358399723
+  },
+  "identity_baseline": {
+    "val_transported_final_energy": 0.3106438526067674,
+    "test_transported_final_energy": 0.30627912488280684,
+    "micro_steps": 4,
+    "rollout_knots": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "energy_metric": "baseline_pc_energy"
+  },
+  "local_field_only_baseline": {
+    "val_transported_final_energy": 0.30991701336991706,
+    "test_transported_final_energy": 0.30556727906955616,
+    "micro_steps": 4,
+    "rollout_knots": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "energy_metric": "baseline_pc_energy"
+  },
+  "timing": {
+    "train_wall_time_seconds": 21.366565100004664,
+    "final_evaluation_wall_time_seconds": 0.035891100007575005
+  },
+  "validation_gate": {
+    "validation_only_gating": true,
+    "test_is_report_only": true,
+    "passes_identity_comparison": true,
+    "passes_local_field_only_comparison": true,
+    "passes_majority_baseline_accuracy": true
+  }
+}

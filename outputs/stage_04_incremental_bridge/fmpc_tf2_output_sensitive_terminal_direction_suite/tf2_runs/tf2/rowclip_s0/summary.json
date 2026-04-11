@@ -1,0 +1,112 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage",
+  "teacher_free": true,
+  "uses_teacher_artifacts": false,
+  "jpc_runtime_dependency": false,
+  "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "family_lineage": "tf1_mlp_aug",
+  "use_teacher_free_features": true,
+  "feature_aware_tangents": false,
+  "identity_tangent_mode": "feature_frozen_truncated_identity_approx",
+  "tangent_epsilon": 0.001,
+  "incremental_weight_updates": false,
+  "supervision_policy": "local_only",
+  "micro_steps": 4,
+  "theta_update_budget": "matched",
+  "theta_update_cadence": "terminal_only",
+  "onpolicy_mix_ratio": 0.0,
+  "interleaving_start": "epoch_0",
+  "psi_family": "residualized_local_field",
+  "time_encoding_variant": "poly_rt2",
+  "terminal_local_field_direction_intervention": "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
+  "terminal_local_field_angle_clip_degrees": 30.0,
+  "transported_output_alignment_weight": 0.0,
+  "transported_output_alignment_schedule": "none",
+  "theta_micro_lr": 0.02,
+  "theta_micro_bias_lr": 0.02,
+  "bootstrap_integrator": "rk2",
+  "bootstrap_substeps": 4,
+  "identity_loss_weight": 0.2,
+  "warmup_epochs": 5,
+  "hybrid_ramp_epochs": 10,
+  "selection_metric": "val_transported_final_energy",
+  "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+  "selection_metric_source": "val_metric",
+  "report_metric_source": "test_metric",
+  "best_epoch": 53,
+  "selected_epoch_passes_gate": true,
+  "gate_passing_epoch_count": 24,
+  "selector_fallback_used": false,
+  "selected_epoch_selection_reason": "selected highest validation accuracy among gate-passing epochs",
+  "val_transported_final_energy": 0.3261533935359916,
+  "test_transported_final_energy": 0.3233801296699931,
+  "val_energy_delta_vs_identity": -0.014012555954418415,
+  "test_energy_delta_vs_identity": -0.01454074437177505,
+  "val_energy_delta_vs_local_field_only": -0.013215965635363203,
+  "test_energy_delta_vs_local_field_only": -0.013749740982074266,
+  "val_accuracy": 0.7481481481481481,
+  "test_accuracy": 0.7851851851851852,
+  "val_loss": 0.068033189898082,
+  "test_loss": 0.06758417480835362,
+  "val_baseline_accuracy": 0.1037037037037037,
+  "test_baseline_accuracy": 0.1037037037037037,
+  "rollout_knots": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "selection_diagnostics_artifact": "selection_diagnostics.json",
+  "forward_init_stability_metrics": {
+    "hidden_layer_stats": [
+      {
+        "layer_index": 1,
+        "feature_dim": 64,
+        "rms": 0.19354658097690547,
+        "mean_l2_norm": 1.542022286164281
+      }
+    ],
+    "initial_target_clamped_energy": 0.5211936938331945,
+    "initial_hidden_gradient_rms": 0.00039953637452119973,
+    "initial_hidden_gradient_mean_l2_norm": 0.0031756089358399723
+  },
+  "identity_baseline": {
+    "val_transported_final_energy": 0.34016594949041,
+    "test_transported_final_energy": 0.3379208740417681,
+    "micro_steps": 4,
+    "rollout_knots": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "energy_metric": "baseline_pc_energy"
+  },
+  "local_field_only_baseline": {
+    "val_transported_final_energy": 0.3393693591713548,
+    "test_transported_final_energy": 0.33712987065206734,
+    "micro_steps": 4,
+    "rollout_knots": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "energy_metric": "baseline_pc_energy"
+  },
+  "timing": {
+    "train_wall_time_seconds": 19.638886500000808,
+    "final_evaluation_wall_time_seconds": 0.03162929999962216
+  },
+  "validation_gate": {
+    "validation_only_gating": true,
+    "test_is_report_only": true,
+    "passes_identity_comparison": true,
+    "passes_local_field_only_comparison": true,
+    "passes_majority_baseline_accuracy": true
+  }
+}

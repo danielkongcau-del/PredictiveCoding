@@ -1,0 +1,83 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_psi_expressivity_suite",
+  "offline_train_seeds": [
+    0,
+    1
+  ],
+  "offline_val_seeds": [
+    2
+  ],
+  "end_to_end_seeds": [
+    0,
+    1,
+    2
+  ],
+  "offline_probe_epoch_indices": [
+    0,
+    4,
+    14,
+    29,
+    59
+  ],
+  "sample_batches_per_probe_epoch": 1,
+  "offline_fit_epochs": 150,
+  "family_candidates": [
+    {
+      "key": "baseline_plain_raw",
+      "psi_family": "baseline_plain",
+      "psi_hidden_dims": [
+        128
+      ],
+      "time_encoding_variant": "raw",
+      "notes": "current corrective-default psi family and raw time concat"
+    },
+    {
+      "key": "wider_plain_raw",
+      "psi_family": "baseline_plain",
+      "psi_hidden_dims": [
+        256
+      ],
+      "time_encoding_variant": "raw",
+      "notes": "single-axis capacity increase by widening the plain psi MLP"
+    },
+    {
+      "key": "residualized_local_field_raw",
+      "psi_family": "residualized_local_field",
+      "psi_hidden_dims": [
+        128
+      ],
+      "time_encoding_variant": "raw",
+      "notes": "u_hat = g_t_detached + delta_u_psi with baseline hidden dims"
+    }
+  ],
+  "fixed": {
+    "preset_name": "tf2_corrective_transport_default",
+    "use_teacher_free_features": true,
+    "feature_aware_tangents": false,
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "theta_update_budget": "matched",
+    "identity_loss_weight": 0.2,
+    "warmup_epochs": 5,
+    "hybrid_ramp_epochs": 10,
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy"
+  },
+  "offline_primary_gate": {
+    "hybrid_loss_improvement_fraction": 0.05,
+    "bootstrap_mse_must_not_worsen": true,
+    "identity_residual_must_not_worsen": true
+  },
+  "offline_fallback_gate": {
+    "hybrid_loss_must_improve": true,
+    "identity_residual_must_improve": true,
+    "max_runtime_ratio": 2.0,
+    "max_parameter_ratio": 2.5
+  },
+  "slow_pc_reference_runs_path": "outputs/fmpc_tf2_default_adoption_suite/aggregate_runs.csv",
+  "slow_pc_reference_name": "canonical_slow_pc_digits_baseline"
+}

@@ -1,0 +1,215 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_jpc_probe",
+  "probe_type": "reference_only",
+  "benchmark_equivalence": false,
+  "comparability_note": "This is a diagnostic probe, not an apples-to-apples benchmark. The current repo uses the existing NumPy layered PC substrate, while JPC is an optional JAX reference implementation with its own model parameterisation.",
+  "current_repo_forward_init_stats": {
+    "batch_size": 8,
+    "layer_dims": [
+      64,
+      64,
+      10
+    ],
+    "state_init": "forward",
+    "hidden_layer_stats": [
+      {
+        "layer_index": 1,
+        "feature_dim": 64,
+        "rms": 0.18439971831012894,
+        "mean_l2_norm": 1.4663783318151529
+      }
+    ],
+    "initial_target_clamped_energy": 0.5336081102362861,
+    "includes_output_layer": false,
+    "residual_rms": 0.006562523658281857,
+    "residual_mean_l2_norm": 0.052279849885006786
+  },
+  "jpc_standard_forward_init_stats": {
+    "available": true,
+    "param_type": "sp",
+    "uses_skip_model": false,
+    "includes_output_layer": true,
+    "activity_layer_stats": [
+      {
+        "layer_index": 1,
+        "feature_dim": 64,
+        "rms": 0.30543750533916925,
+        "mean_l2_norm": 2.4267569902172017
+      },
+      {
+        "layer_index": 2,
+        "feature_dim": 10,
+        "rms": 0.1172703354955462,
+        "mean_l2_norm": 0.36632128654065776
+      }
+    ],
+    "activity_mean_l2_norms_by_layer": [
+      2.4267570972442627,
+      0.36632126569747925
+    ],
+    "conditioning_proxy": {
+      "metric": "max_layer_rms_over_min_layer_rms",
+      "value": 2.6045589794596387
+    }
+  },
+  "jpc_mupc_forward_init_stats": {
+    "available": true,
+    "param_type": "mupc",
+    "uses_skip_model": true,
+    "includes_output_layer": true,
+    "activity_layer_stats": [
+      {
+        "layer_index": 1,
+        "feature_dim": 64,
+        "rms": 0.48168999197833157,
+        "mean_l2_norm": 3.837500839491124
+      },
+      {
+        "layer_index": 2,
+        "feature_dim": 10,
+        "rms": 0.04613200879960632,
+        "mean_l2_norm": 0.14363518781234796
+      }
+    ],
+    "activity_mean_l2_norms_by_layer": [
+      3.837501049041748,
+      0.14363518357276917
+    ],
+    "conditioning_proxy": {
+      "metric": "max_layer_rms_over_min_layer_rms",
+      "value": 10.44155683899987
+    }
+  },
+  "current_repo_energy_trajectory": {
+    "sampled_steps": [
+      0,
+      1,
+      2,
+      4,
+      8
+    ],
+    "sampled_energies": [
+      0.5336081102362861,
+      0.5314194683953773,
+      0.5292953510765803,
+      0.5252331171978223,
+      0.5178027157277899
+    ],
+    "full_energy_trace": [
+      0.5336081102362861,
+      0.5314194683953773,
+      0.5292953510765803,
+      0.5272338509459839,
+      0.5252331171978223,
+      0.5232913538748217,
+      0.5214068182385834,
+      0.5195778191885039,
+      0.5178027157277899
+    ],
+    "step_to_energy": {
+      "0": 0.5336081102362861,
+      "1": 0.5314194683953773,
+      "2": 0.5292953510765803,
+      "4": 0.5252331171978223,
+      "8": 0.5178027157277899
+    },
+    "horizon_steps": 8,
+    "final_energy": 0.5178027157277899,
+    "many_step_materially_beats_one_step": true,
+    "residual_rms": 0.005822371868086458,
+    "residual_mean_l2_norm": 0.04639227059233563
+  },
+  "jpc_standard_energy_trajectory": {
+    "sampled_steps": [
+      0,
+      1,
+      2,
+      4,
+      8
+    ],
+    "sampled_energies": [
+      0.5613306164741516,
+      0.5425552879460156,
+      0.5288930656388402,
+      0.5115228174254298,
+      0.4968246705830097
+    ],
+    "full_energy_trace": [
+      0.5613306164741516,
+      0.5425552879460156,
+      0.5288930656388402,
+      0.5189052326604724,
+      0.5115228174254298,
+      0.506086690351367,
+      0.5020313560962677,
+      0.4990259949117899,
+      0.4968246705830097
+    ],
+    "step_to_energy": {
+      "0": 0.5613306164741516,
+      "1": 0.5425552879460156,
+      "2": 0.5288930656388402,
+      "4": 0.5115228174254298,
+      "8": 0.4968246705830097
+    },
+    "recorded_points": 9,
+    "many_step_materially_beats_one_step": true
+  },
+  "jpc_mupc_energy_trajectory": {
+    "sampled_steps": [
+      0,
+      1,
+      2,
+      4,
+      8
+    ],
+    "sampled_energies": [
+      0.5189738273620605,
+      0.5179986018047202,
+      0.5172493797290372,
+      0.5162509221117944,
+      0.5152967256726697
+    ],
+    "full_energy_trace": [
+      0.5189738273620605,
+      0.5179986018047202,
+      0.5172493797290372,
+      0.5166900879121386,
+      0.5162509221117944,
+      0.5159185617230833,
+      0.5156675917096436,
+      0.5154574695043266,
+      0.5152967256726697
+    ],
+    "step_to_energy": {
+      "0": 0.5189738273620605,
+      "1": 0.5179986018047202,
+      "2": 0.5172493797290372,
+      "4": 0.5162509221117944,
+      "8": 0.5152967256726697
+    },
+    "recorded_points": 9,
+    "many_step_materially_beats_one_step": false
+  },
+  "jpc_probe_status": {
+    "available": true,
+    "reason": null,
+    "submodule_root": "E:\\CodeSpace\\PredictiveCoding\\third_party\\jpc",
+    "jpc_version": "submodule",
+    "jax_version": "0.9.2",
+    "diffrax_version": "0.7.2",
+    "equinox_version": "0.13.6",
+    "optax_version": "0.2.8"
+  },
+  "forward_init_stability_proxy": {
+    "metric": "max_layer_rms_over_min_layer_rms",
+    "jpc_standard": 2.6045589794596387,
+    "jpc_mupc": 10.44155683899987
+  },
+  "whether_mupc_like_scaling_appears_to_improve_forward_init_stability": false,
+  "whether_many_step_inference_still_materially_outperforms_1_step_in_jpc_standard_pc": true,
+  "whether_many_step_inference_still_materially_outperforms_1_step_in_jpc_mupc": false,
+  "whether_many_step_inference_still_materially_outperforms_1_step_in_the_jpc_probe": true,
+  "recommended_tf2_emphasis": "incremental scheduling"
+}

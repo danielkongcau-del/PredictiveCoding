@@ -1,0 +1,40 @@
+{
+  "selection_rules": {
+    "val_transported_final_energy": {
+      "selected_epoch": 60,
+      "selection_metric_name": "val_transported_final_energy",
+      "selection_metric_higher_is_better": false,
+      "selection_metric_value": 0.2920966471581314,
+      "val_accuracy": 0.7814814814814814,
+      "val_transported_final_energy": 0.2920966471581314,
+      "val_energy_delta_vs_identity": 0.0028773286998707293,
+      "val_energy_delta_vs_local_field_only": 0.0038287232866312526
+    },
+    "val_accuracy": {
+      "selected_epoch": 53,
+      "selection_metric_name": "val_accuracy",
+      "selection_metric_higher_is_better": true,
+      "selection_metric_value": 0.8037037037037037,
+      "val_accuracy": 0.8037037037037037,
+      "val_transported_final_energy": 0.3044381803208057,
+      "val_energy_delta_vs_identity": 0.0050257977843845,
+      "val_energy_delta_vs_local_field_only": 0.005927013461087538
+    },
+    "val_energy_delta_vs_local_field_only": {
+      "selected_epoch": 59,
+      "selection_metric_name": "val_energy_delta_vs_local_field_only",
+      "selection_metric_higher_is_better": false,
+      "selection_metric_value": 0.003646339313547964,
+      "val_accuracy": 0.7925925925925926,
+      "val_transported_final_energy": 0.29288515168181833,
+      "val_energy_delta_vs_identity": 0.002703946151765446,
+      "val_energy_delta_vs_local_field_only": 0.003646339313547964
+    }
+  },
+  "gate_passing_epoch_count": 0,
+  "has_gate_passing_epoch": false,
+  "best_gate_passing_epoch_by_val_accuracy": null,
+  "accuracy_gap_best_energy_vs_best_accuracy": 0.022222222222222254,
+  "significant_accuracy_gap_threshold": 0.01,
+  "significant_validation_accuracy_left_on_table": true
+}

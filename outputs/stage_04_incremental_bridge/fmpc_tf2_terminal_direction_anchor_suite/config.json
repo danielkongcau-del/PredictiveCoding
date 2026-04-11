@@ -1,0 +1,56 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_direction_anchor_suite",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "candidates": [
+    {
+      "key": "baseline_plain_raw",
+      "psi_family": "baseline_plain",
+      "time_encoding_variant": "raw",
+      "notes": "current corrective default baseline"
+    },
+    {
+      "key": "residualized_local_field_poly_rt2",
+      "psi_family": "residualized_local_field",
+      "time_encoding_variant": "poly_rt2",
+      "notes": "offline-better challenger from the psi-expressivity suite"
+    }
+  ],
+  "baseline_controls": [
+    "closed_loop_live_plan",
+    "open_loop_baseline_plan_replay"
+  ],
+  "challenger_modes": [
+    "terminal_live_action_raw",
+    "terminal_baseline_direction_only_keep_live_norm",
+    "terminal_baseline_direction_mix_half_keep_live_norm",
+    "terminal_local_field_direction_only_keep_live_norm",
+    "terminal_local_field_direction_mix_half_keep_live_norm",
+    "terminal_replay_action_vector_only",
+    "k4_open_loop_baseline_plan_replay"
+  ],
+  "fixed": {
+    "preset_name": "tf2_corrective_transport_default",
+    "feature_aware_tangents": false,
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "theta_update_budget": "matched",
+    "identity_loss_weight": 0.2,
+    "warmup_epochs": 5,
+    "hybrid_ramp_epochs": 10,
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "terminal_source_family": "teacher_free_local_field",
+    "selector_policy": "gate_constrained_accuracy_then_val_accuracy"
+  },
+  "diagnostic_only": true,
+  "material_test_gain": 0.005,
+  "baseline_similarity_tolerance": 0.003,
+  "terminal_definition": "All challenger modes replay cached baseline steps 0-2 and keep the terminal supervision bundle fixed to the cached baseline step-3 bundle while varying only the terminal action direction anchor under the challenger's own live action norm."
+}

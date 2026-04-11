@@ -1,0 +1,253 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_readout_refit_endpoint_separability",
+  "num_runs": 15,
+  "reference_context_reused": true,
+  "reference_context_path": "outputs/fmpc_tf2_gap_decomposition_suite/aggregate_summary.json",
+  "mean_std_val_accuracy_by_case": {
+    "adopted_control": {
+      "mean": 0.8355555555555556,
+      "std": 0.04187642674104467
+    },
+    "transported_endpoint_readout_refit": {
+      "mean": 0.4844444444444444,
+      "std": 0.07879058385525775
+    },
+    "slow_pc_endpoint_readout_refit": {
+      "mean": 0.9488888888888889,
+      "std": 0.0063720927904019654
+    }
+  },
+  "mean_std_test_accuracy_by_case": {
+    "adopted_control": {
+      "mean": 0.834074074074074,
+      "std": 0.020068469902435663
+    },
+    "transported_endpoint_readout_refit": {
+      "mean": 0.47703703703703704,
+      "std": 0.0863018596203865
+    },
+    "slow_pc_endpoint_readout_refit": {
+      "mean": 0.9585185185185185,
+      "std": 0.010317324649765994
+    }
+  },
+  "mean_std_report_output_mse_by_case": {
+    "adopted_control": {
+      "mean_val": 0.06074065925219836,
+      "std_val": 0.0019686938777406893,
+      "mean_test": 0.06050089784540062,
+      "std_test": 0.0018479687366432262
+    },
+    "transported_endpoint_readout_refit": {
+      "mean_val": 0.08451646802570154,
+      "std_val": 0.0106761299281016,
+      "mean_test": 0.08374196827873917,
+      "std_test": 0.010066375409701851
+    },
+    "slow_pc_endpoint_readout_refit": {
+      "mean_val": 0.029638095039745637,
+      "std_val": 0.0017996244113182218,
+      "mean_test": 0.02794238327894159,
+      "std_test": 0.0009654009829022115
+    }
+  },
+  "mean_std_supervised_output_mse_by_case": {
+    "adopted_control": {
+      "mean_val": 0.05174862970956438,
+      "std_val": 0.0021017615513611587,
+      "mean_test": 0.051521855132393955,
+      "std_test": 0.0019424825606536766
+    },
+    "transported_endpoint_readout_refit": {
+      "mean_val": 0.0017418126924963328,
+      "std_val": 0.0003471905639823977,
+      "mean_test": 0.0017085317757053763,
+      "std_test": 0.00029761278338353805
+    },
+    "slow_pc_endpoint_readout_refit": {
+      "mean_val": 0.029307253871526016,
+      "std_val": 0.0017457407297384105,
+      "mean_test": 0.027629772361402644,
+      "std_test": 0.0009311018592874088
+    }
+  },
+  "mean_selected_epoch_by_case": {
+    "adopted_control": 54.8,
+    "transported_endpoint_readout_refit": 54.8,
+    "slow_pc_endpoint_readout_refit": 54.8
+  },
+  "mean_runtime_proxy_seconds_by_case": {
+    "adopted_control": 20.822492460002103,
+    "transported_endpoint_readout_refit": 20.84830954000281,
+    "slow_pc_endpoint_readout_refit": 20.849443220002286
+  },
+  "mean_selected_readout_ridge_by_case": {
+    "adopted_control": null,
+    "transported_endpoint_readout_refit": 0.0001,
+    "slow_pc_endpoint_readout_refit": 0.00604
+  },
+  "by_case": {
+    "adopted_control": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8355555555555556,
+      "std_val_accuracy": 0.04187642674104467,
+      "mean_test_accuracy": 0.834074074074074,
+      "std_test_accuracy": 0.020068469902435663,
+      "mean_val_report_output_mse": 0.06074065925219836,
+      "std_val_report_output_mse": 0.0019686938777406893,
+      "mean_test_report_output_mse": 0.06050089784540062,
+      "std_test_report_output_mse": 0.0018479687366432262,
+      "mean_val_supervised_output_mse": 0.05174862970956438,
+      "std_val_supervised_output_mse": 0.0021017615513611587,
+      "mean_test_supervised_output_mse": 0.051521855132393955,
+      "std_test_supervised_output_mse": 0.0019424825606536766,
+      "mean_selected_epoch": 54.8,
+      "mean_runtime_proxy_seconds": 20.822492460002103,
+      "std_runtime_proxy_seconds": 0.3714172905594479,
+      "mean_readout_refit_runtime_seconds": 0.0,
+      "std_readout_refit_runtime_seconds": 0.0,
+      "mean_selected_readout_ridge": null,
+      "selected_readout_ridges": [],
+      "mean_readout_selection_val_accuracy": null,
+      "mean_readout_selection_val_output_mse": null
+    },
+    "transported_endpoint_readout_refit": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.4844444444444444,
+      "std_val_accuracy": 0.07879058385525775,
+      "mean_test_accuracy": 0.47703703703703704,
+      "std_test_accuracy": 0.0863018596203865,
+      "mean_val_report_output_mse": 0.08451646802570154,
+      "std_val_report_output_mse": 0.0106761299281016,
+      "mean_test_report_output_mse": 0.08374196827873917,
+      "std_test_report_output_mse": 0.010066375409701851,
+      "mean_val_supervised_output_mse": 0.0017418126924963328,
+      "std_val_supervised_output_mse": 0.0003471905639823977,
+      "mean_test_supervised_output_mse": 0.0017085317757053763,
+      "std_test_supervised_output_mse": 0.00029761278338353805,
+      "mean_selected_epoch": 54.8,
+      "mean_runtime_proxy_seconds": 20.84830954000281,
+      "std_runtime_proxy_seconds": 0.37101986434391404,
+      "mean_readout_refit_runtime_seconds": 0.025817080000706483,
+      "std_readout_refit_runtime_seconds": 0.0013055217520915293,
+      "mean_selected_readout_ridge": 0.0001,
+      "selected_readout_ridges": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001
+      ],
+      "mean_readout_selection_val_accuracy": 1.0,
+      "mean_readout_selection_val_output_mse": 0.0017418126924963328
+    },
+    "slow_pc_endpoint_readout_refit": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.9488888888888889,
+      "std_val_accuracy": 0.0063720927904019654,
+      "mean_test_accuracy": 0.9585185185185185,
+      "std_test_accuracy": 0.010317324649765994,
+      "mean_val_report_output_mse": 0.029638095039745637,
+      "std_val_report_output_mse": 0.0017996244113182218,
+      "mean_test_report_output_mse": 0.02794238327894159,
+      "std_test_report_output_mse": 0.0009654009829022115,
+      "mean_val_supervised_output_mse": 0.029307253871526016,
+      "std_val_supervised_output_mse": 0.0017457407297384105,
+      "mean_test_supervised_output_mse": 0.027629772361402644,
+      "std_test_supervised_output_mse": 0.0009311018592874088,
+      "mean_selected_epoch": 54.8,
+      "mean_runtime_proxy_seconds": 20.849443220002286,
+      "std_runtime_proxy_seconds": 0.3730154140800199,
+      "mean_readout_refit_runtime_seconds": 0.026950760000181616,
+      "std_readout_refit_runtime_seconds": 0.0023861192326686863,
+      "mean_selected_readout_ridge": 0.00604,
+      "selected_readout_ridges": [
+        0.0001,
+        0.0001,
+        0.01,
+        0.01,
+        0.01
+      ],
+      "mean_readout_selection_val_accuracy": 0.9481481481481481,
+      "mean_readout_selection_val_output_mse": 0.029307253871526016
+    }
+  },
+  "pairwise_transported_endpoint_readout_refit_vs_adopted_control": {
+    "shared_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mean_val_accuracy_delta": -0.3511111111111111,
+    "mean_test_accuracy_delta": -0.35703703703703704,
+    "mean_val_report_output_mse_delta": 0.02377580877350318,
+    "mean_test_report_output_mse_delta": 0.02324107043333854,
+    "mean_val_supervised_output_mse_delta": -0.050006817017068037,
+    "mean_test_supervised_output_mse_delta": -0.04981332335668858,
+    "mean_runtime_proxy_seconds_delta": 0.025817080000706483
+  },
+  "pairwise_slow_pc_endpoint_readout_refit_vs_adopted_control": {
+    "shared_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mean_val_accuracy_delta": 0.11333333333333336,
+    "mean_test_accuracy_delta": 0.12444444444444444,
+    "mean_val_report_output_mse_delta": -0.031102564212452728,
+    "mean_test_report_output_mse_delta": -0.03255851456645904,
+    "mean_val_supervised_output_mse_delta": -0.022441375838038354,
+    "mean_test_supervised_output_mse_delta": -0.023892082770991314,
+    "mean_runtime_proxy_seconds_delta": 0.026950760000181616
+  },
+  "pairwise_slow_pc_endpoint_readout_refit_vs_transported_endpoint_readout_refit": {
+    "shared_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mean_val_accuracy_delta": 0.4644444444444445,
+    "mean_test_accuracy_delta": 0.4814814814814815,
+    "mean_val_report_output_mse_delta": -0.0548783729859559,
+    "mean_test_report_output_mse_delta": -0.05579958499979758,
+    "mean_val_supervised_output_mse_delta": 0.027565441179029683,
+    "mean_test_supervised_output_mse_delta": 0.02592124058569727,
+    "mean_runtime_proxy_seconds_delta": 0.0011336799994751344
+  },
+  "report_only_vs_canonical_slow_pc_digits_baseline": {
+    "adopted_control": {
+      "mean_val_accuracy_delta": -0.04370370370370369,
+      "mean_test_accuracy_delta": -0.06148148148148158,
+      "mean_val_report_output_mse_delta": 0.011257482458353445,
+      "mean_test_report_output_mse_delta": 0.011597451976165685,
+      "mean_runtime_proxy_seconds_delta": 4.911111660003369
+    },
+    "transported_endpoint_readout_refit": {
+      "mean_val_accuracy_delta": -0.3948148148148149,
+      "mean_test_accuracy_delta": -0.4185185185185185,
+      "mean_val_report_output_mse_delta": 0.03503329123185662,
+      "mean_test_report_output_mse_delta": 0.03483852240950423,
+      "mean_runtime_proxy_seconds_delta": 4.936928740004076
+    },
+    "slow_pc_endpoint_readout_refit": {
+      "mean_val_accuracy_delta": 0.0696296296296296,
+      "mean_test_accuracy_delta": 0.062962962962963,
+      "mean_val_report_output_mse_delta": -0.01984508175409928,
+      "mean_test_report_output_mse_delta": -0.020961062590293348,
+      "mean_runtime_proxy_seconds_delta": 4.938062420003552
+    }
+  },
+  "transported_endpoint_refit_materially_improves_over_control": false,
+  "slow_pc_endpoint_refit_materially_improves_over_control": true,
+  "slow_pc_endpoint_refit_materially_improves_over_transported_endpoint_refit": true,
+  "diagnosis": "endpoint_basis_mismatch_between_transported_and_slow_pc_endpoints",
+  "recommended_next_narrow_tf2_move": "run one narrow adopted-package endpoint-basis / separability diagnostic at the hidden-to-output interface without changing the TF2 transport family",
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

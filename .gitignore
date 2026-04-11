@@ -17,8 +17,10 @@ venv/
 env/
 
 # Experiment outputs
-outputs/
+outputs/**
 !outputs/.gitkeep
+!outputs/**/
+!outputs/**/*.json
 
 # OS / editor
 .DS_Store

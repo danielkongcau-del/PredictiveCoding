@@ -1,0 +1,402 @@
+{
+  "phase": "Phase TF2B",
+  "stage": "interleaving_rescue_suite",
+  "num_runs": 54,
+  "anchor_preset_name": "tf2_corrective_transport_default",
+  "current_tf2_corrective_transport_default_reference": {
+    "config_key": "cad_terminal_only_mix_0_start_epoch_0",
+    "preset_name": "tf2_corrective_transport_default",
+    "theta_update_cadence": "terminal_only",
+    "onpolicy_mix_ratio": 0.0,
+    "interleaving_start": "epoch_0",
+    "micro_steps": 4,
+    "theta_update_budget": "matched",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "num_runs": 3,
+    "mean_val_accuracy": 0.8246913580246913,
+    "std_val_accuracy": 0.028741843769932895,
+    "mean_test_accuracy": 0.8197530864197531,
+    "std_test_accuracy": 0.027104319012469347,
+    "mean_gate_passing_epoch_count": 27.666666666666668,
+    "mean_selected_epoch": 54.333333333333336,
+    "mean_val_accuracy_gap_to_slow_pc": -0.03580246913580254,
+    "mean_test_accuracy_gap_to_slow_pc": -0.07654320987654328
+  },
+  "mean_std_val_accuracy_by_configuration": {
+    "cad_every_2_micro_steps_mix_0_start_after_warmup": {
+      "mean": 0.7679012345679013,
+      "std": 0.03088887902023903
+    },
+    "cad_every_2_micro_steps_mix_0_start_epoch_0": {
+      "mean": 0.7580246913580245,
+      "std": 0.0375682075424764
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_after_warmup": {
+      "mean": 0.7679012345679013,
+      "std": 0.03088887902023903
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_epoch_0": {
+      "mean": 0.7555555555555555,
+      "std": 0.034079441337882134
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_after_warmup": {
+      "mean": 0.7691358024691358,
+      "std": 0.03261690077437753
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_epoch_0": {
+      "mean": 0.7555555555555555,
+      "std": 0.034079441337882134
+    },
+    "cad_every_micro_step_mix_0_start_after_warmup": {
+      "mean": 0.8037037037037037,
+      "std": 0.02978355081929586
+    },
+    "cad_every_micro_step_mix_0_start_epoch_0": {
+      "mean": 0.7975308641975308,
+      "std": 0.029834681416282885
+    },
+    "cad_every_micro_step_mix_0p25_start_after_warmup": {
+      "mean": 0.8061728395061728,
+      "std": 0.026420906863003336
+    },
+    "cad_every_micro_step_mix_0p25_start_epoch_0": {
+      "mean": 0.7950617283950617,
+      "std": 0.026420906863003298
+    },
+    "cad_every_micro_step_mix_0p5_start_after_warmup": {
+      "mean": 0.8061728395061728,
+      "std": 0.026420906863003336
+    },
+    "cad_every_micro_step_mix_0p5_start_epoch_0": {
+      "mean": 0.7975308641975308,
+      "std": 0.027439642927028204
+    },
+    "cad_terminal_only_mix_0_start_after_warmup": {
+      "mean": 0.8246913580246913,
+      "std": 0.028741843769932895
+    },
+    "cad_terminal_only_mix_0_start_epoch_0": {
+      "mean": 0.8246913580246913,
+      "std": 0.028741843769932895
+    },
+    "cad_terminal_only_mix_0p25_start_after_warmup": {
+      "mean": 0.825925925925926,
+      "std": 0.028847707272957854
+    },
+    "cad_terminal_only_mix_0p25_start_epoch_0": {
+      "mean": 0.825925925925926,
+      "std": 0.028847707272957854
+    },
+    "cad_terminal_only_mix_0p5_start_after_warmup": {
+      "mean": 0.825925925925926,
+      "std": 0.03069087134482976
+    },
+    "cad_terminal_only_mix_0p5_start_epoch_0": {
+      "mean": 0.8283950617283949,
+      "std": 0.029371301860173647
+    }
+  },
+  "mean_std_test_accuracy_by_configuration": {
+    "cad_every_2_micro_steps_mix_0_start_after_warmup": {
+      "mean": 0.7641975308641976,
+      "std": 0.033447449837392756
+    },
+    "cad_every_2_micro_steps_mix_0_start_epoch_0": {
+      "mean": 0.7716049382716049,
+      "std": 0.033447449837392756
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_after_warmup": {
+      "mean": 0.7641975308641976,
+      "std": 0.03176464279078666
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_epoch_0": {
+      "mean": 0.7728395061728395,
+      "std": 0.03205124687838804
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_after_warmup": {
+      "mean": 0.7617283950617284,
+      "std": 0.03176464279078671
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_epoch_0": {
+      "mean": 0.7728395061728395,
+      "std": 0.03205124687838804
+    },
+    "cad_every_micro_step_mix_0_start_after_warmup": {
+      "mean": 0.7999999999999999,
+      "std": 0.019830096795319774
+    },
+    "cad_every_micro_step_mix_0_start_epoch_0": {
+      "mean": 0.8049382716049384,
+      "std": 0.016655231559545732
+    },
+    "cad_every_micro_step_mix_0p25_start_after_warmup": {
+      "mean": 0.7999999999999999,
+      "std": 0.019830096795319774
+    },
+    "cad_every_micro_step_mix_0p25_start_epoch_0": {
+      "mean": 0.7962962962962963,
+      "std": 0.027715980642769925
+    },
+    "cad_every_micro_step_mix_0p5_start_after_warmup": {
+      "mean": 0.8012345679012345,
+      "std": 0.022290703808972568
+    },
+    "cad_every_micro_step_mix_0p5_start_epoch_0": {
+      "mean": 0.7950617283950617,
+      "std": 0.026420906863003298
+    },
+    "cad_terminal_only_mix_0_start_after_warmup": {
+      "mean": 0.8197530864197531,
+      "std": 0.027104319012469347
+    },
+    "cad_terminal_only_mix_0_start_epoch_0": {
+      "mean": 0.8197530864197531,
+      "std": 0.027104319012469347
+    },
+    "cad_terminal_only_mix_0p25_start_after_warmup": {
+      "mean": 0.8197530864197531,
+      "std": 0.027104319012469347
+    },
+    "cad_terminal_only_mix_0p25_start_epoch_0": {
+      "mean": 0.8197530864197531,
+      "std": 0.027104319012469347
+    },
+    "cad_terminal_only_mix_0p5_start_after_warmup": {
+      "mean": 0.8135802469135803,
+      "std": 0.03331046311909146
+    },
+    "cad_terminal_only_mix_0p5_start_epoch_0": {
+      "mean": 0.8135802469135802,
+      "std": 0.035823748465547936
+    }
+  },
+  "mean_gate_passing_epoch_count_by_configuration": {
+    "cad_every_2_micro_steps_mix_0_start_after_warmup": 0.0,
+    "cad_every_2_micro_steps_mix_0_start_epoch_0": 0.0,
+    "cad_every_2_micro_steps_mix_0p25_start_after_warmup": 0.0,
+    "cad_every_2_micro_steps_mix_0p25_start_epoch_0": 0.0,
+    "cad_every_2_micro_steps_mix_0p5_start_after_warmup": 0.0,
+    "cad_every_2_micro_steps_mix_0p5_start_epoch_0": 0.0,
+    "cad_every_micro_step_mix_0_start_after_warmup": 11.666666666666666,
+    "cad_every_micro_step_mix_0_start_epoch_0": 3.0,
+    "cad_every_micro_step_mix_0p25_start_after_warmup": 11.666666666666666,
+    "cad_every_micro_step_mix_0p25_start_epoch_0": 2.6666666666666665,
+    "cad_every_micro_step_mix_0p5_start_after_warmup": 11.666666666666666,
+    "cad_every_micro_step_mix_0p5_start_epoch_0": 2.6666666666666665,
+    "cad_terminal_only_mix_0_start_after_warmup": 27.666666666666668,
+    "cad_terminal_only_mix_0_start_epoch_0": 27.666666666666668,
+    "cad_terminal_only_mix_0p25_start_after_warmup": 27.666666666666668,
+    "cad_terminal_only_mix_0p25_start_epoch_0": 27.666666666666668,
+    "cad_terminal_only_mix_0p5_start_after_warmup": 28.0,
+    "cad_terminal_only_mix_0p5_start_epoch_0": 27.666666666666668
+  },
+  "pairwise_comparison_against_current_tf2_corrective_transport_default": {
+    "cad_every_2_micro_steps_mix_0_start_after_warmup": {
+      "mean_val_accuracy_delta": -0.05679012345679002,
+      "mean_test_accuracy_delta": -0.05555555555555547,
+      "mean_gate_passing_epoch_count_delta": -27.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.05555555555555547
+    },
+    "cad_every_2_micro_steps_mix_0_start_epoch_0": {
+      "mean_val_accuracy_delta": -0.06666666666666676,
+      "mean_test_accuracy_delta": -0.04814814814814816,
+      "mean_gate_passing_epoch_count_delta": -27.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.04814814814814816
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_after_warmup": {
+      "mean_val_accuracy_delta": -0.05679012345679002,
+      "mean_test_accuracy_delta": -0.05555555555555547,
+      "mean_gate_passing_epoch_count_delta": -27.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.05555555555555547
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_epoch_0": {
+      "mean_val_accuracy_delta": -0.06913580246913575,
+      "mean_test_accuracy_delta": -0.04691358024691361,
+      "mean_gate_passing_epoch_count_delta": -27.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.04691358024691361
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_after_warmup": {
+      "mean_val_accuracy_delta": -0.05555555555555547,
+      "mean_test_accuracy_delta": -0.05802469135802468,
+      "mean_gate_passing_epoch_count_delta": -27.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.05802469135802468
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_epoch_0": {
+      "mean_val_accuracy_delta": -0.06913580246913575,
+      "mean_test_accuracy_delta": -0.04691358024691361,
+      "mean_gate_passing_epoch_count_delta": -27.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.04691358024691361
+    },
+    "cad_every_micro_step_mix_0_start_after_warmup": {
+      "mean_val_accuracy_delta": -0.020987654320987592,
+      "mean_test_accuracy_delta": -0.019753086419753152,
+      "mean_gate_passing_epoch_count_delta": -16.0,
+      "mean_test_gap_to_slow_pc_delta": -0.019753086419753152
+    },
+    "cad_every_micro_step_mix_0_start_epoch_0": {
+      "mean_val_accuracy_delta": -0.02716049382716046,
+      "mean_test_accuracy_delta": -0.014814814814814725,
+      "mean_gate_passing_epoch_count_delta": -24.666666666666668,
+      "mean_test_gap_to_slow_pc_delta": -0.014814814814814725
+    },
+    "cad_every_micro_step_mix_0p25_start_after_warmup": {
+      "mean_val_accuracy_delta": -0.01851851851851849,
+      "mean_test_accuracy_delta": -0.019753086419753152,
+      "mean_gate_passing_epoch_count_delta": -16.0,
+      "mean_test_gap_to_slow_pc_delta": -0.019753086419753152
+    },
+    "cad_every_micro_step_mix_0p25_start_epoch_0": {
+      "mean_val_accuracy_delta": -0.02962962962962956,
+      "mean_test_accuracy_delta": -0.023456790123456805,
+      "mean_gate_passing_epoch_count_delta": -25.0,
+      "mean_test_gap_to_slow_pc_delta": -0.023456790123456805
+    },
+    "cad_every_micro_step_mix_0p5_start_after_warmup": {
+      "mean_val_accuracy_delta": -0.01851851851851849,
+      "mean_test_accuracy_delta": -0.0185185185185186,
+      "mean_gate_passing_epoch_count_delta": -16.0,
+      "mean_test_gap_to_slow_pc_delta": -0.0185185185185186
+    },
+    "cad_every_micro_step_mix_0p5_start_epoch_0": {
+      "mean_val_accuracy_delta": -0.02716049382716046,
+      "mean_test_accuracy_delta": -0.024691358024691357,
+      "mean_gate_passing_epoch_count_delta": -25.0,
+      "mean_test_gap_to_slow_pc_delta": -0.024691358024691357
+    },
+    "cad_terminal_only_mix_0_start_after_warmup": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "cad_terminal_only_mix_0_start_epoch_0": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "cad_terminal_only_mix_0p25_start_after_warmup": {
+      "mean_val_accuracy_delta": 0.0012345679012346622,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "cad_terminal_only_mix_0p25_start_epoch_0": {
+      "mean_val_accuracy_delta": 0.0012345679012346622,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "cad_terminal_only_mix_0p5_start_after_warmup": {
+      "mean_val_accuracy_delta": 0.0012345679012346622,
+      "mean_test_accuracy_delta": -0.006172839506172756,
+      "mean_gate_passing_epoch_count_delta": 0.33333333333333215,
+      "mean_test_gap_to_slow_pc_delta": -0.006172839506172756
+    },
+    "cad_terminal_only_mix_0p5_start_epoch_0": {
+      "mean_val_accuracy_delta": 0.0037037037037036535,
+      "mean_test_accuracy_delta": -0.006172839506172867,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": -0.006172839506172867
+    }
+  },
+  "gap_to_canonical_slow_pc_by_configuration": {
+    "cad_every_2_micro_steps_mix_0_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.09259259259259256,
+      "mean_test_accuracy_gap": -0.13209876543209875
+    },
+    "cad_every_2_micro_steps_mix_0_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.1024691358024693,
+      "mean_test_accuracy_gap": -0.12469135802469145
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.09259259259259256,
+      "mean_test_accuracy_gap": -0.13209876543209875
+    },
+    "cad_every_2_micro_steps_mix_0p25_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.1049382716049383,
+      "mean_test_accuracy_gap": -0.1234567901234569
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.09135802469135801,
+      "mean_test_accuracy_gap": -0.13456790123456797
+    },
+    "cad_every_2_micro_steps_mix_0p5_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.1049382716049383,
+      "mean_test_accuracy_gap": -0.1234567901234569
+    },
+    "cad_every_micro_step_mix_0_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.05679012345679013,
+      "mean_test_accuracy_gap": -0.09629629629629644
+    },
+    "cad_every_micro_step_mix_0_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.062962962962963,
+      "mean_test_accuracy_gap": -0.09135802469135801
+    },
+    "cad_every_micro_step_mix_0p25_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.05432098765432103,
+      "mean_test_accuracy_gap": -0.09629629629629644
+    },
+    "cad_every_micro_step_mix_0p25_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.0654320987654321,
+      "mean_test_accuracy_gap": -0.10000000000000009
+    },
+    "cad_every_micro_step_mix_0p5_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.05432098765432103,
+      "mean_test_accuracy_gap": -0.09506172839506188
+    },
+    "cad_every_micro_step_mix_0p5_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.062962962962963,
+      "mean_test_accuracy_gap": -0.10123456790123464
+    },
+    "cad_terminal_only_mix_0_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.03580246913580254,
+      "mean_test_accuracy_gap": -0.07654320987654328
+    },
+    "cad_terminal_only_mix_0_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.03580246913580254,
+      "mean_test_accuracy_gap": -0.07654320987654328
+    },
+    "cad_terminal_only_mix_0p25_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.03456790123456788,
+      "mean_test_accuracy_gap": -0.07654320987654328
+    },
+    "cad_terminal_only_mix_0p25_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.03456790123456788,
+      "mean_test_accuracy_gap": -0.07654320987654328
+    },
+    "cad_terminal_only_mix_0p5_start_after_warmup": {
+      "mean_val_accuracy_gap": -0.03456790123456788,
+      "mean_test_accuracy_gap": -0.08271604938271604
+    },
+    "cad_terminal_only_mix_0p5_start_epoch_0": {
+      "mean_val_accuracy_gap": -0.032098765432098886,
+      "mean_test_accuracy_gap": -0.08271604938271615
+    }
+  },
+  "whether_gentle_interleaving_helps": false,
+  "whether_low_ratio_onpolicy_supervision_helps": false,
+  "whether_delayed_interleaving_helps": false,
+  "whether_any_configuration_narrows_the_slow_pc_test_gap_below_current_tf2_default": false,
+  "best_configuration_by_mean_test_accuracy": {
+    "config_key": "cad_terminal_only_mix_0p25_start_after_warmup",
+    "preset_name": "tf2_corrective_transport_default",
+    "theta_update_cadence": "terminal_only",
+    "onpolicy_mix_ratio": 0.25,
+    "interleaving_start": "after_warmup",
+    "micro_steps": 4,
+    "theta_update_budget": "matched",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "num_runs": 3,
+    "mean_val_accuracy": 0.825925925925926,
+    "std_val_accuracy": 0.028847707272957854,
+    "mean_test_accuracy": 0.8197530864197531,
+    "std_test_accuracy": 0.027104319012469347,
+    "mean_gate_passing_epoch_count": 27.666666666666668,
+    "mean_selected_epoch": 54.666666666666664,
+    "mean_val_accuracy_gap_to_slow_pc": -0.03456790123456788,
+    "mean_test_accuracy_gap_to_slow_pc": -0.07654320987654328
+  },
+  "recommended_next_tf2_step": "keep corrective transport default",
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

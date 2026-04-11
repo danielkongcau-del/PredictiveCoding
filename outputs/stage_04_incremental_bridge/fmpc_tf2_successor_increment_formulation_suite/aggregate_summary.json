@@ -1,0 +1,375 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_successor_increment_formulation_source_localization",
+  "num_runs": 20,
+  "increment_formulation_component_table": [
+    {
+      "component_name": "g_t_live",
+      "where_produced": "_single_source_supervision: teacher_free_state_features(context, z_on_k_live).g_t",
+      "source_type": "live_on_policy",
+      "used_for": "detached local-field anchor term inside the raw preterminal live successor velocity"
+    },
+    {
+      "component_name": "u_res_live",
+      "where_produced": "_single_source_supervision residualized_local_field path: u_on_live - g_t_live",
+      "source_type": "live_on_policy",
+      "used_for": "learned residual correction added on top of the live detached local-field anchor"
+    },
+    {
+      "component_name": "u_on_live",
+      "where_produced": "_plan_tf2_micro_step raw on-policy velocity before the angle clip",
+      "source_type": "live_on_policy",
+      "used_for": "raw preterminal live successor velocity where u_on_live = g_t_live + u_res_live"
+    },
+    {
+      "component_name": "delta_on_live_raw",
+      "where_produced": "derived as dt * u_on_live before any preterminal angle clip",
+      "source_type": "live_on_policy",
+      "used_for": "raw live preterminal successor increment under formulation-level decomposition"
+    },
+    {
+      "component_name": "g_t_cached",
+      "where_produced": "_build_cached_plan(...).features.g_t",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached detached local-field anchor analogue"
+    },
+    {
+      "component_name": "u_res_cached",
+      "where_produced": "derived as u_on_cached - g_t_cached from the cached preterminal plan",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached learned residual analogue"
+    },
+    {
+      "component_name": "u_on_cached",
+      "where_produced": "derived from the cached preterminal successor value as (z_on_next_cached - z_on_k_cached) / dt",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached raw successor velocity analogue where u_on_cached = g_t_cached + u_res_cached"
+    },
+    {
+      "component_name": "delta_on_cached_raw",
+      "where_produced": "derived as dt * u_on_cached from the cached preterminal plan",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached raw successor increment analogue"
+    }
+  ],
+  "by_case": {
+    "adopted_control_terminal_only": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8355555555555556,
+      "std_val_accuracy": 0.04187642674104467,
+      "mean_test_accuracy": 0.834074074074074,
+      "std_test_accuracy": 0.020068469902435663,
+      "mean_gate_passing_epoch_count": 16.8,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.29883527640213287,
+      "mean_val_report_output_mse": 0.06074065925219836,
+      "mean_val_terminal_rowspace_rms": 0.15361602796209764,
+      "mean_val_terminal_rowspace_fraction": 0.5447906149156865,
+      "mean_runtime_proxy_seconds": 17.929277000005822,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "failed_penultimate_plus_terminal_live": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8570370370370372,
+      "std_val_accuracy": 0.026147203844033764,
+      "mean_test_accuracy": 0.86,
+      "std_test_accuracy": 0.015431604930370116,
+      "mean_gate_passing_epoch_count": 0.0,
+      "seed_gate_positive_rate": 0.0,
+      "selected_epoch_passes_gate_rate": 0.0,
+      "selector_fallback_used_rate": 1.0,
+      "mean_val_transported_final_energy": 0.2873208109031,
+      "mean_val_report_output_mse": 0.05624914094322821,
+      "mean_val_terminal_rowspace_rms": 0.14253004057151525,
+      "mean_val_terminal_rowspace_fraction": 0.49551303909108385,
+      "mean_runtime_proxy_seconds": 34.669769399997314,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "live_anchor_cached_residual": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8570370370370372,
+      "std_val_accuracy": 0.026147203844033764,
+      "mean_test_accuracy": 0.86,
+      "std_test_accuracy": 0.015431604930370116,
+      "mean_gate_passing_epoch_count": 0.0,
+      "seed_gate_positive_rate": 0.0,
+      "selected_epoch_passes_gate_rate": 0.0,
+      "selector_fallback_used_rate": 1.0,
+      "mean_val_transported_final_energy": 0.28730758312746785,
+      "mean_val_report_output_mse": 0.056246304771638736,
+      "mean_val_terminal_rowspace_rms": 0.14251435713699073,
+      "mean_val_terminal_rowspace_fraction": 0.49549322353877867,
+      "mean_runtime_proxy_seconds": 35.013489639997715,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "cached_anchor_live_residual": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8570370370370372,
+      "std_val_accuracy": 0.026147203844033764,
+      "mean_test_accuracy": 0.86,
+      "std_test_accuracy": 0.015431604930370116,
+      "mean_gate_passing_epoch_count": 0.0,
+      "seed_gate_positive_rate": 0.0,
+      "selected_epoch_passes_gate_rate": 0.0,
+      "selector_fallback_used_rate": 1.0,
+      "mean_val_transported_final_energy": 0.2873208109031,
+      "mean_val_report_output_mse": 0.05624914094322821,
+      "mean_val_terminal_rowspace_rms": 0.1425300405715153,
+      "mean_val_terminal_rowspace_fraction": 0.49551303909108385,
+      "mean_runtime_proxy_seconds": 34.95597598000895,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    }
+  },
+  "pairwise_vs_control": {
+    "failed_penultimate_plus_terminal_live": {
+      "shared_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_val_accuracy_delta": 0.021481481481481525,
+      "mean_test_accuracy_delta": 0.02592592592592593,
+      "mean_gate_passing_epoch_count_delta": -16.8,
+      "mean_seed_gate_positive_rate_delta": -1.0,
+      "mean_selected_epoch_passes_gate_rate_delta": -1.0,
+      "mean_selector_fallback_used_rate_delta": 1.0,
+      "mean_val_transported_final_energy_delta": -0.011514465499032834,
+      "mean_val_report_output_mse_delta": -0.00449151830897016,
+      "mean_val_terminal_rowspace_rms_delta": -0.011085987390582364,
+      "mean_val_terminal_rowspace_fraction_delta": -0.0492775758246027,
+      "mean_runtime_proxy_seconds_delta": 16.74049239999149
+    },
+    "live_anchor_cached_residual": {
+      "shared_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_val_accuracy_delta": 0.021481481481481525,
+      "mean_test_accuracy_delta": 0.02592592592592593,
+      "mean_gate_passing_epoch_count_delta": -16.8,
+      "mean_seed_gate_positive_rate_delta": -1.0,
+      "mean_selected_epoch_passes_gate_rate_delta": -1.0,
+      "mean_selector_fallback_used_rate_delta": 1.0,
+      "mean_val_transported_final_energy_delta": -0.011527693274665008,
+      "mean_val_report_output_mse_delta": -0.004494354480559628,
+      "mean_val_terminal_rowspace_rms_delta": -0.011101670825106885,
+      "mean_val_terminal_rowspace_fraction_delta": -0.04929739137690783,
+      "mean_runtime_proxy_seconds_delta": 17.084212639991893
+    },
+    "cached_anchor_live_residual": {
+      "shared_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_val_accuracy_delta": 0.021481481481481525,
+      "mean_test_accuracy_delta": 0.02592592592592593,
+      "mean_gate_passing_epoch_count_delta": -16.8,
+      "mean_seed_gate_positive_rate_delta": -1.0,
+      "mean_selected_epoch_passes_gate_rate_delta": -1.0,
+      "mean_selector_fallback_used_rate_delta": 1.0,
+      "mean_val_transported_final_energy_delta": -0.011514465499032834,
+      "mean_val_report_output_mse_delta": -0.004491518308970157,
+      "mean_val_terminal_rowspace_rms_delta": -0.011085987390582336,
+      "mean_val_terminal_rowspace_fraction_delta": -0.04927757582460261,
+      "mean_runtime_proxy_seconds_delta": 17.02669898000313
+    }
+  },
+  "pairwise_vs_failed_anchor": {
+    "adopted_control_terminal_only": {
+      "shared_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_val_accuracy_delta": -0.021481481481481525,
+      "mean_test_accuracy_delta": -0.02592592592592593,
+      "mean_gate_passing_epoch_count_delta": 16.8,
+      "mean_seed_gate_positive_rate_delta": 1.0,
+      "mean_selected_epoch_passes_gate_rate_delta": 1.0,
+      "mean_selector_fallback_used_rate_delta": -1.0,
+      "mean_val_transported_final_energy_delta": 0.011514465499032834,
+      "mean_val_report_output_mse_delta": 0.00449151830897016,
+      "mean_val_terminal_rowspace_rms_delta": 0.011085987390582364,
+      "mean_val_terminal_rowspace_fraction_delta": 0.0492775758246027,
+      "mean_runtime_proxy_seconds_delta": -16.74049239999149
+    },
+    "live_anchor_cached_residual": {
+      "shared_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_seed_gate_positive_rate_delta": 0.0,
+      "mean_selected_epoch_passes_gate_rate_delta": 0.0,
+      "mean_selector_fallback_used_rate_delta": 0.0,
+      "mean_val_transported_final_energy_delta": -1.3227775632174144e-05,
+      "mean_val_report_output_mse_delta": -2.8361715894681392e-06,
+      "mean_val_terminal_rowspace_rms_delta": -1.5683434524521588e-05,
+      "mean_val_terminal_rowspace_fraction_delta": -1.9815552305124662e-05,
+      "mean_runtime_proxy_seconds_delta": 0.3437202400004026
+    },
+    "cached_anchor_live_residual": {
+      "shared_seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_seed_gate_positive_rate_delta": 0.0,
+      "mean_selected_epoch_passes_gate_rate_delta": 0.0,
+      "mean_selector_fallback_used_rate_delta": 0.0,
+      "mean_val_transported_final_energy_delta": 0.0,
+      "mean_val_report_output_mse_delta": 4.163336342344337e-18,
+      "mean_val_terminal_rowspace_rms_delta": 2.7755575615628914e-17,
+      "mean_val_terminal_rowspace_fraction_delta": 8.881784197001253e-17,
+      "mean_runtime_proxy_seconds_delta": 0.28620658001163973
+    }
+  },
+  "recovery_fractions_vs_failed_anchor": {
+    "live_anchor_cached_residual": {
+      "accuracy_gain_retained_fraction_from_control_to_failed_anchor": 1.0,
+      "gate_robustness_recovery_fraction_from_failed_anchor_to_control": 0.0,
+      "terminal_rowspace_rms_gain_retained_fraction_from_control_to_failed_anchor": 1.0014147079526574
+    },
+    "cached_anchor_live_residual": {
+      "accuracy_gain_retained_fraction_from_control_to_failed_anchor": 1.0,
+      "gate_robustness_recovery_fraction_from_failed_anchor_to_control": 0.0,
+      "terminal_rowspace_rms_gain_retained_fraction_from_control_to_failed_anchor": 0.999999999999995
+    }
+  },
+  "control_relative_recovery": {
+    "live_anchor_cached_residual": {
+      "val_accuracy_fraction_of_control": 1.025709219858156,
+      "gate_robustness_fraction_of_control": 0.0,
+      "terminal_rowspace_rms_improvement_fraction_vs_control": 0.07226896159459396
+    },
+    "cached_anchor_live_residual": {
+      "val_accuracy_fraction_of_control": 1.025709219858156,
+      "gate_robustness_fraction_of_control": 0.0,
+      "terminal_rowspace_rms_improvement_fraction_vs_control": 0.0721668665545605
+    }
+  },
+  "diagnosis": "bad_live_direction_source_not_yet_localized_but_formulation_blocker_strengthened",
+  "localized_bad_direction_term": "not_localized",
+  "diagnosis_evidence": {
+    "control_case": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8355555555555556,
+      "std_val_accuracy": 0.04187642674104467,
+      "mean_test_accuracy": 0.834074074074074,
+      "std_test_accuracy": 0.020068469902435663,
+      "mean_gate_passing_epoch_count": 16.8,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.29883527640213287,
+      "mean_val_report_output_mse": 0.06074065925219836,
+      "mean_val_terminal_rowspace_rms": 0.15361602796209764,
+      "mean_val_terminal_rowspace_fraction": 0.5447906149156865,
+      "mean_runtime_proxy_seconds": 17.929277000005822,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "failed_anchor_case": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8570370370370372,
+      "std_val_accuracy": 0.026147203844033764,
+      "mean_test_accuracy": 0.86,
+      "std_test_accuracy": 0.015431604930370116,
+      "mean_gate_passing_epoch_count": 0.0,
+      "seed_gate_positive_rate": 0.0,
+      "selected_epoch_passes_gate_rate": 0.0,
+      "selector_fallback_used_rate": 1.0,
+      "mean_val_transported_final_energy": 0.2873208109031,
+      "mean_val_report_output_mse": 0.05624914094322821,
+      "mean_val_terminal_rowspace_rms": 0.14253004057151525,
+      "mean_val_terminal_rowspace_fraction": 0.49551303909108385,
+      "mean_runtime_proxy_seconds": 34.669769399997314,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "live_anchor_cached_residual_case": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8570370370370372,
+      "std_val_accuracy": 0.026147203844033764,
+      "mean_test_accuracy": 0.86,
+      "std_test_accuracy": 0.015431604930370116,
+      "mean_gate_passing_epoch_count": 0.0,
+      "seed_gate_positive_rate": 0.0,
+      "selected_epoch_passes_gate_rate": 0.0,
+      "selector_fallback_used_rate": 1.0,
+      "mean_val_transported_final_energy": 0.28730758312746785,
+      "mean_val_report_output_mse": 0.056246304771638736,
+      "mean_val_terminal_rowspace_rms": 0.14251435713699073,
+      "mean_val_terminal_rowspace_fraction": 0.49549322353877867,
+      "mean_runtime_proxy_seconds": 35.013489639997715,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "cached_anchor_live_residual_case": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8570370370370372,
+      "std_val_accuracy": 0.026147203844033764,
+      "mean_test_accuracy": 0.86,
+      "std_test_accuracy": 0.015431604930370116,
+      "mean_gate_passing_epoch_count": 0.0,
+      "seed_gate_positive_rate": 0.0,
+      "selected_epoch_passes_gate_rate": 0.0,
+      "selector_fallback_used_rate": 1.0,
+      "mean_val_transported_final_energy": 0.2873208109031,
+      "mean_val_report_output_mse": 0.05624914094322821,
+      "mean_val_terminal_rowspace_rms": 0.1425300405715153,
+      "mean_val_terminal_rowspace_fraction": 0.49551303909108385,
+      "mean_runtime_proxy_seconds": 34.95597598000895,
+      "failure_incidence_rate": 0.0,
+      "nan_incidence_rate": 0.0
+    },
+    "live_anchor_cached_residual_recovery_vs_failed_anchor": {
+      "accuracy_gain_retained_fraction_from_control_to_failed_anchor": 1.0,
+      "gate_robustness_recovery_fraction_from_failed_anchor_to_control": 0.0,
+      "terminal_rowspace_rms_gain_retained_fraction_from_control_to_failed_anchor": 1.0014147079526574
+    },
+    "cached_anchor_live_residual_recovery_vs_failed_anchor": {
+      "accuracy_gain_retained_fraction_from_control_to_failed_anchor": 1.0,
+      "gate_robustness_recovery_fraction_from_failed_anchor_to_control": 0.0,
+      "terminal_rowspace_rms_gain_retained_fraction_from_control_to_failed_anchor": 0.999999999999995
+    },
+    "live_anchor_cached_residual_recovery_vs_control": {
+      "val_accuracy_fraction_of_control": 1.025709219858156,
+      "gate_robustness_fraction_of_control": 0.0,
+      "terminal_rowspace_rms_improvement_fraction_vs_control": 0.07226896159459396
+    },
+    "cached_anchor_live_residual_recovery_vs_control": {
+      "val_accuracy_fraction_of_control": 1.025709219858156,
+      "gate_robustness_fraction_of_control": 0.0,
+      "terminal_rowspace_rms_improvement_fraction_vs_control": 0.0721668665545605
+    }
+  },
+  "recommended_next_narrow_tf2_move": "treat the live preterminal successor increment as a strengthened formulation-level blocker and avoid another broader successor-value, interaction, or cone-family sweep from this state",
+  "aggregate_runs_csv_path": "aggregate_runs.csv"
+}

@@ -1,0 +1,99 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_successor_value_source_localization",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "successor_value_mode": "live_successor_value"
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Higher-gain non-adopted reference: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps with the full live successor value.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_mode": "live_successor_value"
+    },
+    {
+      "case_name": "safe_blended_successor_value_alpha_025",
+      "description": "Current best narrow safe reference: penultimate successor value blended 25% live / 75% cached.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_mode": "blend_successor_value_alpha_025"
+    },
+    {
+      "case_name": "live_carry_cached_increment",
+      "description": "Keep the live predecessor carry state z_on_k and replace only the successor increment with its cached analogue.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_mode": "live_carry_cached_increment"
+    },
+    {
+      "case_name": "cached_carry_live_increment",
+      "description": "Replace only the predecessor carry state with the cached analogue while keeping the successor increment live/on-policy.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_mode": "cached_carry_live_increment"
+    }
+  ],
+  "successor_value_component_table": [
+    {
+      "component_name": "z_on_k_live",
+      "where_produced": "batch rollout loop carry state before calling _plan_tf2_micro_step",
+      "source_type": "live_on_policy",
+      "used_for": "predecessor carry state in z_on_next = z_on_k + \u0394_on"
+    },
+    {
+      "component_name": "z_on_next_live",
+      "where_produced": "_plan_tf2_micro_step: z_on_k + dt * on_velocity, optionally stabilized by the existing full-vector angle clip",
+      "source_type": "live_on_policy",
+      "used_for": "preterminal successor value handed to the next micro-step"
+    },
+    {
+      "component_name": "\u0394_on_live",
+      "where_produced": "derived inside this suite as z_on_next_live - z_on_k_live",
+      "source_type": "live_on_policy",
+      "used_for": "successor increment component of the live preterminal successor-value formulation"
+    },
+    {
+      "component_name": "z_on_k_cached",
+      "where_produced": "_build_cached_plan(...).z_on_k",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached predecessor carry analogue"
+    },
+    {
+      "component_name": "z_on_next_cached",
+      "where_produced": "_build_cached_plan(...).z_on_next",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached successor value analogue"
+    },
+    {
+      "component_name": "\u0394_on_cached",
+      "where_produced": "derived inside this suite as z_on_next_cached - z_on_k_cached",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached successor increment analogue"
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true
+}

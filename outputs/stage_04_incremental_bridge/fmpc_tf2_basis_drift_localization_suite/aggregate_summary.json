@@ -1,0 +1,437 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_basis_drift_source_localization",
+  "num_runs": 5,
+  "integrated_behavior": {
+    "mean_val_accuracy": 0.8355555555555556,
+    "std_val_accuracy": 0.04187642674104467,
+    "mean_test_accuracy": 0.834074074074074,
+    "std_test_accuracy": 0.020068469902435663,
+    "mean_gate_passing_epoch_count": 16.8,
+    "selected_epoch_passes_gate_rate": 1.0,
+    "selector_fallback_used_rate": 0.0,
+    "mean_val_report_output_mse": 0.06074065925219836,
+    "std_val_report_output_mse": 0.0019686938777406893,
+    "mean_test_report_output_mse": 0.06050089784540062,
+    "std_test_report_output_mse": 0.0018479687366432262,
+    "mean_val_transported_final_energy": 0.29883527640213287,
+    "mean_selected_epoch": 54.8,
+    "mean_runtime_proxy_seconds": 16.744743059999383
+  },
+  "validation_knot_breakdown": {
+    "mean_hidden_state_rms_gap_to_slow_pc_by_knot": [
+      0.0,
+      0.0740015231408402,
+      0.14131213484925634,
+      0.2089929895438989,
+      0.28198694536160185
+    ],
+    "mean_output_state_rms_gap_to_slow_pc_by_knot": [
+      0.0,
+      0.008017258726322979,
+      0.015559668053301372,
+      0.02315002321441005,
+      0.03105231147235757
+    ],
+    "mean_hidden_state_rms_gap_rowspace_by_knot": [
+      0.0,
+      0.039501397487947426,
+      0.07678168933279027,
+      0.11438291684846229,
+      0.15361602796209764
+    ],
+    "mean_hidden_state_rms_gap_orthogonal_by_knot": [
+      0.0,
+      0.06257258913277837,
+      0.11861377564791138,
+      0.17488920417528375,
+      0.23644900039793287
+    ],
+    "mean_hidden_state_gap_rowspace_fraction_by_knot": [
+      0.0,
+      0.5336674572581571,
+      0.5431996366352659,
+      0.5472468652579597,
+      0.5447906149156865
+    ],
+    "mean_centroid_displacement_rms_rowspace_by_knot": [
+      0.0,
+      0.03763731617041507,
+      0.07294235123953523,
+      0.10857381356906297,
+      0.1459076543999083
+    ],
+    "mean_centroid_displacement_rms_total_by_knot": [
+      0.0,
+      0.06838192867980092,
+      0.12945196580764617,
+      0.19084416757751504,
+      0.25797688560353427
+    ],
+    "mean_transported_frozen_head_accuracy_by_knot": [
+      0.8355555555555556,
+      0.8696296296296296,
+      0.8896296296296295,
+      0.9081481481481483,
+      0.9348148148148148
+    ],
+    "mean_transported_frozen_head_output_mse_by_knot": [
+      0.06074065925219836,
+      0.0582908256411506,
+      0.05597056334395747,
+      0.053782573034361215,
+      0.05174862970956438
+    ],
+    "mean_transported_fisher_separability_ratio_by_knot": [
+      1.4985514858915505,
+      1.5647177712740796,
+      1.6400360656813242,
+      1.7215613059946346,
+      1.806693865450363
+    ],
+    "mean_transported_nearest_centroid_accuracy_by_knot": [
+      0.8651851851851852,
+      0.8792592592592593,
+      0.8955555555555555,
+      0.922962962962963,
+      0.9355555555555556
+    ],
+    "mean_transported_mean_true_class_margin_by_knot": [
+      0.10084136003826794,
+      0.11892430319111842,
+      0.13657294605416684,
+      0.15386651230267775,
+      0.17081453978216782
+    ],
+    "mean_transported_mean_within_class_rms_by_knot": [
+      0.5616254254063296,
+      0.5651399485640167,
+      0.570034038209287,
+      0.5762834953475853,
+      0.5838623772413774
+    ],
+    "mean_transported_between_class_centroid_margin_by_knot": [
+      0.468577532321791,
+      0.49397438437925495,
+      0.5326535108556325,
+      0.5816000065856599,
+      0.6333723142206227
+    ],
+    "mean_slow_pc_frozen_head_accuracy_by_knot": [
+      0.8355555555555556,
+      0.8362962962962962,
+      0.8385185185185184,
+      0.8407407407407408,
+      0.8407407407407408
+    ],
+    "mean_slow_pc_frozen_head_output_mse_by_knot": [
+      0.06074065925219836,
+      0.06067286840724172,
+      0.06060526190834483,
+      0.06055467766680127,
+      0.060487392397133924
+    ],
+    "mean_slow_pc_fisher_separability_ratio_by_knot": [
+      1.4985514858915505,
+      1.4996971017076233,
+      1.5008423822509864,
+      1.5017011162149425,
+      1.502845784411163
+    ],
+    "mean_slow_pc_nearest_centroid_accuracy_by_knot": [
+      0.8651851851851852,
+      0.8651851851851852,
+      0.8651851851851852,
+      0.8651851851851852,
+      0.8651851851851852
+    ],
+    "mean_slow_pc_mean_true_class_margin_by_knot": [
+      0.10084136003826794,
+      0.10134695228517135,
+      0.1018514574073712,
+      0.10222912573195472,
+      0.10273162520497978
+    ],
+    "mean_slow_pc_mean_within_class_rms_by_knot": [
+      0.5616254254063296,
+      0.5615172971557892,
+      0.5614094533977317,
+      0.5613287567859725,
+      0.5612214089259993
+    ],
+    "mean_slow_pc_between_class_centroid_margin_by_knot": [
+      0.468577532321791,
+      0.4689616584798638,
+      0.46934725023395246,
+      0.46963739550156464,
+      0.47002551074771953
+    ],
+    "rollout_knot_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "rollout_knot_times": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "aligned_slow_pc_step_indices": [
+      0,
+      4,
+      8,
+      11,
+      15
+    ],
+    "peak_rowspace_gap_knot_index": 4,
+    "peak_rowspace_gap_region": "terminal_knot",
+    "peak_output_gap_knot_index": 4,
+    "peak_output_gap_region": "terminal_knot"
+  },
+  "test_knot_breakdown": {
+    "mean_hidden_state_rms_gap_to_slow_pc_by_knot": [
+      0.0,
+      0.0739363761321183,
+      0.14111388929723206,
+      0.2086109957836614,
+      0.281396173570196
+    ],
+    "mean_output_state_rms_gap_to_slow_pc_by_knot": [
+      0.0,
+      0.007999945589586027,
+      0.015518203125787628,
+      0.02307799956812277,
+      0.030944987843186535
+    ],
+    "mean_hidden_state_rms_gap_rowspace_by_knot": [
+      0.0,
+      0.03942579446823204,
+      0.07659381897523637,
+      0.11404858792770316,
+      0.15310916263101096
+    ],
+    "mean_hidden_state_rms_gap_orthogonal_by_knot": [
+      0.0,
+      0.06254128046533217,
+      0.11849528066930201,
+      0.17464273683760823,
+      0.23605752737540966
+    ],
+    "mean_hidden_state_gap_rowspace_fraction_by_knot": [
+      0.0,
+      0.5331324769018277,
+      0.5426493107823098,
+      0.5466621844685401,
+      0.5441489416624726
+    ],
+    "mean_centroid_displacement_rms_rowspace_by_knot": [
+      0.0,
+      0.03762322609858627,
+      0.07286051343725872,
+      0.10838088065565521,
+      0.14557713039374592
+    ],
+    "mean_centroid_displacement_rms_total_by_knot": [
+      0.0,
+      0.06842601646301627,
+      0.12945939819702326,
+      0.19074294858911794,
+      0.257720165977463
+    ],
+    "mean_transported_frozen_head_accuracy_by_knot": [
+      0.834074074074074,
+      0.8637037037037038,
+      0.8992592592592594,
+      0.9222222222222222,
+      0.942962962962963
+    ],
+    "mean_transported_frozen_head_output_mse_by_knot": [
+      0.06050089784540062,
+      0.05804468671008937,
+      0.055725284454586174,
+      0.05354416635111455,
+      0.051521855132393955
+    ],
+    "mean_transported_fisher_separability_ratio_by_knot": [
+      1.500576912096241,
+      1.5663966116637915,
+      1.641332900577035,
+      1.7223974180648143,
+      1.8069678544067311
+    ],
+    "mean_transported_nearest_centroid_accuracy_by_knot": [
+      0.8585185185185186,
+      0.8807407407407407,
+      0.9125925925925926,
+      0.9348148148148148,
+      0.9525925925925925
+    ],
+    "mean_transported_mean_true_class_margin_by_knot": [
+      0.10265295015558792,
+      0.12090703980128774,
+      0.1386130344712996,
+      0.155854995424275,
+      0.17245484041867926
+    ],
+    "mean_transported_mean_within_class_rms_by_knot": [
+      0.5597053577328805,
+      0.5634333101067799,
+      0.5685242448444808,
+      0.5749596735238227,
+      0.5827193525637184
+    ],
+    "mean_transported_between_class_centroid_margin_by_knot": [
+      0.4267480050099211,
+      0.4594626761420712,
+      0.5039568584668949,
+      0.5571825304731985,
+      0.6130429068068813
+    ],
+    "mean_slow_pc_frozen_head_accuracy_by_knot": [
+      0.834074074074074,
+      0.8355555555555556,
+      0.8355555555555556,
+      0.8362962962962962,
+      0.8377777777777778
+    ],
+    "mean_slow_pc_frozen_head_output_mse_by_knot": [
+      0.06050089784540062,
+      0.060433588423475404,
+      0.06036646176599392,
+      0.060316236371077116,
+      0.06024942818898216
+    ],
+    "mean_slow_pc_fisher_separability_ratio_by_knot": [
+      1.500576912096241,
+      1.5017285948016075,
+      1.5028799199980813,
+      1.50374317285691,
+      1.5048938467840745
+    ],
+    "mean_slow_pc_nearest_centroid_accuracy_by_knot": [
+      0.8585185185185186,
+      0.8585185185185186,
+      0.8585185185185186,
+      0.8592592592592592,
+      0.8592592592592592
+    ],
+    "mean_slow_pc_mean_true_class_margin_by_knot": [
+      0.10265295015558792,
+      0.10315567761686635,
+      0.1036573482054413,
+      0.10403290892125631,
+      0.10453265087506007
+    ],
+    "mean_slow_pc_mean_within_class_rms_by_knot": [
+      0.5597053577328805,
+      0.5595990561757934,
+      0.5594930348221171,
+      0.5594137022051722,
+      0.5593081692686133
+    ],
+    "mean_slow_pc_between_class_centroid_margin_by_knot": [
+      0.4267480050099211,
+      0.42718748059870804,
+      0.427628531793579,
+      0.42796034161035557,
+      0.42840409994653383
+    ],
+    "rollout_knot_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "rollout_knot_times": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "aligned_slow_pc_step_indices": [
+      0,
+      4,
+      8,
+      11,
+      15
+    ],
+    "peak_rowspace_gap_knot_index": 4,
+    "peak_rowspace_gap_region": "terminal_knot",
+    "peak_output_gap_knot_index": 4,
+    "peak_output_gap_region": "terminal_knot"
+  },
+  "diagnosis": "preterminal_accumulation_dominates",
+  "diagnosis_evidence": {
+    "validation_contribution_breakdown": {
+      "rowspace_hidden_gap": {
+        "start_value": 0.0,
+        "preterminal_value": 0.11438291684846229,
+        "terminal_value": 0.15361602796209764,
+        "preterminal_contribution": 0.11438291684846229,
+        "terminal_jump_contribution": 0.03923311111363535,
+        "preterminal_share": 0.744602749894591,
+        "terminal_share": 0.255397250105409
+      },
+      "output_state_gap": {
+        "start_value": 0.0,
+        "preterminal_value": 0.02315002321441005,
+        "terminal_value": 0.03105231147235757,
+        "preterminal_contribution": 0.02315002321441005,
+        "terminal_jump_contribution": 0.007902288257947518,
+        "preterminal_share": 0.7455169073329034,
+        "terminal_share": 0.2544830926670966
+      },
+      "rowspace_centroid_displacement": {
+        "start_value": 0.0,
+        "preterminal_value": 0.10857381356906297,
+        "terminal_value": 0.1459076543999083,
+        "preterminal_contribution": 0.10857381356906297,
+        "terminal_jump_contribution": 0.03733384083084533,
+        "preterminal_share": 0.7441269206581886,
+        "terminal_share": 0.25587307934181136
+      }
+    },
+    "test_contribution_breakdown": {
+      "rowspace_hidden_gap": {
+        "start_value": 0.0,
+        "preterminal_value": 0.11404858792770316,
+        "terminal_value": 0.15310916263101096,
+        "preterminal_contribution": 0.11404858792770316,
+        "terminal_jump_contribution": 0.0390605747033078,
+        "preterminal_share": 0.7448841464998228,
+        "terminal_share": 0.25511585350017724
+      },
+      "output_state_gap": {
+        "start_value": 0.0,
+        "preterminal_value": 0.02307799956812277,
+        "terminal_value": 0.030944987843186535,
+        "preterminal_contribution": 0.02307799956812277,
+        "terminal_jump_contribution": 0.007866988275063765,
+        "preterminal_share": 0.7457750406970698,
+        "terminal_share": 0.25422495930293015
+      },
+      "rowspace_centroid_displacement": {
+        "start_value": 0.0,
+        "preterminal_value": 0.10838088065565521,
+        "terminal_value": 0.14557713039374592,
+        "preterminal_contribution": 0.10838088065565521,
+        "terminal_jump_contribution": 0.037196249738090714,
+        "preterminal_share": 0.744491118642845,
+        "terminal_share": 0.25550888135715505
+      }
+    },
+    "validation_preterminal_share_mean": 0.7447488592952277,
+    "validation_terminal_share_mean": 0.25525114070477234,
+    "test_preterminal_share_mean": 0.7450501019465792,
+    "test_terminal_share_mean": 0.25494989805342083
+  },
+  "recommended_next_narrow_tf2_move": "run one narrow adopted-package late-rollout drift-control diagnostic next",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "knotwise_localization_csv_path": "knotwise_localization.csv"
+}

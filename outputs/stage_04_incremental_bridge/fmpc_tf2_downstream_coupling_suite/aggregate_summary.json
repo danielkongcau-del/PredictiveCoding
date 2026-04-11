@@ -1,0 +1,158 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_downstream_coupling_suite",
+  "live_theta_end_to_end": {
+    "baseline_plain_raw": {
+      "mean_val_accuracy": 0.8246913580246913,
+      "std_val_accuracy": 0.028741843769932898,
+      "mean_test_accuracy": 0.8197530864197531,
+      "std_test_accuracy": 0.027104319012469347,
+      "mean_gate_passing_epoch_count": 27.666666666666668,
+      "mean_val_transported_final_energy": 0.3070547870776022,
+      "mean_total_wall_time_seconds": 19.711537033300072,
+      "std_total_wall_time_seconds": 0.5852042547156429
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_val_accuracy": 0.7592592592592592,
+      "std_val_accuracy": 0.026363156177855077,
+      "mean_test_accuracy": 0.780246913580247,
+      "std_test_accuracy": 0.015220775315972804,
+      "mean_gate_passing_epoch_count": 26.333333333333332,
+      "mean_val_transported_final_energy": 0.30582114546803274,
+      "mean_total_wall_time_seconds": 21.51154006664486,
+      "std_total_wall_time_seconds": 0.22964949995683978
+    }
+  },
+  "frozen_theta_end_to_end": {
+    "baseline_plain_raw": {
+      "mean_val_accuracy": 0.09012345679012346,
+      "std_val_accuracy": 0.020135193123827274,
+      "mean_test_accuracy": 0.09999999999999999,
+      "std_test_accuracy": 0.02636315617785509,
+      "mean_gate_passing_epoch_count": 0.0,
+      "mean_val_transported_final_energy": 0.6473667227035939,
+      "mean_total_wall_time_seconds": 22.03903949999949,
+      "std_total_wall_time_seconds": 0.1767379603187997
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_val_accuracy": 0.09012345679012346,
+      "std_val_accuracy": 0.020135193123827274,
+      "mean_test_accuracy": 0.09999999999999999,
+      "std_test_accuracy": 0.02636315617785509,
+      "mean_gate_passing_epoch_count": 0.0,
+      "mean_val_transported_final_energy": 0.6585548352301019,
+      "mean_total_wall_time_seconds": 21.991011399989173,
+      "std_total_wall_time_seconds": 0.2731667363029005
+    }
+  },
+  "live_vs_frozen_pairwise_gap": {
+    "live_val_gap_challenger_minus_baseline": -0.0654320987654321,
+    "live_test_gap_challenger_minus_baseline": -0.03950617283950608,
+    "frozen_val_gap_challenger_minus_baseline": 0.0,
+    "frozen_test_gap_challenger_minus_baseline": 0.0
+  },
+  "replay_vs_self_drift_summary": {
+    "baseline_plain_raw": {
+      "replay_states": {
+        "bootstrap_target_mse": 0.003902907189852338,
+        "identity_target_mse": 0.005317259352005815,
+        "identity_residual_error": 0.5745468918613112,
+        "hybrid_loss": 0.004966359060253501,
+        "mean_step_transported_hidden_energy": 0.5822962141699123,
+        "mean_step_output_mse": 0.1049993067322077,
+        "mean_step_output_accuracy": 0.095703125,
+        "rollout_final_hidden_energy": 0.6462759154019858,
+        "rollout_final_output_mse": 0.10533605715926088,
+        "rollout_final_output_accuracy": 0.09375
+      },
+      "self_induced_states": {
+        "bootstrap_target_mse": 0.003902907189852338,
+        "identity_target_mse": 0.005317259352005815,
+        "identity_residual_error": 0.5745468918613112,
+        "hybrid_loss": 0.004966359060253501,
+        "mean_step_transported_hidden_energy": 0.5822962141699123,
+        "mean_step_output_mse": 0.1049993067322077,
+        "mean_step_output_accuracy": 0.095703125,
+        "rollout_final_hidden_energy": 0.6462759154019858,
+        "rollout_final_output_mse": 0.10533605715926088,
+        "rollout_final_output_accuracy": 0.09375
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "replay_states": {
+        "bootstrap_target_mse": 0.00432404123851372,
+        "identity_target_mse": 0.0087543698225122,
+        "identity_residual_error": 0.7126049888415081,
+        "hybrid_loss": 0.00607491520301616,
+        "mean_step_transported_hidden_energy": 0.5600251534951303,
+        "mean_step_output_mse": 0.1048291502500146,
+        "mean_step_output_accuracy": 0.10091145833333333,
+        "rollout_final_hidden_energy": 0.6531932543772966,
+        "rollout_final_output_mse": 0.10513695938468644,
+        "rollout_final_output_accuracy": 0.12760416666666666
+      },
+      "self_induced_states": {
+        "bootstrap_target_mse": 0.004356333794251532,
+        "identity_target_mse": 0.008819956246429944,
+        "identity_residual_error": 0.7158039190158115,
+        "hybrid_loss": 0.006120325043537521,
+        "mean_step_transported_hidden_energy": 0.5862920075105947,
+        "mean_step_output_mse": 0.10485740304661006,
+        "mean_step_output_accuracy": 0.11783854166666667,
+        "rollout_final_hidden_energy": 0.6531932543772966,
+        "rollout_final_output_mse": 0.10513695938468644,
+        "rollout_final_output_accuracy": 0.12760416666666666
+      }
+    }
+  },
+  "selector_reselection_summary_live_theta": {
+    "canonical_selector": {
+      "baseline_plain_raw": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "mean_test_accuracy": 0.8197530864197531,
+        "mean_gate_pass_rate": 1.0
+      },
+      "residualized_local_field_poly_rt2": {
+        "mean_val_accuracy": 0.7592592592592592,
+        "mean_test_accuracy": 0.780246913580247,
+        "mean_gate_pass_rate": 1.0
+      }
+    },
+    "oracle_transported_energy": {
+      "baseline_plain_raw": {
+        "mean_val_accuracy": 0.7913580246913581,
+        "mean_test_accuracy": 0.7962962962962963,
+        "mean_gate_pass_rate": 1.0
+      },
+      "residualized_local_field_poly_rt2": {
+        "mean_val_accuracy": 0.7148148148148148,
+        "mean_test_accuracy": 0.7296296296296297,
+        "mean_gate_pass_rate": 1.0
+      }
+    },
+    "oracle_hybrid_loss": {
+      "baseline_plain_raw": {
+        "mean_val_accuracy": 0.7518518518518519,
+        "mean_test_accuracy": 0.7481481481481481,
+        "mean_gate_pass_rate": 1.0
+      },
+      "residualized_local_field_poly_rt2": {
+        "mean_val_accuracy": 0.7308641975308642,
+        "mean_test_accuracy": 0.7395061728395061,
+        "mean_gate_pass_rate": 1.0
+      }
+    }
+  },
+  "is_rollout_state_distribution_drift_present": false,
+  "is_moving_target_theta_coupling_present": false,
+  "is_selector_sensitivity_the_main_limiter": false,
+  "oracle_reselection_still_fails_to_rescue_challenger": true,
+  "dominant_bottleneck": "structural_downstream_coupling_not_yet_isolated",
+  "next_single_narrow_move": "run one narrow target-lag coupling diagnostic to separate live-target timing drift from residual rollout mismatch",
+  "artifacts": {
+    "run_rows_csv": "end_to_end_runs.csv",
+    "selector_epoch_metrics_csv": "selector_epoch_metrics.csv",
+    "selector_reselection_csv": "selector_reselection.csv",
+    "replay_vs_self_drift_csv": "replay_vs_self_drift.csv"
+  }
+}

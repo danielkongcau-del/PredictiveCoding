@@ -1,0 +1,62 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_unified_cone_vs_split_subspace_geometry",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control",
+      "description": "Current adopted full-vector terminal angle clip.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm",
+      "rowspace_angle_clip_degrees": 30.0,
+      "orthogonal_angle_clip_degrees": 30.0
+    },
+    {
+      "case_name": "rowspace_only_angle_clip",
+      "description": "Clip only the terminal row-space component; keep the orthogonal component unchanged.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm_rowspace_only",
+      "rowspace_angle_clip_degrees": 30.0,
+      "orthogonal_angle_clip_degrees": 30.0
+    },
+    {
+      "case_name": "orthogonal_only_angle_clip",
+      "description": "Clip only the terminal orthogonal component; keep the row-space component unchanged.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm_orthogonal_only",
+      "rowspace_angle_clip_degrees": 30.0,
+      "orthogonal_angle_clip_degrees": 30.0
+    },
+    {
+      "case_name": "split_threshold_row_strict_20_45",
+      "description": "Keep both subspaces active with stricter row-space clip than orthogonal clip.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm_split_threshold",
+      "rowspace_angle_clip_degrees": 20.0,
+      "orthogonal_angle_clip_degrees": 45.0
+    },
+    {
+      "case_name": "split_threshold_orthogonal_strict_45_20",
+      "description": "Keep both subspaces active with stricter orthogonal clip than row-space clip.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm_split_threshold",
+      "rowspace_angle_clip_degrees": 45.0,
+      "orthogonal_angle_clip_degrees": 20.0
+    },
+    {
+      "case_name": "split_threshold_balanced_30_30",
+      "description": "Balanced split-threshold sanity check with equal row-space and orthogonal clip strengths.",
+      "terminal_intervention": "local_field_direction_angle_clip_keep_live_norm_split_threshold",
+      "rowspace_angle_clip_degrees": 30.0,
+      "orthogonal_angle_clip_degrees": 30.0
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "diagnostics": {
+    "terminal_action_geometry": true,
+    "rowspace_orthogonal_coupling_metrics": true,
+    "validation_only_terminal_geometry_selection_view": true
+  }
+}

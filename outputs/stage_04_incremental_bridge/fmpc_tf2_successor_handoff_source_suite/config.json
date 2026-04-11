@@ -1,0 +1,91 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_successor_handoff_source_localization",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "successor_handoff_mode": "live_successor_handoff"
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Earlier-control failure reference: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps with the full live successor handoff.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_handoff_mode": "live_successor_handoff"
+    },
+    {
+      "case_name": "cached_on_successor_only",
+      "description": "Swap only the preterminal learned/on-policy successor state z_on_next back to the cached batch-start successor.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_handoff_mode": "cached_on_successor_only"
+    },
+    {
+      "case_name": "cached_lf_successor_only",
+      "description": "Swap only the preterminal local-field successor state z_lf_next back to the cached batch-start successor.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_handoff_mode": "cached_lf_successor_only"
+    },
+    {
+      "case_name": "cached_both_successor_components",
+      "description": "Swap both preterminal successor-state handoff components z_on_next and z_lf_next back to the cached batch-start successors.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_handoff_mode": "cached_both_successor_components"
+    }
+  ],
+  "handoff_component_table": [
+    {
+      "component_name": "z_on_next",
+      "produced_by": "_plan_tf2_micro_step: z_on_k + dt * on_velocity",
+      "default_source": "live_on_policy",
+      "cached_source_available": true,
+      "used_for": "successor_state_content; becomes next-step z_on_k and therefore controls next-step on-policy rollout geometry"
+    },
+    {
+      "component_name": "z_lf_next",
+      "produced_by": "_plan_tf2_micro_step: z_lf_k + dt * hidden_local_flow(context, z_lf_k)",
+      "default_source": "live_local_field",
+      "cached_source_available": true,
+      "used_for": "successor_state_content; becomes next-step z_lf_k and therefore controls next-step detached local-field feature bundle / anchor generation"
+    },
+    {
+      "component_name": "psi_inputs",
+      "produced_by": "_plan_tf2_micro_step supervision bundle assembly",
+      "default_source": "live_current_step",
+      "cached_source_available": true,
+      "used_for": "current-step direction anchor extraction and psi training inputs; not swapped in this successor-state-only diagnostic"
+    },
+    {
+      "component_name": "boot_targets + identity_targets",
+      "produced_by": "_plan_tf2_micro_step supervision target assembly",
+      "default_source": "live_current_step",
+      "cached_source_available": true,
+      "used_for": "current-step regression targets only; not swapped in this successor-state-only diagnostic"
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true
+}

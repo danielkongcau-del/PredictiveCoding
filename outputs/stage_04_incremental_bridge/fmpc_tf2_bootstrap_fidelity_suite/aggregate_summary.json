@@ -1,0 +1,223 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_bootstrap_fidelity_suite",
+  "offline_reference_definition": {
+    "integrator": "rk2",
+    "substeps": 64,
+    "same_vector_field": "hidden_local_flow(context, z)",
+    "same_horizon": true,
+    "sampled_stream": "z_lf_k"
+  },
+  "pruned_candidates_for_end_to_end": [
+    {
+      "candidate_key": "rk2_s4",
+      "bootstrap_integrator": "rk2",
+      "bootstrap_substeps": 4
+    },
+    {
+      "candidate_key": "rk2_s16",
+      "bootstrap_integrator": "rk2",
+      "bootstrap_substeps": 16
+    },
+    {
+      "candidate_key": "rk2_s8",
+      "bootstrap_integrator": "rk2",
+      "bootstrap_substeps": 8
+    }
+  ],
+  "offline_target_fidelity_by_candidate": {
+    "euler_s1": {
+      "mean_mse_to_reference_average_velocity": 1.6494976827647457e-12,
+      "mean_relative_mse_to_reference_average_velocity": 1.1016740764229404e-05,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999785746105,
+      "mean_endpoint_displacement_error": 6.92603447920556e-06,
+      "mean_hidden_energy_after_bootstrap_step": 0.406356717457397,
+      "mean_wall_time_seconds_per_eval": 0.0002508349978597835
+    },
+    "euler_s2": {
+      "mean_mse_to_reference_average_velocity": 4.101084171971502e-13,
+      "mean_relative_mse_to_reference_average_velocity": 2.739194095489317e-06,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.999999994680536,
+      "mean_endpoint_displacement_error": 3.4535962334271694e-06,
+      "mean_hidden_energy_after_bootstrap_step": 0.40635809214181706,
+      "mean_wall_time_seconds_per_eval": 0.00046887500405622026
+    },
+    "euler_s4": {
+      "mean_mse_to_reference_average_velocity": 1.0224609221689111e-13,
+      "mean_relative_mse_to_reference_average_velocity": 6.82939311146624e-07,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999986746988,
+      "mean_endpoint_displacement_error": 1.7244561820517025e-06,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063587766860699,
+      "mean_wall_time_seconds_per_eval": 0.0008811183331999927
+    },
+    "euler_s8": {
+      "mean_mse_to_reference_average_velocity": 2.5526625193349547e-14,
+      "mean_relative_mse_to_reference_average_velocity": 1.705039306946861e-07,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999996692401,
+      "mean_endpoint_displacement_error": 8.616457626844935e-07,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063591182627123,
+      "mean_wall_time_seconds_per_eval": 0.0017877383303130045
+    },
+    "euler_s16": {
+      "mean_mse_to_reference_average_velocity": 6.3773532225464544e-15,
+      "mean_relative_mse_to_reference_average_velocity": 4.259751142463004e-08,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999999173793,
+      "mean_endpoint_displacement_error": 4.3067919312808406e-07,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063592888776597,
+      "mean_wall_time_seconds_per_eval": 0.003632979995260636
+    },
+    "rk2_s1": {
+      "mean_mse_to_reference_average_velocity": 1.3390551477832123e-17,
+      "mean_relative_mse_to_reference_average_velocity": 8.770043417829588e-11,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.999999999999296,
+      "mean_endpoint_displacement_error": 1.8878027633857453e-08,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063594668510661,
+      "mean_wall_time_seconds_per_eval": 0.00046853333866844575
+    },
+    "rk2_s2": {
+      "mean_mse_to_reference_average_velocity": 8.298952935740804e-19,
+      "mean_relative_mse_to_reference_average_velocity": 5.435735966494559e-12,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999999999566,
+      "mean_endpoint_displacement_error": 4.700558367300511e-09,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063594612395484,
+      "mean_wall_time_seconds_per_eval": 0.0008867516677128151
+    },
+    "rk2_s4": {
+      "mean_mse_to_reference_average_velocity": 5.1386094734649767e-20,
+      "mean_relative_mse_to_reference_average_velocity": 3.3658636162887083e-13,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999999999974,
+      "mean_endpoint_displacement_error": 1.1697705945466323e-09,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063594598420332,
+      "mean_wall_time_seconds_per_eval": 0.0017556650020803014
+    },
+    "rk2_s8": {
+      "mean_mse_to_reference_average_velocity": 3.1310982063501844e-21,
+      "mean_relative_mse_to_reference_average_velocity": 2.0509518936017903e-14,
+      "mean_cosine_similarity_to_reference_average_velocity": 0.9999999999999999,
+      "mean_endpoint_displacement_error": 2.887660782481701e-10,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063594594933229,
+      "mean_wall_time_seconds_per_eval": 0.003487473335311127
+    },
+    "rk2_s16": {
+      "mean_mse_to_reference_average_velocity": 1.7734921520430766e-22,
+      "mean_relative_mse_to_reference_average_velocity": 1.161694502198131e-15,
+      "mean_cosine_similarity_to_reference_average_velocity": 1.0,
+      "mean_endpoint_displacement_error": 6.87261916270841e-11,
+      "mean_hidden_energy_after_bootstrap_step": 0.4063594594062288,
+      "mean_wall_time_seconds_per_eval": 0.007041291668429039
+    }
+  },
+  "mean_std_val_accuracy_by_candidate": {
+    "rk2_s4": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    },
+    "rk2_s16": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    },
+    "rk2_s8": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    }
+  },
+  "mean_std_test_accuracy_by_candidate": {
+    "rk2_s4": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    },
+    "rk2_s16": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    },
+    "rk2_s8": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    }
+  },
+  "mean_gate_passing_epoch_count_by_candidate": {
+    "rk2_s4": 27.6,
+    "rk2_s16": 27.6,
+    "rk2_s8": 27.6
+  },
+  "mean_val_transported_final_energy_by_candidate": {
+    "rk2_s4": 0.30196696727335726,
+    "rk2_s16": 0.3019669672429417,
+    "rk2_s8": 0.3019669672490204
+  },
+  "gap_to_canonical_slow_pc_by_candidate": {
+    "rk2_s4": {
+      "mean_test_accuracy_gap": -0.0762962962962962
+    },
+    "rk2_s16": {
+      "mean_test_accuracy_gap": -0.0762962962962962
+    },
+    "rk2_s8": {
+      "mean_test_accuracy_gap": -0.0762962962962962
+    }
+  },
+  "mean_wall_clock_runtime_by_candidate": {
+    "rk2_s4": {
+      "mean_total_wall_time_seconds": 18.724116779991892,
+      "std_total_wall_time_seconds": 0.1431415846447905
+    },
+    "rk2_s16": {
+      "mean_total_wall_time_seconds": 46.686002859997096,
+      "std_total_wall_time_seconds": 0.0986269243392013
+    },
+    "rk2_s8": {
+      "mean_total_wall_time_seconds": 28.41359444000991,
+      "std_total_wall_time_seconds": 0.17643620155391027
+    }
+  },
+  "pairwise_delta_vs_current_corrective_default": {
+    "rk2_s4": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_val_transported_final_energy_delta": 0.0,
+      "mean_total_wall_time_seconds_delta": 0.0,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "rk2_s16": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_val_transported_final_energy_delta": -3.0415558960328326e-11,
+      "mean_total_wall_time_seconds_delta": 27.961886080005204,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    },
+    "rk2_s8": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "mean_val_transported_final_energy_delta": -2.433686585590067e-11,
+      "mean_total_wall_time_seconds_delta": 9.689477660018017,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    }
+  },
+  "best_end_to_end_candidate": {
+    "candidate_key": "rk2_s4",
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "num_runs": 5,
+    "num_completed_runs": 5,
+    "num_failures": 0,
+    "nan_or_inf_failure_count": 0,
+    "mean_val_accuracy": 0.8296296296296296,
+    "std_val_accuracy": 0.02318885309999784,
+    "mean_test_accuracy": 0.8192592592592594,
+    "std_test_accuracy": 0.02113384091509203,
+    "mean_gate_passing_epoch_count": 27.6,
+    "mean_val_transported_final_energy": 0.30196696727335726,
+    "mean_total_wall_time_seconds": 18.724116779991892,
+    "std_total_wall_time_seconds": 0.1431415846447905,
+    "mean_test_accuracy_gap_to_slow_pc": -0.0762962962962962
+  },
+  "does_bootstrap_target_fidelity_materially_improve_end_to_end_behavior": false,
+  "should_corrective_default_change": false,
+  "bootstrap_target_fidelity_is_current_bottleneck": false,
+  "next_single_narrow_research_move": "keep the current corrective default and narrow the next move beyond curriculum/bootstrap fidelity, because u_boot fidelity is not the current limiter",
+  "offline_csv_path": "offline_target_fidelity.csv",
+  "end_to_end_csv_path": "end_to_end_runs.csv"
+}

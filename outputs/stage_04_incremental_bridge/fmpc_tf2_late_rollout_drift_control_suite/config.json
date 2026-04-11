@@ -1,0 +1,51 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_late_rollout_drift_control_diagnostic",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "same_geometry_control_family": "local_field_direction_angle_clip_keep_live_norm",
+  "case_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted default: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ]
+    },
+    {
+      "case_name": "same_geometry_penultimate_plus_terminal",
+      "description": "Apply the same full-vector hard 30 degree cone on the penultimate and terminal micro-steps.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ]
+    },
+    {
+      "case_name": "same_geometry_last_two_preterminal_plus_terminal",
+      "description": "Apply the same full-vector hard 30 degree cone on the last two preterminal micro-steps plus terminal.",
+      "intervention_step_offsets": [
+        -3,
+        -2,
+        -1
+      ]
+    },
+    {
+      "case_name": "same_geometry_penultimate_only_reference",
+      "description": "Diagnostic-only control: apply the same full-vector hard 30 degree cone on the penultimate micro-step only.",
+      "intervention_step_offsets": [
+        -2
+      ]
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "thresholds": {
+    "material_val_gain_threshold": 0.005,
+    "max_gate_count_drop_for_adoption": 1.0
+  }
+}

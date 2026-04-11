@@ -1,0 +1,48 @@
+{
+  "phase": "Phase TF2",
+  "stage": "target_lag_coupling_suite",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "candidates": [
+    {
+      "key": "baseline_plain_raw",
+      "psi_family": "baseline_plain",
+      "time_encoding_variant": "raw",
+      "notes": "current corrective default baseline"
+    },
+    {
+      "key": "residualized_local_field_poly_rt2",
+      "psi_family": "residualized_local_field",
+      "time_encoding_variant": "poly_rt2",
+      "notes": "offline-better challenger from the psi-expressivity suite"
+    }
+  ],
+  "target_snapshot_modes": [
+    "live_target_snapshot",
+    "lag1_target_snapshot"
+  ],
+  "fixed": {
+    "preset_name": "tf2_corrective_transport_default",
+    "feature_aware_tangents": false,
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "theta_update_budget": "matched",
+    "identity_loss_weight": 0.2,
+    "warmup_epochs": 5,
+    "hybrid_ramp_epochs": 10,
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "terminal_source_family": "teacher_free_local_field",
+    "selector_policy": "gate_constrained_accuracy_then_val_accuracy"
+  },
+  "diagnostic_only": true,
+  "material_test_gain": 0.005,
+  "baseline_similarity_tolerance": 0.003,
+  "drift_reduction_fraction": 0.1,
+  "lag_definition": "lag1 snapshot means the parameter state one optimizer event earlier; the lagged snapshot is used only for teacher-free target construction."
+}

@@ -1,0 +1,275 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_action_output_stabilization_diagnostic",
+  "diagnostic_only": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "closed_loop_live_plan": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.3070547870776022,
+        "mean_total_wall_time_seconds": 20.666740300133824,
+        "std_total_wall_time_seconds": 0.34950635473014185
+      },
+      "open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.30704622840267876,
+        "mean_total_wall_time_seconds": 3.0122333000957346,
+        "std_total_wall_time_seconds": 0.052317505826727034
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "terminal_live_action_raw": {
+        "mean_val_accuracy": 0.8135802469135802,
+        "std_val_accuracy": 0.02743964292702823,
+        "mean_test_accuracy": 0.8123456790123457,
+        "std_test_accuracy": 0.02518034327700139,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.3600938037578749,
+        "mean_total_wall_time_seconds": 7.629328000107004,
+        "std_total_wall_time_seconds": 0.06673994053019804
+      },
+      "terminal_replay_action_vector_only": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.364036283635824,
+        "mean_total_wall_time_seconds": 7.621277699906689,
+        "std_total_wall_time_seconds": 0.08512557309460021
+      },
+      "terminal_replay_action_direction_only": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8185185185185185,
+        "std_test_accuracy": 0.02636315617785513,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.3635346529730779,
+        "mean_total_wall_time_seconds": 7.631215700084188,
+        "std_total_wall_time_seconds": 0.06589495588379768
+      },
+      "terminal_replay_action_norm_only": {
+        "mean_val_accuracy": 0.8135802469135802,
+        "std_val_accuracy": 0.02743964292702823,
+        "mean_test_accuracy": 0.8123456790123457,
+        "std_test_accuracy": 0.02518034327700139,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.3612285638970611,
+        "mean_total_wall_time_seconds": 7.664962433259158,
+        "std_total_wall_time_seconds": 0.025466314901385654
+      },
+      "terminal_replay_post_action_state_only": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.364036283635824,
+        "mean_total_wall_time_seconds": 7.6337892671387335,
+        "std_total_wall_time_seconds": 0.06100578583981827
+      },
+      "k4_open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.36403626556212404,
+        "mean_total_wall_time_seconds": 3.0771241662247726,
+        "std_total_wall_time_seconds": 0.020783409148428973
+      }
+    }
+  },
+  "terminal_action_drift_summary": {
+    "terminal_live_action_raw": {
+      "mean_relative_terminal_action_vector_delta_vs_replay": 1.4669676633161748,
+      "mean_terminal_action_direction_cosine_similarity_vs_replay": 0.01955320785397766,
+      "mean_terminal_action_norm_ratio_vs_replay": 1.092995569770095,
+      "mean_terminal_action_norm_delta_vs_replay": 0.05103458131769142,
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_state_slot_displacement_after_action": 0.0,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 0.13782352187226923
+    },
+    "terminal_replay_action_vector_only": {
+      "mean_relative_terminal_action_vector_delta_vs_replay": 0.0,
+      "mean_terminal_action_direction_cosine_similarity_vs_replay": 1.0,
+      "mean_terminal_action_norm_ratio_vs_replay": 1.0,
+      "mean_terminal_action_norm_delta_vs_replay": 0.0,
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_state_slot_displacement_after_action": 0.1374195470648911,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 0.0
+    },
+    "terminal_replay_action_direction_only": {
+      "mean_relative_terminal_action_vector_delta_vs_replay": 0.14118362173560076,
+      "mean_terminal_action_direction_cosine_similarity_vs_replay": 1.0,
+      "mean_terminal_action_norm_ratio_vs_replay": 1.0882063397050927,
+      "mean_terminal_action_norm_delta_vs_replay": 0.05052542068656544,
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_state_slot_displacement_after_action": 0.1416612717319262,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 0.01263135517164136
+    },
+    "terminal_replay_action_norm_only": {
+      "mean_relative_terminal_action_vector_delta_vs_replay": 1.3972913202283683,
+      "mean_terminal_action_direction_cosine_similarity_vs_replay": 0.019575287649303014,
+      "mean_terminal_action_norm_ratio_vs_replay": 1.0,
+      "mean_terminal_action_norm_delta_vs_replay": 1.491288307936163e-17,
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_state_slot_displacement_after_action": 0.012739680521648247,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 0.13238096971240554
+    },
+    "terminal_replay_post_action_state_only": {
+      "mean_relative_terminal_action_vector_delta_vs_replay": 1.4625419643884452,
+      "mean_terminal_action_direction_cosine_similarity_vs_replay": 0.02092198975984655,
+      "mean_terminal_action_norm_ratio_vs_replay": 1.088332237009963,
+      "mean_terminal_action_norm_delta_vs_replay": 0.05060557196488499,
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_state_slot_displacement_after_action": 0.1374195470648911,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 0.0
+    },
+    "k4_open_loop_baseline_plan_replay": {
+      "mean_relative_terminal_action_vector_delta_vs_replay": 0.0,
+      "mean_terminal_action_direction_cosine_similarity_vs_replay": 1.0,
+      "mean_terminal_action_norm_ratio_vs_replay": 1.0,
+      "mean_terminal_action_norm_delta_vs_replay": 0.0,
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_state_slot_displacement_after_action": 0.0,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 0.0
+    }
+  },
+  "pairwise_delta_vs_baseline_closed_loop_run": {
+    "baseline_plain_raw__closed_loop_live_plan": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "baseline_plain_raw__open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -17.65450700003809
+    },
+    "residualized_local_field_poly_rt2__terminal_live_action_raw": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": -13.037412300026821
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_action_vector_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -13.045462600227134
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_action_direction_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": -0.0012345679012345512,
+      "mean_runtime_delta": -13.035524600049635
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_action_norm_only": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": -13.001777866874667
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_post_action_state_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -13.032951032995092
+    },
+    "residualized_local_field_poly_rt2__k4_open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -17.58961613390905
+    }
+  },
+  "pairwise_delta_vs_challenger_terminal_live_action_raw": {
+    "terminal_live_action_raw": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "terminal_replay_action_vector_only": {
+      "mean_val_accuracy_delta": 0.011111111111111108,
+      "mean_test_accuracy_delta": 0.007407407407407418,
+      "mean_runtime_delta": -0.008050300200314572
+    },
+    "terminal_replay_action_direction_only": {
+      "mean_val_accuracy_delta": 0.011111111111111108,
+      "mean_test_accuracy_delta": 0.006172839506172867,
+      "mean_runtime_delta": 0.0018876999771843355
+    },
+    "terminal_replay_action_norm_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.03563443315215409
+    },
+    "terminal_replay_post_action_state_only": {
+      "mean_val_accuracy_delta": 0.011111111111111108,
+      "mean_test_accuracy_delta": 0.007407407407407418,
+      "mean_runtime_delta": 0.004461267031729221
+    },
+    "k4_open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.011111111111111108,
+      "mean_test_accuracy_delta": 0.007407407407407418,
+      "mean_runtime_delta": -4.552203833882231
+    }
+  },
+  "pairwise_delta_vs_challenger_k4_open_loop_replay_run": {
+    "terminal_live_action_raw": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": 4.552203833882231
+    },
+    "terminal_replay_action_vector_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 4.544153533681917
+    },
+    "terminal_replay_action_direction_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": -0.0012345679012345512,
+      "mean_runtime_delta": 4.554091533859416
+    },
+    "terminal_replay_action_norm_only": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": 4.587838267034385
+    },
+    "terminal_replay_post_action_state_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 4.5566651009139605
+    },
+    "k4_open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    }
+  },
+  "is_terminal_action_vector_dominant": true,
+  "is_terminal_action_direction_dominant": true,
+  "is_terminal_action_norm_dominant": false,
+  "is_terminal_post_action_transition_dominant": false,
+  "dominant_interpretation": "terminal_raw_action_vector_is_dominant",
+  "next_single_narrow_move": "run one narrow terminal trust-region diagnostic that constrains the challenger's final action toward the replayed baseline direction-and-scale neighborhood without reopening broader TF2 search",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv",
+    "terminal_action_drift_epoch_metrics_csv": "terminal_action_drift_epoch_metrics.csv"
+  }
+}

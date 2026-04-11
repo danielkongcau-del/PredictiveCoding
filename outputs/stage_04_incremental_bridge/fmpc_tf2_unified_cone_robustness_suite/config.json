@@ -1,0 +1,35 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_unified_cone_robustness_diagnostic",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "reuse_existing_outputs": true,
+  "source_roots": {
+    "hard_shape_source_root": "outputs/fmpc_tf2_unified_cone_shape_suite",
+    "smooth_source_root": "outputs/fmpc_tf2_smooth_unified_cone_suite"
+  },
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control",
+      "description": "Current hard full-vector 30 degree adopted cone.",
+      "source_root": "outputs/fmpc_tf2_smooth_unified_cone_suite",
+      "source_case_name": "adopted_control"
+    },
+    {
+      "case_name": "hard_interior_reference_20",
+      "description": "Current non-adopted hard 20 degree interior-margin reference.",
+      "source_root": "outputs/fmpc_tf2_unified_cone_shape_suite",
+      "source_case_name": "unified_cone_interior_margin_20"
+    },
+    {
+      "case_name": "smooth_unified_reference_30",
+      "description": "Current non-adopted smooth unified-cone reference.",
+      "source_root": "outputs/fmpc_tf2_smooth_unified_cone_suite",
+      "source_case_name": "smooth_unified_cone_projection_30"
+    }
+  ],
+  "thresholds": {
+    "volatility_ratio_threshold": 1.25,
+    "severe_epoch_fraction_threshold": 0.1,
+    "gate_count_recovery_threshold": 2.0
+  }
+}

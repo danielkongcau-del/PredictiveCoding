@@ -1,0 +1,169 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_localfield_confirmation",
+  "diagnostic_only": true,
+  "confirmation_oriented": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "baseline_closed_loop_live_plan": {
+        "mean_val_accuracy": 0.8116402116402117,
+        "std_val_accuracy": 0.03799958597031848,
+        "mean_test_accuracy": 0.8084656084656084,
+        "std_test_accuracy": 0.027411288565055276,
+        "mean_gate_passing_epoch_count": 26.285714285714285,
+        "selected_epoch_passes_gate_rate": 1.0,
+        "selector_fallback_used_rate": 0.0,
+        "seed_gate_positive_rate": 1.0,
+        "mean_val_transported_final_energy": 0.30662838038083035,
+        "mean_total_wall_time_seconds": 18.00115958588763,
+        "std_total_wall_time_seconds": 0.32421200991807736
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "terminal_live_raw_closed_loop": {
+        "mean_val_accuracy": 0.792063492063492,
+        "std_val_accuracy": 0.038916773647477865,
+        "mean_test_accuracy": 0.8005291005291005,
+        "std_test_accuracy": 0.029124569194757432,
+        "mean_gate_passing_epoch_count": 27.285714285714285,
+        "selected_epoch_passes_gate_rate": 1.0,
+        "selector_fallback_used_rate": 0.0,
+        "seed_gate_positive_rate": 1.0,
+        "mean_val_transported_final_energy": 0.3062042954493143,
+        "mean_total_wall_time_seconds": 18.23304281428656,
+        "std_total_wall_time_seconds": 0.36544667704318645
+      },
+      "terminal_local_field_direction_hard_replace_keep_live_norm": {
+        "mean_val_accuracy": 0.8455026455026455,
+        "std_val_accuracy": 0.026167752420906316,
+        "mean_test_accuracy": 0.8539682539682539,
+        "std_test_accuracy": 0.016187363535215195,
+        "mean_gate_passing_epoch_count": 4.0,
+        "selected_epoch_passes_gate_rate": 0.5714285714285714,
+        "selector_fallback_used_rate": 0.42857142857142855,
+        "seed_gate_positive_rate": 0.5714285714285714,
+        "mean_val_transported_final_energy": 0.2987675221762376,
+        "mean_total_wall_time_seconds": 18.261722885770723,
+        "std_total_wall_time_seconds": 0.4349316060535246
+      },
+      "terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+        "mean_val_accuracy": 0.8338624338624339,
+        "std_val_accuracy": 0.036847588034878635,
+        "mean_test_accuracy": 0.8365079365079365,
+        "std_test_accuracy": 0.01808254760913764,
+        "mean_gate_passing_epoch_count": 17.571428571428573,
+        "selected_epoch_passes_gate_rate": 1.0,
+        "selector_fallback_used_rate": 0.0,
+        "seed_gate_positive_rate": 1.0,
+        "mean_val_transported_final_energy": 0.3001318369435807,
+        "mean_total_wall_time_seconds": 19.466137356657004,
+        "std_total_wall_time_seconds": 0.46843575766397605
+      }
+    }
+  },
+  "pairwise_delta_vs_baseline_closed_loop_run": {
+    "baseline_plain_raw__baseline_closed_loop_live_plan": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "residualized_local_field_poly_rt2__terminal_live_raw_closed_loop": {
+      "mean_val_accuracy_delta": -0.0195767195767196,
+      "mean_test_accuracy_delta": -0.007936507936507908,
+      "mean_gate_passing_epoch_count_delta": 1.0,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 0.23188322839892603
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.033862433862433865,
+      "mean_test_accuracy_delta": 0.0455026455026455,
+      "mean_gate_passing_epoch_count_delta": -22.285714285714285,
+      "selected_epoch_passes_gate_rate_delta": -0.42857142857142855,
+      "selector_fallback_used_rate_delta": 0.42857142857142855,
+      "mean_runtime_delta": 0.2605632998830905
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+      "mean_val_accuracy_delta": 0.022222222222222192,
+      "mean_test_accuracy_delta": 0.02804232804232806,
+      "mean_gate_passing_epoch_count_delta": -8.714285714285714,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 1.4649777707693699
+    }
+  },
+  "pairwise_delta_vs_terminal_live_raw_closed_loop": {
+    "terminal_live_raw_closed_loop": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.05343915343915346,
+      "mean_test_accuracy_delta": 0.05343915343915341,
+      "mean_gate_passing_epoch_count_delta": -23.285714285714285,
+      "selected_epoch_passes_gate_rate_delta": -0.42857142857142855,
+      "selector_fallback_used_rate_delta": 0.42857142857142855,
+      "mean_runtime_delta": 0.028680071484164467
+    },
+    "terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+      "mean_val_accuracy_delta": 0.04179894179894179,
+      "mean_test_accuracy_delta": 0.035978835978835964,
+      "mean_gate_passing_epoch_count_delta": -9.714285714285714,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 1.2330945423704438
+    }
+  },
+  "pairwise_delta_angle_clip_package_vs_baseline_closed_loop_run": {
+    "mean_val_accuracy_delta": 0.022222222222222192,
+    "mean_test_accuracy_delta": 0.02804232804232806,
+    "mean_gate_passing_epoch_count_delta": -8.714285714285714,
+    "selected_epoch_passes_gate_rate_delta": 0.0,
+    "selector_fallback_used_rate_delta": 0.0,
+    "mean_runtime_delta": 1.4649777707693699
+  },
+  "pairwise_delta_angle_clip_package_vs_terminal_live_raw_closed_loop": {
+    "mean_val_accuracy_delta": 0.04179894179894179,
+    "mean_test_accuracy_delta": 0.035978835978835964,
+    "mean_gate_passing_epoch_count_delta": -9.714285714285714,
+    "selected_epoch_passes_gate_rate_delta": 0.0,
+    "selector_fallback_used_rate_delta": 0.0,
+    "mean_runtime_delta": 1.2330945423704438
+  },
+  "pairwise_delta_hard_replace_vs_angle_clip_package": {
+    "mean_val_accuracy_delta": 0.011640211640211673,
+    "mean_test_accuracy_delta": 0.017460317460317447,
+    "mean_gate_passing_epoch_count_delta": -13.571428571428571,
+    "selected_epoch_passes_gate_rate_delta": -0.42857142857142855,
+    "selector_fallback_used_rate_delta": 0.42857142857142855,
+    "mean_runtime_delta": -1.2044144708862794
+  },
+  "confirmation_thresholds": {
+    "mean_test_accuracy_gain_vs_baseline_closed_loop": 0.005,
+    "required_gate_seed_majority_rate": 0.5,
+    "selected_epoch_passes_gate_rate_floor": 0.5,
+    "modest_runtime_overhead_seconds": 2.0,
+    "mean_val_accuracy_not_worse_than_baseline_closed_loop": true
+  },
+  "does_angle_clip_package_beat_plain_baseline": true,
+  "is_angle_clip_package_gain_robust_across_seeds_and_gate_constrained_selection": true,
+  "is_angle_clip_package_runtime_overhead_modest": true,
+  "is_hard_replace_still_only_upper_bound_control": true,
+  "hard_replace_has_higher_mean_test_than_angle_clip": true,
+  "should_adopt_angle_clip_package_as_next_tf2_experimental_default": true,
+  "recommended_next_tf2_experimental_default_package": "residualized_local_field_poly_rt2 + terminal_local_field_direction_angle_clip_keep_live_norm_deg30",
+  "recommendation_reason": "The angle-clip package materially beats the plain baseline, remains gate-robust under the canonical selector, and offers a better robustness tradeoff than hard replace.",
+  "tradeoff_note": "Hard replace remains an upper-bound control if it preserves stronger mean test but loses on gate robustness or selector stability.",
+  "dominant_interpretation": "angle_clip_package_is_strong_enough_to_replace_the_plain_tf2_experimental_default",
+  "next_single_narrow_move": "run one narrow package-adoption patch that promotes the clip30 terminal local-field stabilizer into the next TF2 experimental default",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv"
+  }
+}

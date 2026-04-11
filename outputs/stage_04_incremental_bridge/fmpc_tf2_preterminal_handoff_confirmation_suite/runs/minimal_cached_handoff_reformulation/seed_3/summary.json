@@ -1,0 +1,50 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage",
+  "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "suite_case_name": "minimal_cached_handoff_reformulation",
+  "direction_source_mode": "detached_local_field",
+  "norm_handling_mode": "keep_live_norm",
+  "handoff_mode": "cached_onpolicy_handoff",
+  "teacher_free": true,
+  "uses_teacher_artifacts": false,
+  "jpc_runtime_dependency": false,
+  "family_lineage": "tf1_mlp_aug",
+  "feature_aware_tangents": false,
+  "psi_family": "residualized_local_field",
+  "time_encoding_variant": "poly_rt2",
+  "terminal_local_field_direction_intervention": "local_field_direction_angle_clip_keep_live_norm",
+  "terminal_local_field_angle_clip_degrees": 30.0,
+  "terminal_local_field_intervention_step_offsets": [
+    -2,
+    -1
+  ],
+  "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+  "selection_metric_source": "val_metric",
+  "report_metric_source": "test_metric",
+  "best_epoch": 54,
+  "selected_epoch_passes_gate": true,
+  "gate_passing_epoch_count": 13,
+  "selector_fallback_used": false,
+  "selected_epoch_selection_reason": "selected highest validation accuracy among gate-passing epochs",
+  "val_transported_final_energy": 0.29437774893393015,
+  "test_transported_final_energy": 0.29274752392003894,
+  "val_energy_delta_vs_identity": -0.0036496224061115523,
+  "val_energy_delta_vs_local_field_only": -0.0027985069568399745,
+  "val_accuracy": 0.8703703703703703,
+  "test_accuracy": 0.8555555555555555,
+  "val_loss": 0.05960547426800834,
+  "test_loss": 0.05920135250370061,
+  "val_baseline_accuracy": 0.1037037037037037,
+  "val_terminal_rowspace_rms": 0.15287536542383007,
+  "val_terminal_rowspace_fraction": 0.5322950651150019,
+  "timing": {
+    "train_wall_time_seconds": 37.629796199998964,
+    "final_evaluation_wall_time_seconds": 0.028727900000376394
+  },
+  "validation_gate": {
+    "passes_identity_comparison": true,
+    "passes_local_field_only_comparison": true,
+    "passes_majority_baseline_accuracy": true
+  }
+}

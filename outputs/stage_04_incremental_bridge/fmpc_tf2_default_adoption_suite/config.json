@@ -1,0 +1,21 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_default_adoption_suite",
+  "tf2_preset_names": [
+    "tf2_canonical",
+    "tf2_corrective_transport_default"
+  ],
+  "tf1_reference_preset_name": "baseline_working_default",
+  "slow_pc_reference_name": "canonical_slow_pc_digits_baseline",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "jpc_probe_summary_path": "outputs/tf2_jpc_probe/summary.json",
+  "validation_only_gating": true,
+  "test_report_only": true,
+  "no_selector_override": true
+}

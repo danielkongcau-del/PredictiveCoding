@@ -1,0 +1,44 @@
+{
+  "phase": "Phase TF2",
+  "stage": "mainline_terminal_localfield_adoption_confirmation",
+  "adoption_oriented": true,
+  "comparison_cells": [
+    "tf2_corrective_transport_default",
+    "tf2_corrective_transport_terminal_angleclip_default",
+    "residualized_local_field_poly_rt2__no_terminal_stabilizer",
+    "residualized_local_field_poly_rt2__terminal_hard_replace_upper_bound"
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "fixed": {
+    "root_preset_family": "tf2_corrective_transport_default",
+    "feature_aware_tangents": false,
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "theta_update_budget": "matched",
+    "identity_loss_weight": 0.2,
+    "warmup_epochs": 5,
+    "hybrid_ramp_epochs": 10,
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "terminal_source_family": "teacher_free_local_field",
+    "selector_policy": "gate_constrained_accuracy_then_val_accuracy"
+  },
+  "new_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "historical_reference_preset": "tf2_corrective_transport_default",
+  "confirmation_thresholds": {
+    "mean_test_accuracy_gain_vs_old_preset": 0.005,
+    "required_gate_seed_majority_rate": 0.5,
+    "selected_epoch_passes_gate_rate_floor": 0.5,
+    "modest_runtime_overhead_seconds": 2.0
+  }
+}

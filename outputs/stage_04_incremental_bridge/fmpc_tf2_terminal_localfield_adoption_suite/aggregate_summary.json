@@ -1,0 +1,311 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_localfield_adoption_selection",
+  "diagnostic_only": true,
+  "adoption_oriented": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "baseline_closed_loop_live_plan": {
+        "mean_val_accuracy": 0.8296296296296296,
+        "std_val_accuracy": 0.02318885309999784,
+        "mean_test_accuracy": 0.8192592592592594,
+        "std_test_accuracy": 0.02113384091509203,
+        "mean_gate_passing_epoch_count": 27.6,
+        "selected_epoch_passes_gate_rate": 1.0,
+        "selector_fallback_used_rate": 0.0,
+        "seed_gate_positive_rate": 1.0,
+        "mean_val_transported_final_energy": 0.30196696727335726,
+        "mean_total_wall_time_seconds": 19.128649679629596,
+        "std_total_wall_time_seconds": 0.9083055126168922
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "terminal_live_raw_closed_loop": {
+        "mean_val_accuracy": 0.7911111111111111,
+        "std_val_accuracy": 0.04417200449148318,
+        "mean_test_accuracy": 0.8051851851851852,
+        "std_test_accuracy": 0.03325917677132393,
+        "mean_gate_passing_epoch_count": 26.4,
+        "selected_epoch_passes_gate_rate": 1.0,
+        "selector_fallback_used_rate": 0.0,
+        "seed_gate_positive_rate": 1.0,
+        "mean_val_transported_final_energy": 0.3062615807467476,
+        "mean_total_wall_time_seconds": 19.474467660079245,
+        "std_total_wall_time_seconds": 0.975990177502328
+      },
+      "terminal_local_field_direction_hard_replace_keep_live_norm": {
+        "mean_val_accuracy": 0.8533333333333333,
+        "std_val_accuracy": 0.02687164021809933,
+        "mean_test_accuracy": 0.86,
+        "std_test_accuracy": 0.015431604930370133,
+        "mean_gate_passing_epoch_count": 4.0,
+        "selected_epoch_passes_gate_rate": 0.6,
+        "selector_fallback_used_rate": 0.4,
+        "seed_gate_positive_rate": 0.6,
+        "mean_val_transported_final_energy": 0.2899868843795841,
+        "mean_total_wall_time_seconds": 19.42175392009085,
+        "std_total_wall_time_seconds": 1.0026439473787634
+      },
+      "terminal_local_field_direction_strong_mix_keep_live_norm_w075": {
+        "mean_val_accuracy": 0.8437037037037036,
+        "std_val_accuracy": 0.0369183282796359,
+        "mean_test_accuracy": 0.8481481481481481,
+        "std_test_accuracy": 0.022589556565891726,
+        "mean_gate_passing_epoch_count": 9.8,
+        "selected_epoch_passes_gate_rate": 0.8,
+        "selector_fallback_used_rate": 0.2,
+        "seed_gate_positive_rate": 0.8,
+        "mean_val_transported_final_energy": 0.2935248653084036,
+        "mean_total_wall_time_seconds": 19.488543719577137,
+        "std_total_wall_time_seconds": 0.9559916255975469
+      },
+      "terminal_local_field_direction_strong_mix_keep_live_norm_w090": {
+        "mean_val_accuracy": 0.8518518518518519,
+        "std_val_accuracy": 0.026810312697561286,
+        "mean_test_accuracy": 0.8592592592592592,
+        "std_test_accuracy": 0.016891487779246473,
+        "mean_gate_passing_epoch_count": 6.0,
+        "selected_epoch_passes_gate_rate": 0.6,
+        "selector_fallback_used_rate": 0.4,
+        "seed_gate_positive_rate": 0.6,
+        "mean_val_transported_final_energy": 0.28956009784003534,
+        "mean_total_wall_time_seconds": 19.48947456028545,
+        "std_total_wall_time_seconds": 0.9791480765707312
+      },
+      "terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+        "mean_val_accuracy": 0.8355555555555556,
+        "std_val_accuracy": 0.04187642674104467,
+        "mean_test_accuracy": 0.834074074074074,
+        "std_test_accuracy": 0.020068469902435663,
+        "mean_gate_passing_epoch_count": 16.8,
+        "selected_epoch_passes_gate_rate": 1.0,
+        "selector_fallback_used_rate": 0.0,
+        "seed_gate_positive_rate": 1.0,
+        "mean_val_transported_final_energy": 0.29883527640213287,
+        "mean_total_wall_time_seconds": 20.788580780138727,
+        "std_total_wall_time_seconds": 1.08724753520711
+      },
+      "terminal_local_field_direction_angle_clip_keep_live_norm_deg20": {
+        "mean_val_accuracy": 0.8414814814814815,
+        "std_val_accuracy": 0.03758118783397279,
+        "mean_test_accuracy": 0.8414814814814815,
+        "std_test_accuracy": 0.02505412522264853,
+        "mean_gate_passing_epoch_count": 11.2,
+        "selected_epoch_passes_gate_rate": 0.8,
+        "selector_fallback_used_rate": 0.2,
+        "seed_gate_positive_rate": 0.8,
+        "mean_val_transported_final_energy": 0.2940993813094773,
+        "mean_total_wall_time_seconds": 20.771441380633043,
+        "std_total_wall_time_seconds": 1.0959902754331912
+      }
+    }
+  },
+  "pairwise_delta_vs_baseline_closed_loop_run": {
+    "baseline_plain_raw__baseline_closed_loop_live_plan": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "residualized_local_field_poly_rt2__terminal_live_raw_closed_loop": {
+      "mean_val_accuracy_delta": -0.03851851851851853,
+      "mean_test_accuracy_delta": -0.01407407407407404,
+      "mean_gate_passing_epoch_count_delta": -1.2,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 0.34581798044964673
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.023703703703703692,
+      "mean_test_accuracy_delta": 0.040740740740740744,
+      "mean_gate_passing_epoch_count_delta": -23.6,
+      "selected_epoch_passes_gate_rate_delta": -0.4,
+      "selector_fallback_used_rate_delta": 0.4,
+      "mean_runtime_delta": 0.2931042404612526
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_strong_mix_keep_live_norm_w075": {
+      "mean_val_accuracy_delta": 0.014074074074074062,
+      "mean_test_accuracy_delta": 0.028888888888888898,
+      "mean_gate_passing_epoch_count_delta": -17.8,
+      "selected_epoch_passes_gate_rate_delta": -0.2,
+      "selector_fallback_used_rate_delta": 0.2,
+      "mean_runtime_delta": 0.35989403994753955
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_strong_mix_keep_live_norm_w090": {
+      "mean_val_accuracy_delta": 0.02222222222222221,
+      "mean_test_accuracy_delta": 0.040000000000000015,
+      "mean_gate_passing_epoch_count_delta": -21.6,
+      "selected_epoch_passes_gate_rate_delta": -0.4,
+      "selector_fallback_used_rate_delta": 0.4,
+      "mean_runtime_delta": 0.36082488065585494
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+      "mean_val_accuracy_delta": 0.00592592592592589,
+      "mean_test_accuracy_delta": 0.014814814814814836,
+      "mean_gate_passing_epoch_count_delta": -10.8,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 1.6599311005091295
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_angle_clip_keep_live_norm_deg20": {
+      "mean_val_accuracy_delta": 0.011851851851851846,
+      "mean_test_accuracy_delta": 0.022222222222222233,
+      "mean_gate_passing_epoch_count_delta": -16.4,
+      "selected_epoch_passes_gate_rate_delta": -0.2,
+      "selector_fallback_used_rate_delta": 0.2,
+      "mean_runtime_delta": 1.6427917010034434
+    }
+  },
+  "pairwise_delta_vs_terminal_live_raw_closed_loop": {
+    "terminal_live_raw_closed_loop": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.0,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.06222222222222222,
+      "mean_test_accuracy_delta": 0.05481481481481478,
+      "mean_gate_passing_epoch_count_delta": -22.4,
+      "selected_epoch_passes_gate_rate_delta": -0.4,
+      "selector_fallback_used_rate_delta": 0.4,
+      "mean_runtime_delta": -0.052713739988394084
+    },
+    "terminal_local_field_direction_strong_mix_keep_live_norm_w075": {
+      "mean_val_accuracy_delta": 0.052592592592592594,
+      "mean_test_accuracy_delta": 0.04296296296296294,
+      "mean_gate_passing_epoch_count_delta": -16.6,
+      "selected_epoch_passes_gate_rate_delta": -0.2,
+      "selector_fallback_used_rate_delta": 0.2,
+      "mean_runtime_delta": 0.014076059497892857
+    },
+    "terminal_local_field_direction_strong_mix_keep_live_norm_w090": {
+      "mean_val_accuracy_delta": 0.06074074074074074,
+      "mean_test_accuracy_delta": 0.05407407407407405,
+      "mean_gate_passing_epoch_count_delta": -20.4,
+      "selected_epoch_passes_gate_rate_delta": -0.4,
+      "selector_fallback_used_rate_delta": 0.4,
+      "mean_runtime_delta": 0.01500690020620823
+    },
+    "terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+      "mean_val_accuracy_delta": 0.04444444444444442,
+      "mean_test_accuracy_delta": 0.028888888888888874,
+      "mean_gate_passing_epoch_count_delta": -9.6,
+      "selected_epoch_passes_gate_rate_delta": 0.0,
+      "selector_fallback_used_rate_delta": 0.0,
+      "mean_runtime_delta": 1.3141131200594827
+    },
+    "terminal_local_field_direction_angle_clip_keep_live_norm_deg20": {
+      "mean_val_accuracy_delta": 0.05037037037037038,
+      "mean_test_accuracy_delta": 0.03629629629629627,
+      "mean_gate_passing_epoch_count_delta": -15.2,
+      "selected_epoch_passes_gate_rate_delta": -0.2,
+      "selector_fallback_used_rate_delta": 0.2,
+      "mean_runtime_delta": 1.2969737205537968
+    }
+  },
+  "adoption_thresholds": {
+    "mean_test_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.005,
+    "required_gate_seed_majority_rate": 0.5,
+    "selected_epoch_passes_gate_rate_floor": 0.4,
+    "modest_runtime_overhead_seconds": 2.0,
+    "mean_val_accuracy_not_worse_than_terminal_live_raw_closed_loop": true
+  },
+  "candidate_adoption_assessment": {
+    "terminal_local_field_direction_angle_clip_keep_live_norm_deg30": {
+      "intervention_strength_rank": 1,
+      "mean_val_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.04444444444444442,
+      "mean_test_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.028888888888888874,
+      "mean_gate_passing_epoch_count": 16.8,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "seed_gate_positive_rate": 1.0,
+      "mean_runtime_overhead_seconds_vs_terminal_live_raw_closed_loop": 1.3141131200594827,
+      "meets_mean_test_gain_threshold": true,
+      "has_majority_seed_gate_epochs": true,
+      "selected_epoch_passes_gate_not_rare": true,
+      "runtime_overhead_modest": true,
+      "mean_val_accuracy_not_worse": true,
+      "qualifies_for_adoption": true
+    },
+    "terminal_local_field_direction_angle_clip_keep_live_norm_deg20": {
+      "intervention_strength_rank": 2,
+      "mean_val_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.05037037037037038,
+      "mean_test_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.03629629629629627,
+      "mean_gate_passing_epoch_count": 11.2,
+      "selected_epoch_passes_gate_rate": 0.8,
+      "selector_fallback_used_rate": 0.2,
+      "seed_gate_positive_rate": 0.8,
+      "mean_runtime_overhead_seconds_vs_terminal_live_raw_closed_loop": 1.2969737205537968,
+      "meets_mean_test_gain_threshold": true,
+      "has_majority_seed_gate_epochs": true,
+      "selected_epoch_passes_gate_not_rare": true,
+      "runtime_overhead_modest": true,
+      "mean_val_accuracy_not_worse": true,
+      "qualifies_for_adoption": true
+    },
+    "terminal_local_field_direction_strong_mix_keep_live_norm_w075": {
+      "intervention_strength_rank": 3,
+      "mean_val_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.052592592592592594,
+      "mean_test_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.04296296296296294,
+      "mean_gate_passing_epoch_count": 9.8,
+      "selected_epoch_passes_gate_rate": 0.8,
+      "selector_fallback_used_rate": 0.2,
+      "seed_gate_positive_rate": 0.8,
+      "mean_runtime_overhead_seconds_vs_terminal_live_raw_closed_loop": 0.014076059497892857,
+      "meets_mean_test_gain_threshold": true,
+      "has_majority_seed_gate_epochs": true,
+      "selected_epoch_passes_gate_not_rare": true,
+      "runtime_overhead_modest": true,
+      "mean_val_accuracy_not_worse": true,
+      "qualifies_for_adoption": true
+    },
+    "terminal_local_field_direction_strong_mix_keep_live_norm_w090": {
+      "intervention_strength_rank": 4,
+      "mean_val_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.06074074074074074,
+      "mean_test_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.05407407407407405,
+      "mean_gate_passing_epoch_count": 6.0,
+      "selected_epoch_passes_gate_rate": 0.6,
+      "selector_fallback_used_rate": 0.4,
+      "seed_gate_positive_rate": 0.6,
+      "mean_runtime_overhead_seconds_vs_terminal_live_raw_closed_loop": 0.01500690020620823,
+      "meets_mean_test_gain_threshold": true,
+      "has_majority_seed_gate_epochs": true,
+      "selected_epoch_passes_gate_not_rare": true,
+      "runtime_overhead_modest": true,
+      "mean_val_accuracy_not_worse": true,
+      "qualifies_for_adoption": true
+    },
+    "terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "intervention_strength_rank": 5,
+      "mean_val_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.06222222222222222,
+      "mean_test_accuracy_gain_vs_terminal_live_raw_closed_loop": 0.05481481481481478,
+      "mean_gate_passing_epoch_count": 4.0,
+      "selected_epoch_passes_gate_rate": 0.6,
+      "selector_fallback_used_rate": 0.4,
+      "seed_gate_positive_rate": 0.6,
+      "mean_runtime_overhead_seconds_vs_terminal_live_raw_closed_loop": -0.052713739988394084,
+      "meets_mean_test_gain_threshold": true,
+      "has_majority_seed_gate_epochs": true,
+      "selected_epoch_passes_gate_not_rare": true,
+      "runtime_overhead_modest": true,
+      "mean_val_accuracy_not_worse": true,
+      "qualifies_for_adoption": true
+    }
+  },
+  "best_mean_test_candidate": "terminal_local_field_direction_hard_replace_keep_live_norm",
+  "recommended_next_tf2_experimental_default": "terminal_local_field_direction_angle_clip_keep_live_norm_deg30",
+  "recommendation_reason": "Select the weakest intervention that clears the adoption threshold while preserving nontrivial gate robustness.",
+  "is_any_terminal_local_field_stabilizer_strong_enough_for_adoption": true,
+  "is_hard_replace_necessary": false,
+  "tradeoff_note": "terminal_local_field_direction_hard_replace_keep_live_norm has the strongest mean test accuracy, but terminal_local_field_direction_angle_clip_keep_live_norm_deg30 is the weakest intervention that clears the adoption threshold.",
+  "dominant_interpretation": "at_least_one_terminal_local_field_stabilizer_is_strong_enough_for_adoption",
+  "next_single_narrow_move": "run one narrow confirmation pass that compares the selected terminal local-field stabilizer against the current corrective default before broader TF2 changes",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv"
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "phase": "Phase TF2",
+  "stage": "corrective_bootstrap_source_bias_suite",
+  "offline_source_bias_by_candidate": {
+    "local_field_source": {
+      "candidate_key": "local_field_source",
+      "source_family": "local_field",
+      "diagnostic_only": false,
+      "slow_pc_steps": null,
+      "num_probe_evaluations": 60,
+      "mean_mse_to_local_field_average_velocity": 0.0,
+      "mean_cosine_similarity_to_local_field_average_velocity": 1.0,
+      "mean_endpoint_hidden_energy": 0.4063594598420332,
+      "mean_endpoint_output_mse": 0.08127094637896852,
+      "mean_endpoint_accuracy": 0.5140625,
+      "mean_wall_time_seconds_per_eval": 0.0018852149999778096
+    },
+    "diagnostic_slow_pc_k4": {
+      "candidate_key": "diagnostic_slow_pc_k4",
+      "source_family": "diagnostic_detached_slow_pc",
+      "diagnostic_only": true,
+      "slow_pc_steps": 4,
+      "num_probe_evaluations": 60,
+      "mean_mse_to_local_field_average_velocity": 3.583118763371206e-08,
+      "mean_cosine_similarity_to_local_field_average_velocity": 0.9999999916079626,
+      "mean_endpoint_hidden_energy": 0.4066301780703398,
+      "mean_endpoint_output_mse": 0.08132539295774048,
+      "mean_endpoint_accuracy": 0.5122395833333333,
+      "mean_wall_time_seconds_per_eval": 0.0010807250015204771
+    },
+    "diagnostic_slow_pc_k8": {
+      "candidate_key": "diagnostic_slow_pc_k8",
+      "source_family": "diagnostic_detached_slow_pc",
+      "diagnostic_only": true,
+      "slow_pc_steps": 8,
+      "num_probe_evaluations": 60,
+      "mean_mse_to_local_field_average_velocity": 1.9096386516245759e-07,
+      "mean_cosine_similarity_to_local_field_average_velocity": 0.9999999961706437,
+      "mean_endpoint_hidden_energy": 0.40615068911146684,
+      "mean_endpoint_output_mse": 0.08122876166828004,
+      "mean_endpoint_accuracy": 0.515234375,
+      "mean_wall_time_seconds_per_eval": 0.0018851366699285184
+    },
+    "diagnostic_slow_pc_k16": {
+      "candidate_key": "diagnostic_slow_pc_k16",
+      "source_family": "diagnostic_detached_slow_pc",
+      "diagnostic_only": true,
+      "slow_pc_steps": 16,
+      "num_probe_evaluations": 60,
+      "mean_mse_to_local_field_average_velocity": 1.288014629705893e-06,
+      "mean_cosine_similarity_to_local_field_average_velocity": 0.9999999615071106,
+      "mean_endpoint_hidden_energy": 0.4052028250021239,
+      "mean_endpoint_output_mse": 0.08103683959693046,
+      "mean_endpoint_accuracy": 0.5182291666666666,
+      "mean_wall_time_seconds_per_eval": 0.003525803338076609
+    }
+  },
+  "pruned_candidates_for_end_to_end": [
+    {
+      "candidate_key": "local_field_source",
+      "source_family": "local_field",
+      "diagnostic_only": false,
+      "slow_pc_steps": null
+    },
+    {
+      "candidate_key": "diagnostic_slow_pc_k16",
+      "source_family": "diagnostic_detached_slow_pc",
+      "diagnostic_only": true,
+      "slow_pc_steps": 16
+    }
+  ],
+  "mean_std_val_accuracy_by_candidate": {
+    "local_field_source": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    },
+    "diagnostic_slow_pc_k16": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    }
+  },
+  "mean_std_test_accuracy_by_candidate": {
+    "local_field_source": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    },
+    "diagnostic_slow_pc_k16": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    }
+  },
+  "mean_gate_passing_epoch_count_by_candidate": {
+    "local_field_source": 27.6,
+    "diagnostic_slow_pc_k16": 27.8
+  },
+  "mean_val_transported_final_energy_by_candidate": {
+    "local_field_source": 0.30196696727335726,
+    "diagnostic_slow_pc_k16": 0.3018090065014549
+  },
+  "gap_to_canonical_slow_pc_by_candidate": {
+    "local_field_source": {
+      "mean_test_accuracy_gap": -0.07629629629629633
+    },
+    "diagnostic_slow_pc_k16": {
+      "mean_test_accuracy_gap": -0.07629629629629633
+    }
+  },
+  "mean_wall_clock_runtime_by_candidate": {
+    "local_field_source": {
+      "mean_total_wall_time_seconds": 19.166302680002993,
+      "std_total_wall_time_seconds": 0.13070638103084609
+    },
+    "diagnostic_slow_pc_k16": {
+      "mean_total_wall_time_seconds": 27.046930220013017,
+      "std_total_wall_time_seconds": 0.2051739391674355
+    }
+  },
+  "pairwise_delta_vs_current_corrective_default": {
+    "diagnostic_slow_pc_k16": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_gate_passing_epoch_count_delta": 0.1999999999999993,
+      "mean_val_transported_final_energy_delta": -0.00015796077190233238,
+      "mean_total_wall_time_seconds_delta": 7.880627540010025,
+      "mean_test_gap_to_slow_pc_delta": 0.0
+    }
+  },
+  "best_end_to_end_candidate": {
+    "candidate_key": "local_field_source",
+    "source_family": "local_field",
+    "diagnostic_only": false,
+    "slow_pc_steps": null,
+    "num_runs": 5,
+    "num_completed_runs": 5,
+    "num_failures": 0,
+    "nan_or_inf_failure_count": 0,
+    "mean_val_accuracy": 0.8296296296296296,
+    "std_val_accuracy": 0.02318885309999784,
+    "mean_test_accuracy": 0.8192592592592594,
+    "std_test_accuracy": 0.02113384091509203,
+    "mean_gate_passing_epoch_count": 27.6,
+    "mean_val_transported_final_energy": 0.30196696727335726,
+    "mean_total_wall_time_seconds": 19.166302680002993,
+    "std_total_wall_time_seconds": 0.13070638103084609,
+    "mean_test_accuracy_gap_to_slow_pc": -0.07629629629629633
+  },
+  "is_bootstrap_target_bottlenecked_by_terminal_source_bias": false,
+  "does_detached_slow_pc_source_materially_beat_local_field_source": false,
+  "current_mainline_safe_result": "keep tf2_corrective_transport_default with the local-field bootstrap source",
+  "diagnostic_only_finding": {
+    "challenger_key": "diagnostic_slow_pc_k16",
+    "source_family": "diagnostic_detached_slow_pc",
+    "diagnostic_only": true,
+    "slow_pc_steps": 16
+  },
+  "next_teacher_free_surrogate_if_source_bias_wins": "explore a teacher-free surrogate that predicts a stronger detached endpoint correction from current state without regressing directly to slow-PC fixed-point targets",
+  "next_single_narrow_research_move": "if source bias is not the limiter, target psi-side transport expressivity under the fixed teacher-free local-field source rather than changing target construction again",
+  "offline_csv_path": "offline_source_bias.csv",
+  "end_to_end_csv_path": "end_to_end_runs.csv"
+}

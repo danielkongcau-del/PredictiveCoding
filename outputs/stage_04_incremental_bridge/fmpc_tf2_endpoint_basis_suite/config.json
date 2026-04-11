@@ -1,0 +1,26 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_endpoint_basis_separability",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "validation_only_selection": true,
+  "report_scope": {
+    "integrated_behavior_metrics": true,
+    "hidden_to_output_interface_geometry": true,
+    "readout_rowspace_delta_decomposition": true,
+    "validation_knot_breakdown": true
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "thresholds": {
+    "rowspace_fraction_threshold": 0.55,
+    "centroid_rowspace_fraction_threshold": 0.55,
+    "between_margin_ratio_threshold": 0.9,
+    "within_spread_ratio_threshold": 1.1
+  }
+}

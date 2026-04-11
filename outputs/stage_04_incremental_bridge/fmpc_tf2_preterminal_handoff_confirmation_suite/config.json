@@ -1,0 +1,58 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_handoff_confirmation",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "live_onpolicy"
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Earlier-control failure anchor: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "live_onpolicy"
+    },
+    {
+      "case_name": "minimal_cached_handoff_reformulation",
+      "description": "Earlier-control package with only the preterminal on-policy handoff state swapped back to the cached batch-start successor handoff.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "direction_source_mode": "detached_local_field",
+      "norm_handling_mode": "keep_live_norm",
+      "handoff_mode": "cached_onpolicy_handoff"
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true,
+  "viability_thresholds": {
+    "seed_gate_positive_rate_threshold": 0.8,
+    "selected_gate_rate_threshold": 0.8,
+    "max_selector_fallback_used_rate": 0.2,
+    "min_accuracy_recovery_fraction": 0.5,
+    "min_rowspace_recovery_fraction": 0.5,
+    "max_val_accuracy_regression_vs_control": 0.005,
+    "max_test_accuracy_regression_vs_control": 0.005
+  }
+}

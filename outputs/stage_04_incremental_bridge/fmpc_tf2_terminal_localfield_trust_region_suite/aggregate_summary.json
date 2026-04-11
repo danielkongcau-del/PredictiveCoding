@@ -1,0 +1,207 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_localfield_trust_region_diagnostic",
+  "diagnostic_only": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "closed_loop_live_plan": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.3070547870776022,
+        "mean_total_wall_time_seconds": 17.322902765629504,
+        "std_total_wall_time_seconds": 0.11841925085535555
+      },
+      "open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.30704622840267876,
+        "mean_total_wall_time_seconds": 2.528917566737315,
+        "std_total_wall_time_seconds": 0.022061975037966593
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "terminal_live_raw_closed_loop": {
+        "mean_val_accuracy": 0.7592592592592592,
+        "std_val_accuracy": 0.026363156177855077,
+        "mean_test_accuracy": 0.780246913580247,
+        "std_test_accuracy": 0.015220775315972804,
+        "mean_gate_passing_epoch_count": 26.333333333333332,
+        "mean_val_transported_final_energy": 0.30582114546803274,
+        "mean_total_wall_time_seconds": 17.610989699489437,
+        "std_total_wall_time_seconds": 0.1733048065088662
+      },
+      "terminal_local_field_direction_hard_replace_keep_live_norm": {
+        "mean_val_accuracy": 0.8432098765432099,
+        "std_val_accuracy": 0.029834681416282885,
+        "mean_test_accuracy": 0.8530864197530864,
+        "std_test_accuracy": 0.015518277888859948,
+        "mean_gate_passing_epoch_count": 4.0,
+        "mean_val_transported_final_energy": 0.29508615341242855,
+        "mean_total_wall_time_seconds": 17.62507023361589,
+        "std_total_wall_time_seconds": 0.1732664262843198
+      },
+      "terminal_local_field_direction_strong_mix_keep_live_norm": {
+        "mean_val_accuracy": 0.8234567901234567,
+        "std_val_accuracy": 0.03530950529895083,
+        "mean_test_accuracy": 0.8320987654320987,
+        "std_test_accuracy": 0.012221598687174868,
+        "mean_gate_passing_epoch_count": 9.333333333333334,
+        "mean_val_transported_final_energy": 0.30061473902918595,
+        "mean_total_wall_time_seconds": 17.610991333747126,
+        "std_total_wall_time_seconds": 0.1340012802815567
+      },
+      "terminal_local_field_direction_angle_clip_keep_live_norm": {
+        "mean_val_accuracy": 0.811111111111111,
+        "std_val_accuracy": 0.03777051491550211,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.01222159868717491,
+        "mean_gate_passing_epoch_count": 17.333333333333332,
+        "mean_val_transported_final_energy": 0.30437866571446764,
+        "mean_total_wall_time_seconds": 18.92554763390217,
+        "std_total_wall_time_seconds": 0.17356856031579312
+      },
+      "terminal_replay_action_vector_only": {
+        "mean_val_accuracy": 0.8160493827160494,
+        "std_val_accuracy": 0.03530950529895082,
+        "mean_test_accuracy": 0.7987654320987655,
+        "std_test_accuracy": 0.013636248169366988,
+        "mean_gate_passing_epoch_count": 8.333333333333334,
+        "mean_val_transported_final_energy": 0.316019522455149,
+        "mean_total_wall_time_seconds": 17.571355333493557,
+        "std_total_wall_time_seconds": 0.11038921198854451
+      }
+    }
+  },
+  "terminal_localfield_trust_region_drift_summary": {
+    "terminal_live_raw_closed_loop": {
+      "mean_relative_terminal_action_vector_delta_vs_baseline_replay": 1.5080081298042194,
+      "mean_terminal_action_direction_cosine_similarity_vs_baseline_replay": -0.0145821230933771,
+      "mean_terminal_action_direction_cosine_similarity_vs_terminal_local_field": 0.26570436917455703,
+      "mean_terminal_action_norm_ratio_vs_live_raw": 1.0,
+      "mean_terminal_action_norm_delta_vs_live_raw": 0.0,
+      "mean_terminal_state_slot_displacement": 0.0,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 7.357417049869588,
+      "mean_terminal_next_state_displacement_vs_live_raw": 0.0
+    },
+    "terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_relative_terminal_action_vector_delta_vs_baseline_replay": 1.5155716931449028,
+      "mean_terminal_action_direction_cosine_similarity_vs_baseline_replay": -0.00887962520943502,
+      "mean_terminal_action_direction_cosine_similarity_vs_terminal_local_field": 1.0,
+      "mean_terminal_action_norm_ratio_vs_live_raw": 1.0,
+      "mean_terminal_action_norm_delta_vs_live_raw": 1.5466318380696427e-17,
+      "mean_terminal_state_slot_displacement": 0.13338987610067762,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 6.898426535889272,
+      "mean_terminal_next_state_displacement_vs_live_raw": 0.13338987610067762
+    },
+    "terminal_local_field_direction_strong_mix_keep_live_norm": {
+      "mean_relative_terminal_action_vector_delta_vs_baseline_replay": 1.5131941486220715,
+      "mean_terminal_action_direction_cosine_similarity_vs_baseline_replay": -0.012241040610057163,
+      "mean_terminal_action_direction_cosine_similarity_vs_terminal_local_field": 0.9565368387177825,
+      "mean_terminal_action_norm_ratio_vs_live_raw": 1.0,
+      "mean_terminal_action_norm_delta_vs_live_raw": 1.4451763290624397e-17,
+      "mean_terminal_state_slot_displacement": 0.10692892067455965,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 7.044574777590105,
+      "mean_terminal_next_state_displacement_vs_live_raw": 0.10692892067455965
+    },
+    "terminal_local_field_direction_angle_clip_keep_live_norm": {
+      "mean_relative_terminal_action_vector_delta_vs_baseline_replay": 1.511762338293295,
+      "mean_terminal_action_direction_cosine_similarity_vs_baseline_replay": -0.014167163091029642,
+      "mean_terminal_action_direction_cosine_similarity_vs_terminal_local_field": 0.866025403784439,
+      "mean_terminal_action_norm_ratio_vs_live_raw": 1.0,
+      "mean_terminal_action_norm_delta_vs_live_raw": 1.722041523009608e-17,
+      "mean_terminal_state_slot_displacement": 0.08503498752415352,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 7.127954617670074,
+      "mean_terminal_next_state_displacement_vs_live_raw": 0.08503498752415352
+    },
+    "terminal_replay_action_vector_only": {
+      "mean_relative_terminal_action_vector_delta_vs_baseline_replay": 0.0,
+      "mean_terminal_action_direction_cosine_similarity_vs_baseline_replay": 1.0,
+      "mean_terminal_action_direction_cosine_similarity_vs_terminal_local_field": 0.07006157802154846,
+      "mean_terminal_action_norm_ratio_vs_live_raw": 0.9079139685763824,
+      "mean_terminal_action_norm_delta_vs_live_raw": 0.06680754404638785,
+      "mean_terminal_state_slot_displacement": 0.14243073174171825,
+      "mean_terminal_next_state_displacement_vs_baseline_replay": 5.944952557372945,
+      "mean_terminal_next_state_displacement_vs_live_raw": 0.14243073174171825
+    }
+  },
+  "pairwise_delta_vs_baseline_closed_loop_run": {
+    "baseline_plain_raw__closed_loop_live_plan": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "baseline_plain_raw__open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -14.793985198892187
+    },
+    "residualized_local_field_poly_rt2__terminal_live_raw_closed_loop": {
+      "mean_val_accuracy_delta": -0.0654320987654321,
+      "mean_test_accuracy_delta": -0.03950617283950616,
+      "mean_runtime_delta": 0.2880869338599344
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.018518518518518528,
+      "mean_test_accuracy_delta": 0.033333333333333326,
+      "mean_runtime_delta": 0.30216746798638877
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_strong_mix_keep_live_norm": {
+      "mean_val_accuracy_delta": -0.0012345679012345883,
+      "mean_test_accuracy_delta": 0.01234567901234566,
+      "mean_runtime_delta": 0.2880885681176248
+    },
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_angle_clip_keep_live_norm": {
+      "mean_val_accuracy_delta": -0.013580246913580285,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 1.602644868272667
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_action_vector_only": {
+      "mean_val_accuracy_delta": -0.00864197530864197,
+      "mean_test_accuracy_delta": -0.020987654320987665,
+      "mean_runtime_delta": 0.2484525678640542
+    }
+  },
+  "pairwise_delta_vs_challenger_terminal_live_raw_closed_loop": {
+    "terminal_live_raw_closed_loop": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "terminal_local_field_direction_hard_replace_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.08395061728395063,
+      "mean_test_accuracy_delta": 0.07283950617283948,
+      "mean_runtime_delta": 0.014080534126454344
+    },
+    "terminal_local_field_direction_strong_mix_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.06419753086419751,
+      "mean_test_accuracy_delta": 0.051851851851851816,
+      "mean_runtime_delta": 1.6342576903601487e-06
+    },
+    "terminal_local_field_direction_angle_clip_keep_live_norm": {
+      "mean_val_accuracy_delta": 0.051851851851851816,
+      "mean_test_accuracy_delta": 0.03950617283950616,
+      "mean_runtime_delta": 1.3145579344127327
+    },
+    "terminal_replay_action_vector_only": {
+      "mean_val_accuracy_delta": 0.05679012345679013,
+      "mean_test_accuracy_delta": 0.01851851851851849,
+      "mean_runtime_delta": -0.039634365995880216
+    }
+  },
+  "is_hard_replace_local_field_direction_rescue": true,
+  "is_strong_mix_local_field_direction_rescue": true,
+  "is_angle_clip_local_field_direction_rescue": true,
+  "is_any_local_field_trust_region_rescue": true,
+  "dominant_interpretation": "strong_terminal_local_field_direction_anchor_is_viable_in_true_closed_loop",
+  "next_single_narrow_move": "promote the result into one narrow mainline-safe terminal local-field trust-region adoption study before considering any broader late-step mechanism search",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv",
+    "terminal_localfield_trust_region_drift_epoch_metrics_csv": "terminal_localfield_trust_region_drift_epoch_metrics.csv"
+  }
+}

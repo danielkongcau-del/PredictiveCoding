@@ -1,0 +1,46 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_readout_refit_endpoint_separability",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "diagnostic_protocol": {
+    "transport_family_fixed": true,
+    "hidden_parameters_frozen_during_readout_refit": true,
+    "validation_only_readout_selection": true,
+    "test_report_only": true,
+    "report_metrics_for_refit_cases": "integrated_prediction_mode_with_refit_head",
+    "supervised_metrics_for_refit_cases": "frozen_endpoint_basis_with_refit_head"
+  },
+  "case_specs": [
+    {
+      "case_name": "adopted_control",
+      "description": "Current adopted package with the integrated readout head unchanged.",
+      "refit_basis": "none"
+    },
+    {
+      "case_name": "transported_endpoint_readout_refit",
+      "description": "Refit only the output layer on frozen transported endpoints from the selected adopted model.",
+      "refit_basis": "transported_endpoints"
+    },
+    {
+      "case_name": "slow_pc_endpoint_readout_refit",
+      "description": "Refit only the output layer on frozen target-clamped slow-PC endpoints from the same selected adopted model.",
+      "refit_basis": "slow_pc_endpoints"
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "readout_ridge_grid": [
+    0.0,
+    0.0001,
+    0.01
+  ],
+  "thresholds": {
+    "material_test_gain_threshold": 0.005,
+    "material_supervised_output_mse_gain_threshold": 0.001
+  }
+}

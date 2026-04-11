@@ -1,0 +1,129 @@
+{
+  "phase": "Phase TF2",
+  "stage": "batch_frozen_target_state_coupling_diagnostic",
+  "diagnostic_only": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "live_target_recompute": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.3070547870776022,
+        "mean_total_wall_time_seconds": 31.47478050001276,
+        "std_total_wall_time_seconds": 0.056113788557577135
+      },
+      "batch_frozen_target_state_cache": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8172839506172839,
+        "std_test_accuracy": 0.030591386897194768,
+        "mean_gate_passing_epoch_count": 28.0,
+        "mean_val_transported_final_energy": 0.30717546514764277,
+        "mean_total_wall_time_seconds": 32.19963516667485,
+        "std_total_wall_time_seconds": 0.4053736197408885
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "live_target_recompute": {
+        "mean_val_accuracy": 0.7592592592592592,
+        "std_val_accuracy": 0.026363156177855077,
+        "mean_test_accuracy": 0.780246913580247,
+        "std_test_accuracy": 0.015220775315972804,
+        "mean_gate_passing_epoch_count": 26.333333333333332,
+        "mean_val_transported_final_energy": 0.30582114546803274,
+        "mean_total_wall_time_seconds": 31.91417986662903,
+        "std_total_wall_time_seconds": 0.051593458660043626
+      },
+      "batch_frozen_target_state_cache": {
+        "mean_val_accuracy": 0.7592592592592592,
+        "std_val_accuracy": 0.026189140043946214,
+        "mean_test_accuracy": 0.7691358024691358,
+        "std_test_accuracy": 0.027272496338733968,
+        "mean_gate_passing_epoch_count": 26.333333333333332,
+        "mean_val_transported_final_energy": 0.31284427659155983,
+        "mean_total_wall_time_seconds": 31.56113523330229,
+        "std_total_wall_time_seconds": 1.6539900259802647
+      }
+    }
+  },
+  "within_batch_drift_summary": {
+    "baseline_plain_raw": {
+      "live_target_recompute": {
+        "mean_relative_bootstrap_target_delta": 0.0,
+        "mean_relative_identity_target_delta": 0.00013618795728569317,
+        "mean_bootstrap_target_cosine_similarity": 1.0,
+        "mean_identity_target_cosine_similarity": 0.9999999867404752,
+        "mean_relative_psi_input_delta": 0.0
+      },
+      "batch_frozen_target_state_cache": {
+        "mean_relative_bootstrap_target_delta": 0.0,
+        "mean_relative_identity_target_delta": 0.00013628366635161867,
+        "mean_bootstrap_target_cosine_similarity": 1.0,
+        "mean_identity_target_cosine_similarity": 0.9999999867259766,
+        "mean_relative_psi_input_delta": 0.0
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "live_target_recompute": {
+        "mean_relative_bootstrap_target_delta": 0.0,
+        "mean_relative_identity_target_delta": 0.0003121330242344524,
+        "mean_bootstrap_target_cosine_similarity": 1.0,
+        "mean_identity_target_cosine_similarity": 0.9999999490810774,
+        "mean_relative_psi_input_delta": 0.0
+      },
+      "batch_frozen_target_state_cache": {
+        "mean_relative_bootstrap_target_delta": 0.0,
+        "mean_relative_identity_target_delta": 0.0003121351604895178,
+        "mean_bootstrap_target_cosine_similarity": 1.0,
+        "mean_identity_target_cosine_similarity": 0.9999999490129982,
+        "mean_relative_psi_input_delta": 0.0
+      }
+    }
+  },
+  "pairwise_delta_vs_baseline_live_target_run": {
+    "baseline_plain_raw__live_target_recompute": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "baseline_plain_raw__batch_frozen_target_state_cache": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": -0.0024691358024691392,
+      "mean_runtime_delta": 0.724854666662092
+    },
+    "residualized_local_field_poly_rt2__live_target_recompute": {
+      "mean_val_accuracy_delta": -0.0654320987654321,
+      "mean_test_accuracy_delta": -0.03950617283950616,
+      "mean_runtime_delta": 0.43939936661627144
+    },
+    "residualized_local_field_poly_rt2__batch_frozen_target_state_cache": {
+      "mean_val_accuracy_delta": -0.06543209876543214,
+      "mean_test_accuracy_delta": -0.050617283950617264,
+      "mean_runtime_delta": 0.08635473328952988
+    }
+  },
+  "pairwise_delta_vs_same_family_live_target_run": {
+    "baseline_plain_raw": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": -0.0024691358024691392,
+      "mean_runtime_delta": 0.724854666662092
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_val_accuracy_delta": -3.700743415417188e-17,
+      "mean_test_accuracy_delta": -0.011111111111111108,
+      "mean_runtime_delta": -0.3530446333267416
+    }
+  },
+  "is_within_batch_live_target_state_coupling_present": false,
+  "is_challenger_rescued_by_batch_frozen_target_state_cache": false,
+  "batch_frozen_cache_helps_generally_but_not_challenger_specifically": false,
+  "drift_is_nontrivial_but_behavior_does_not_improve": false,
+  "dominant_interpretation": "simple_batch_frozen_target_state_cache_not_main_limiter",
+  "next_single_narrow_move": "run one narrow cached-target-only versus cached-state-only split diagnostic before reopening any broader TF2 mechanism search",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv",
+    "within_batch_drift_epoch_metrics_csv": "within_batch_drift_epoch_metrics.csv"
+  }
+}

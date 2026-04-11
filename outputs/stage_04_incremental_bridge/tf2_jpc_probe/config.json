@@ -1,0 +1,24 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_jpc_probe",
+  "probe_type": "reference_only",
+  "benchmark_equivalence": false,
+  "output_layout": "single_dir",
+  "data_seed": 0,
+  "model_seed": 0,
+  "batch_size": 8,
+  "layer_dims": [
+    64,
+    64,
+    10
+  ],
+  "hidden_activation": "tanh",
+  "output_activation": "identity",
+  "weight_scale": 0.05,
+  "sigma2": 1.0,
+  "eta_x": 0.1,
+  "inference_steps_horizon": 8,
+  "jpc_act_fn": "relu",
+  "jpc_use_bias": false,
+  "jpc_submodule_root": "E:\\CodeSpace\\PredictiveCoding\\third_party\\jpc"
+}

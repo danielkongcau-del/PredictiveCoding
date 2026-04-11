@@ -1,0 +1,229 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_step_supervision_split_diagnostic",
+  "diagnostic_only": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "closed_loop_live_plan": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.3070547870776022,
+        "mean_total_wall_time_seconds": 19.27157039990804,
+        "std_total_wall_time_seconds": 0.16902047604349887
+      },
+      "open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.30704622840267876,
+        "mean_total_wall_time_seconds": 2.576308000308927,
+        "std_total_wall_time_seconds": 0.03737658259023236
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "terminal_live_full_bundle": {
+        "mean_val_accuracy": 0.8135802469135802,
+        "std_val_accuracy": 0.02743964292702823,
+        "mean_test_accuracy": 0.8123456790123457,
+        "std_test_accuracy": 0.02518034327700139,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.36004710735173423,
+        "mean_total_wall_time_seconds": 6.820666766550858,
+        "std_total_wall_time_seconds": 0.030820068445858544
+      },
+      "terminal_replay_bootstrap_only": {
+        "mean_val_accuracy": 0.8135802469135802,
+        "std_val_accuracy": 0.02743964292702823,
+        "mean_test_accuracy": 0.8123456790123457,
+        "std_test_accuracy": 0.02518034327700139,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.36004360885357284,
+        "mean_total_wall_time_seconds": 6.778064566412165,
+        "std_total_wall_time_seconds": 0.026104319490271734
+      },
+      "terminal_replay_identity_only": {
+        "mean_val_accuracy": 0.8135802469135802,
+        "std_val_accuracy": 0.02743964292702823,
+        "mean_test_accuracy": 0.8123456790123457,
+        "std_test_accuracy": 0.02518034327700139,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.3600968746763749,
+        "mean_total_wall_time_seconds": 6.803223767085001,
+        "std_total_wall_time_seconds": 0.030842313527158497
+      },
+      "terminal_replay_full_supervision_bundle": {
+        "mean_val_accuracy": 0.8135802469135802,
+        "std_val_accuracy": 0.02743964292702823,
+        "mean_test_accuracy": 0.8123456790123457,
+        "std_test_accuracy": 0.02518034327700139,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.3600938037578749,
+        "mean_total_wall_time_seconds": 6.796912200283259,
+        "std_total_wall_time_seconds": 0.014601194276789487
+      },
+      "k4_open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.36403626556212404,
+        "mean_total_wall_time_seconds": 2.5808112667291425,
+        "std_total_wall_time_seconds": 0.021599274988446805
+      }
+    }
+  },
+  "terminal_bundle_drift_summary": {
+    "terminal_live_full_bundle": {
+      "mean_relative_terminal_bootstrap_target_delta": 0.2967870353555916,
+      "mean_relative_terminal_identity_target_delta": 2.027891563416745,
+      "mean_terminal_bootstrap_target_cosine_similarity": 0.9545552024662805,
+      "mean_terminal_identity_target_cosine_similarity": -0.10966077921291974,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_predicted_average_velocity_delta_vs_replay": 0.011575682474155082,
+      "mean_terminal_state_slot_displacement": 0.1383333917210352
+    },
+    "terminal_replay_bootstrap_only": {
+      "mean_relative_terminal_bootstrap_target_delta": 0.29673800957225366,
+      "mean_relative_terminal_identity_target_delta": 2.0277922992259456,
+      "mean_terminal_bootstrap_target_cosine_similarity": 0.9545687247767825,
+      "mean_terminal_identity_target_cosine_similarity": -0.10964083072971502,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_predicted_average_velocity_delta_vs_replay": 0.01157508067449439,
+      "mean_terminal_state_slot_displacement": 0.1383162021540582
+    },
+    "terminal_replay_identity_only": {
+      "mean_relative_terminal_bootstrap_target_delta": 0.2954825478665295,
+      "mean_relative_terminal_identity_target_delta": 2.0211794193138464,
+      "mean_terminal_bootstrap_target_cosine_similarity": 0.9548861349548913,
+      "mean_terminal_identity_target_cosine_similarity": -0.10802692184203869,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_predicted_average_velocity_delta_vs_replay": 0.011563213130790721,
+      "mean_terminal_state_slot_displacement": 0.13784031672166822
+    },
+    "terminal_replay_full_supervision_bundle": {
+      "mean_relative_terminal_bootstrap_target_delta": 0.29543450380234426,
+      "mean_relative_terminal_identity_target_delta": 2.0210830007572147,
+      "mean_terminal_bootstrap_target_cosine_similarity": 0.9548993629122831,
+      "mean_terminal_identity_target_cosine_similarity": -0.10800736702330645,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_predicted_average_velocity_delta_vs_replay": 0.011562607743792008,
+      "mean_terminal_state_slot_displacement": 0.13782352187226923
+    },
+    "k4_open_loop_baseline_plan_replay": {
+      "mean_relative_terminal_bootstrap_target_delta": 0.0,
+      "mean_relative_terminal_identity_target_delta": 0.0,
+      "mean_terminal_bootstrap_target_cosine_similarity": 1.0,
+      "mean_terminal_identity_target_cosine_similarity": 1.0,
+      "mean_terminal_lambda_id_delta": 0.0,
+      "mean_terminal_predicted_average_velocity_delta_vs_replay": 0.0,
+      "mean_terminal_state_slot_displacement": 0.0
+    }
+  },
+  "pairwise_delta_vs_baseline_closed_loop_run": {
+    "baseline_plain_raw__closed_loop_live_plan": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "baseline_plain_raw__open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -16.695262399599113
+    },
+    "residualized_local_field_poly_rt2__terminal_live_full_bundle": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": -12.45090363335718
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_bootstrap_only": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": -12.493505833495874
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_identity_only": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": -12.468346632823037
+    },
+    "residualized_local_field_poly_rt2__terminal_replay_full_supervision_bundle": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": -12.474658199624779
+    },
+    "residualized_local_field_poly_rt2__k4_open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -16.690759133178897
+    }
+  },
+  "pairwise_delta_vs_challenger_terminal_live_full_bundle": {
+    "terminal_live_full_bundle": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "terminal_replay_bootstrap_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -0.04260220013869306
+    },
+    "terminal_replay_identity_only": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -0.0174429994658567
+    },
+    "terminal_replay_full_supervision_bundle": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -0.02375456626759842
+    },
+    "k4_open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.011111111111111108,
+      "mean_test_accuracy_delta": 0.007407407407407418,
+      "mean_runtime_delta": -4.239855499821715
+    }
+  },
+  "pairwise_delta_vs_challenger_k4_open_loop_replay_run": {
+    "terminal_live_full_bundle": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": 4.239855499821715
+    },
+    "terminal_replay_bootstrap_only": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": 4.197253299683022
+    },
+    "terminal_replay_identity_only": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": 4.222412500355858
+    },
+    "terminal_replay_full_supervision_bundle": {
+      "mean_val_accuracy_delta": -0.011111111111111108,
+      "mean_test_accuracy_delta": -0.007407407407407418,
+      "mean_runtime_delta": 4.216100933554117
+    },
+    "k4_open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    }
+  },
+  "is_terminal_bootstrap_target_mismatch_dominant": false,
+  "is_terminal_identity_side_coupling_dominant": false,
+  "is_terminal_supervision_bundle_interaction_dominant": false,
+  "is_terminal_live_action_prediction_dominant": true,
+  "dominant_interpretation": "terminal_live_action_prediction_is_more_problematic_than_supervision_bundle",
+  "next_single_narrow_move": "run one narrow terminal-step action-output stabilization diagnostic that keeps supervision replayed but targets the challenger's own terminal transition/prediction rather than target construction",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv",
+    "terminal_bundle_drift_epoch_metrics_csv": "terminal_bundle_drift_epoch_metrics.csv"
+  }
+}

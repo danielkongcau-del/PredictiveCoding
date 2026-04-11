@@ -1,0 +1,28 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_basis_drift_source_localization",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "reference_alignment": "same_model_target_clamped_slow_pc_trajectory_sampled_at_transport_knot_times",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "dominance_thresholds": {
+    "dominance_share_threshold": 0.6,
+    "dominance_margin": 0.1
+  },
+  "required_localization_metrics": {
+    "hidden_state_rms_gap_to_slow_pc": true,
+    "output_state_rms_gap_to_slow_pc": true,
+    "rowspace_component_breakdown": true,
+    "centroid_rowspace_displacement": true,
+    "nearest_centroid_accuracy": true,
+    "fisher_separability_ratio": true,
+    "frozen_head_output_mse": true,
+    "class_margin_and_within_class_spread": true
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_successor_increment_confirmation",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "increment_mode": "live_successor_increment"
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Higher-gain unstable reference: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps with the live successor increment.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "live_successor_increment"
+    },
+    {
+      "case_name": "live_carry_cached_increment_lower_bound",
+      "description": "Safe lower-bound reference: keep the live predecessor carry state and replace only the successor increment with the cached analogue.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "cached_successor_increment_lower_bound"
+    },
+    {
+      "case_name": "increment_direction_trust_region_keep_live_norm_30",
+      "description": "Increment-only direction trust-region toward the cached increment, keeping the live increment norm unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "increment_direction_trust_region_keep_live_norm_30"
+    }
+  ],
+  "increment_component_table": [
+    {
+      "component_name": "z_on_k_live",
+      "where_produced": "batch rollout loop carry state before calling _plan_tf2_micro_step",
+      "source_type": "live_on_policy",
+      "used_for": "predecessor carry state for successor increment composition"
+    },
+    {
+      "component_name": "z_on_next_live",
+      "where_produced": "_plan_tf2_micro_step: z_on_k + dt * on_velocity, then optionally stabilized by the existing full-vector terminal-angle clip on the preterminal step",
+      "source_type": "live_on_policy",
+      "used_for": "live successor value before increment-only reformulation"
+    },
+    {
+      "component_name": "delta_on_live",
+      "where_produced": "derived inside this suite as z_on_next_live - z_on_k_live",
+      "source_type": "live_on_policy",
+      "used_for": "preterminal live successor increment under test"
+    },
+    {
+      "component_name": "delta_on_cached",
+      "where_produced": "derived inside this suite as z_on_next_cached - z_on_k_cached from _build_cached_plan(...)",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached analogue used either as lower-bound replacement or as the direction anchor for the trust-region reformulation"
+    }
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true,
+  "increment_direction_trust_region_angle_degrees": 30.0,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ]
+}

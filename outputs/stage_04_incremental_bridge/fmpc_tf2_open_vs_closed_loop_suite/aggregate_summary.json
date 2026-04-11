@@ -1,0 +1,113 @@
+{
+  "phase": "Phase TF2",
+  "stage": "open_vs_closed_loop_trajectory_coupling_diagnostic",
+  "diagnostic_only": true,
+  "end_to_end_summary": {
+    "baseline_plain_raw": {
+      "closed_loop_live_plan": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.3070547870776022,
+        "mean_total_wall_time_seconds": 107.61621056665899,
+        "std_total_wall_time_seconds": 3.4957508064748186
+      },
+      "open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 27.666666666666668,
+        "mean_val_transported_final_energy": 0.30704622840267876,
+        "mean_total_wall_time_seconds": 107.62477063331364,
+        "std_total_wall_time_seconds": 3.499820276730016
+      }
+    },
+    "residualized_local_field_poly_rt2": {
+      "closed_loop_live_plan": {
+        "mean_val_accuracy": 0.7592592592592592,
+        "std_val_accuracy": 0.026363156177855077,
+        "mean_test_accuracy": 0.780246913580247,
+        "std_test_accuracy": 0.015220775315972804,
+        "mean_gate_passing_epoch_count": 26.333333333333332,
+        "mean_val_transported_final_energy": 0.30582114546803274,
+        "mean_total_wall_time_seconds": 107.61536306666676,
+        "std_total_wall_time_seconds": 3.50035418812866
+      },
+      "open_loop_baseline_plan_replay": {
+        "mean_val_accuracy": 0.8246913580246913,
+        "std_val_accuracy": 0.028741843769932898,
+        "mean_test_accuracy": 0.8197530864197531,
+        "std_test_accuracy": 0.027104319012469347,
+        "mean_gate_passing_epoch_count": 0.0,
+        "mean_val_transported_final_energy": 0.36403626556212404,
+        "mean_total_wall_time_seconds": 107.6140367333234,
+        "std_total_wall_time_seconds": 3.499509751782044
+      }
+    }
+  },
+  "plan_drift_summary": {
+    "baseline_plain_raw": {
+      "mean_relative_bootstrap_target_delta": 0.0,
+      "mean_relative_identity_target_delta": 0.0,
+      "mean_relative_psi_input_delta": 0.0,
+      "mean_bootstrap_target_cosine_similarity": 1.0,
+      "mean_identity_target_cosine_similarity": 1.0,
+      "mean_state_slot_displacement": 0.0
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_relative_bootstrap_target_delta": 0.6197210939688031,
+      "mean_relative_identity_target_delta": 2.016598507599366,
+      "mean_relative_psi_input_delta": 1.3048654188295634,
+      "mean_bootstrap_target_cosine_similarity": 0.7782452178781515,
+      "mean_identity_target_cosine_similarity": -0.05285530932425639,
+      "mean_state_slot_displacement": 7.281704066255358
+    }
+  },
+  "pairwise_delta_vs_baseline_closed_loop_run": {
+    "baseline_plain_raw__closed_loop_live_plan": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.0
+    },
+    "baseline_plain_raw__open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.008560066654657325
+    },
+    "residualized_local_field_poly_rt2__closed_loop_live_plan": {
+      "mean_val_accuracy_delta": -0.0654320987654321,
+      "mean_test_accuracy_delta": -0.03950617283950616,
+      "mean_runtime_delta": -0.0008474999922327697
+    },
+    "residualized_local_field_poly_rt2__open_loop_baseline_plan_replay": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": -0.0021738333355945847
+    }
+  },
+  "pairwise_delta_vs_same_family_closed_loop_run": {
+    "baseline_plain_raw": {
+      "mean_val_accuracy_delta": 0.0,
+      "mean_test_accuracy_delta": 0.0,
+      "mean_runtime_delta": 0.008560066654657325
+    },
+    "residualized_local_field_poly_rt2": {
+      "mean_val_accuracy_delta": 0.0654320987654321,
+      "mean_test_accuracy_delta": 0.03950617283950616,
+      "mean_runtime_delta": -0.0013263333433618147
+    }
+  },
+  "is_closed_loop_trajectory_coupling_present": true,
+  "is_challenger_rescued_by_open_loop_baseline_plan_replay": true,
+  "open_loop_replay_helps_generally_but_not_challenger_specifically": false,
+  "plan_drift_is_nontrivial_but_behavior_does_not_improve": false,
+  "dominant_interpretation": "closed_loop_trajectory_state_coevolution",
+  "next_single_narrow_move": "run one narrow partial-open-loop handoff diagnostic that replays the first corrective micro-steps but lets the final step close live, to localize where self-induced trajectory co-evolution becomes harmful",
+  "artifacts": {
+    "end_to_end_runs_csv": "end_to_end_runs.csv",
+    "plan_drift_epoch_metrics_csv": "plan_drift_epoch_metrics.csv"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "phase": "Phase TF2",
+  "stage": "external_comparison_gap_closure",
+  "tf2_presets": [
+    "tf2_corrective_transport_terminal_angleclip_default",
+    "tf2_corrective_transport_default",
+    "tf2_canonical"
+  ],
+  "slow_pc_reference_method": "canonical_slow_pc_digits_baseline",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "tf2_fixed": {
+    "feature_aware_tangents": false,
+    "selector_policy": "gate_constrained_accuracy_then_val_accuracy",
+    "validation_only_selection": true,
+    "test_report_only": true
+  },
+  "slow_pc_fixed": {
+    "selection_metric_source": "val_metric",
+    "report_metric_source": "test_metric"
+  },
+  "baseline_artifact_audit": {
+    "digits_pc_summary_exists": false,
+    "digits_baselines_summary_exists": false,
+    "reused_existing_canonical_slow_pc_artifacts": false,
+    "reuse_reason": "Local canonical slow-PC multiseed artifacts were not available, so the suite reran the canonical slow-PC digits baseline per seed inside the comparison run."
+  },
+  "thresholds": {
+    "material_gap_narrowing_threshold": 0.005,
+    "broad_stage_gap_threshold": 0.05
+  }
+}

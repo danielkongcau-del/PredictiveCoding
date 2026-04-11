@@ -1,0 +1,81 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_successor_value_followup",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "successor_value_blend_alpha": null
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Reference earlier-control package: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps with the live on-policy successor value.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_blend_alpha": null
+    },
+    {
+      "case_name": "blended_successor_value_alpha_020",
+      "description": "Penultimate successor value blended 20% live / 80% cached, with all terminal angle-clip semantics unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_blend_alpha": 0.2
+    },
+    {
+      "case_name": "blended_successor_value_alpha_025",
+      "description": "Penultimate successor value blended 25% live / 75% cached, kept as the current best narrow reference anchor.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_blend_alpha": 0.25
+    },
+    {
+      "case_name": "blended_successor_value_alpha_030",
+      "description": "Penultimate successor value blended 30% live / 70% cached, with all terminal angle-clip semantics unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "successor_value_blend_alpha": 0.3
+    }
+  ],
+  "successor_value_audit_table": [
+    {
+      "component_name": "on_velocity",
+      "where_produced": "_single_source_supervision(..., z_on_k, ...)",
+      "source_type": "live_on_policy_only",
+      "used_for": "precursor of the preterminal learned successor value"
+    },
+    {
+      "component_name": "z_on_next",
+      "where_produced": "_plan_tf2_micro_step: z_on_k + dt * on_velocity",
+      "source_type": "live_on_policy_by_default; cached batch-start reference available from _build_cached_plan",
+      "used_for": "preterminal successor-state content"
+    },
+    {
+      "component_name": "z_on handoff assignment",
+      "where_produced": "batch rollout loop: z_on = z_on_next after each micro-step",
+      "source_type": "inherits whichever z_on_next variant the step emits",
+      "used_for": "next-step on-policy rollout state"
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true
+}

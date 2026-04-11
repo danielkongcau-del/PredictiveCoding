@@ -1,0 +1,49 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage",
+  "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "suite_case_name": "adopted_control_terminal_only",
+  "direction_source_mode": "detached_local_field",
+  "norm_handling_mode": "keep_live_norm",
+  "handoff_mode": "live_onpolicy",
+  "teacher_free": true,
+  "uses_teacher_artifacts": false,
+  "jpc_runtime_dependency": false,
+  "family_lineage": "tf1_mlp_aug",
+  "feature_aware_tangents": false,
+  "psi_family": "residualized_local_field",
+  "time_encoding_variant": "poly_rt2",
+  "terminal_local_field_direction_intervention": "local_field_direction_angle_clip_keep_live_norm",
+  "terminal_local_field_angle_clip_degrees": 30.0,
+  "terminal_local_field_intervention_step_offsets": [
+    -1
+  ],
+  "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+  "selection_metric_source": "val_metric",
+  "report_metric_source": "test_metric",
+  "best_epoch": 51,
+  "selected_epoch_passes_gate": true,
+  "gate_passing_epoch_count": 18,
+  "selector_fallback_used": false,
+  "selected_epoch_selection_reason": "selected highest validation accuracy among gate-passing epochs",
+  "val_transported_final_energy": 0.3111068208914448,
+  "test_transported_final_energy": 0.309422356845605,
+  "val_energy_delta_vs_identity": -0.004153881137195892,
+  "val_energy_delta_vs_local_field_only": -0.003322501406487599,
+  "val_accuracy": 0.7962962962962963,
+  "test_accuracy": 0.8222222222222222,
+  "val_loss": 0.06305214040572814,
+  "test_loss": 0.06270885437346925,
+  "val_baseline_accuracy": 0.1037037037037037,
+  "val_terminal_rowspace_rms": 0.16463456848443525,
+  "val_terminal_rowspace_fraction": 0.5496282608980444,
+  "timing": {
+    "train_wall_time_seconds": 19.39281050000136,
+    "final_evaluation_wall_time_seconds": 0.031251299998984905
+  },
+  "validation_gate": {
+    "passes_identity_comparison": true,
+    "passes_local_field_only_comparison": true,
+    "passes_majority_baseline_accuracy": true
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "phase": "Phase TF2",
+  "stage": "mainline_terminal_localfield_adoption_confirmation",
+  "adoption_oriented": true,
+  "historical_reference_preset": "tf2_corrective_transport_default",
+  "candidate_preset": "tf2_corrective_transport_terminal_angleclip_default",
+  "comparison_cells": [
+    "tf2_corrective_transport_default",
+    "tf2_corrective_transport_terminal_angleclip_default",
+    "residualized_local_field_poly_rt2__no_terminal_stabilizer",
+    "residualized_local_field_poly_rt2__terminal_hard_replace_upper_bound"
+  ],
+  "end_to_end_summary": {
+    "tf2_corrective_transport_default": {
+      "mean_val_accuracy": 0.8116402116402117,
+      "std_val_accuracy": 0.03799958597031848,
+      "mean_test_accuracy": 0.8084656084656084,
+      "std_test_accuracy": 0.027411288565055276,
+      "mean_gate_passing_epoch_count": 26.285714285714285,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.30662838038083035,
+      "mean_total_wall_time_seconds": 19.13302708571012,
+      "std_total_wall_time_seconds": 0.7948890762273045
+    },
+    "tf2_corrective_transport_terminal_angleclip_default": {
+      "mean_val_accuracy": 0.8338624338624339,
+      "std_val_accuracy": 0.036847588034878635,
+      "mean_test_accuracy": 0.8365079365079365,
+      "std_test_accuracy": 0.01808254760913764,
+      "mean_gate_passing_epoch_count": 17.571428571428573,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.3001318369435807,
+      "mean_total_wall_time_seconds": 20.781322628575644,
+      "std_total_wall_time_seconds": 0.7005364771120323
+    },
+    "residualized_local_field_poly_rt2__no_terminal_stabilizer": {
+      "mean_val_accuracy": 0.792063492063492,
+      "std_val_accuracy": 0.038916773647477865,
+      "mean_test_accuracy": 0.8005291005291005,
+      "std_test_accuracy": 0.029124569194757432,
+      "mean_gate_passing_epoch_count": 27.285714285714285,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.3062042954493143,
+      "mean_total_wall_time_seconds": 19.632406299992,
+      "std_total_wall_time_seconds": 0.7494080089371113
+    },
+    "residualized_local_field_poly_rt2__terminal_hard_replace_upper_bound": {
+      "mean_val_accuracy": 0.8455026455026455,
+      "std_val_accuracy": 0.026167752420906316,
+      "mean_test_accuracy": 0.8539682539682539,
+      "std_test_accuracy": 0.016187363535215195,
+      "mean_gate_passing_epoch_count": 4.0,
+      "seed_gate_positive_rate": 0.5714285714285714,
+      "selected_epoch_passes_gate_rate": 0.5714285714285714,
+      "selector_fallback_used_rate": 0.42857142857142855,
+      "mean_val_transported_final_energy": 0.2987675221762376,
+      "mean_total_wall_time_seconds": 19.817824199986976,
+      "std_total_wall_time_seconds": 0.555918511068785
+    }
+  },
+  "pairwise_delta_new_preset_vs_old_preset": {
+    "mean_val_accuracy_delta": 0.022222222222222192,
+    "mean_test_accuracy_delta": 0.02804232804232806,
+    "mean_gate_passing_epoch_count_delta": -8.714285714285714,
+    "seed_gate_positive_rate_delta": 0.0,
+    "selected_epoch_passes_gate_rate_delta": 0.0,
+    "selector_fallback_used_rate_delta": 0.0,
+    "mean_val_transported_final_energy_delta": -0.0064965434372496545,
+    "mean_runtime_delta": 1.648295542865526
+  },
+  "pairwise_delta_new_preset_vs_unstabilized_challenger": {
+    "mean_val_accuracy_delta": 0.04179894179894179,
+    "mean_test_accuracy_delta": 0.035978835978835964,
+    "mean_gate_passing_epoch_count_delta": -9.714285714285714,
+    "seed_gate_positive_rate_delta": 0.0,
+    "selected_epoch_passes_gate_rate_delta": 0.0,
+    "selector_fallback_used_rate_delta": 0.0,
+    "mean_val_transported_final_energy_delta": -0.006072458505733609,
+    "mean_runtime_delta": 1.1489163285836443
+  },
+  "pairwise_delta_hard_replace_vs_new_preset": {
+    "mean_val_accuracy_delta": 0.011640211640211673,
+    "mean_test_accuracy_delta": 0.017460317460317447,
+    "mean_gate_passing_epoch_count_delta": -13.571428571428571,
+    "seed_gate_positive_rate_delta": -0.42857142857142855,
+    "selected_epoch_passes_gate_rate_delta": -0.42857142857142855,
+    "selector_fallback_used_rate_delta": 0.42857142857142855,
+    "mean_val_transported_final_energy_delta": -0.001364314767343111,
+    "mean_runtime_delta": -0.9634984285886665
+  },
+  "confirmation_thresholds": {
+    "mean_test_accuracy_gain_vs_old_preset": 0.005,
+    "required_gate_seed_majority_rate": 0.5,
+    "selected_epoch_passes_gate_rate_floor": 0.5,
+    "modest_runtime_overhead_seconds": 2.0
+  },
+  "does_new_preset_beat_old_corrective_default": true,
+  "is_new_preset_gain_robust_across_seeds_and_gate_constrained_selection": true,
+  "is_new_preset_runtime_overhead_modest": true,
+  "is_hard_replace_still_only_upper_bound_control": true,
+  "should_promote_new_preset_as_next_tf2_experimental_default": true,
+  "recommended_tf2_experimental_default_preset": "tf2_corrective_transport_terminal_angleclip_default",
+  "tradeoff_note": "Hard replace remains a diagnostic upper-bound if it keeps a higher mean test score but loses gate robustness or selector stability relative to the angle-clip package.",
+  "dominant_interpretation": "the integrated angle-clip package preserves the package-level confirmation result and should replace the historical plain corrective reference as the next TF2 experimental default",
+  "next_single_move": "promote the integrated angle-clip package into the named TF2 experimental default path"
+}

@@ -1,0 +1,199 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "frozen_bridge_vs_corrected_residual_core_comparison",
+  "num_runs": 6,
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_04_control": {
+      "method_name": "stage_04_frozen_bridge",
+      "preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+      "configured_transport_steps": 4,
+      "epochs": 60,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        64,
+        10
+      ]
+    },
+    "stage_05_candidate": {
+      "method_name": "stage_05_corrected_residual_core",
+      "transport_family": "residual_meanflow_core",
+      "residual_identity_mode": "residual_corrected_meanflow",
+      "configured_transport_steps": 2,
+      "epochs": 12,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "requires_all_stage05_artifact_checks": true,
+      "requires_stage05_one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+      "requires_stage05_configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true,
+      "task_accuracy_is_report_only": true
+    }
+  },
+  "by_method": {
+    "stage_04_frozen_bridge": {
+      "num_runs": 3,
+      "configured_transport_steps": 4,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 0.6666666666666666,
+      "one_step_energy_delta_vs_identity": {
+        "mean": 0.0003669573859489221,
+        "std": 0.0009275947375724848
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.004070538730777469,
+        "std": 0.0014245919147429114
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.8072299104931235e-05,
+        "std": 2.5678412571680846e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": 0.001199319940873263,
+        "std": 0.0009440854790503557
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0032397953606488708,
+        "std": 0.001444790198580633
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -1.6930583478288714e-05,
+        "std": 2.5780692053074534e-06
+      },
+      "val_accuracy": {
+        "mean": 0.811111111111111,
+        "std": 0.03777051491550211
+      },
+      "test_accuracy": {
+        "mean": 0.8197530864197531,
+        "std": 0.01222159868717491
+      },
+      "val_output_mse": {
+        "mean": 0.06168984088904902,
+        "std": 0.002034026066822284
+      },
+      "test_output_mse": {
+        "mean": 0.061619460275610126,
+        "std": 0.0015642377535134405
+      },
+      "runtime_proxy_seconds": {
+        "mean": 30.125786133336078,
+        "std": 0.2415228588298537
+      }
+    },
+    "stage_05_corrected_residual_core": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.00015049783324024477,
+        "std": 4.903454338149422e-05
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.00015441938077428072,
+        "std": 4.9676343968973974e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -8.351992466021287e-07,
+        "std": 2.9268028165687316e-07
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -1.8093597014712248e-05,
+        "std": 5.2327265860505996e-05
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -2.214683742046697e-05,
+        "std": 5.296019912359915e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -1.373179416834857e-07,
+        "std": 2.966427216504934e-07
+      },
+      "val_accuracy": {
+        "mean": 0.2740740740740741,
+        "std": 0.010475656017578472
+      },
+      "test_accuracy": {
+        "mean": 0.2716049382716049,
+        "std": 0.024255410746158643
+      },
+      "val_output_mse": {
+        "mean": 0.08722097216435765,
+        "std": 0.0008803484633052729
+      },
+      "test_output_mse": {
+        "mean": 0.08720699195315129,
+        "std": 0.0009606239579613
+      },
+      "runtime_proxy_seconds": {
+        "mean": 1.4734455000010105,
+        "std": 0.018671512663616628
+      }
+    }
+  },
+  "pairwise_stage05_vs_stage04": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0005174552191891668,
+      "std": 0.0009298628567525612
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": 0.003916119350003189,
+      "std": 0.0013996775584833988
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": 1.7237099858329106e-05,
+      "std": 2.4983616068842113e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": 0.0032176485232284038,
+      "std": 0.0014165249756837154
+    },
+    "val_accuracy_delta": {
+      "mean": -0.5370370370370371,
+      "std": 0.04566232594791836
+    },
+    "test_accuracy_delta": {
+      "mean": -0.5481481481481482,
+      "std": 0.03628873693012116
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -28.65234063333507,
+      "std": 0.2439928288547363
+    }
+  },
+  "stage05_corrected_residual_core_justifies_v2_charter": true,
+  "stage05_v2_charter_decision_detail": {
+    "artifact_checks_all_pass": true,
+    "one_step_energy_delta_vs_identity_negative_on_every_seed": true,
+    "configured_step_energy_delta_vs_identity_negative_on_every_seed": true,
+    "configured_step_fixed_point_residual_delta_vs_identity_negative_on_every_seed": true
+  },
+  "stage05_v2_charter_decision_rationale": "Stage 05 clears the multiseed mechanism-first comparison rule.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}

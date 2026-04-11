@@ -1,0 +1,219 @@
+{
+  "phase": "Phase TF2",
+  "stage": "external_comparison_gap_closure",
+  "num_runs": 20,
+  "baseline_artifact_audit": {
+    "digits_pc_summary_exists": false,
+    "digits_baselines_summary_exists": false,
+    "reused_existing_canonical_slow_pc_artifacts": false,
+    "reuse_reason": "Local canonical slow-PC multiseed artifacts were not available, so the suite reran the canonical slow-PC digits baseline per seed inside the comparison run."
+  },
+  "mean_std_val_accuracy_by_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": {
+      "mean": 0.8355555555555556,
+      "std": 0.04187642674104467
+    },
+    "tf2_corrective_transport_default": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    },
+    "tf2_canonical": {
+      "mean": 0.8207407407407408,
+      "std": 0.0361827399757624
+    },
+    "canonical_slow_pc_digits_baseline": {
+      "mean": 0.8792592592592593,
+      "std": 0.026563586780801663
+    }
+  },
+  "mean_std_test_accuracy_by_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": {
+      "mean": 0.834074074074074,
+      "std": 0.020068469902435663
+    },
+    "tf2_corrective_transport_default": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    },
+    "tf2_canonical": {
+      "mean": 0.8037037037037038,
+      "std": 0.02533723166886972
+    },
+    "canonical_slow_pc_digits_baseline": {
+      "mean": 0.8955555555555555,
+      "std": 0.01629629629629628
+    }
+  },
+  "mean_gate_passing_epoch_count_by_tf2_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 16.8,
+    "tf2_corrective_transport_default": 27.6,
+    "tf2_canonical": 3.0
+  },
+  "mean_selected_epoch_by_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 54.8,
+    "tf2_corrective_transport_default": 56.2,
+    "tf2_canonical": 57.6,
+    "canonical_slow_pc_digits_baseline": 56.8
+  },
+  "selected_epoch_passes_gate_rate_by_tf2_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 1.0,
+    "tf2_corrective_transport_default": 1.0,
+    "tf2_canonical": 0.6
+  },
+  "selector_fallback_used_rate_by_tf2_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 0.0,
+    "tf2_corrective_transport_default": 0.0,
+    "tf2_canonical": 0.4
+  },
+  "seed_gate_positive_rate_by_tf2_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 1.0,
+    "tf2_corrective_transport_default": 1.0,
+    "tf2_canonical": 0.6
+  },
+  "mean_val_transported_final_energy_by_tf2_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 0.29883527640213287,
+    "tf2_corrective_transport_default": 0.30196696727335726,
+    "tf2_canonical": 0.3130398830156948
+  },
+  "mean_runtime_proxy_seconds_by_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": 29.22100822000066,
+    "tf2_corrective_transport_default": 33.48915496000118,
+    "tf2_canonical": 31.687997560000078,
+    "canonical_slow_pc_digits_baseline": 21.521748600000137
+  },
+  "by_method": {
+    "tf2_corrective_transport_terminal_angleclip_default": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8355555555555556,
+      "std_val_accuracy": 0.04187642674104467,
+      "mean_test_accuracy": 0.834074074074074,
+      "std_test_accuracy": 0.020068469902435663,
+      "mean_gate_passing_epoch_count": 16.8,
+      "mean_selected_epoch": 54.8,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.29883527640213287,
+      "mean_runtime_proxy_seconds": 29.22100822000066,
+      "std_runtime_proxy_seconds": 1.075555120911398
+    },
+    "tf2_corrective_transport_default": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8296296296296296,
+      "std_val_accuracy": 0.02318885309999784,
+      "mean_test_accuracy": 0.8192592592592594,
+      "std_test_accuracy": 0.02113384091509203,
+      "mean_gate_passing_epoch_count": 27.6,
+      "mean_selected_epoch": 56.2,
+      "seed_gate_positive_rate": 1.0,
+      "selected_epoch_passes_gate_rate": 1.0,
+      "selector_fallback_used_rate": 0.0,
+      "mean_val_transported_final_energy": 0.30196696727335726,
+      "mean_runtime_proxy_seconds": 33.48915496000118,
+      "std_runtime_proxy_seconds": 1.535048911608603
+    },
+    "tf2_canonical": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8207407407407408,
+      "std_val_accuracy": 0.0361827399757624,
+      "mean_test_accuracy": 0.8037037037037038,
+      "std_test_accuracy": 0.02533723166886972,
+      "mean_gate_passing_epoch_count": 3.0,
+      "mean_selected_epoch": 57.6,
+      "seed_gate_positive_rate": 0.6,
+      "selected_epoch_passes_gate_rate": 0.6,
+      "selector_fallback_used_rate": 0.4,
+      "mean_val_transported_final_energy": 0.3130398830156948,
+      "mean_runtime_proxy_seconds": 31.687997560000078,
+      "std_runtime_proxy_seconds": 3.0661882388116024
+    },
+    "canonical_slow_pc_digits_baseline": {
+      "num_runs": 5,
+      "mean_val_accuracy": 0.8792592592592593,
+      "std_val_accuracy": 0.026563586780801663,
+      "mean_test_accuracy": 0.8955555555555555,
+      "std_test_accuracy": 0.01629629629629628,
+      "mean_gate_passing_epoch_count": null,
+      "mean_selected_epoch": 56.8,
+      "seed_gate_positive_rate": null,
+      "selected_epoch_passes_gate_rate": null,
+      "selector_fallback_used_rate": null,
+      "mean_val_transported_final_energy": null,
+      "mean_runtime_proxy_seconds": 21.521748600000137,
+      "std_runtime_proxy_seconds": 0.33434674707755013
+    }
+  },
+  "pairwise_adopted_default_vs_historical_corrective_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mean_val_accuracy_delta": 0.00592592592592589,
+    "mean_test_accuracy_delta": 0.014814814814814836,
+    "mean_gate_passing_epoch_count_delta": -10.8,
+    "mean_selected_epoch_delta": -1.4,
+    "selected_epoch_passes_gate_rate_delta": 0.0,
+    "selector_fallback_used_rate_delta": 0.0,
+    "seed_gate_positive_rate_delta": 0.0,
+    "mean_val_transported_final_energy_delta": -0.003131690871224413,
+    "mean_runtime_proxy_seconds_delta": -4.26814674000052
+  },
+  "pairwise_adopted_default_vs_tf2_canonical": {
+    "shared_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mean_val_accuracy_delta": 0.014814814814814791,
+    "mean_test_accuracy_delta": 0.03037037037037036,
+    "mean_gate_passing_epoch_count_delta": 13.8,
+    "mean_selected_epoch_delta": -2.8,
+    "selected_epoch_passes_gate_rate_delta": 0.4,
+    "selector_fallback_used_rate_delta": -0.4,
+    "seed_gate_positive_rate_delta": 0.4,
+    "mean_val_transported_final_energy_delta": -0.014204606613561922,
+    "mean_runtime_proxy_seconds_delta": -2.466989339999418
+  },
+  "pairwise_adopted_default_vs_canonical_slow_pc_digits_baseline": {
+    "shared_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "mean_val_accuracy_delta": -0.04370370370370373,
+    "mean_test_accuracy_delta": -0.06148148148148149,
+    "mean_gate_passing_epoch_count_delta": null,
+    "mean_selected_epoch_delta": -2.0,
+    "selected_epoch_passes_gate_rate_delta": null,
+    "selector_fallback_used_rate_delta": null,
+    "seed_gate_positive_rate_delta": null,
+    "mean_val_transported_final_energy_delta": null,
+    "mean_runtime_proxy_seconds_delta": 7.699259620000521
+  },
+  "best_pre_adoption_tf2_comparator": "tf2_corrective_transport_default",
+  "adopted_default_gap_to_slow_pc_baseline": {
+    "mean_test_accuracy_gap": -0.06148148148148158,
+    "mean_val_accuracy_gap": -0.04370370370370369
+  },
+  "historical_corrective_reference_gap_to_slow_pc_baseline": {
+    "mean_test_accuracy_gap": -0.0762962962962962,
+    "mean_val_accuracy_gap": -0.04962962962962969
+  },
+  "tf2_canonical_gap_to_slow_pc_baseline": {
+    "mean_test_accuracy_gap": -0.09185185185185174,
+    "mean_val_accuracy_gap": -0.058518518518518525
+  },
+  "adopted_default_gap_narrowing_vs_best_pre_adoption_tf2": 0.014814814814814614,
+  "adopted_default_materially_narrows_slow_pc_gap": true,
+  "historical_corrective_reference_status": "now_mainly_historical",
+  "tf2_canonical_status": "clearly_subordinate_in_current_phase",
+  "recommended_next_stage": "continue TF2 bridge inside the adopted package",
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

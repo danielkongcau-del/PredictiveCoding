@@ -1,0 +1,41 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_readout_alignment_confirmation",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "candidate_specs": [
+    {
+      "candidate_name": "adopted_control",
+      "description": "Current adopted package with no readout-alignment aid.",
+      "transported_output_alignment_weight": 0.0,
+      "transported_output_alignment_schedule": "none",
+      "intervention_strength_rank": 0
+    },
+    {
+      "candidate_name": "readout_align_final_w050",
+      "description": "Adopted package plus a final-micro-step transported readout-alignment weight.",
+      "transported_output_alignment_weight": 0.5,
+      "transported_output_alignment_schedule": "final_micro_step_only",
+      "intervention_strength_rank": 1
+    },
+    {
+      "candidate_name": "readout_align_every_w050",
+      "description": "Adopted package plus the same transported readout-alignment weight on every micro-step.",
+      "transported_output_alignment_weight": 0.5,
+      "transported_output_alignment_schedule": "every_micro_step",
+      "intervention_strength_rank": 2
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "thresholds": {
+    "material_test_gain_threshold": 0.005,
+    "material_supervised_output_mse_gain_threshold": 0.001,
+    "max_gate_rate_drop": 0.2,
+    "max_selector_fallback_increase": 0.2
+  }
+}

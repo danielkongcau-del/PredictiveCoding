@@ -1,0 +1,59 @@
+{
+  "phase": "Phase TF2",
+  "stage": "terminal_localfield_confirmation_suite",
+  "confirmation_oriented": true,
+  "changes_mainline_default": false,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "baseline_reference": "baseline_plain_raw__baseline_closed_loop_live_plan",
+  "candidates": [
+    {
+      "key": "baseline_plain_raw",
+      "psi_family": "baseline_plain",
+      "time_encoding_variant": "raw",
+      "notes": "current corrective default baseline"
+    },
+    {
+      "key": "residualized_local_field_poly_rt2",
+      "psi_family": "residualized_local_field",
+      "time_encoding_variant": "poly_rt2",
+      "notes": "offline-better challenger from the psi-expressivity suite"
+    }
+  ],
+  "comparison_cells": [
+    "baseline_plain_raw__baseline_closed_loop_live_plan",
+    "residualized_local_field_poly_rt2__terminal_live_raw_closed_loop",
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_angle_clip_keep_live_norm_deg30",
+    "residualized_local_field_poly_rt2__terminal_local_field_direction_hard_replace_keep_live_norm"
+  ],
+  "fixed": {
+    "preset_name": "tf2_corrective_transport_default",
+    "feature_aware_tangents": false,
+    "micro_steps": 4,
+    "incremental_weight_updates": false,
+    "supervision_policy": "local_only",
+    "theta_update_cadence": "terminal_only",
+    "theta_update_budget": "matched",
+    "identity_loss_weight": 0.2,
+    "warmup_epochs": 5,
+    "hybrid_ramp_epochs": 10,
+    "bootstrap_integrator": "rk2",
+    "bootstrap_substeps": 4,
+    "terminal_source_family": "teacher_free_local_field",
+    "selector_policy": "gate_constrained_accuracy_then_val_accuracy"
+  },
+  "confirmation_thresholds": {
+    "mean_test_accuracy_gain_vs_baseline_closed_loop": 0.005,
+    "required_gate_seed_majority_rate": 0.5,
+    "selected_epoch_passes_gate_rate_floor": 0.5,
+    "modest_runtime_overhead_seconds": 2.0
+  },
+  "terminal_definition": "The challenger remains in the true harmful closed-loop regime through all micro-steps. Only the final-step action direction may be stabilized toward the teacher-free local-field direction, while the live supervision bundle remains unchanged."
+}

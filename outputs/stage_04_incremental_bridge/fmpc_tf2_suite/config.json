@@ -1,0 +1,32 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_stage_suite",
+  "incremental_weight_updates_options": [
+    false,
+    true
+  ],
+  "supervision_policies": [
+    "local_only",
+    "mixed"
+  ],
+  "micro_steps_options": [
+    2,
+    4
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "fixed": {
+    "family_lineage": "tf1_mlp_aug",
+    "feature_aware_tangents": false,
+    "identity_loss_weight": 0.2,
+    "hybrid_ramp_epochs": 10,
+    "bootstrap_substeps": 4,
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "theta_update_budget": "matched"
+  },
+  "sealed_tf1_summary_path": "outputs/fmpc_tf1_default_adoption_suite/aggregate_summary.json",
+  "slow_pc_summary_path": "outputs/fmpc_tf1_external_comparison_suite/aggregate_summary.json"
+}

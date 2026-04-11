@@ -1,0 +1,50 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_vs_slow_pc_gap_decomposition",
+  "adopted_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "include_historical_corrective_reference": true,
+  "historical_preset_name": "tf2_corrective_transport_default",
+  "slow_pc_method_name": "canonical_slow_pc_digits_baseline",
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "tf2_fixed": {
+    "feature_aware_tangents": false,
+    "selector_policy": "gate_constrained_accuracy_then_val_accuracy",
+    "validation_only_selection": true,
+    "test_report_only": true
+  },
+  "diagnostics": {
+    "official_external_metrics": [
+      "val_accuracy",
+      "test_accuracy",
+      "selected_epoch",
+      "gate_passing_epoch_count",
+      "selector_fallback_used_rate",
+      "runtime_proxy_seconds"
+    ],
+    "internal_supervised_gap_metrics": [
+      "transport_output_mse",
+      "internal_slow_pc_output_mse",
+      "transport_supervised_final_energy",
+      "internal_slow_pc_supervised_final_energy",
+      "endpoint_hidden_state_rms_gap_to_internal_slow_pc",
+      "endpoint_output_state_rms_gap_to_internal_slow_pc"
+    ],
+    "adopted_package_validation_knot_breakdown": true
+  },
+  "baseline_artifact_audit": {
+    "external_comparison_summary_exists": true,
+    "digits_pc_summary_exists": false,
+    "reused_existing_canonical_slow_pc_artifacts": false,
+    "reuse_reason": "Existing local summaries did not contain the per-seed supervised slow-PC state/output artifacts needed for gap decomposition, so the suite reran the minimum required runs."
+  },
+  "thresholds": {
+    "selector_effect_rate_threshold": 0.25,
+    "diagnosis_ratio_threshold": 1.25
+  }
+}

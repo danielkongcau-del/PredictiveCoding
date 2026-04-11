@@ -1,0 +1,122 @@
+{
+  "phase": "Phase TF2",
+  "stage": "ifmpc_bridge_default_adoption_suite",
+  "num_runs": 20,
+  "mean_std_val_accuracy_by_preset": {
+    "tf2_canonical": {
+      "mean": 0.8207407407407408,
+      "std": 0.0361827399757624
+    },
+    "tf2_corrective_transport_default": {
+      "mean": 0.8296296296296296,
+      "std": 0.02318885309999784
+    },
+    "baseline_working_default": {
+      "mean": 0.6962962962962963,
+      "std": 0.037987796755431374
+    },
+    "canonical_slow_pc_digits_baseline": {
+      "mean": 0.8792592592592593,
+      "std": 0.026563586780801663
+    }
+  },
+  "mean_std_test_accuracy_by_preset": {
+    "tf2_canonical": {
+      "mean": 0.8037037037037038,
+      "std": 0.02533723166886972
+    },
+    "tf2_corrective_transport_default": {
+      "mean": 0.8192592592592594,
+      "std": 0.02113384091509203
+    },
+    "baseline_working_default": {
+      "mean": 0.6859259259259259,
+      "std": 0.0403278743372332
+    },
+    "canonical_slow_pc_digits_baseline": {
+      "mean": 0.8955555555555555,
+      "std": 0.01629629629629628
+    }
+  },
+  "mean_gate_passing_epoch_count_by_preset": {
+    "tf2_canonical": 3.0,
+    "tf2_corrective_transport_default": 27.6,
+    "baseline_working_default": 5.8,
+    "canonical_slow_pc_digits_baseline": null
+  },
+  "by_preset": {
+    "tf2_canonical": {
+      "num_runs": 5,
+      "checkpoint_selectors": [
+        "gate_constrained_accuracy_then_val_accuracy"
+      ],
+      "mean_val_accuracy": 0.8207407407407408,
+      "std_val_accuracy": 0.0361827399757624,
+      "mean_test_accuracy": 0.8037037037037038,
+      "std_test_accuracy": 0.02533723166886972,
+      "mean_gate_passing_epoch_count": 3.0,
+      "mean_selected_epoch": 57.6
+    },
+    "tf2_corrective_transport_default": {
+      "num_runs": 5,
+      "checkpoint_selectors": [
+        "gate_constrained_accuracy_then_val_accuracy"
+      ],
+      "mean_val_accuracy": 0.8296296296296296,
+      "std_val_accuracy": 0.02318885309999784,
+      "mean_test_accuracy": 0.8192592592592594,
+      "std_test_accuracy": 0.02113384091509203,
+      "mean_gate_passing_epoch_count": 27.6,
+      "mean_selected_epoch": 56.2
+    },
+    "baseline_working_default": {
+      "num_runs": 5,
+      "checkpoint_selectors": [
+        "gate_constrained_accuracy_then_val_accuracy"
+      ],
+      "mean_val_accuracy": 0.6962962962962963,
+      "std_val_accuracy": 0.037987796755431374,
+      "mean_test_accuracy": 0.6859259259259259,
+      "std_test_accuracy": 0.0403278743372332,
+      "mean_gate_passing_epoch_count": 5.8,
+      "mean_selected_epoch": 56.0
+    },
+    "canonical_slow_pc_digits_baseline": {
+      "num_runs": 5,
+      "checkpoint_selectors": [],
+      "mean_val_accuracy": 0.8792592592592593,
+      "std_val_accuracy": 0.026563586780801663,
+      "mean_test_accuracy": 0.8955555555555555,
+      "std_test_accuracy": 0.01629629629629628,
+      "mean_gate_passing_epoch_count": null,
+      "mean_selected_epoch": null
+    }
+  },
+  "pairwise_tf2_corrective_transport_default_vs_tf2_canonical": {
+    "mean_val_accuracy_delta": 0.008888888888888835,
+    "mean_test_accuracy_delta": 0.015555555555555545
+  },
+  "pairwise_tf2_corrective_transport_default_vs_sealed_tf1_working_default": {
+    "mean_val_accuracy_delta": 0.1333333333333333,
+    "mean_test_accuracy_delta": 0.13333333333333341
+  },
+  "pairwise_tf2_corrective_transport_default_vs_canonical_slow_pc_digits_baseline": {
+    "mean_val_accuracy_gap": -0.04962962962962969,
+    "mean_test_accuracy_gap": -0.0762962962962962
+  },
+  "tf2_corrective_transport_default_should_become_main_tf2_preset": true,
+  "current_tf2_evidence_interpretation": "corrective transport bridge",
+  "jpc_probe_reference": {
+    "summary_path": "outputs/tf2_jpc_probe/summary.json",
+    "recommended_tf2_emphasis": "incremental scheduling",
+    "whether_mupc_like_scaling_appears_to_improve_forward_init_stability": false,
+    "whether_many_step_inference_still_materially_outperforms_1_step_in_jpc_standard_pc": true
+  },
+  "jpc_probe_supports_prioritizing_incremental_scheduling": true,
+  "recommended_main_tf2_preset_after_adoption_validation": {
+    "preset_name": "tf2_corrective_transport_default",
+    "checkpoint_selector": "gate_constrained_accuracy_then_val_accuracy",
+    "mechanistic_interpretation": "corrective transport bridge"
+  },
+  "aggregate_csv_path": "aggregate_runs.csv"
+}

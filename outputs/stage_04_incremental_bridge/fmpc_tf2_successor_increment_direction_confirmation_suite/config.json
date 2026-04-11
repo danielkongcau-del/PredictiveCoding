@@ -1,0 +1,108 @@
+{
+  "phase": "Phase TF2",
+  "stage": "adopted_package_preterminal_successor_increment_direction_confirmation",
+  "base_preset_name": "tf2_corrective_transport_terminal_angleclip_default",
+  "transport_family_fixed": true,
+  "candidate_specs": [
+    {
+      "case_name": "adopted_control_terminal_only",
+      "description": "Current adopted package: full-vector hard 30 degree cone on the terminal micro-step only.",
+      "intervention_step_offsets": [
+        -1
+      ],
+      "increment_mode": "live_successor_increment",
+      "direction_angle_degrees": null
+    },
+    {
+      "case_name": "failed_penultimate_plus_terminal_live",
+      "description": "Higher-gain unstable reference: same adopted full-vector hard 30 degree cone on the penultimate and terminal micro-steps with the live successor increment.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "live_successor_increment",
+      "direction_angle_degrees": null
+    },
+    {
+      "case_name": "exact_cached_direction_live_magnitude_lower_bound",
+      "description": "Safe lower-bound reference: replace only the live successor-increment direction with the exact cached direction while keeping the live increment magnitude unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "exact_cached_direction_live_magnitude",
+      "direction_angle_degrees": null
+    },
+    {
+      "case_name": "trust_region_direction_30",
+      "description": "Current partial-signal reference: 30 degree trust-region toward the cached increment direction while keeping the live increment magnitude unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "increment_direction_trust_region_keep_live_norm_30",
+      "direction_angle_degrees": 30.0
+    },
+    {
+      "case_name": "trust_region_direction_45",
+      "description": "Weaker direction-only trust-region: 45 degree cone toward the cached increment direction while keeping the live increment magnitude unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "increment_direction_trust_region_keep_live_norm_30",
+      "direction_angle_degrees": 45.0
+    },
+    {
+      "case_name": "trust_region_direction_20",
+      "description": "Stronger direction-only trust-region: 20 degree cone toward the cached increment direction while keeping the live increment magnitude unchanged.",
+      "intervention_step_offsets": [
+        -2,
+        -1
+      ],
+      "increment_mode": "increment_direction_trust_region_keep_live_norm_30",
+      "direction_angle_degrees": 20.0
+    }
+  ],
+  "increment_direction_component_table": [
+    {
+      "component_name": "delta_on_live",
+      "where_produced": "derived from the live preterminal successor value as z_on_next_live - z_on_k_live",
+      "source_type": "live_on_policy",
+      "used_for": "live successor increment before direction-only reformulation"
+    },
+    {
+      "component_name": "delta_on_cached",
+      "where_produced": "derived from the cached preterminal successor value as z_on_next_cached - z_on_k_cached",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached successor increment direction anchor"
+    },
+    {
+      "component_name": "dir_live",
+      "where_produced": "normalize(delta_on_live)",
+      "source_type": "live_on_policy",
+      "used_for": "live increment direction under test"
+    },
+    {
+      "component_name": "dir_cached",
+      "where_produced": "normalize(delta_on_cached)",
+      "source_type": "cached_batch_start_reference",
+      "used_for": "cached direction anchor"
+    },
+    {
+      "component_name": "norm_live",
+      "where_produced": "||delta_on_live||",
+      "source_type": "live_on_policy",
+      "used_for": "fixed live increment magnitude for all direction-only candidates in this pass"
+    }
+  ],
+  "selector_contract_fixed": true,
+  "diagnostic_only": true,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ]
+}
