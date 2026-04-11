@@ -8,6 +8,19 @@ If the task is specifically to draft a prompt for Codex or web GPT, read `PROMPT
 - If documents conflict, follow:
   - `spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md`
 
+Treat this GitHub repository as the authority for:
+
+- code
+- current normative docs
+- current project state
+- current decision chain
+
+If Google Drive materials are also available, treat them as supplementary:
+
+- `PredictiveCoding_papers` for external references
+- `PredictiveCoding_notes` for supplementary notes
+- `PredictiveCoding_results` for heavy result materials
+
 ## Minimal Read Order
 
 Start here, then expand only as needed:

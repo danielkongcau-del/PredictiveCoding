@@ -6,6 +6,22 @@ This file is the shortest context sheet for drafting prompts to Codex or web GPT
 - If documents conflict, follow:
   - `spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md`
 
+For prompt writing, treat this GitHub repository as the only authority for:
+
+- code
+- tests
+- current defaults
+- current state
+- current decision chain
+
+If the task also references Google Drive materials, treat them only as supplementary:
+
+- `PredictiveCoding_papers` for papers and external references
+- `PredictiveCoding_notes` for notes and design sketches
+- `PredictiveCoding_results` for tables, charts, and reports
+
+Do not let those Drive materials override the repository docs.
+
 ## Use This File For
 
 Read this file first when you want GPT to help write a task prompt.

@@ -53,6 +53,9 @@ This does not replace the mandatory read order above when editing code.
    - Run the relevant test subset.
 5. Keep randomness explicit.
    - Use fixed seeds for tests and experiments.
+6. Treat this repository as the sole authority for code and current state.
+   - Google Drive materials may be used for papers, notes, and result reports.
+   - They must not override the current repository docs.
 
 ## Current FMPC Status
 

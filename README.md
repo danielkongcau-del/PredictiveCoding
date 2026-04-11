@@ -63,6 +63,27 @@ If documents conflict, repository precedence is:
 
 - `spec_math.md > validation.md > AGENTS.md > CURRENT_STATE.md > PLANS.md > README.md`
 
+## Authority Boundary
+
+Treat this GitHub repository as the only authority for:
+
+- code
+- tests
+- experiment entrypoints
+- current README and current normative docs
+- current repository state
+- current decision chain
+
+Google Drive should be treated as supplementary research storage only.
+
+Recommended Google Drive roots are:
+
+- `PredictiveCoding_papers`
+- `PredictiveCoding_notes`
+- `PredictiveCoding_results`
+
+Those Drive directories may hold papers, design notes, tables, charts, and reports, but they do not override the current repository documents.
+
 For low-context web GPT prompt drafting, start with:
 
 1. `PROMPT_CONTEXT.md`
@@ -99,6 +120,14 @@ The repository now uses a layered documentation structure:
   - [archive/validation_history.md](/e:/CodeSpace/PredictiveCoding/archive/validation_history.md)
 
 If you only need the current project picture, do not open the archive first.
+
+External research storage lives outside the repo:
+
+- Google Drive `PredictiveCoding_papers` for papers and external references
+- Google Drive `PredictiveCoding_notes` for supplementary notes and design sketches
+- Google Drive `PredictiveCoding_results` for heavy result materials such as tables, charts, and reports
+
+Those locations are supplementary only. Current code and current state still live in this repository.
 
 ## Which Document Answers What
 
