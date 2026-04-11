@@ -16,12 +16,6 @@ src/*.egg-info/
 venv/
 env/
 
-# Experiment outputs
-outputs/**
-!outputs/.gitkeep
-!outputs/**/
-!outputs/**/*.json
-
 # OS / editor
 .DS_Store
 Thumbs.db
