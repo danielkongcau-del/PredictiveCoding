@@ -144,7 +144,7 @@ Current interpretation:
   - the same stronger budget materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
 - the next Stage 05 v2 budget-push validation now also says:
-  - a stronger same-family `1536`-epoch budget materially improves configured-step mechanism magnitude over the `768`-epoch reference
+  - a stronger same-family `3072`-epoch budget materially improves configured-step mechanism magnitude over the `1536`-epoch reference
   - the same stronger budget materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
   - the explicit stop-rule layer still says:
@@ -163,8 +163,8 @@ Current interpretation:
 The next validation move is:
 
 - keep the current Stage 05 v2 transport family fixed and continue pushing budget on the same v2 family before inventing a new Stage 05 family
-- the latest same-family budget reference is now the `768 -> 1536 epochs` validation under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536/`
+- the latest same-family budget reference is now the `1536 -> 3072 epochs` validation under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
 
 That next step should preserve:
 
@@ -193,7 +193,7 @@ It should not be framed as:
 - Stage 05 v2 longer-training validation:
   - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
 - Stage 05 v2 budget-push validation:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536/`
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
 
 ## Document Layering
 

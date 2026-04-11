@@ -185,8 +185,8 @@ Required framing:
 Completed outcome:
 
 - the dedicated budget-push validation now exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536/`
-- the same Stage 05 v2 family with a stronger `1536`-epoch budget materially improves:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
+- the same Stage 05 v2 family with a stronger `3072`-epoch budget materially improves:
   - configured-step validation energy delta vs identity
   - configured-step validation fixed-point residual delta vs identity
   - report-only validation accuracy
@@ -204,7 +204,7 @@ Completed outcome:
 Current execution plan:
 
 - keep the current Stage 05 v2 family fixed
-- if Stage 05 continues, run the next narrow budget push beyond the current `1536`-epoch reference on the same:
+- if Stage 05 continues, run the next narrow budget push beyond the current `3072`-epoch reference on the same:
   - `transport_family = two_branch_residual_meanflow_core`
   - `feature_aware_state_branch_tangents = true`
   - residual branch structure
@@ -228,8 +228,8 @@ Current execution plan:
   - whether the budget line should continue
   - or whether budget should stop and a true Stage 05 v3 charter should be opened
 - use the next formal budget comparison:
-  - current reference: `768 epochs`
-  - stronger candidate: `1536 epochs`
+  - current reference: `3072 epochs`
+  - stronger candidate: still to be chosen by the same hard stop rule, only if this same-family line remains open
 - enforce the hard stop rule:
   - continue budget only if the stronger budget still materially improves configured-step mechanism
   - and still materially improves report-only accuracy

@@ -117,9 +117,9 @@ Current probe status:
 - the narrow Stage 05 v2 longer-training validation now exists under:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - the next narrow Stage 05 v2 budget-push validation now also exists under:
-  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536)
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072)
 - current budget-push result:
-  - the same v2 family with a stronger `1536`-epoch budget materially improves configured-step mechanism magnitude over the current `768`-epoch reference
+  - the same v2 family with a stronger `3072`-epoch budget materially improves configured-step mechanism magnitude over the current `1536`-epoch reference
   - the same stronger budget also materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
   - the explicit stop-rule layer still says:
@@ -188,4 +188,4 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
 - Stage 05 v2 longer-training validation artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - Stage 05 v2 budget-push validation artifact:
-  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_768_to_1536)
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072)
