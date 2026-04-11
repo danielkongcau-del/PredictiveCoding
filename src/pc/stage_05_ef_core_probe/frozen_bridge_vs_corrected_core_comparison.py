@@ -38,6 +38,8 @@ ComparisonMethodName = Literal[
     "stage_05_two_branch_corrected_residual_core_v2",
     "stage_05_two_branch_corrected_residual_core_v2_current_budget",
     "stage_05_two_branch_corrected_residual_core_v2_longer_training",
+    "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+    "stage_05_two_branch_corrected_residual_core_v2_budget_push",
 ]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
@@ -51,6 +53,12 @@ STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: ComparisonMethodName = (
 STAGE05_V2_LONGER_TRAINING_METHOD_NAME: ComparisonMethodName = (
     "stage_05_two_branch_corrected_residual_core_v2_longer_training"
 )
+STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME: ComparisonMethodName = (
+    "stage_05_two_branch_corrected_residual_core_v2_budget_reference"
+)
+STAGE05_V2_BUDGET_PUSH_METHOD_NAME: ComparisonMethodName = (
+    "stage_05_two_branch_corrected_residual_core_v2_budget_push"
+)
 JUSTIFY_V2_DECISION_NAME = "stage05_corrected_residual_core_justifies_v2_charter"
 STAGE05_V2_FAVORABLE_DECISION_NAME = "stage05_v2_improves_mechanism_magnitude_over_v1"
 STAGE05_V2_LONGER_TRAINING_DECISION_NAME = (
@@ -58,6 +66,12 @@ STAGE05_V2_LONGER_TRAINING_DECISION_NAME = (
 )
 STAGE05_V2_LONGER_TRAINING_ACCURACY_DECISION_NAME = (
     "stage05_v2_longer_training_materially_improves_report_only_accuracy"
+)
+STAGE05_V2_BUDGET_PUSH_DECISION_NAME = (
+    "stage05_v2_budget_push_materially_improves_configured_step_mechanism"
+)
+STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME = (
+    "stage05_v2_budget_push_materially_improves_report_only_accuracy"
 )
 
 
@@ -228,6 +242,56 @@ class Stage05V2LongerTrainingValidationConfig:
             raise ValueError("current_stage05_epochs and longer_stage05_epochs must be positive.")
         if self.longer_stage05_epochs <= self.current_stage05_epochs:
             raise ValueError("longer_stage05_epochs must be greater than current_stage05_epochs.")
+        if self.stage05_eval_steps <= 0:
+            raise ValueError("stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+        if self.configured_step_improvement_fraction_threshold < 0.0:
+            raise ValueError("configured_step_improvement_fraction_threshold must be non-negative.")
+        if self.report_accuracy_improvement_threshold < 0.0:
+            raise ValueError("report_accuracy_improvement_threshold must be non-negative.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
+class Stage05V2BudgetPushValidationConfig:
+    """Compare the current Stage 05 v2 24-epoch reference against a stronger budget push."""
+
+    experiment_name: str = "stage05_v2_budget_push_validation"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0, 1, 2)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    reference_stage05_epochs: int = 24
+    stronger_stage05_epochs: int = 48
+    stage05_eval_steps: int = 15
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+    configured_step_improvement_fraction_threshold: float = 0.05
+    report_accuracy_improvement_threshold: float = 0.01
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The Stage 05 v2 budget-push validation currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.reference_stage05_epochs <= 0 or self.stronger_stage05_epochs <= 0:
+            raise ValueError("reference_stage05_epochs and stronger_stage05_epochs must be positive.")
+        if self.stronger_stage05_epochs <= self.reference_stage05_epochs:
+            raise ValueError("stronger_stage05_epochs must be greater than reference_stage05_epochs.")
         if self.stage05_eval_steps <= 0:
             raise ValueError("stage05_eval_steps must be positive.")
         if self.stage05_transport_steps <= 0:
@@ -541,7 +605,7 @@ def _stage05_v2_bridge_config(
 
 
 def _stage05_v2_budget_config(
-    config: Stage05V2LongerTrainingValidationConfig,
+    config: Stage05V2LongerTrainingValidationConfig | Stage05V2BudgetPushValidationConfig,
     *,
     seed: int,
     output_root: Path,
@@ -2319,6 +2383,423 @@ def run_stage05_v2_longer_training_validation(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_stage05_v2_longer_training_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _stage05_v2_budget_push_protocol_payload(
+    config: Stage05V2BudgetPushValidationConfig,
+) -> dict[str, Any]:
+    return {
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "reference_budget": {
+            "method_name": STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "epochs": int(config.reference_stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "stronger_budget_candidate": {
+            "method_name": STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "epochs": int(config.stronger_stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "decision_rule": {
+            "primary_split": "validation",
+            "task_accuracy_is_report_only": True,
+            "configured_step_improvement_fraction_threshold": float(
+                config.configured_step_improvement_fraction_threshold
+            ),
+            "report_accuracy_improvement_threshold": float(
+                config.report_accuracy_improvement_threshold
+            ),
+            "selection_rule_unchanged": True,
+        },
+    }
+
+
+def _stage05_v2_budget_push_decision(
+    *,
+    rows: list[dict[str, Any]],
+    config: Stage05V2BudgetPushValidationConfig,
+    by_method: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], str]:
+    reference_rows = _method_rows(rows, STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME)
+    stronger_rows = _method_rows(rows, STAGE05_V2_BUDGET_PUSH_METHOD_NAME)
+    reference_by_seed = {int(row["seed"]): row for row in reference_rows}
+    stronger_by_seed = {int(row["seed"]): row for row in stronger_rows}
+    shared_seeds = sorted(set(reference_by_seed).intersection(stronger_by_seed))
+    if not shared_seeds:
+        raise ValueError("Budget-push decision requires shared seeds.")
+
+    reference_summary = by_method[STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME]
+    stronger_summary = by_method[STAGE05_V2_BUDGET_PUSH_METHOD_NAME]
+    reference_energy_mean = float(
+        reference_summary["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    stronger_energy_mean = float(
+        stronger_summary["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    reference_residual_mean = float(
+        reference_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    stronger_residual_mean = float(
+        stronger_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    reference_val_accuracy_mean = float(reference_summary["val_accuracy"]["mean"])
+    stronger_val_accuracy_mean = float(stronger_summary["val_accuracy"]["mean"])
+    reference_test_accuracy_mean = float(reference_summary["test_accuracy"]["mean"])
+    stronger_test_accuracy_mean = float(stronger_summary["test_accuracy"]["mean"])
+
+    configured_energy_gain_fraction = _negative_magnitude_relative_gain(
+        current_value=reference_energy_mean,
+        candidate_value=stronger_energy_mean,
+    )
+    configured_residual_gain_fraction = _negative_magnitude_relative_gain(
+        current_value=reference_residual_mean,
+        candidate_value=stronger_residual_mean,
+    )
+    energy_seed_improvement_rate = _rate(
+        [
+            float(stronger_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            < float(reference_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            for seed in shared_seeds
+        ]
+    )
+    residual_seed_improvement_rate = _rate(
+        [
+            float(stronger_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            < float(reference_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            for seed in shared_seeds
+        ]
+    )
+    configured_step_mechanism_improved_materially = bool(
+        configured_energy_gain_fraction
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and configured_residual_gain_fraction
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and energy_seed_improvement_rate >= 0.5
+        and residual_seed_improvement_rate >= 0.5
+    )
+    val_accuracy_gain = float(stronger_val_accuracy_mean - reference_val_accuracy_mean)
+    test_accuracy_gain = float(stronger_test_accuracy_mean - reference_test_accuracy_mean)
+    report_only_accuracy_improved_materially = bool(
+        val_accuracy_gain >= float(config.report_accuracy_improvement_threshold)
+        and test_accuracy_gain >= float(config.report_accuracy_improvement_threshold)
+    )
+    reference_boundary_all = bool(
+        all(bool(row["selection_hits_final_training_boundary"]) for row in reference_rows)
+    )
+    stronger_boundary_all = bool(
+        all(bool(row["selection_hits_final_training_boundary"]) for row in stronger_rows)
+    )
+    stronger_boundary_rate = _rate(
+        [bool(row["selection_hits_final_training_boundary"]) for row in stronger_rows]
+    )
+    recommended_next_move = (
+        "continue_with_budget"
+        if stronger_boundary_all
+        else "open_stage05_v3_charter"
+    )
+    if stronger_boundary_all:
+        rationale = (
+            "The stronger Stage 05 v2 budget still selects the final training epoch on every seed, "
+            "so the same-family budget line still looks boundary-limited."
+        )
+    elif configured_step_mechanism_improved_materially or report_only_accuracy_improved_materially:
+        rationale = (
+            "The stronger Stage 05 v2 budget improves the same-family reference without still "
+            "hitting the final training boundary on every seed, so the budget question is closer "
+            "to saturation and a true v3 charter can be considered if needed."
+        )
+    else:
+        rationale = (
+            "The stronger Stage 05 v2 budget no longer looks boundary-limited and still does not "
+            "materially improve the same-family reference, so a true v3 mechanism charter is now justified."
+        )
+    decision = {
+        STAGE05_V2_BUDGET_PUSH_DECISION_NAME: bool(
+            configured_step_mechanism_improved_materially
+        ),
+        STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME: bool(
+            report_only_accuracy_improved_materially
+        ),
+        "configured_step_energy_gain_fraction": float(configured_energy_gain_fraction),
+        "configured_step_residual_gain_fraction": float(configured_residual_gain_fraction),
+        "configured_step_energy_seed_improvement_rate": float(energy_seed_improvement_rate),
+        "configured_step_residual_seed_improvement_rate": float(residual_seed_improvement_rate),
+        "val_accuracy_gain": float(val_accuracy_gain),
+        "test_accuracy_gain": float(test_accuracy_gain),
+        "reference_budget_selection_hits_final_training_boundary_on_all_seeds": bool(
+            reference_boundary_all
+        ),
+        "budget_push_selection_hits_final_training_boundary_on_all_seeds": bool(
+            stronger_boundary_all
+        ),
+        "budget_push_selection_hits_final_training_boundary_rate": float(
+            stronger_boundary_rate
+        ),
+        "recommended_next_move": recommended_next_move,
+    }
+    return decision, rationale
+
+
+def _stage05_v2_budget_push_supports_lines(
+    *,
+    decision: dict[str, Any],
+    config: Stage05V2BudgetPushValidationConfig,
+    by_method: dict[str, dict[str, Any]],
+) -> list[str]:
+    reference_summary = by_method[STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME]
+    stronger_summary = by_method[STAGE05_V2_BUDGET_PUSH_METHOD_NAME]
+    return [
+        (
+            f"The stronger-budget Stage 05 v2 candidate materially improves configured-step mechanism magnitude over the {int(config.reference_stage05_epochs)}-epoch reference."
+            if decision[STAGE05_V2_BUDGET_PUSH_DECISION_NAME]
+            else f"The stronger-budget Stage 05 v2 candidate does not yet materially improve configured-step mechanism magnitude over the {int(config.reference_stage05_epochs)}-epoch reference."
+        ),
+        (
+            f"The stronger-budget Stage 05 v2 candidate materially improves report-only accuracy over the {int(config.reference_stage05_epochs)}-epoch reference."
+            if decision[STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME]
+            else f"The stronger-budget Stage 05 v2 candidate does not yet materially improve report-only accuracy over the {int(config.reference_stage05_epochs)}-epoch reference."
+        ),
+        (
+            "The stronger budget still hits the final training boundary on every seed."
+            if decision["budget_push_selection_hits_final_training_boundary_on_all_seeds"]
+            else "The stronger budget no longer hits the final training boundary on every seed."
+        ),
+        (
+            f"{int(config.reference_stage05_epochs)}-epoch reference configured-step validation energy delta vs identity mean: {reference_summary['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"{int(config.stronger_stage05_epochs)}-epoch candidate configured-step validation energy delta vs identity mean: {stronger_summary['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"{int(config.reference_stage05_epochs)}-epoch reference validation/test accuracy means: {reference_summary['val_accuracy']['mean']:.6f} / {reference_summary['test_accuracy']['mean']:.6f}."
+        ),
+        (
+            f"{int(config.stronger_stage05_epochs)}-epoch candidate validation/test accuracy means: {stronger_summary['val_accuracy']['mean']:.6f} / {stronger_summary['test_accuracy']['mean']:.6f}."
+        ),
+    ]
+
+
+def _stage05_v2_budget_push_does_not_support_lines(
+    *,
+    decision: dict[str, Any],
+) -> list[str]:
+    lines = [
+        "This validation does not reopen Stage 04 package-internal work.",
+        "This validation does not change the Stage 05 v2 transport family, residual branch structure, corrected residual identity contract, or selection rule.",
+        "This validation does not claim that Stage 05 replaces the frozen Stage 04 bridge result on main.",
+    ]
+    if decision["recommended_next_move"] == "continue_with_budget":
+        lines.append(
+            "This validation does not yet justify opening a true Stage 05 v3 mechanism charter."
+        )
+    else:
+        lines.append("This validation does not imply any Stage 04 replacement claim.")
+    return lines
+
+
+def _stage05_v2_budget_push_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    lines = [
+        "# Stage 05 V2 Budget-Push Validation",
+        "",
+        "## Protocol",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- shared shuffle_batches: `{protocol['shared_shuffle_batches']}`",
+        f"- reference budget epochs: `{protocol['reference_budget']['epochs']}`",
+        f"- stronger budget epochs: `{protocol['stronger_budget_candidate']['epochs']}`",
+        "",
+        "## Decision",
+        f"- `{STAGE05_V2_BUDGET_PUSH_DECISION_NAME}`: `{decision[STAGE05_V2_BUDGET_PUSH_DECISION_NAME]}`",
+        f"- `{STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME}`: `{decision[STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME]}`",
+        f"- stronger budget still hits final training boundary on all seeds: `{decision['budget_push_selection_hits_final_training_boundary_on_all_seeds']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Supports",
+    ]
+    for item in report["supports"]:
+        lines.append(f"- {item}")
+    lines.extend(["", "## Does Not Support"])
+    for item in report["does_not_support"]:
+        lines.append(f"- {item}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _stage05_v2_budget_push_suite_config_payload(
+    config: Stage05V2BudgetPushValidationConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": "stage05_v2_budget_push_validation",
+        "comparison_protocol": _stage05_v2_budget_push_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
+def run_stage05_v2_budget_push_validation(
+    config: Stage05V2BudgetPushValidationConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run the next narrow Stage 05 v2 same-family budget-push validation."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v2_budget_push_suite_config_payload(config))
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+
+    for seed in config.seeds:
+        run_index += 1
+        reference_config = _stage05_v2_budget_config(
+            config,
+            seed=seed,
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME,
+            epochs=int(config.reference_stage05_epochs),
+        )
+        reference_result = run_fmpc_ef_exploratory_probe(reference_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=reference_result,
+                config=reference_config,
+                method_name=STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME,
+                stage_name=(
+                    f"FMPC Stage 05 EF Core Probe v2 {int(config.reference_stage05_epochs)}-Epoch Reference"
+                ),
+            )
+        )
+
+        run_index += 1
+        stronger_config = _stage05_v2_budget_config(
+            config,
+            seed=seed,
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+            epochs=int(config.stronger_stage05_epochs),
+        )
+        stronger_result = run_fmpc_ef_exploratory_probe(stronger_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=stronger_result,
+                config=stronger_config,
+                method_name=STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+                stage_name=(
+                    f"FMPC Stage 05 EF Core Probe v2 {int(config.stronger_stage05_epochs)}-Epoch Budget Push"
+                ),
+            )
+        )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME)
+        ),
+        STAGE05_V2_BUDGET_PUSH_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V2_BUDGET_PUSH_METHOD_NAME)
+        ),
+    }
+    pairwise_budget_push_vs_reference = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+        reference_method=STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME,
+    )
+    decision, decision_rationale = _stage05_v2_budget_push_decision(
+        rows=rows,
+        config=config,
+        by_method=by_method,
+    )
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": "stage05_v2_budget_push_validation",
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_budget_push_protocol_payload(config),
+        "by_method": by_method,
+        "pairwise_budget_push_vs_reference_budget": pairwise_budget_push_vs_reference,
+        **decision,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_budget_push_protocol_payload(config),
+        "decision": {
+            **decision,
+            "decision_rationale": decision_rationale,
+        },
+        "supports": _stage05_v2_budget_push_supports_lines(
+            decision=decision,
+            config=config,
+            by_method=by_method,
+        ),
+        "does_not_support": _stage05_v2_budget_push_does_not_support_lines(
+            decision=decision,
+        ),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v2_budget_push_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_budget_push_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

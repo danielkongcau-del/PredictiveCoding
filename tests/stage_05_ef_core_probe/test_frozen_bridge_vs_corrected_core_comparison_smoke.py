@@ -276,3 +276,63 @@ def test_stage05_v2_longer_training_validation_writes_expected_artifacts(
         in report["decision"]
     )
     assert "recommended_next_move" in report["decision"]
+
+
+def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
+    tmp_path: Path,
+) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_budget_push_smoke",
+        comparison_variant="stage05_v2_budget_push_validation",
+        seeds=(0,),
+        reference_stage05_epochs=4,
+        stronger_stage05_epochs=6,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 2
+    method_names = {row["method_name"] for row in rows}
+    assert method_names == {
+        "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+        "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    }
+
+    first_row = rows[0]
+    assert "selected_epoch" in first_row
+    assert "total_training_epochs" in first_row
+    assert "selection_hits_final_training_boundary" in first_row
+    assert "configured_step_energy_delta_vs_identity" in first_row
+    assert "configured_step_fixed_point_residual_delta_vs_identity" in first_row
+    assert "val_accuracy" in first_row
+    assert "test_accuracy" in first_row
+    assert "runtime_proxy_seconds" in first_row
+
+    assert summary["stage"] == "stage05_v2_budget_push_validation"
+    assert "comparison_protocol" in summary
+    assert "by_method" in summary
+    assert "pairwise_budget_push_vs_reference_budget" in summary
+    assert "stage05_v2_budget_push_materially_improves_configured_step_mechanism" in summary
+    assert "stage05_v2_budget_push_materially_improves_report_only_accuracy" in summary
+    assert "budget_push_selection_hits_final_training_boundary_on_all_seeds" in summary
+    assert "recommended_next_move" in summary
+    assert "decision_rationale" in summary
+
+    assert "decision" in report
+    assert "supports" in report
+    assert "does_not_support" in report
+    assert "stage05_v2_budget_push_materially_improves_configured_step_mechanism" in report["decision"]
+    assert "recommended_next_move" in report["decision"]

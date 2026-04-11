@@ -143,6 +143,10 @@ Current interpretation:
   - a stronger same-family `24`-epoch budget materially improves configured-step mechanism magnitude
   - the same stronger budget materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
+- the next Stage 05 v2 budget-push validation now also says:
+  - a stronger same-family `48`-epoch budget materially improves configured-step mechanism magnitude over the `24`-epoch reference
+  - the same stronger budget materially improves report-only validation and test accuracy
+  - the stronger budget still selects the final training epoch on every seed
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -177,6 +181,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
 - Stage 05 v2 longer-training validation:
   - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
+- Stage 05 v2 budget-push validation:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation/`
 
 ## Document Layering
 

@@ -122,26 +122,15 @@ Relevant artifacts:
 - `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
 
-## FMPC Stage 05 Longer-Training Validation Snapshot
+## FMPC Stage 05 Budget-Push Validation Snapshot
 
 Current formal validation:
 
-- `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
+- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation/`
 
 Current comparison result:
 
-- current Stage 05 v2 budget:
-  - mean configured-step validation energy delta vs identity:
-    - `-0.0001763621381912032`
-  - mean configured-step validation fixed-point residual delta vs identity:
-    - `-9.455861891589161e-07`
-  - mean validation accuracy:
-    - `0.27037037037037037`
-  - mean test accuracy:
-    - `0.27283950617283953`
-  - selected epoch:
-    - `12 / 12` on every seed
-- longer same-family Stage 05 v2 budget:
+- current Stage 05 v2 reference budget:
   - mean configured-step validation energy delta vs identity:
     - `-0.0002055564608433036`
   - mean configured-step validation fixed-point residual delta vs identity:
@@ -149,9 +138,20 @@ Current comparison result:
   - mean validation accuracy:
     - `0.417283950617284`
   - mean test accuracy:
-    - `0.4`
+    - `0.39999999999999997`
   - selected epoch:
     - `24 / 24` on every seed
+- stronger same-family Stage 05 v2 budget:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0002906233051726363`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.2817411134451841e-06`
+  - mean validation accuracy:
+    - `0.562962962962963`
+  - mean test accuracy:
+    - `0.5444444444444444`
+  - selected epoch:
+    - `48 / 48` on every seed
 
 Current interpretation:
 

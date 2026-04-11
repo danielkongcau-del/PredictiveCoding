@@ -116,11 +116,13 @@ Current probe status:
     - `likely_undertrained`
 - the narrow Stage 05 v2 longer-training validation now exists under:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
-- current longer-training validation result:
-  - the same v2 family with a stronger `24`-epoch budget materially improves configured-step mechanism magnitude over the current `12`-epoch budget
+- the next narrow Stage 05 v2 budget-push validation now also exists under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation)
+- current budget-push result:
+  - the same v2 family with a stronger `48`-epoch budget materially improves configured-step mechanism magnitude over the current `24`-epoch reference
   - the same stronger budget also materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
-  - the budget question is therefore not yet closed
+  - the budget question is therefore still not closed
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
@@ -179,3 +181,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v2_diagnostics](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_diagnostics)
 - Stage 05 v2 longer-training validation artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
+- Stage 05 v2 budget-push validation artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation)
