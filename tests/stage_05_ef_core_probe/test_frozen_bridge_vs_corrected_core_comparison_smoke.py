@@ -329,12 +329,21 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
     assert "pairwise_budget_push_vs_reference_budget" in summary
     assert "stage05_v2_budget_push_materially_improves_configured_step_mechanism" in summary
     assert "stage05_v2_budget_push_materially_improves_report_only_accuracy" in summary
+    assert "configured_step_gain_fraction_vs_reference" in summary
+    assert "report_accuracy_gain_vs_reference" in summary
     assert "budget_push_selection_hits_final_training_boundary_on_all_seeds" in summary
+    assert "budget_line_still_looks_boundary_limited" in summary
+    assert "budget_line_should_continue" in summary
+    assert "budget_line_should_stop_and_open_v3" in summary
+    assert "contextual_accuracy_note" in summary
     assert "recommended_next_move" in summary
     assert "decision_rationale" in summary
 
     assert "decision" in report
+    assert "contextual_accuracy_note" in report
     assert "supports" in report
     assert "does_not_support" in report
     assert "stage05_v2_budget_push_materially_improves_configured_step_mechanism" in report["decision"]
+    assert "configured_step_gain_fraction_vs_reference" in report["decision"]
+    assert "budget_line_should_continue" in report["decision"]
     assert "recommended_next_move" in report["decision"]

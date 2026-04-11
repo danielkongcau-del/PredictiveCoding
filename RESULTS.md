@@ -126,22 +126,11 @@ Relevant artifacts:
 
 Current formal validation:
 
-- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_192_to_384/`
+- `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768/`
 
 Current comparison result:
 
 - current Stage 05 v2 reference budget:
-  - mean configured-step validation energy delta vs identity:
-    - `-0.001024608932377084`
-  - mean configured-step validation fixed-point residual delta vs identity:
-    - `-3.174532069885576e-06`
-  - mean validation accuracy:
-    - `0.7246913580246913`
-  - mean test accuracy:
-    - `0.7185185185185184`
-  - selected epoch:
-    - `192 / 192` on every seed
-- stronger same-family Stage 05 v2 budget:
   - mean configured-step validation energy delta vs identity:
     - `-0.001944251310910398`
   - mean configured-step validation fixed-point residual delta vs identity:
@@ -152,12 +141,31 @@ Current comparison result:
     - `0.7851851851851852`
   - selected epoch:
     - `384 / 384` on every seed
+- stronger same-family Stage 05 v2 budget:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0033615114119863454`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.050532412466991e-05`
+  - mean validation accuracy:
+    - `0.8469135802469135`
+  - mean test accuracy:
+    - `0.8382716049382717`
+  - selected epoch:
+    - `768 / 768` on every seed
 
 Current interpretation:
 
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism magnitude
 - the stronger same-family budget also materially improves report-only accuracy
 - the stronger budget still selects the final training epoch on every seed
+- the explicit stop-rule layer still says:
+  - `budget_line_still_looks_boundary_limited = true`
+  - `budget_line_should_continue = true`
+  - `budget_line_should_stop_and_open_v3 = false`
+- the diagnostic contextual note now says the stronger Stage 05 v2 budget is:
+  - above the frozen Stage 04 bridge accuracy level
+  - mixed relative to the standalone `digits_pc` baseline
+  - below the standalone `digits_mlp` baseline
 - the next move therefore remains:
   - continue pushing budget on the same v2 family
   - do not open a true Stage 05 v3 mechanism charter yet

@@ -185,13 +185,17 @@ Required framing:
 Completed outcome:
 
 - the dedicated budget-push validation now exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_192_to_384/`
-- the same Stage 05 v2 family with a stronger `384`-epoch budget materially improves:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768/`
+- the same Stage 05 v2 family with a stronger `768`-epoch budget materially improves:
   - configured-step validation energy delta vs identity
   - configured-step validation fixed-point residual delta vs identity
   - report-only validation accuracy
   - report-only test accuracy
 - the stronger budget still selects the final training epoch on every seed
+- the explicit stop-rule layer now also says:
+  - `budget_line_still_looks_boundary_limited = true`
+  - `budget_line_should_continue = true`
+  - `budget_line_should_stop_and_open_v3 = false`
 - the current answer is therefore:
   - keep pushing budget on the same v2 family
   - do not open a true Stage 05 v3 mechanism charter yet
@@ -199,7 +203,7 @@ Completed outcome:
 Current execution plan:
 
 - keep the current Stage 05 v2 family fixed
-- if Stage 05 continues, run the next narrow budget push beyond the current `384`-epoch reference on the same:
+- if Stage 05 continues, run the next narrow budget push beyond the current `768`-epoch reference on the same:
   - `transport_family = two_branch_residual_meanflow_core`
   - `feature_aware_state_branch_tangents = true`
   - residual branch structure
@@ -218,6 +222,10 @@ Current execution plan:
   - selected epoch
   - whether selection still hits the final training boundary
   - runtime
+- require the next budget pass to add an explicit stop-rule layer that answers:
+  - whether the same-family budget line still looks boundary-limited
+  - whether the budget line should continue
+  - or whether budget should stop and a true Stage 05 v3 charter should be opened
 - only open a true Stage 05 v3 charter after the stronger-budget line stops looking boundary-limited
 
 ## Exploratory Acceptance Criteria

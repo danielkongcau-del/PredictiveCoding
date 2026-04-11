@@ -144,9 +144,17 @@ Current interpretation:
   - the same stronger budget materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
 - the next Stage 05 v2 budget-push validation now also says:
-  - a stronger same-family `384`-epoch budget materially improves configured-step mechanism magnitude over the `192`-epoch reference
+  - a stronger same-family `768`-epoch budget materially improves configured-step mechanism magnitude over the `384`-epoch reference
   - the same stronger budget materially improves report-only validation and test accuracy
   - the stronger budget still selects the final training epoch on every seed
+  - the explicit stop-rule layer still says:
+    - `budget_line_still_looks_boundary_limited = true`
+    - `budget_line_should_continue = true`
+    - `budget_line_should_stop_and_open_v3 = false`
+  - the contextual accuracy note now places the stronger Stage 05 v2 budget:
+    - above the frozen Stage 04 bridge accuracy level
+    - mixed relative to the standalone `digits_pc` baseline
+    - below the standalone `digits_mlp` baseline
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -154,8 +162,8 @@ Current interpretation:
 The next validation move is:
 
 - keep the current Stage 05 v2 transport family fixed and continue pushing budget on the same v2 family before inventing a new Stage 05 family
-- the latest same-family budget reference is now the `192 -> 384 epochs` validation under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_192_to_384/`
+- the latest same-family budget reference is now the `384 -> 768 epochs` validation under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768/`
 
 That next step should preserve:
 
@@ -184,7 +192,7 @@ It should not be framed as:
 - Stage 05 v2 longer-training validation:
   - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
 - Stage 05 v2 budget-push validation:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_192_to_384/`
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_384_to_768/`
 
 ## Document Layering
 

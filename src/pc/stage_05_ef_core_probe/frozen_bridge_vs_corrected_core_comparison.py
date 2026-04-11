@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 import shutil
 from dataclasses import dataclass
 from datetime import datetime
@@ -260,7 +261,7 @@ class Stage05V2LongerTrainingValidationConfig:
 
 @dataclass
 class Stage05V2BudgetPushValidationConfig:
-    """Compare the current Stage 05 v2 24-epoch reference against a stronger budget push."""
+    """Compare the current Stage 05 v2 reference budget against a stronger same-family budget push."""
 
     experiment_name: str = "stage05_v2_budget_push_validation"
     output_root: str | Path = "outputs/stage_05_ef_core_probe"
@@ -333,6 +334,14 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
         json.dump(payload, handle, indent=2)
 
 
+def _read_json(path: Path) -> dict[str, Any]:
+    with path.open("r", encoding="utf-8") as handle:
+        payload = json.load(handle)
+    if not isinstance(payload, dict):
+        raise ValueError(f"Expected JSON object at '{path}'.")
+    return payload
+
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise ValueError("rows must contain at least one entry.")
@@ -370,6 +379,103 @@ def _rate(values: list[bool]) -> float:
     if not values:
         raise ValueError("Rate requires at least one value.")
     return float(sum(1.0 for value in values if bool(value)) / float(len(values)))
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+def _load_results_md_accuracy_snapshot(name: str) -> dict[str, float | str]:
+    results_path = _repo_root() / "RESULTS.md"
+    text = results_path.read_text(encoding="utf-8")
+    pattern = re.compile(
+        rf"- `{re.escape(name)}`:\s+"
+        rf"- `best_epoch = (?P<best_epoch>[^`]+)`\s+"
+        rf"- `val_accuracy = (?P<val_accuracy>[^`]+)`\s+"
+        rf"- `test_accuracy = (?P<test_accuracy>[^`]+)`",
+        re.MULTILINE,
+    )
+    match = pattern.search(text)
+    if match is None:
+        raise ValueError(f"Could not find '{name}' accuracy snapshot in RESULTS.md.")
+    return {
+        "source": "RESULTS.md",
+        "best_epoch": str(match.group("best_epoch")).strip(),
+        "val_accuracy": float(match.group("val_accuracy")),
+        "test_accuracy": float(match.group("test_accuracy")),
+    }
+
+
+def _load_budget_push_contextual_accuracy_snapshot(
+    *,
+    stronger_summary: dict[str, Any],
+) -> dict[str, Any]:
+    repo_root = _repo_root()
+    frozen_bridge_comparison_path = (
+        repo_root
+        / "outputs"
+        / "stage_05_ef_core_probe"
+        / "frozen_bridge_vs_two_branch_corrected_core_comparison"
+        / "aggregate_summary.json"
+    )
+    if frozen_bridge_comparison_path.exists():
+        frozen_bridge_summary = _read_json(frozen_bridge_comparison_path)
+        stage04_reference = {
+            "source": str(
+                Path("outputs")
+                / "stage_05_ef_core_probe"
+                / "frozen_bridge_vs_two_branch_corrected_core_comparison"
+                / "aggregate_summary.json"
+            ),
+            "val_accuracy": float(
+                frozen_bridge_summary["by_method"][STAGE04_METHOD_NAME]["val_accuracy"]["mean"]
+            ),
+            "test_accuracy": float(
+                frozen_bridge_summary["by_method"][STAGE04_METHOD_NAME]["test_accuracy"]["mean"]
+            ),
+        }
+    else:
+        stage04_summary = _read_json(
+            repo_root / "outputs" / "stage_04_incremental_bridge" / "fmpc_tf2" / "summary.json"
+        )
+        stage04_reference = {
+            "source": "outputs/stage_04_incremental_bridge/fmpc_tf2/summary.json",
+            "val_accuracy": float(stage04_summary["val_accuracy"]),
+            "test_accuracy": float(stage04_summary["test_accuracy"]),
+        }
+    digits_pc = _load_results_md_accuracy_snapshot("digits_pc")
+    digits_mlp = _load_results_md_accuracy_snapshot("digits_mlp")
+    stronger_val_accuracy = float(stronger_summary["val_accuracy"]["mean"])
+    stronger_test_accuracy = float(stronger_summary["test_accuracy"]["mean"])
+    stronger_pair = (stronger_val_accuracy, stronger_test_accuracy)
+
+    def _relation_phrase(reference: dict[str, float | str], label: str) -> str:
+        ref_val = float(reference["val_accuracy"])
+        ref_test = float(reference["test_accuracy"])
+        if stronger_pair[0] >= ref_val and stronger_pair[1] >= ref_test:
+            return f"above the {label} accuracy level"
+        if stronger_pair[0] <= ref_val and stronger_pair[1] <= ref_test:
+            return f"below the {label} accuracy level"
+        return f"mixed relative to the {label} accuracy level"
+
+    note = (
+        "Diagnostic-only accuracy context: the stronger Stage 05 v2 budget is "
+        f"{_relation_phrase(stage04_reference, 'frozen Stage 04 bridge')}, "
+        f"{_relation_phrase(digits_pc, 'standalone digits_pc baseline')}, and "
+        f"{_relation_phrase(digits_mlp, 'standalone digits_mlp baseline')}; this comparison informs "
+        "budgeting only and does not change the Stage 05 mechanism-first gate."
+    )
+    return {
+        "stage05_v2_stronger_budget": {
+            "source": "aggregate_summary.by_method",
+            "val_accuracy_mean": float(stronger_val_accuracy),
+            "test_accuracy_mean": float(stronger_test_accuracy),
+        },
+        "frozen_stage04_bridge": stage04_reference,
+        "digits_pc": digits_pc,
+        "digits_mlp": digits_mlp,
+        "note": note,
+    }
 
 
 def _hidden_residual_rms(context: Any, z: np.ndarray) -> float:
@@ -2512,21 +2618,42 @@ def _stage05_v2_budget_push_decision(
     stronger_boundary_rate = _rate(
         [bool(row["selection_hits_final_training_boundary"]) for row in stronger_rows]
     )
+    configured_step_gain_fraction_vs_reference = float(
+        min(configured_energy_gain_fraction, configured_residual_gain_fraction)
+    )
+    report_accuracy_gain_vs_reference = {
+        "val_accuracy_delta": float(val_accuracy_gain),
+        "test_accuracy_delta": float(test_accuracy_gain),
+    }
+    budget_line_still_looks_boundary_limited = bool(stronger_boundary_all)
+    budget_line_should_continue = bool(
+        configured_step_mechanism_improved_materially
+        and report_only_accuracy_improved_materially
+        and budget_line_still_looks_boundary_limited
+    )
+    budget_line_should_stop_and_open_v3 = bool(not budget_line_should_continue)
     recommended_next_move = (
         "continue_with_budget"
-        if stronger_boundary_all
+        if budget_line_should_continue
         else "open_stage05_v3_charter"
     )
-    if stronger_boundary_all:
+    if budget_line_should_continue:
         rationale = (
-            "The stronger Stage 05 v2 budget still selects the final training epoch on every seed, "
-            "so the same-family budget line still looks boundary-limited."
+            "The stronger Stage 05 v2 budget still materially improves configured-step mechanism and "
+            "report-only accuracy while also selecting the final training epoch on every seed, so the "
+            "same-family budget line still looks boundary-limited enough to continue."
+        )
+    elif budget_line_still_looks_boundary_limited:
+        rationale = (
+            "The stronger Stage 05 v2 budget still reaches the final training boundary on every seed, "
+            "but the gains are no longer material enough across both configured-step mechanism and "
+            "report-only accuracy, so the budget line should stop and a true Stage 05 v3 charter should open."
         )
     elif configured_step_mechanism_improved_materially or report_only_accuracy_improved_materially:
         rationale = (
-            "The stronger Stage 05 v2 budget improves the same-family reference without still "
-            "hitting the final training boundary on every seed, so the budget question is closer "
-            "to saturation and a true v3 charter can be considered if needed."
+            "The stronger Stage 05 v2 budget improves the same-family reference, but it no longer "
+            "hits the final training boundary on every seed, so the budget line no longer looks clearly "
+            "boundary-limited enough to justify continuing the same-family scaling pass."
         )
     else:
         rationale = (
@@ -2540,6 +2667,13 @@ def _stage05_v2_budget_push_decision(
         STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME: bool(
             report_only_accuracy_improved_materially
         ),
+        "configured_step_gain_fraction_vs_reference": configured_step_gain_fraction_vs_reference,
+        "report_accuracy_gain_vs_reference": report_accuracy_gain_vs_reference,
+        "budget_line_still_looks_boundary_limited": bool(
+            budget_line_still_looks_boundary_limited
+        ),
+        "budget_line_should_continue": bool(budget_line_should_continue),
+        "budget_line_should_stop_and_open_v3": bool(budget_line_should_stop_and_open_v3),
         "configured_step_energy_gain_fraction": float(configured_energy_gain_fraction),
         "configured_step_residual_gain_fraction": float(configured_residual_gain_fraction),
         "configured_step_energy_seed_improvement_rate": float(energy_seed_improvement_rate),
@@ -2565,9 +2699,11 @@ def _stage05_v2_budget_push_supports_lines(
     decision: dict[str, Any],
     config: Stage05V2BudgetPushValidationConfig,
     by_method: dict[str, dict[str, Any]],
+    contextual_accuracy_snapshot: dict[str, Any],
 ) -> list[str]:
     reference_summary = by_method[STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME]
     stronger_summary = by_method[STAGE05_V2_BUDGET_PUSH_METHOD_NAME]
+    contextual_note = contextual_accuracy_snapshot["note"]
     return [
         (
             f"The stronger-budget Stage 05 v2 candidate materially improves configured-step mechanism magnitude over the {int(config.reference_stage05_epochs)}-epoch reference."
@@ -2596,6 +2732,18 @@ def _stage05_v2_budget_push_supports_lines(
         (
             f"{int(config.stronger_stage05_epochs)}-epoch candidate validation/test accuracy means: {stronger_summary['val_accuracy']['mean']:.6f} / {stronger_summary['test_accuracy']['mean']:.6f}."
         ),
+        (
+            f"Diagnostic-only context: Stage 05 v2 stronger-budget validation/test accuracy means remain at "
+            f"{contextual_accuracy_snapshot['stage05_v2_stronger_budget']['val_accuracy_mean']:.6f} / "
+            f"{contextual_accuracy_snapshot['stage05_v2_stronger_budget']['test_accuracy_mean']:.6f}, "
+            f"versus frozen Stage 04 at {contextual_accuracy_snapshot['frozen_stage04_bridge']['val_accuracy']:.6f} / "
+            f"{contextual_accuracy_snapshot['frozen_stage04_bridge']['test_accuracy']:.6f}, standalone digits_pc at "
+            f"{contextual_accuracy_snapshot['digits_pc']['val_accuracy']:.6f} / "
+            f"{contextual_accuracy_snapshot['digits_pc']['test_accuracy']:.6f}, and standalone digits_mlp at "
+            f"{contextual_accuracy_snapshot['digits_mlp']['val_accuracy']:.6f} / "
+            f"{contextual_accuracy_snapshot['digits_mlp']['test_accuracy']:.6f}."
+        ),
+        str(contextual_note),
     ]
 
 
@@ -2620,6 +2768,7 @@ def _stage05_v2_budget_push_does_not_support_lines(
 def _stage05_v2_budget_push_report_markdown(report: dict[str, Any]) -> str:
     protocol = report["comparison_protocol"]
     decision = report["decision"]
+    contextual = report["contextual_accuracy_note"]
     lines = [
         "# Stage 05 V2 Budget-Push Validation",
         "",
@@ -2634,9 +2783,21 @@ def _stage05_v2_budget_push_report_markdown(report: dict[str, Any]) -> str:
         "## Decision",
         f"- `{STAGE05_V2_BUDGET_PUSH_DECISION_NAME}`: `{decision[STAGE05_V2_BUDGET_PUSH_DECISION_NAME]}`",
         f"- `{STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME}`: `{decision[STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME]}`",
+        f"- configured-step gain fraction vs reference: `{decision['configured_step_gain_fraction_vs_reference']}`",
+        f"- report accuracy gain vs reference: `{decision['report_accuracy_gain_vs_reference']}`",
+        f"- budget line still looks boundary-limited: `{decision['budget_line_still_looks_boundary_limited']}`",
+        f"- budget line should continue: `{decision['budget_line_should_continue']}`",
+        f"- budget line should stop and open v3: `{decision['budget_line_should_stop_and_open_v3']}`",
         f"- stronger budget still hits final training boundary on all seeds: `{decision['budget_push_selection_hits_final_training_boundary_on_all_seeds']}`",
         f"- recommended next move: `{decision['recommended_next_move']}`",
         f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Contextual Accuracy Note",
+        f"- Stage 05 v2 stronger budget validation/test accuracy means: `{contextual['stage05_v2_stronger_budget']['val_accuracy_mean']}` / `{contextual['stage05_v2_stronger_budget']['test_accuracy_mean']}`",
+        f"- frozen Stage 04 validation/test accuracy: `{contextual['frozen_stage04_bridge']['val_accuracy']}` / `{contextual['frozen_stage04_bridge']['test_accuracy']}`",
+        f"- standalone digits_pc validation/test accuracy: `{contextual['digits_pc']['val_accuracy']}` / `{contextual['digits_pc']['test_accuracy']}`",
+        f"- standalone digits_mlp validation/test accuracy: `{contextual['digits_mlp']['val_accuracy']}` / `{contextual['digits_mlp']['test_accuracy']}`",
+        f"- note: `{contextual['note']}`",
         "",
         "## Supports",
     ]
@@ -2763,6 +2924,9 @@ def run_stage05_v2_budget_push_validation(
         config=config,
         by_method=by_method,
     )
+    contextual_accuracy_snapshot = _load_budget_push_contextual_accuracy_snapshot(
+        stronger_summary=by_method[STAGE05_V2_BUDGET_PUSH_METHOD_NAME]
+    )
 
     summary = {
         "phase": "FMPC Stage 05 EF Core Probe",
@@ -2771,6 +2935,7 @@ def run_stage05_v2_budget_push_validation(
         "comparison_protocol": _stage05_v2_budget_push_protocol_payload(config),
         "by_method": by_method,
         "pairwise_budget_push_vs_reference_budget": pairwise_budget_push_vs_reference,
+        "contextual_accuracy_note": contextual_accuracy_snapshot,
         **decision,
         "decision_rationale": decision_rationale,
         "aggregate_runs_csv_path": "aggregate_runs.csv",
@@ -2785,10 +2950,12 @@ def run_stage05_v2_budget_push_validation(
             **decision,
             "decision_rationale": decision_rationale,
         },
+        "contextual_accuracy_note": contextual_accuracy_snapshot,
         "supports": _stage05_v2_budget_push_supports_lines(
             decision=decision,
             config=config,
             by_method=by_method,
+            contextual_accuracy_snapshot=contextual_accuracy_snapshot,
         ),
         "does_not_support": _stage05_v2_budget_push_does_not_support_lines(
             decision=decision,

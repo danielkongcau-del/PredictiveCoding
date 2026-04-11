@@ -1,0 +1,251 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_budget_push_validation_384_to_768",
+  "num_runs": 6,
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "reference_budget": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 384,
+      "eval_steps": 15,
+      "configured_transport_steps": 2,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stronger_budget_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 768,
+      "eval_steps": 15,
+      "configured_transport_steps": 2,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "report_accuracy_improvement_threshold": 0.01,
+      "selection_rule_unchanged": true
+    }
+  },
+  "by_method": {
+    "stage_05_two_branch_corrected_residual_core_v2_budget_reference": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 384,
+      "selected_epoch": {
+        "mean": 384.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.001947061909655064,
+        "std": 9.248398594260162e-05
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.001944251310910398,
+        "std": 8.638976043635511e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -5.647316885241508e-06,
+        "std": 5.612104051678844e-07
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.00023310422990265497,
+        "std": 4.536110614643691e-05
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.00023373355288291986,
+        "std": 3.9944217545140724e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -5.729052039633705e-07,
+        "std": 3.222374973436944e-07
+      },
+      "val_accuracy": {
+        "mean": 0.780246913580247,
+        "std": 0.015220775315972804
+      },
+      "test_accuracy": {
+        "mean": 0.7851851851851852,
+        "std": 0.026189140043946166
+      },
+      "val_output_mse": {
+        "mean": 0.0579251293063728,
+        "std": 0.0022409596641480125
+      },
+      "test_output_mse": {
+        "mean": 0.05797256660977723,
+        "std": 0.0035139862820122683
+      },
+      "runtime_proxy_seconds": {
+        "mean": 50.3651009999982,
+        "std": 0.5846187922576854
+      }
+    },
+    "stage_05_two_branch_corrected_residual_core_v2_budget_push": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 768,
+      "selected_epoch": {
+        "mean": 768.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.003365826242540106,
+        "std": 0.00017562467976712286
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0033615114119863454,
+        "std": 0.0001885040054751274
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.050532412466991e-05,
+        "std": 1.9999256795905366e-07
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.00046783085000268176,
+        "std": 8.286914002302781e-05
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.00047166645103052796,
+        "std": 9.134766931298792e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -1.2370465274314998e-06,
+        "std": 1.1171041428524302e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8469135802469135,
+        "std": 0.030290973200951317
+      },
+      "test_accuracy": {
+        "mean": 0.8382716049382717,
+        "std": 0.0017459426695964424
+      },
+      "val_output_mse": {
+        "mean": 0.05035734274148873,
+        "std": 0.0007715535921745141
+      },
+      "test_output_mse": {
+        "mean": 0.04976173218410623,
+        "std": 0.0018201128256026121
+      },
+      "runtime_proxy_seconds": {
+        "mean": 102.7906700333333,
+        "std": 0.7665131396008873
+      }
+    }
+  },
+  "pairwise_budget_push_vs_reference_budget": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0014187643328850419,
+      "std": 0.0002680437834274012
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0014172601010759474,
+      "std": 0.00027484601820214506
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -4.8580072394284034e-06,
+      "std": 7.61198098911548e-07
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.0002379328981476081,
+      "std": 0.00012966073794208263
+    },
+    "val_accuracy_delta": {
+      "mean": 0.06666666666666665,
+      "std": 0.019830096795319732
+    },
+    "test_accuracy_delta": {
+      "mean": 0.0530864197530864,
+      "std": 0.027104319012469295
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 52.4255690333351,
+      "std": 0.5619766605716129
+    }
+  },
+  "contextual_accuracy_note": {
+    "stage05_v2_stronger_budget": {
+      "source": "aggregate_summary.by_method",
+      "val_accuracy_mean": 0.8469135802469135,
+      "test_accuracy_mean": 0.8382716049382717
+    },
+    "frozen_stage04_bridge": {
+      "source": "outputs\\stage_05_ef_core_probe\\frozen_bridge_vs_two_branch_corrected_core_comparison\\aggregate_summary.json",
+      "val_accuracy": 0.811111111111111,
+      "test_accuracy": 0.8197530864197531
+    },
+    "digits_pc": {
+      "source": "RESULTS.md",
+      "best_epoch": "55",
+      "val_accuracy": 0.8444444444444444,
+      "test_accuracy": 0.9185185185185185
+    },
+    "digits_mlp": {
+      "source": "RESULTS.md",
+      "best_epoch": "99",
+      "val_accuracy": 0.9111111111111111,
+      "test_accuracy": 0.9481481481481482
+    },
+    "note": "Diagnostic-only accuracy context: the stronger Stage 05 v2 budget is above the frozen Stage 04 bridge accuracy level, mixed relative to the standalone digits_pc baseline accuracy level, and below the standalone digits_mlp baseline accuracy level; this comparison informs budgeting only and does not change the Stage 05 mechanism-first gate."
+  },
+  "stage05_v2_budget_push_materially_improves_configured_step_mechanism": true,
+  "stage05_v2_budget_push_materially_improves_report_only_accuracy": true,
+  "configured_step_gain_fraction_vs_reference": 0.7289490268685037,
+  "report_accuracy_gain_vs_reference": {
+    "val_accuracy_delta": 0.06666666666666654,
+    "test_accuracy_delta": 0.05308641975308648
+  },
+  "budget_line_still_looks_boundary_limited": true,
+  "budget_line_should_continue": true,
+  "budget_line_should_stop_and_open_v3": false,
+  "configured_step_energy_gain_fraction": 0.7289490268685037,
+  "configured_step_residual_gain_fraction": 0.8602328040284302,
+  "configured_step_energy_seed_improvement_rate": 1.0,
+  "configured_step_residual_seed_improvement_rate": 1.0,
+  "val_accuracy_gain": 0.06666666666666654,
+  "test_accuracy_gain": 0.05308641975308648,
+  "reference_budget_selection_hits_final_training_boundary_on_all_seeds": true,
+  "budget_push_selection_hits_final_training_boundary_on_all_seeds": true,
+  "budget_push_selection_hits_final_training_boundary_rate": 1.0,
+  "recommended_next_move": "continue_with_budget",
+  "decision_rationale": "The stronger Stage 05 v2 budget still materially improves configured-step mechanism and report-only accuracy while also selecting the final training epoch on every seed, so the same-family budget line still looks boundary-limited enough to continue.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}
