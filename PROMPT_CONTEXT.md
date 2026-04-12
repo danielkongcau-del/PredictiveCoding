@@ -103,6 +103,8 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - the v3-A candidate materially improves configured-step mechanism over the fixed-budget v2 reference
   - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the active Stage 05 implementation branch
   - the next Stage 05 move is now to open the `v3-B` charter
+  - `v3-B = trajectory curriculum contract`
+  - motivated by the working hypothesis that the remaining fixed-budget inefficiency is now trajectory-level
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -113,6 +115,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family budget push
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - if Stage 05 continues, draft the next step as the Stage 05 `v3-B` charter on top of the implemented `explicit transport-drift contract`
+- for that v3-B charter, treat the key mechanism hypothesis as trajectory-level direct-match vs recursive-continuation tension, not another branch-local tweak
 
 ## What Prompt Writers Must Not Reopen
 

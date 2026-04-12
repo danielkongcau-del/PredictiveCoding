@@ -202,6 +202,34 @@ That next v3-B chartering pass should preserve:
 - the mechanism-first validation contract for Stage 05
 - task accuracy as a secondary signal only
 
+The next future v3-B implementation pass should be accepted only if it:
+
+- preserves explicit transport-drift decomposition from v3-A
+- keeps artifact-independent target construction
+- keeps deterministic artifact generation
+- keeps one-step mechanism metrics positive under the current Stage 05 rule
+- reports explicit pairwise deltas versus:
+  - the fixed-budget v3-A result
+  - the fixed-budget v2 control
+- makes the trajectory curriculum identity explicit
+- keeps task accuracy as a secondary signal only
+
+The next future v3-B implementation pass must minimally produce:
+
+- a new Stage 05 v3-B candidate codepath
+- a new comparison entry or suite against:
+  - the fixed-budget Stage 05 v2 control
+  - the fixed-budget Stage 05 v3-A result
+- a matching smoke test
+- a dedicated artifact directory
+- aggregate summary fields that report:
+  - whether trajectory curriculum is enabled
+  - the curriculum schedule identity
+  - pairwise deltas versus v3-A
+  - pairwise deltas versus v2
+  - a gap-closure style decision field
+  - `recommended_next_move`
+
 It should not be framed as:
 
 - a Stage 04 package-internal reopening

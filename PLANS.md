@@ -249,6 +249,46 @@ Next pass objective:
 - keep Stage 04 frozen on `main`
 - keep Stage 05 mechanism-first and keep task accuracy report-only
 - use the fixed-budget v2 result as the immediate control when specifying the next v3-B comparison target
+- treat the fixed-budget v3-A result as the active implementation branch for onward design work
+
+Working hypothesis:
+
+- after explicit transport-drift decomposition, the main remaining fixed-budget inefficiency is now more likely trajectory-level than target-entanglement-level
+- the next mechanism change should therefore target the trajectory contract rather than another branch-local or schedule-local tweak
+
+Normative v3-B charter direction:
+
+- `Stage 05 v3-B = trajectory curriculum contract`
+- keep the Stage 05 `t, r` notation unchanged
+- introduce a curriculum split:
+  - `alpha in (0, 1]`
+  - `s = t + alpha * r`
+  - `r_s = (1 - alpha) * r`
+- use the exact trajectory decomposition:
+  - `u^*_{t,r} = alpha * u^*_{t, alpha r} + (1 - alpha) * u^*_{s, r_s}`
+
+Required framing:
+
+- do not reopen Stage 04 package-internal work
+- do not reopen another pure same-family budget escalation
+- do not reopen another pure same-family efficiency tweak
+- do not frame v3-B as replacing the frozen Stage 04 bridge result on `main`
+- do not treat task accuracy as the primary gate
+
+Required next implementation deliverables:
+
+- a new Stage 05 v3-B candidate codepath on top of the current v3-A branch
+- a new comparison entry against:
+  - the fixed-budget v2 control
+  - the fixed-budget v3-A result
+- a matching smoke test
+- aggregate summary fields for:
+  - whether trajectory curriculum is enabled
+  - the curriculum schedule identity
+  - pairwise deltas versus v3-A
+  - pairwise deltas versus v2
+  - a gap-closure decision field
+  - `recommended_next_move`
 
 ## Exploratory Acceptance Criteria
 

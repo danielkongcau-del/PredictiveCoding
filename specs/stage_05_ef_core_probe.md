@@ -368,7 +368,7 @@ This first implementation choice is deliberate:
 - it does not yet introduce rollout-consistency or semigroup losses
 - it does not yet claim that explicit transport-drift decomposition is a confirmed repair
 
-#### 18.11.4 Non-goals and required next deliverables
+#### 18.11.5 Non-goals and required next deliverables
 
 Stage 05 v3-A must not be framed as:
 
@@ -388,5 +388,118 @@ The next Stage 05 v3-A implementation pass must minimally add:
 - aggregate summary fields that report:
   - whether explicit transport-drift decomposition is enabled
   - pairwise deltas versus the current v2 reference
+  - a gap-closure style decision field
+  - `recommended_next_move`
+
+### 18.12 Stage 05 v3-B charter
+
+This section opens the next Stage 05 charter only.
+
+It does not itself modify:
+
+- the current Stage 05 v3-A implementation
+- the current Stage 05 experiment entrypoints
+- the current Stage 05 smoke or fixed-budget comparison code
+
+Current evidence motivating this charter:
+
+- the fixed-budget `1536`-epoch `v2 vs v3-A` comparison shows positive gap closure versus the fixed-budget v2 reference
+- the same comparison shows material configured-step mechanism improvement versus the fixed-budget v2 reference
+- the same comparison does not show an obvious report-only accuracy regression under the current Stage 05 rule
+- the next credible mechanism question is therefore no longer target-entanglement-only
+
+#### 18.12.1 Working hypothesis
+
+Stage 05 v3-B is motivated by the working hypothesis that, after explicit transport-drift
+decomposition, the main remaining fixed-budget inefficiency is trajectory-level rather than
+target-entanglement-level.
+
+More specifically, the current residual MeanFlow family may still face an optimization conflict
+between:
+
+- direct horizon matching
+- recursive continuation or trajectory consistency
+
+This is a chartering hypothesis, not a proved repository conclusion.
+
+#### 18.12.2 Trajectory curriculum split
+
+Stage 05 v3-B keeps the current Stage 05 remaining-horizon notation:
+
+- `t` is the current knot time
+- `r` is the remaining horizon
+
+Introduce a curriculum split parameter:
+
+- `alpha in (0, 1]`
+
+Define the intermediate knot time and remaining horizon after that knot by:
+
+- `s = t + alpha * r`
+- `r_s = (1 - alpha) * r`
+
+The exact average velocity over the full interval can then be decomposed as:
+
+- `u^*_{t,r} = alpha * u^*_{t, alpha r} + (1 - alpha) * u^*_{s, r_s}`
+
+Interpretation:
+
+- when `alpha = 1`, the contract reduces to direct full-interval trajectory matching
+- when `alpha` becomes smaller, the contract shifts more mass onto recursive continuation over the remaining interval
+
+This gives Stage 05 a natural curriculum axis without leaving the corrected residual MeanFlow
+family.
+
+#### 18.12.3 v3-B contract definition
+
+Stage 05 v3-B is defined as a trajectory curriculum contract on top of the validated v3-A
+explicit transport-drift contract.
+
+It preserves:
+
+- explicit transport-drift decomposition
+- artifact-independent target construction
+- mechanism-first evaluation
+- task accuracy as a report-only signal
+- the current fixed-budget shared comparison protocol
+
+It changes only the higher-level trajectory supervision contract:
+
+- how direct full-interval matching and recursive continuation are balanced during training
+
+This charter does not yet fix:
+
+- the exact curriculum schedule over `alpha`
+- the exact v3-B loss form
+- the exact weighting between direct and recursive trajectory terms
+- the final rollout-consistency implementation details
+
+Those choices belong to the next implementation pass.
+
+#### 18.12.4 Non-goals and required next deliverables
+
+Stage 05 v3-B must not be framed as:
+
+- a reopening of Stage 04 package-internal work
+- another pure same-family budget escalation
+- another pure same-family efficiency tweak
+- a branch-gating variant
+- a default introduction of `muPC`, `iPC`, `DKP-PC`, or a full `AlphaFlow` family replacement
+- a change to the artifact-independent target-construction boundary
+- a promotion of task accuracy to the primary gate
+
+The next Stage 05 v3-B implementation pass must minimally add:
+
+- a new Stage 05 v3-B candidate codepath on top of the current v3-A branch
+- a new comparison entry or suite against:
+  - the fixed-budget Stage 05 v2 control
+  - the fixed-budget Stage 05 v3-A result
+- a matching smoke test
+- a dedicated artifact directory
+- aggregate summary fields that report:
+  - whether trajectory curriculum is enabled
+  - the curriculum schedule identity
+  - pairwise deltas versus the current v3-A result
+  - pairwise deltas versus the current v2 control
   - a gap-closure style decision field
   - `recommended_next_move`

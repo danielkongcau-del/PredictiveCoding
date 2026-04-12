@@ -28,6 +28,7 @@ Current working interpretation:
 - Stage 04 package-internal digging is treated as closed from the current state
 - the current open work is no longer another Stage 04 repair
 - the current narrow Stage 05 exploratory reference is the two-branch corrected residual MeanFlow v2 core
+- the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the active Stage 05 implementation branch for onward design work
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
 - the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed
@@ -45,7 +46,7 @@ Current working interpretation:
 - the refreshed frozen-bridge vs Stage 05 v2 comparison says Stage 05 v2 remains mechanism-positive and should be treated as the current exploratory reference, but not as a replacement for the frozen bridge result on `main`
 - the dedicated Stage 05 v2 diagnostics say the current narrow diagnosis is `likely_undertrained`, not primarily a selection-rule issue
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it remains contextual evidence rather than the active next move
-- the fixed-budget same-family efficiency diagnostic now says the next move should be to open the Stage 05 v3-A charter rather than keep pushing the same family by schedule tweaks alone
+- the fixed-budget same-family efficiency diagnostic closed the pure same-family schedule-tweak line and now serves as part of the evidence base behind the current Stage 05 `v3-B` charter
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference and should feed the next `v3-B` charter
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
