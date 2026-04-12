@@ -1,0 +1,243 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_vs_v3a_explicit_transport_drift_comparison",
+  "num_runs": 2,
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "explicit_transport_drift_decomposition_enabled": false,
+      "configured_transport_steps": 2,
+      "epochs": 3,
+      "eval_steps": 5,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3a_candidate": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "explicit_transport_drift_decomposition_enabled": true,
+      "lambda_drift": 1.0,
+      "configured_transport_steps": 2,
+      "epochs": 3,
+      "eval_steps": 5,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "purpose": "smoke_ready_v3a_candidate_sanity_check",
+      "task_accuracy_is_report_only": true,
+      "full_fixed_budget_comparison_still_required": true
+    }
+  },
+  "by_method": {
+    "stage_05_two_branch_corrected_residual_core_v2": {
+      "num_runs": 1,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 3,
+      "selected_epoch": {
+        "mean": 3.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.00010702574098109263,
+        "std": 0.0
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.00011296177373015803,
+        "std": 0.0
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -5.897066476646766e-07,
+        "std": 0.0
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": 2.7933692625603523e-05,
+        "std": 0.0
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": 2.186413272292631e-05,
+        "std": 0.0
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": 1.111827962098225e-07,
+        "std": 0.0
+      },
+      "val_accuracy": {
+        "mean": 0.1,
+        "std": 0.0
+      },
+      "test_accuracy": {
+        "mean": 0.13333333333333333,
+        "std": 0.0
+      },
+      "val_output_mse": {
+        "mean": 0.09161314577531175,
+        "std": 0.0
+      },
+      "test_output_mse": {
+        "mean": 0.09183371689892363,
+        "std": 0.0
+      },
+      "runtime_proxy_seconds": {
+        "mean": 0.36174709999977495,
+        "std": 0.0
+      }
+    },
+    "stage05_v3a_explicit_transport_drift_contract": {
+      "num_runs": 1,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 3,
+      "selected_epoch": {
+        "mean": 3.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.00010485075275640243,
+        "std": 0.0
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.00011094232096753309,
+        "std": 0.0
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -5.793707302127868e-07,
+        "std": 0.0
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": 3.0108680850293723e-05,
+        "std": 0.0
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": 2.388358548555125e-05,
+        "std": 0.0
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": 1.2151871366171234e-07,
+        "std": 0.0
+      },
+      "val_accuracy": {
+        "mean": 0.1,
+        "std": 0.0
+      },
+      "test_accuracy": {
+        "mean": 0.13333333333333333,
+        "std": 0.0
+      },
+      "val_output_mse": {
+        "mean": 0.09161314577531175,
+        "std": 0.0
+      },
+      "test_output_mse": {
+        "mean": 0.09183371689892363,
+        "std": 0.0
+      },
+      "runtime_proxy_seconds": {
+        "mean": 0.3596042999997735,
+        "std": 0.0
+      }
+    }
+  },
+  "pairwise_stage05_v3a_vs_v2": {
+    "shared_seeds": [
+      0
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": 2.1749882246901997e-06,
+      "std": 0.0
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": 2.0194527626249403e-06,
+      "std": 0.0
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": 1.0335917451889838e-08,
+      "std": 0.0
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": 2.0194527626249403e-06,
+      "std": 0.0
+    },
+    "val_accuracy_delta": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "test_accuracy_delta": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -0.0021428000000014435,
+      "std": 0.0
+    }
+  },
+  "stage05_v3a_shows_positive_gap_closure_signal_vs_v2": false,
+  "deterministic_artifact_checks_all_pass": true,
+  "stage05_v3a_mechanism_signal_positive_on_all_smoke_runs": true,
+  "pairwise_gap_closure_vs_v2": {
+    "shared_seeds": [
+      0
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": 2.1749882246901997e-06,
+      "std": 0.0
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": 2.0194527626249403e-06,
+      "std": 0.0
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": 1.0335917451889838e-08,
+      "std": 0.0
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": 2.0194527626249403e-06,
+      "std": 0.0
+    },
+    "val_accuracy_delta": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "test_accuracy_delta": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -0.0021428000000014435,
+      "std": 0.0
+    }
+  },
+  "gap_closure_decision": "signal_not_yet_established",
+  "recommended_next_move": "run_fixed_budget_v2_vs_v3a_comparison",
+  "decision_rationale": "The smoke-level v3-A candidate is artifact-stable and ready for a fixed-budget v2 vs v3-A comparison.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}

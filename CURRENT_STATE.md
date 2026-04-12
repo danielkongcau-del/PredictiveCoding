@@ -141,13 +141,17 @@ Current probe status:
     - `same_family_efficiency_change_materially_improves_configured_step_mechanism = false`
     - `same_family_efficiency_change_materially_improves_report_only_accuracy = false`
     - `same_family_efficiency_change_materially_narrows_gap_to_3072_reference = false`
-    - `recommended_next_move = open_stage05_v3_charter`
-- the next Stage 05 charter is now defined as:
+    - `recommended_next_move = implement_stage05_v3a_candidate`
+- the next Stage 05 charter was then defined as:
   - `Stage 05 v3-A`
   - `explicit transport-drift contract`
 - current v3-A charter motivation:
   - it is driven by the working hypothesis that the current residual target may entangle transport residual and anchor-drift residual too tightly
   - that hypothesis is being treated as charter motivation, not as a proved repository conclusion
+- the first minimal v3-A candidate path now exists in the Stage 05 probe:
+  - candidate name: `stage05_v3a_explicit_transport_drift_contract`
+  - it reuses the current two-branch scaffold but replaces the bootstrap supervision with an explicit `q_boot / d_boot` split
+  - a smoke-level `v2 vs v3-A` comparison entry now also exists and writes formal aggregate artifacts
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
@@ -157,7 +161,7 @@ Current probe status:
   - the longer-training and budget-push validations showed real same-family budget upside
   - the fixed-budget efficiency diagnostic then showed that a narrow same-family schedule change does not recover a material fraction of that upside
   - on this simple task, further pure epoch escalation is now treated as economically unjustified from the current state
-  - the current operative next move is therefore to open the working-hypothesis-driven Stage 05 v3-A charter rather than another same-family budget or schedule push
+  - the current operative next move is therefore to run a fixed-budget Stage 05 `v2 vs v3-A` comparison rather than another same-family budget or schedule push
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -169,10 +173,10 @@ Current probe status:
 - Keep Stage 05 mechanism-first and task accuracy report-only.
 - Do not continue pure same-family budget escalation from the current state.
 - Do not continue pure same-family efficiency tweaking from the current state.
-- The next Stage 05 move should now be to open the Stage 05 v3-A charter:
-  - `explicit transport-drift contract`
-  - motivated by a working hypothesis about residual-target entanglement
-  - not a claim that the frozen bridge result on `main` should be replaced
+- The next Stage 05 move should now be to run a fixed-budget comparison between:
+  - the current Stage 05 v2 exploratory reference
+  - `stage05_v3a_explicit_transport_drift_contract`
+  - still mechanism-first and still not a claim that the frozen bridge result on `main` should be replaced
 
 ## Reopen Conditions
 

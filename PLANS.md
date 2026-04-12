@@ -169,11 +169,11 @@ Completed outcome:
 - the current narrow diagnosis is:
   - `likely_undertrained`
 
-### 7. Open Stage 05 V3-A Charter
+### 7. Implement The First Stage 05 V3-A Candidate
 
 Objective:
 
-- open a true Stage 05 v3-A mechanism charter on top of the current Stage 05 v2 exploratory reference
+- implement the first minimal Stage 05 v3-A candidate on top of the current Stage 05 v2 exploratory reference
 
 Required framing:
 
@@ -190,7 +190,7 @@ Current evidence supporting this move:
 - Stage 05 v2 therefore still looks useful as an exploratory reference, but not as a family that should keep being pushed only by epochs or schedule tweaks
 - the next credible move is now to change the higher-level mechanism contract rather than another same-family local knob
 
-Current execution plan:
+Completed outcome:
 
 - keep the current Stage 05 v2 family fixed as the exploratory reference:
   - `transport_family = two_branch_residual_meanflow_core`
@@ -222,12 +222,19 @@ Current execution plan:
     - a gap-closure style decision field
     - `recommended_next_move`
 
-The next Stage 05 chartering pass must answer:
+- the repository now contains:
+  - the v3-A candidate codepath `stage05_v3a_explicit_transport_drift_contract`
+  - the explicit `gbar_boot / q_boot / d_boot` supervision split
+  - a smoke-ready `v2 vs v3-A` comparison entry
+  - matching Stage 05 smoke coverage
 
-- what explicit transport-drift decomposition should be tested first
-- why that change is justified beyond same-family budget scaling and same-family schedule tuning
-- how the new charter preserves the Stage 05 mechanism-first contract
-- how the new charter avoids reopening Stage 04 package-internal work
+### 8. Run A Fixed-Budget V2 vs V3-A Comparison
+
+Next pass objective:
+
+- run a real fixed-budget comparison between the current Stage 05 v2 exploratory reference and the new v3-A candidate
+- keep the comparison mechanism-first and keep task accuracy report-only
+- decide whether the explicit transport-drift contract closes any meaningful configured-step gap versus v2
 
 ## Exploratory Acceptance Criteria
 

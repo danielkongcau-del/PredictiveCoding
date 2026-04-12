@@ -140,6 +140,53 @@ def test_stage05_v1_vs_v2_comparison_writes_expected_artifacts(tmp_path: Path) -
     assert "stage05_v2_improves_mechanism_magnitude_over_v1" in report["decision"]
 
 
+def test_stage05_v2_vs_v3a_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_vs_v3a_smoke",
+        comparison_variant="stage05_v2_vs_v3a",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 2
+    method_names = {row["method_name"] for row in rows}
+    assert method_names == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3a_explicit_transport_drift_contract",
+    }
+
+    assert summary["stage"] == "stage05_v2_vs_v3a_explicit_transport_drift_comparison"
+    assert "comparison_protocol" in summary
+    assert "by_method" in summary
+    assert "pairwise_stage05_v3a_vs_v2" in summary
+    assert "stage05_v3a_shows_positive_gap_closure_signal_vs_v2" in summary
+    assert "recommended_next_move" in summary
+    assert summary["comparison_report_json_path"] == "comparison_report.json"
+    assert summary["comparison_report_md_path"] == "comparison_report.md"
+
+    assert "decision" in report
+    assert "supports" in report
+    assert "does_not_support" in report
+    assert "stage05_v3a_shows_positive_gap_closure_signal_vs_v2" in report["decision"]
+    assert "recommended_next_move" in report["decision"]
+
+
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(
         output_root=tmp_path,

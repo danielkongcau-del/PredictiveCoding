@@ -37,6 +37,7 @@ ComparisonMethodName = Literal[
     "stage_05_corrected_residual_core",
     "stage_05_corrected_residual_core_v1",
     "stage_05_two_branch_corrected_residual_core_v2",
+    "stage05_v3a_explicit_transport_drift_contract",
     "stage_05_two_branch_corrected_residual_core_v2_current_budget",
     "stage_05_two_branch_corrected_residual_core_v2_longer_training",
     "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
@@ -50,6 +51,7 @@ STAGE04_METHOD_NAME: ComparisonMethodName = "stage_04_frozen_bridge"
 STAGE05_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core"
 STAGE05_V1_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core_v1"
 STAGE05_V2_METHOD_NAME: ComparisonMethodName = "stage_05_two_branch_corrected_residual_core_v2"
+STAGE05_V3A_METHOD_NAME: ComparisonMethodName = "stage05_v3a_explicit_transport_drift_contract"
 STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: ComparisonMethodName = (
     "stage_05_two_branch_corrected_residual_core_v2_current_budget"
 )
@@ -70,6 +72,7 @@ STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME: ComparisonMethodName = (
 )
 JUSTIFY_V2_DECISION_NAME = "stage05_corrected_residual_core_justifies_v2_charter"
 STAGE05_V2_FAVORABLE_DECISION_NAME = "stage05_v2_improves_mechanism_magnitude_over_v1"
+STAGE05_V3A_SIGNAL_DECISION_NAME = "stage05_v3a_shows_positive_gap_closure_signal_vs_v2"
 STAGE05_V2_LONGER_TRAINING_DECISION_NAME = (
     "stage05_v2_longer_training_materially_improves_configured_step_mechanism"
 )
@@ -220,6 +223,48 @@ class CorrectedResidualCoreV1VsV2ComparisonConfig:
             raise ValueError("stage05_epochs and stage05_eval_steps must be positive.")
         if self.stage05_transport_steps <= 0:
             raise ValueError("stage05_transport_steps must be positive.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
+class Stage05V2VsV3AComparisonConfig:
+    """Compare the current Stage 05 v2 reference against the minimal Stage 05 v3-A candidate."""
+
+    experiment_name: str = "stage05_v2_vs_v3a_explicit_transport_drift_comparison"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0,)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    stage05_epochs: int = 4
+    stage05_eval_steps: int = 8
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+    lambda_drift: float = 1.0
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The Stage 05 v2 vs v3-A comparison currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.stage05_epochs <= 0 or self.stage05_eval_steps <= 0:
+            raise ValueError("stage05_epochs and stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+        if self.lambda_drift < 0.0:
+            raise ValueError("lambda_drift must be non-negative.")
 
     def resolved_run_id(self) -> str:
         if self.run_id is not None:
@@ -844,6 +889,30 @@ def _stage05_v2_config(
         eval_steps=int(config.stage05_eval_steps),
         layer_dims=config.stage05_layer_dims,
         transport_steps=int(config.stage05_transport_steps),
+    )
+
+
+def _stage05_v3a_config(
+    config: Stage05V2VsV3AComparisonConfig,
+    *,
+    seed: int,
+    output_root: Path,
+) -> FMPCEFExploratoryProbeConfig:
+    return _build_stage05_v2_config(
+        output_root=output_root,
+        experiment_name=STAGE05_V3A_METHOD_NAME,
+        seed=seed,
+        train_fraction=float(config.train_fraction),
+        val_fraction=float(config.val_fraction),
+        test_fraction=float(config.test_fraction),
+        batch_size=int(config.batch_size),
+        shuffle_batches=bool(config.shuffle_batches),
+        epochs=int(config.stage05_epochs),
+        eval_steps=int(config.stage05_eval_steps),
+        layer_dims=config.stage05_layer_dims,
+        transport_steps=int(config.stage05_transport_steps),
+        use_explicit_transport_drift_decomposition=True,
+        lambda_drift=float(config.lambda_drift),
     )
 
 
@@ -2333,6 +2402,293 @@ def run_corrected_residual_core_v1_vs_v2_comparison(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_stage05_v1_vs_v2_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _stage05_v2_vs_v3a_protocol_payload(
+    config: Stage05V2VsV3AComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "stage_05_v2_reference": {
+            "method_name": STAGE05_V2_METHOD_NAME,
+            "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "explicit_transport_drift_decomposition_enabled": False,
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "stage_05_v3a_candidate": {
+            "method_name": STAGE05_V3A_METHOD_NAME,
+            "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "explicit_transport_drift_decomposition_enabled": True,
+            "lambda_drift": float(config.lambda_drift),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "decision_rule": {
+            "purpose": "smoke_ready_v3a_candidate_sanity_check",
+            "task_accuracy_is_report_only": True,
+            "full_fixed_budget_comparison_still_required": True,
+        },
+    }
+
+
+def _stage05_v2_vs_v3a_decision(
+    *,
+    rows: list[dict[str, Any]],
+    pairwise_v3a_vs_v2: dict[str, Any],
+) -> tuple[dict[str, Any], str]:
+    v3a_rows = _method_rows(rows, STAGE05_V3A_METHOD_NAME)
+    artifact_pass = all(bool(row["deterministic_artifact_checks_passed"]) for row in v3a_rows)
+    mechanism_positive = all(bool(row["mechanism_signal_positive"]) for row in v3a_rows)
+    configured_energy_improves = (
+        float(pairwise_v3a_vs_v2["configured_step_energy_delta_vs_identity_delta"]["mean"]) < 0.0
+    )
+    configured_residual_improves = (
+        float(
+            pairwise_v3a_vs_v2["configured_step_fixed_point_residual_delta_vs_identity_delta"]["mean"]
+        )
+        < 0.0
+    )
+    positive_gap_signal = bool(
+        artifact_pass and mechanism_positive and configured_energy_improves and configured_residual_improves
+    )
+    recommended_next_move = (
+        "run_fixed_budget_v2_vs_v3a_comparison" if artifact_pass else "another_implementation_pass"
+    )
+    rationale = (
+        "The smoke-level v3-A candidate is artifact-stable and ready for a fixed-budget v2 vs v3-A comparison."
+        if artifact_pass
+        else "The smoke-level v3-A candidate still needs another implementation pass before a fixed-budget comparison."
+    )
+    return {
+        STAGE05_V3A_SIGNAL_DECISION_NAME: bool(positive_gap_signal),
+        "deterministic_artifact_checks_all_pass": bool(artifact_pass),
+        "stage05_v3a_mechanism_signal_positive_on_all_smoke_runs": bool(mechanism_positive),
+        "pairwise_gap_closure_vs_v2": pairwise_v3a_vs_v2,
+        "gap_closure_decision": (
+            "positive_smoke_signal" if positive_gap_signal else "signal_not_yet_established"
+        ),
+        "recommended_next_move": recommended_next_move,
+    }, rationale
+
+
+def _stage05_v2_vs_v3a_supports_lines(
+    *,
+    summary: dict[str, Any],
+) -> list[str]:
+    lines = [
+        "The Stage 05 v3-A candidate path writes the standard Stage 05 artifacts.",
+        "The v3-A candidate keeps artifact-independent target construction and the existing aggregate residual identity target.",
+        "The smoke comparison exposes explicit pairwise deltas versus the current Stage 05 v2 reference.",
+    ]
+    if bool(summary["deterministic_artifact_checks_all_pass"]):
+        lines.append("The v3-A smoke run passes deterministic artifact checks.")
+    if bool(summary[STAGE05_V3A_SIGNAL_DECISION_NAME]):
+        lines.append("The v3-A smoke run shows a positive configured-step gap-closure signal versus v2.")
+    return lines
+
+
+def _stage05_v2_vs_v3a_does_not_support_lines(
+    *,
+    decision: dict[str, Any],
+) -> list[str]:
+    return [
+        "This smoke comparison does not establish a formal fixed-budget mechanism win.",
+        "This smoke comparison does not justify replacing the frozen Stage 04 bridge on main.",
+        (
+            "The current evidence is still insufficient for a v2-to-v3-A adoption claim."
+            if not bool(decision[STAGE05_V3A_SIGNAL_DECISION_NAME])
+            else "A multiseed fixed-budget v2 vs v3-A comparison is still required before any stronger claim."
+        ),
+    ]
+
+
+def _stage05_v2_vs_v3a_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    lines = [
+        "# Stage 05 v2 vs v3-A Explicit Transport-Drift Contract",
+        "",
+        "## Protocol",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- shared shuffle_batches: `{protocol['shared_shuffle_batches']}`",
+        "",
+        "## Decision",
+        f"- `{STAGE05_V3A_SIGNAL_DECISION_NAME}`: `{decision[STAGE05_V3A_SIGNAL_DECISION_NAME]}`",
+        f"- deterministic artifact checks all pass: `{decision['deterministic_artifact_checks_all_pass']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Supports",
+    ]
+    for item in report["supports"]:
+        lines.append(f"- {item}")
+    lines.extend(["", "## Does Not Support"])
+    for item in report["does_not_support"]:
+        lines.append(f"- {item}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _stage05_v2_vs_v3a_suite_config_payload(
+    config: Stage05V2VsV3AComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_protocol": _stage05_v2_vs_v3a_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
+def run_stage05_v2_vs_v3a_comparison(
+    config: Stage05V2VsV3AComparisonConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run a tiny Stage 05 v2 vs v3-A comparison for smoke-level candidate validation."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v2_vs_v3a_suite_config_payload(config))
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+
+    for seed in config.seeds:
+        run_index += 1
+        v2_config = _build_stage05_v2_config(
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_METHOD_NAME,
+            seed=seed,
+            train_fraction=float(config.train_fraction),
+            val_fraction=float(config.val_fraction),
+            test_fraction=float(config.test_fraction),
+            batch_size=int(config.batch_size),
+            shuffle_batches=bool(config.shuffle_batches),
+            epochs=int(config.stage05_epochs),
+            eval_steps=int(config.stage05_eval_steps),
+            layer_dims=config.stage05_layer_dims,
+            transport_steps=int(config.stage05_transport_steps),
+        )
+        v2_result = run_fmpc_ef_exploratory_probe(v2_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=v2_result,
+                config=v2_config,
+                method_name=STAGE05_V2_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v2 Reference",
+            )
+        )
+
+        run_index += 1
+        v3a_config = _stage05_v3a_config(config, seed=seed, output_root=runs_root)
+        v3a_result = run_fmpc_ef_exploratory_probe(v3a_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=v3a_result,
+                config=v3a_config,
+                method_name=STAGE05_V3A_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v3-A Explicit Transport-Drift Candidate",
+            )
+        )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE05_V2_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V2_METHOD_NAME)),
+        STAGE05_V3A_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V3A_METHOD_NAME)),
+    }
+    pairwise_v3a_vs_v2 = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3A_METHOD_NAME,
+        reference_method=STAGE05_V2_METHOD_NAME,
+    )
+    decision, decision_rationale = _stage05_v2_vs_v3a_decision(
+        rows=rows,
+        pairwise_v3a_vs_v2=pairwise_v3a_vs_v2,
+    )
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_vs_v3a_protocol_payload(config),
+        "by_method": by_method,
+        "pairwise_stage05_v3a_vs_v2": pairwise_v3a_vs_v2,
+        **decision,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_vs_v3a_protocol_payload(config),
+        "decision": {
+            **decision,
+            "decision_rationale": decision_rationale,
+        },
+        "supports": _stage05_v2_vs_v3a_supports_lines(summary=summary),
+        "does_not_support": _stage05_v2_vs_v3a_does_not_support_lines(decision=decision),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v2_vs_v3a_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_vs_v3a_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

@@ -96,9 +96,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - the tested same-family schedule change does not materially improve configured-step mechanism
   - it does not materially improve report-only accuracy
   - it does not materially narrow the gap to the contextual `3072`-epoch reference
-- the next Stage 05 move is now to open a working-hypothesis-driven `Stage 05 v3-A` charter:
+- the first minimal working-hypothesis-driven `Stage 05 v3-A` candidate now exists:
   - `explicit transport-drift contract`
   - motivated by the hypothesis that the current residual target may entangle transport residual and anchor-drift residual too tightly
+- the next Stage 05 move is now to run a fixed-budget `v2 vs v3-A` comparison
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -108,7 +109,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - use the Stage 05 v2 two-branch core as the current exploratory reference
 - do not draft the next Stage 05 step as another pure same-family budget push
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
-- if Stage 05 continues, draft the next step as a planning/spec-first `Stage 05 v3-A` charter around an `explicit transport-drift contract`
+- if Stage 05 continues, draft the next step as a fixed-budget `v2 vs v3-A` comparison around the implemented `explicit transport-drift contract`
 
 ## What Prompt Writers Must Not Reopen
 

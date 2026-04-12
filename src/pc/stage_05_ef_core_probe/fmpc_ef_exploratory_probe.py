@@ -44,6 +44,9 @@ ResidualIdentityMode = Literal["residual_corrected_meanflow"]
 RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "residual_meanflow_core"
 TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "two_branch_residual_meanflow_core"
 RESIDUAL_IDENTITY_MODE = "residual_corrected_meanflow"
+STAGE05_V1_CANDIDATE_NAME = "stage05_v1_corrected_residual_meanflow_core"
+STAGE05_V2_CANDIDATE_NAME = "stage05_v2_two_branch_corrected_residual_meanflow_core"
+STAGE05_V3A_CANDIDATE_NAME = "stage05_v3a_explicit_transport_drift_contract"
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
@@ -51,6 +54,10 @@ BOOTSTRAP_TARGET_CONTRACT = "m_boot = ((Phi_LF_r(z_t; c) - z_t) / r) - g_t"
 RESIDUAL_IDENTITY_TARGET_CONTRACT = "m_id = r * D_T g_t + r * D_T m_psi"
 TWO_BRANCH_RESIDUAL_IDENTITY_TARGET_CONTRACT = (
     "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state"
+)
+EXPLICIT_TRANSPORT_DRIFT_TARGET_CONTRACT = (
+    "gbar_boot = avg local flow over the same bootstrap interval; "
+    "d_boot = gbar_boot - g_t; q_boot = u_boot - gbar_boot"
 )
 
 
@@ -100,6 +107,8 @@ class FMPCEFExploratoryProbeConfig:
     identity_mode: ResidualIdentityMode = RESIDUAL_IDENTITY_MODE
     use_two_branch_residual_core: bool = False
     feature_aware_state_branch_tangents: bool = False
+    use_explicit_transport_drift_decomposition: bool = False
+    lambda_drift: float = 1.0
     psi_hidden_dims: tuple[int, ...] = (128,)
     psi_weight_scale: float = 0.01
     psi_eta_w: float = 0.01
@@ -131,6 +140,8 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError("lambda_id_ramp_epochs must be non-negative.")
         if self.identity_loss_weight < 0.0:
             raise ValueError("identity_loss_weight must be non-negative.")
+        if self.lambda_drift < 0.0:
+            raise ValueError("lambda_drift must be non-negative.")
         if self.tangent_epsilon <= 0.0:
             raise ValueError("tangent_epsilon must be positive.")
         if self.identity_mode != RESIDUAL_IDENTITY_MODE:
@@ -139,6 +150,10 @@ class FMPCEFExploratoryProbeConfig:
             )
         if self.selection_metric != "val_configured_transported_final_energy":
             raise ValueError("Only val_configured_transported_final_energy is supported.")
+        if self.use_explicit_transport_drift_decomposition and not self.use_two_branch_residual_core:
+            raise ValueError(
+                "use_explicit_transport_drift_decomposition requires use_two_branch_residual_core=True."
+            )
 
     def resolved_run_id(self) -> str:
         if self.run_id is not None:
@@ -256,6 +271,44 @@ class CorrectedResidualIdentityTarget:
 
 
 @dataclass(frozen=True)
+class ExplicitTransportDriftBootstrapTargets:
+    """Bootstrap target decomposition for the Stage 05 v3-A working-hypothesis candidate."""
+
+    u_boot: np.ndarray
+    g_t: np.ndarray
+    gbar_boot: np.ndarray
+    transport_target: np.ndarray
+    drift_target: np.ndarray
+    residual_target: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "u_boot", _as_batch_first("u_boot", self.u_boot))
+        object.__setattr__(self, "g_t", _as_batch_first("g_t", self.g_t))
+        object.__setattr__(self, "gbar_boot", _as_batch_first("gbar_boot", self.gbar_boot))
+        object.__setattr__(
+            self,
+            "transport_target",
+            _as_batch_first("transport_target", self.transport_target),
+        )
+        object.__setattr__(self, "drift_target", _as_batch_first("drift_target", self.drift_target))
+        object.__setattr__(
+            self,
+            "residual_target",
+            _as_batch_first("residual_target", self.residual_target),
+        )
+        reference_shape = self.u_boot.shape
+        for name in (
+            "g_t",
+            "gbar_boot",
+            "transport_target",
+            "drift_target",
+            "residual_target",
+        ):
+            if getattr(self, name).shape != reference_shape:
+                raise ValueError(f"{name} must share the same shape as u_boot.")
+
+
+@dataclass(frozen=True)
 class ResidualSupervisionBatch:
     """Stage 05 supervision tensors, with optional v2 state-branch inputs."""
 
@@ -263,6 +316,10 @@ class ResidualSupervisionBatch:
     state_inputs: np.ndarray | None
     boot_targets: np.ndarray
     identity_targets: np.ndarray
+    gbar_boot: np.ndarray | None = None
+    transport_targets: np.ndarray | None = None
+    drift_targets: np.ndarray | None = None
+    explicit_transport_drift_decomposition_enabled: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -274,12 +331,32 @@ class ResidualSupervisionBatch:
         object.__setattr__(
             self, "identity_targets", _as_batch_first("identity_targets", self.identity_targets)
         )
+        if self.gbar_boot is not None:
+            object.__setattr__(self, "gbar_boot", _as_batch_first("gbar_boot", self.gbar_boot))
+        if self.transport_targets is not None:
+            object.__setattr__(
+                self,
+                "transport_targets",
+                _as_batch_first("transport_targets", self.transport_targets),
+            )
+        if self.drift_targets is not None:
+            object.__setattr__(
+                self,
+                "drift_targets",
+                _as_batch_first("drift_targets", self.drift_targets),
+            )
         if self.trajectory_inputs.shape[0] != self.boot_targets.shape[0]:
             raise ValueError("trajectory_inputs and boot_targets must share the same batch size.")
         if self.trajectory_inputs.shape[0] != self.identity_targets.shape[0]:
             raise ValueError("trajectory_inputs and identity_targets must share the same batch size.")
         if self.state_inputs is not None and self.state_inputs.shape[0] != self.trajectory_inputs.shape[0]:
             raise ValueError("state_inputs and trajectory_inputs must share the same batch size.")
+        if self.gbar_boot is not None and self.gbar_boot.shape != self.boot_targets.shape:
+            raise ValueError("gbar_boot must share the same shape as boot_targets.")
+        if self.transport_targets is not None and self.transport_targets.shape != self.boot_targets.shape:
+            raise ValueError("transport_targets must share the same shape as boot_targets.")
+        if self.drift_targets is not None and self.drift_targets.shape != self.boot_targets.shape:
+            raise ValueError("drift_targets must share the same shape as boot_targets.")
 
 
 @dataclass(frozen=True)
@@ -289,6 +366,8 @@ class FMPCEFExploratoryProbeEpochMetrics:
     lambda_id: float
     train_total_loss: float
     train_boot_loss: float
+    train_transport_loss: float
+    train_drift_loss: float
     train_identity_loss: float
     train_transported_final_energy: float
     val_one_step_transported_final_energy: float
@@ -329,6 +408,7 @@ def build_fmpc_ef_exploratory_probe_config(
         "lambda_id_warmup_epochs": 3,
         "lambda_id_ramp_epochs": 3,
         "identity_loss_weight": 0.1,
+        "lambda_drift": 1.0,
         "tangent_epsilon": 1e-3,
         "identity_mode": RESIDUAL_IDENTITY_MODE,
         "epochs": 12,
@@ -347,6 +427,14 @@ def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
     return RESIDUAL_MEANFLOW_TRANSPORT_FAMILY
 
 
+def _candidate_name(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_explicit_transport_drift_decomposition:
+        return STAGE05_V3A_CANDIDATE_NAME
+    if config.use_two_branch_residual_core:
+        return STAGE05_V2_CANDIDATE_NAME
+    return STAGE05_V1_CANDIDATE_NAME
+
+
 def _residual_branch_structure(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.use_two_branch_residual_core:
         return "two_branch"
@@ -360,6 +448,11 @@ def _psi_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
 
 
 def _velocity_parameterization(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_explicit_transport_drift_decomposition:
+        return (
+            "u_psi = g_theta + q_psi(z_t, target_onehot, t, r) + "
+            "d_psi(g_t, e_out_t, F_t)"
+        )
     if config.use_two_branch_residual_core:
         return (
             "u_psi = g_theta + m_traj(z_t, target_onehot, t, r) + "
@@ -371,8 +464,11 @@ def _velocity_parameterization(config: FMPCEFExploratoryProbeConfig) -> str:
 def _u_psi_input_contract(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.use_two_branch_residual_core:
         return (
-            "u_psi = g_t + m_traj(concat([z_t, target_onehot, t, r])) + "
-            "m_state(concat([g_t, e_out_t, F_t]))"
+            "u_psi = g_t + "
+            + ("q_psi" if config.use_explicit_transport_drift_decomposition else "m_traj")
+            + "(concat([z_t, target_onehot, t, r])) + "
+            + ("d_psi" if config.use_explicit_transport_drift_decomposition else "m_state")
+            + "(concat([g_t, e_out_t, F_t]))"
         )
     return U_PSI_INPUT_CONTRACT
 
@@ -381,6 +477,35 @@ def _residual_identity_target_contract(config: FMPCEFExploratoryProbeConfig) -> 
     if config.use_two_branch_residual_core:
         return TWO_BRANCH_RESIDUAL_IDENTITY_TARGET_CONTRACT
     return RESIDUAL_IDENTITY_TARGET_CONTRACT
+
+
+def _explicit_transport_drift_target_contract(
+    config: FMPCEFExploratoryProbeConfig,
+) -> str | None:
+    if not config.use_explicit_transport_drift_decomposition:
+        return None
+    return EXPLICIT_TRANSPORT_DRIFT_TARGET_CONTRACT
+
+
+def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
+    if not config.use_explicit_transport_drift_decomposition:
+        return None
+    return {
+        "status": "pending_formal_v2_vs_v3a_comparison",
+        "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+    }
+
+
+def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if not config.use_explicit_transport_drift_decomposition:
+        return None
+    return "pending_formal_v2_vs_v3a_comparison"
+
+
+def _recommended_next_move(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_explicit_transport_drift_decomposition:
+        return "run_fixed_budget_v2_vs_v3a_comparison"
+    return "no_change"
 
 
 def build_exploratory_probe_input(
@@ -440,6 +565,59 @@ def build_state_branch_input_tangent(
         ).astype(np.float64, copy=False)
     feature_dim = int(features.g_t.shape[1]) + int(features.e_out_t.shape[1]) + int(features.F_t.shape[1])
     return np.zeros((batch_size, feature_dim), dtype=np.float64)
+
+
+def build_explicit_transport_drift_bootstrap_targets(
+    context: FMPCTF1Context,
+    z_t: np.ndarray,
+    *,
+    t: float,
+    r: float,
+    integrator: Literal["euler", "rk2"] = "rk2",
+    substeps: int = 4,
+) -> ExplicitTransportDriftBootstrapTargets:
+    """Return the v3-A bootstrap decomposition on the same artifact-independent interval.
+
+    This helper exists only to test the Stage 05 v3-A working hypothesis. It does
+    not claim that the explicit transport-drift split is already a confirmed fix.
+    """
+
+    validate_tf1_time_pair(t, r)
+    if integrator not in {"euler", "rk2"}:
+        raise ValueError(f"Unsupported bootstrap integrator '{integrator}'.")
+    if substeps <= 0:
+        raise ValueError("substeps must be positive.")
+
+    z_array = _as_batch_first("z_t", z_t)
+    current = z_array.copy()
+    step_size = float(r) / float(substeps)
+    accumulated_local_flow = np.zeros_like(z_array)
+
+    for _ in range(int(substeps)):
+        if integrator == "euler":
+            effective_flow = hidden_local_flow(context, current)
+            current = current + step_size * effective_flow
+        else:
+            k1 = hidden_local_flow(context, current)
+            mid = current + 0.5 * step_size * k1
+            effective_flow = hidden_local_flow(context, mid)
+            current = current + step_size * effective_flow
+        accumulated_local_flow += effective_flow
+        ensure_finite_array(current, "stage05_v3a_bootstrap_z")
+
+    u_boot = (current - z_array) / float(r)
+    g_t = hidden_local_flow(context, z_array)
+    gbar_boot = accumulated_local_flow / float(substeps)
+    transport_target = u_boot - gbar_boot
+    drift_target = gbar_boot - g_t
+    return ExplicitTransportDriftBootstrapTargets(
+        u_boot=u_boot,
+        g_t=g_t,
+        gbar_boot=gbar_boot,
+        transport_target=transport_target,
+        drift_target=drift_target,
+        residual_target=transport_target + drift_target,
+    )
 
 
 def _resolve_run_dir(
@@ -737,6 +915,61 @@ def _weighted_two_branch_mse_step(
     )
 
 
+def _weighted_explicit_transport_drift_step(
+    residual_core: Stage05ResidualCoreNetworks,
+    trajectory_inputs: np.ndarray,
+    state_inputs: np.ndarray,
+    transport_target: np.ndarray,
+    drift_target: np.ndarray,
+    identity_target: np.ndarray,
+    *,
+    lambda_drift: float,
+    lambda_id: float,
+) -> None:
+    if residual_core.state_network is None:
+        raise ValueError("Explicit transport-drift updates require state_network.")
+    if lambda_drift < 0.0:
+        raise ValueError("lambda_drift must be non-negative.")
+    if lambda_id < 0.0:
+        raise ValueError("lambda_id must be non-negative.")
+
+    predictions = _predict_residual_from_inputs(
+        residual_core,
+        trajectory_inputs,
+        state_inputs=state_inputs,
+    )
+    trajectory_loss_scale = 1.0 + float(lambda_id)
+    trajectory_target = (
+        transport_target
+        + (float(lambda_id) * (identity_target - predictions.state_residual))
+    ) / trajectory_loss_scale
+    _weighted_mse_step(
+        residual_core.trajectory_network,
+        trajectory_inputs,
+        trajectory_target,
+        loss_scale=trajectory_loss_scale,
+    )
+
+    state_loss_scale = float(lambda_drift) + float(lambda_id)
+    if state_loss_scale <= 0.0:
+        return
+    updated_predictions = _predict_residual_from_inputs(
+        residual_core,
+        trajectory_inputs,
+        state_inputs=state_inputs,
+    )
+    state_target = (
+        (float(lambda_drift) * drift_target)
+        + (float(lambda_id) * (identity_target - updated_predictions.trajectory_residual))
+    ) / state_loss_scale
+    _weighted_mse_step(
+        residual_core.state_network,
+        state_inputs,
+        state_target,
+        loss_scale=state_loss_scale,
+    )
+
+
 def build_residual_input_tangent(
     g_t: np.ndarray,
     *,
@@ -898,6 +1131,7 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "state_init": config.state_init,
         },
         "transport": {
+            "candidate_name": _candidate_name(config),
             "teacher_free": True,
             "uses_teacher_artifacts": False,
             "transport_family": _transport_family_name(config),
@@ -914,8 +1148,12 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
                 M_STATE_INPUT_CONTRACT if config.use_two_branch_residual_core else None
             ),
             "bootstrap_target_contract": BOOTSTRAP_TARGET_CONTRACT,
+            "explicit_transport_drift_target_contract": _explicit_transport_drift_target_contract(
+                config
+            ),
             "residual_identity_target_contract": _residual_identity_target_contract(config),
             "identity_loss_weight": float(config.identity_loss_weight),
+            "lambda_drift": float(config.lambda_drift),
             "tangent_epsilon": float(config.tangent_epsilon),
             "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
             "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
@@ -923,6 +1161,9 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "use_teacher_free_features": bool(config.use_two_branch_residual_core),
             "uses_current_state_features": bool(config.use_two_branch_residual_core),
             "use_two_branch_residual_core": bool(config.use_two_branch_residual_core),
+            "explicit_transport_drift_decomposition_enabled": bool(
+                config.use_explicit_transport_drift_decomposition
+            ),
             "feature_aware_state_branch_tangents": bool(
                 config.feature_aware_state_branch_tangents
             ),
@@ -934,6 +1175,9 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "selection_metric_source": "val_metric",
             "report_metric_source": "test_metric",
             "acceptance_contract": "mechanism_first",
+            "pairwise_deltas_vs_stage05_v2_reference": _pairwise_v2_placeholder(config),
+            "gap_closure_decision": _gap_closure_decision_placeholder(config),
+            "recommended_next_move": _recommended_next_move(config),
         },
         "psi_network": {
             "hidden_dims": [int(value) for value in config.psi_hidden_dims],
@@ -966,6 +1210,9 @@ def _collect_residual_supervision(
     state_input_blocks: list[np.ndarray] = []
     boot_targets: list[np.ndarray] = []
     identity_targets: list[np.ndarray] = []
+    gbar_boot_blocks: list[np.ndarray] = []
+    transport_targets: list[np.ndarray] = []
+    drift_targets: list[np.ndarray] = []
     for knot_index, t_k in enumerate(knot_times[:-1]):
         z_t = z_knots[knot_index]
         t_float = float(t_k)
@@ -978,15 +1225,32 @@ def _collect_residual_supervision(
             t=t_float,
             r=r_k,
         )
-        u_boot = bootstrap_average_velocity_target(
-            context,
-            z_t,
-            t=t_float,
-            r=r_k,
-            integrator=config.bootstrap_integrator,
-            substeps=config.bootstrap_substeps,
-        )
-        g_t = hidden_local_flow(context, z_t)
+        if config.use_explicit_transport_drift_decomposition:
+            decomposed_bootstrap = build_explicit_transport_drift_bootstrap_targets(
+                context,
+                z_t,
+                t=t_float,
+                r=r_k,
+                integrator=config.bootstrap_integrator,
+                substeps=config.bootstrap_substeps,
+            )
+            u_boot = decomposed_bootstrap.u_boot
+            g_t = decomposed_bootstrap.g_t
+            gbar_boot_blocks.append(decomposed_bootstrap.gbar_boot)
+            transport_targets.append(decomposed_bootstrap.transport_target)
+            drift_targets.append(decomposed_bootstrap.drift_target)
+            boot_targets.append(decomposed_bootstrap.residual_target)
+        else:
+            u_boot = bootstrap_average_velocity_target(
+                context,
+                z_t,
+                t=t_float,
+                r=r_k,
+                integrator=config.bootstrap_integrator,
+                substeps=config.bootstrap_substeps,
+            )
+            g_t = hidden_local_flow(context, z_t)
+            boot_targets.append(u_boot - g_t)
         corrected_identity = build_corrected_residual_identity_target(
             context,
             psi_network,
@@ -1000,7 +1264,6 @@ def _collect_residual_supervision(
         trajectory_input_blocks.append(trajectory_input)
         if state_input is not None:
             state_input_blocks.append(state_input)
-        boot_targets.append(u_boot - g_t)
         identity_targets.append(corrected_identity.target)
     return ResidualSupervisionBatch(
         trajectory_inputs=np.concatenate(trajectory_input_blocks, axis=0).astype(
@@ -1014,6 +1277,24 @@ def _collect_residual_supervision(
         ),
         boot_targets=np.concatenate(boot_targets, axis=0).astype(np.float64, copy=False),
         identity_targets=np.concatenate(identity_targets, axis=0).astype(np.float64, copy=False),
+        gbar_boot=(
+            np.concatenate(gbar_boot_blocks, axis=0).astype(np.float64, copy=False)
+            if gbar_boot_blocks
+            else None
+        ),
+        transport_targets=(
+            np.concatenate(transport_targets, axis=0).astype(np.float64, copy=False)
+            if transport_targets
+            else None
+        ),
+        drift_targets=(
+            np.concatenate(drift_targets, axis=0).astype(np.float64, copy=False)
+            if drift_targets
+            else None
+        ),
+        explicit_transport_drift_decomposition_enabled=bool(
+            config.use_explicit_transport_drift_decomposition
+        ),
     )
 
 
@@ -1149,7 +1430,7 @@ def _train_one_batch(
     *,
     lambda_id: float,
     stage: ProbeStage,
-) -> tuple[float, float, float, float]:
+) -> tuple[float, float, float, float, float, float]:
     context = build_tf1_context(model, x_batch, y_batch)
     source_rollout = rollout_hidden_transport(
         context,
@@ -1170,32 +1451,58 @@ def _train_one_batch(
         state_inputs=supervision.state_inputs,
     )
     psi_predictions = predictions.total_residual
-    boot_loss = float(np.mean((psi_predictions - supervision.boot_targets) ** 2))
+    transport_loss = float(np.mean((psi_predictions - supervision.boot_targets) ** 2))
+    drift_loss = 0.0
+    boot_loss = transport_loss
     identity_loss = float(np.mean((psi_predictions - supervision.identity_targets) ** 2))
-    if lambda_id > 0.0:
-        combined_target = (
-            supervision.boot_targets + (lambda_id * supervision.identity_targets)
-        ) / (1.0 + lambda_id)
-        loss_scale = 1.0 + lambda_id
-    else:
-        combined_target = supervision.boot_targets
-        loss_scale = 1.0
-    total_loss = boot_loss + (lambda_id * identity_loss)
-    if supervision.state_inputs is None:
-        _weighted_mse_step(
-            psi_network.trajectory_network,
-            supervision.trajectory_inputs,
-            combined_target,
-            loss_scale=loss_scale,
+    if config.use_explicit_transport_drift_decomposition:
+        if supervision.state_inputs is None:
+            raise ValueError("Stage 05 v3-A requires state_inputs for the drift branch.")
+        if supervision.transport_targets is None or supervision.drift_targets is None:
+            raise ValueError(
+                "Stage 05 v3-A supervision requires explicit transport and drift targets."
+            )
+        transport_loss = float(
+            np.mean((predictions.trajectory_residual - supervision.transport_targets) ** 2)
         )
-    else:
-        _weighted_two_branch_mse_step(
+        drift_loss = float(np.mean((predictions.state_residual - supervision.drift_targets) ** 2))
+        boot_loss = transport_loss + (float(config.lambda_drift) * drift_loss)
+        total_loss = boot_loss + (lambda_id * identity_loss)
+        _weighted_explicit_transport_drift_step(
             psi_network,
             supervision.trajectory_inputs,
             supervision.state_inputs,
-            combined_target,
-            loss_scale=loss_scale,
+            supervision.transport_targets,
+            supervision.drift_targets,
+            supervision.identity_targets,
+            lambda_drift=float(config.lambda_drift),
+            lambda_id=float(lambda_id),
         )
+    else:
+        if lambda_id > 0.0:
+            combined_target = (
+                supervision.boot_targets + (lambda_id * supervision.identity_targets)
+            ) / (1.0 + lambda_id)
+            loss_scale = 1.0 + lambda_id
+        else:
+            combined_target = supervision.boot_targets
+            loss_scale = 1.0
+        total_loss = boot_loss + (lambda_id * identity_loss)
+        if supervision.state_inputs is None:
+            _weighted_mse_step(
+                psi_network.trajectory_network,
+                supervision.trajectory_inputs,
+                combined_target,
+                loss_scale=loss_scale,
+            )
+        else:
+            _weighted_two_branch_mse_step(
+                psi_network,
+                supervision.trajectory_inputs,
+                supervision.state_inputs,
+                combined_target,
+                loss_scale=loss_scale,
+            )
 
     if stage == "warmup":
         theta_rollout = source_rollout
@@ -1213,7 +1520,7 @@ def _train_one_batch(
         context,
         theta_rollout.z_knots[-1],
     )
-    return total_loss, boot_loss, identity_loss, transported_energy
+    return total_loss, boot_loss, transport_loss, drift_loss, identity_loss, transported_energy
 
 
 def run_fmpc_ef_exploratory_probe(
@@ -1250,6 +1557,8 @@ def run_fmpc_ef_exploratory_probe(
         lambda_id = lambda_id_for_epoch(config, epoch_index)
         batch_total_losses: list[float] = []
         batch_boot_losses: list[float] = []
+        batch_transport_losses: list[float] = []
+        batch_drift_losses: list[float] = []
         batch_identity_losses: list[float] = []
         batch_transport_energies: list[float] = []
         batch_seed = config.batch_order_seed + epoch_index
@@ -1260,7 +1569,14 @@ def run_fmpc_ef_exploratory_probe(
             shuffle=config.shuffle_batches,
             seed=batch_seed,
         ):
-            total_loss, boot_loss, identity_loss, transported_energy = _train_one_batch(
+            (
+                total_loss,
+                boot_loss,
+                transport_loss,
+                drift_loss,
+                identity_loss,
+                transported_energy,
+            ) = _train_one_batch(
                 model,
                 psi_network,
                 config,
@@ -1271,6 +1587,8 @@ def run_fmpc_ef_exploratory_probe(
             )
             batch_total_losses.append(total_loss)
             batch_boot_losses.append(boot_loss)
+            batch_transport_losses.append(transport_loss)
+            batch_drift_losses.append(drift_loss)
             batch_identity_losses.append(identity_loss)
             batch_transport_energies.append(transported_energy)
 
@@ -1299,6 +1617,8 @@ def run_fmpc_ef_exploratory_probe(
                 lambda_id=float(lambda_id),
                 train_total_loss=float(np.mean(batch_total_losses)),
                 train_boot_loss=float(np.mean(batch_boot_losses)),
+                train_transport_loss=float(np.mean(batch_transport_losses)),
+                train_drift_loss=float(np.mean(batch_drift_losses)),
                 train_identity_loss=float(np.mean(batch_identity_losses)),
                 train_transported_final_energy=float(np.mean(batch_transport_energies)),
                 val_one_step_transported_final_energy=val_one_step.transported_final_energy,
@@ -1388,6 +1708,7 @@ def run_fmpc_ef_exploratory_probe(
     summary = {
         "phase": "post_incremental_bridge_exploratory",
         "stage": "ef_core_probe",
+        "candidate_name": _candidate_name(config),
         "teacher_free": True,
         "uses_teacher_artifacts": False,
         "transport_family": _transport_family_name(config),
@@ -1405,16 +1726,24 @@ def run_fmpc_ef_exploratory_probe(
             M_STATE_INPUT_CONTRACT if config.use_two_branch_residual_core else None
         ),
         "bootstrap_target_contract": BOOTSTRAP_TARGET_CONTRACT,
+        "explicit_transport_drift_target_contract": _explicit_transport_drift_target_contract(
+            config
+        ),
         "residual_identity_target_contract": _residual_identity_target_contract(config),
         "identity_loss_weight": float(config.identity_loss_weight),
+        "lambda_drift": float(config.lambda_drift),
         "tangent_epsilon": float(config.tangent_epsilon),
         "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
         "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
         "use_two_branch_residual_core": bool(config.use_two_branch_residual_core),
+        "explicit_transport_drift_decomposition_enabled": bool(
+            config.use_explicit_transport_drift_decomposition
+        ),
         "uses_current_state_features": bool(config.use_two_branch_residual_core),
         "feature_aware_state_branch_tangents": bool(
             config.feature_aware_state_branch_tangents
         ),
+        "target_construction_artifact_independent": True,
         "selection_metric_source": "val_metric",
         "report_metric_source": "test_metric",
         "selection_metric_name": config.selection_metric,
@@ -1470,6 +1799,9 @@ def run_fmpc_ef_exploratory_probe(
         "acceptance_contract": "mechanism_first",
         "task_accuracy_is_gate": False,
         "no_teacher_dependency_in_target_construction": True,
+        "pairwise_deltas_vs_stage05_v2_reference": _pairwise_v2_placeholder(config),
+        "gap_closure_decision": _gap_closure_decision_placeholder(config),
+        "recommended_next_move": _recommended_next_move(config),
         "run_artifacts": {
             "config_json": "config.json",
             "epoch_metrics_csv": "epoch_metrics.csv",

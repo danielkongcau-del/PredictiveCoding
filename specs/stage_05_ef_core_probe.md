@@ -339,6 +339,35 @@ It does not yet fix:
 
 Those choices belong to the next implementation pass.
 
+#### 18.11.4 First repository implementation of v3-A
+
+The first repository implementation of Stage 05 v3-A is intentionally minimal.
+
+It reuses the current two-branch Stage 05 v2 scaffold and interprets it as:
+
+- `u_psi = g_t + q_psi + d_psi`
+
+with:
+
+- `q_psi` produced by the existing trajectory branch
+- `d_psi` produced by the existing current-state branch
+
+For the first testable implementation:
+
+- `L_transport = ||q_psi - q_boot||^2`
+- `L_drift = ||d_psi - d_boot||^2`
+- `L_id = ||(q_psi + d_psi) - m_id_existing||^2`
+
+where `m_id_existing` remains the already-implemented Stage 05 aggregate corrected residual
+identity target.
+
+This first implementation choice is deliberate:
+
+- it tests the v3-A working hypothesis with the smallest possible code change
+- it does not yet introduce branchwise identity targets
+- it does not yet introduce rollout-consistency or semigroup losses
+- it does not yet claim that explicit transport-drift decomposition is a confirmed repair
+
 #### 18.11.4 Non-goals and required next deliverables
 
 Stage 05 v3-A must not be framed as:

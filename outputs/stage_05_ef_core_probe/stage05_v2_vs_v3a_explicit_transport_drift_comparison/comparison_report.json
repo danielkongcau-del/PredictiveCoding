@@ -1,0 +1,103 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "explicit_transport_drift_decomposition_enabled": false,
+      "configured_transport_steps": 2,
+      "epochs": 3,
+      "eval_steps": 5,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3a_candidate": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "explicit_transport_drift_decomposition_enabled": true,
+      "lambda_drift": 1.0,
+      "configured_transport_steps": 2,
+      "epochs": 3,
+      "eval_steps": 5,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "purpose": "smoke_ready_v3a_candidate_sanity_check",
+      "task_accuracy_is_report_only": true,
+      "full_fixed_budget_comparison_still_required": true
+    }
+  },
+  "decision": {
+    "stage05_v3a_shows_positive_gap_closure_signal_vs_v2": false,
+    "deterministic_artifact_checks_all_pass": true,
+    "stage05_v3a_mechanism_signal_positive_on_all_smoke_runs": true,
+    "pairwise_gap_closure_vs_v2": {
+      "shared_seeds": [
+        0
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": 2.1749882246901997e-06,
+        "std": 0.0
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": 2.0194527626249403e-06,
+        "std": 0.0
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": 1.0335917451889838e-08,
+        "std": 0.0
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": 2.0194527626249403e-06,
+        "std": 0.0
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": -0.0021428000000014435,
+        "std": 0.0
+      }
+    },
+    "gap_closure_decision": "signal_not_yet_established",
+    "recommended_next_move": "run_fixed_budget_v2_vs_v3a_comparison",
+    "decision_rationale": "The smoke-level v3-A candidate is artifact-stable and ready for a fixed-budget v2 vs v3-A comparison."
+  },
+  "supports": [
+    "The Stage 05 v3-A candidate path writes the standard Stage 05 artifacts.",
+    "The v3-A candidate keeps artifact-independent target construction and the existing aggregate residual identity target.",
+    "The smoke comparison exposes explicit pairwise deltas versus the current Stage 05 v2 reference.",
+    "The v3-A smoke run passes deterministic artifact checks."
+  ],
+  "does_not_support": [
+    "This smoke comparison does not establish a formal fixed-budget mechanism win.",
+    "This smoke comparison does not justify replacing the frozen Stage 04 bridge on main.",
+    "The current evidence is still insufficient for a v2-to-v3-A adoption claim."
+  ]
+}

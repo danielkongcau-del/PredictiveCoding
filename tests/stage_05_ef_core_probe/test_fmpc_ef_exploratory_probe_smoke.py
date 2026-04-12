@@ -17,6 +17,7 @@ if str(SRC_ROOT) not in sys.path:
 
 from pc.datasets import load_digits_split
 from pc.stage_03_transport_core_v1.fmpc_tf1_flow import (
+    bootstrap_average_velocity_target,
     build_tf1_context,
     teacher_free_feature_tangents,
     teacher_free_state_features,
@@ -25,6 +26,7 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     _make_pc_model,
     _make_psi_network,
     build_corrected_residual_identity_target,
+    build_explicit_transport_drift_bootstrap_targets,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
     lambda_id_for_epoch,
@@ -131,25 +133,122 @@ def test_two_branch_probe_writes_expected_v2_artifacts(tmp_path: Path) -> None:
 
     assert summary["transport_family"] == "two_branch_residual_meanflow_core"
     assert summary["residual_branch_structure"] == "two_branch"
+    assert summary["candidate_name"] == "stage05_v2_two_branch_corrected_residual_meanflow_core"
     assert summary["m_traj_input_contract"] == "concat([z_t, target_onehot, t, r])"
     assert summary["m_state_input_contract"] == "concat([g_t, e_out_t, F_t])"
     assert summary["residual_identity_target_contract"] == (
         "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state"
     )
     assert summary["use_two_branch_residual_core"] is True
+    assert summary["explicit_transport_drift_decomposition_enabled"] is False
     assert summary["feature_aware_state_branch_tangents"] is True
     assert summary["uses_current_state_features"] is True
 
     assert config["transport"]["transport_family"] == "two_branch_residual_meanflow_core"
     assert config["transport"]["residual_branch_structure"] == "two_branch"
+    assert config["transport"]["candidate_name"] == "stage05_v2_two_branch_corrected_residual_meanflow_core"
     assert config["transport"]["m_traj_input_contract"] == "concat([z_t, target_onehot, t, r])"
     assert config["transport"]["m_state_input_contract"] == "concat([g_t, e_out_t, F_t])"
     assert config["transport"]["residual_identity_target_contract"] == (
         "m_id = r * D_T g_t + r * D_T m_traj + r * D_T m_state"
     )
     assert config["transport"]["use_two_branch_residual_core"] is True
+    assert config["transport"]["explicit_transport_drift_decomposition_enabled"] is False
     assert config["transport"]["feature_aware_state_branch_tangents"] is True
     assert config["transport"]["use_teacher_free_features"] is True
+
+
+def test_explicit_transport_drift_bootstrap_targets_have_expected_shapes() -> None:
+    config = build_fmpc_ef_exploratory_probe_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+        use_explicit_transport_drift_decomposition=True,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    targets = build_explicit_transport_drift_bootstrap_targets(
+        context,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        integrator=config.bootstrap_integrator,
+        substeps=config.bootstrap_substeps,
+    )
+    reference_u_boot = bootstrap_average_velocity_target(
+        context,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        integrator=config.bootstrap_integrator,
+        substeps=config.bootstrap_substeps,
+    )
+
+    assert targets.gbar_boot.shape == context.z0.shape
+    assert targets.transport_target.shape == context.z0.shape
+    assert targets.drift_target.shape == context.z0.shape
+    np.testing.assert_allclose(targets.u_boot, reference_u_boot, atol=1e-12, rtol=1e-12)
+    np.testing.assert_allclose(
+        targets.residual_target,
+        targets.transport_target + targets.drift_target,
+        atol=1e-12,
+        rtol=1e-12,
+    )
+
+
+def test_v3a_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3a_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+        use_explicit_transport_drift_decomposition=True,
+        lambda_drift=1.0,
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert summary["candidate_name"] == "stage05_v3a_explicit_transport_drift_contract"
+    assert summary["transport_family"] == "two_branch_residual_meanflow_core"
+    assert summary["explicit_transport_drift_decomposition_enabled"] is True
+    assert summary["explicit_transport_drift_target_contract"] == (
+        "gbar_boot = avg local flow over the same bootstrap interval; "
+        "d_boot = gbar_boot - g_t; q_boot = u_boot - gbar_boot"
+    )
+    assert summary["target_construction_artifact_independent"] is True
+    assert summary["pairwise_deltas_vs_stage05_v2_reference"]["status"] == (
+        "pending_formal_v2_vs_v3a_comparison"
+    )
+    assert summary["recommended_next_move"] == "run_fixed_budget_v2_vs_v3a_comparison"
+
+    assert config["transport"]["candidate_name"] == "stage05_v3a_explicit_transport_drift_contract"
+    assert config["transport"]["explicit_transport_drift_decomposition_enabled"] is True
+    assert config["transport"]["lambda_drift"] == pytest.approx(1.0)
+    assert config["transport"]["recommended_next_move"] == "run_fixed_budget_v2_vs_v3a_comparison"
+
+    assert "train_transport_loss" in epoch_rows[0]
+    assert "train_drift_loss" in epoch_rows[0]
 
 
 def test_corrected_residual_identity_target_includes_anchor_derivative_term() -> None:

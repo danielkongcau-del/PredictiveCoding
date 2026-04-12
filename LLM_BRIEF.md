@@ -120,7 +120,7 @@ Current known state:
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
 - use the Stage 05 v2 two-branch core as the current exploratory reference
 - do not continue pure same-family budget escalation from the current state
-- if Stage 05 continues, open a true Stage 05 v3 mechanism charter next
+- if Stage 05 continues, run a fixed-budget comparison between the current v2 reference and `stage05_v3a_explicit_transport_drift_contract`
 
 ## Current Code Entry Points
 
