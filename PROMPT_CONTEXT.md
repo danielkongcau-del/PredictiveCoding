@@ -102,15 +102,19 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the fixed-budget `v2 vs v3-A` comparison is now complete:
   - the v3-A candidate materially improves configured-step mechanism over the fixed-budget v2 reference
   - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result became the first active Stage 05 implementation branch
-  - the fixed-budget `v2 vs v3-A vs v3-B` comparison is now also complete
-  - the v3-B candidate improves configured-step mechanism over the fixed-budget v2 control and directionally over v3-A
-  - the v3-B candidate does not materially improve enough over v3-A to replace it as the active fixed-budget improvement reference
+- the fixed-budget `v2 vs v3-A vs v3-B` comparison is now also complete:
+  - the original v3-B candidate improves configured-step mechanism over the fixed-budget v2 control and directionally over v3-A
+  - that original v3-B candidate did not materially improve enough over v3-A for promotion
   - `v3-B = trajectory curriculum contract`
-  - the narrow fixed-budget `v3-B` refinement diagnostic is now also complete
+- the narrow fixed-budget `v3-B` refinement diagnostic is now also complete:
   - the strongest tested refinement is `stage05_v3b_stronger_traj_curr_weight`
   - that refined v3-B candidate materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
-  - the fresh refined fixed-budget recompare is now complete
+- the fresh refined fixed-budget recompare is now complete:
   - `stage05_v3b_stronger_traj_curr_weight` is now the active fixed-budget Stage 05 improvement reference
+  - the `v3-A -> refined v3-B` promotion question is closed
+  - the repo now opens a planning-only `Stage 05 v3-C` charter
+  - `v3-C = endpoint / semigroup consistency contract`
+  - this charter is motivated by the working hypothesis that the current refined v3-B scaffold still lacks an explicit endpoint / semigroup consistency contract across split horizons
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -120,10 +124,12 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - use the fixed-budget v2 result as the immediate control and `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget improvement reference
 - do not draft the next Stage 05 step as another pure same-family budget push
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
+- do not draft the next Stage 05 step as a repeat of the already-closed v3-A versus refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
 - if Stage 05 continues, draft the next step from the promoted refined v3-B reference while keeping:
   - the fixed-budget v2 control
   - the fixed-budget v3-A result as the previous comparison reference
+  - the next mechanism question centered on endpoint / semigroup consistency rather than another pure v3-B sweep
 
 ## What Prompt Writers Must Not Reopen
 

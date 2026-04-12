@@ -316,10 +316,79 @@ Current planning implication:
 - promote `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
 - treat the fixed-budget v3-A result as the previous fixed-budget comparison reference
 - do not reopen the same fixed-budget recompare question as the immediate next move
-- do not open a Stage 05 v3-C charter automatically from this recompare alone
+- the post-promotion planning conclusion is now:
+  - `v3-A` already addressed the target-entanglement question strongly enough that it is no longer the lead unresolved mechanism issue
+  - refined `v3-B` then improved configured-step mechanism again, so trajectory-level supervision matters, but the remaining gap is not best described as another immediate v3-B promotion question
+  - the current v3-B line still lacks an explicit endpoint / semigroup consistency contract across split horizons
+- open a planning-only `Stage 05 v3-C` charter as the next Stage 05 mechanism question
 - any next Stage 05 planning or implementation pass should start from the promoted refined v3-B reference and compare against:
   - the fixed-budget v2 control
-  - the fixed-budget v3-A reference
+  - the promoted refined v3-B reference
+
+### 10. Open The Stage 05 V3-C Charter
+
+Objective:
+
+- define the next Stage 05 mechanism question above the current refined v3-B trajectory-curriculum scaffold
+
+Working ranking of remaining mechanism suspects:
+
+- most credible:
+  - endpoint / semigroup consistency contract
+- second:
+  - still-insufficient trajectory curriculum contract
+- third:
+  - corrected residual identity contract
+
+Current evidence supporting this ranking:
+
+- the fixed-budget `v2 vs v3-A` result already shows that explicit transport-drift decomposition materially improves configured-step mechanism
+- the refined fixed-budget `v3-B` recompare then shows that stronger trajectory curriculum weighting materially improves configured-step mechanism again over v3-A
+- those two results together mean target entanglement and basic trajectory weighting are both partly addressed
+- the remaining fixed-budget gap is therefore more plausibly tied to a higher-level consistency layer than to another immediate branch-local or weight-local tweak
+- the current v3-B contract still uses an aggregate detached continuation target and does not impose an explicit endpoint / semigroup consistency constraint
+- the corrected residual identity contract is already explicit and branchwise in the current scaffold, so current repo evidence does not rank it as the lead unresolved issue
+
+Normative v3-C charter direction:
+
+- `Stage 05 v3-C = endpoint / semigroup consistency contract`
+- keep the Stage 05 `t, r` notation unchanged
+- define:
+  - `s = t + alpha * r`
+  - `r_s = (1 - alpha) * r`
+- define the direct full-horizon endpoint prediction:
+  - `z_hat_direct = z_t + r * u_hat(z_t, r, t; c)`
+- define the split-horizon endpoint prediction:
+  - `z_hat_mid = z_t + alpha * r * u_hat(z_t, alpha * r, t; c)`
+  - `z_hat_split = z_t + alpha * r * u_hat(z_t, alpha * r, t; c) + (1 - alpha) * r * u_hat(z_hat_mid, r_s, s; c)`
+- define the semigroup consistency residual:
+  - `Delta_sg = z_hat_direct - z_hat_split`
+
+Required framing:
+
+- keep Stage 04 frozen on `main`
+- keep Stage 05 mechanism-first and task accuracy report-only
+- do not treat v3-C as a replacement claim against the frozen Stage 04 bridge result
+- do not reopen another pure same-family budget escalation
+- do not reopen another pure same-family efficiency tweak
+- do not broaden the current v3-B parameter search as the immediate next move
+- treat v3-C as a working hypothesis, not a proved fix
+
+Required next implementation deliverables:
+
+- a new Stage 05 v3-C candidate codepath on top of `stage05_v3b_stronger_traj_curr_weight`
+- a new comparison entry or suite against:
+  - the fixed-budget Stage 05 v2 control
+  - the promoted refined Stage 05 v3-B reference
+- a matching smoke test
+- a dedicated artifact directory
+- aggregate summary fields that report:
+  - whether endpoint / semigroup consistency is enabled
+  - the split-horizon semigroup identity
+  - pairwise deltas versus the promoted refined v3-B reference
+  - pairwise deltas versus the fixed-budget v2 control
+  - a gap-closure style decision field
+  - `recommended_next_move`
 
 ## Exploratory Acceptance Criteria
 

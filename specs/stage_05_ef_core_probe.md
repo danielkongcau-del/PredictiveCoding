@@ -565,3 +565,146 @@ The first implemented schedule must keep:
 - no collapse to `alpha = 0`
 
 This first v3-B candidate is still a working-hypothesis test, not a proved superior family.
+
+### 18.13 Stage 05 v3-C charter
+
+This section opens the next Stage 05 charter only.
+
+It does not itself implement:
+
+- a new Stage 05 loss term
+- a new Stage 05 experiment suite
+- a new Stage 05 default or replacement claim
+
+#### 18.13.1 Current post-promotion motivation
+
+Current evidence after the refined v3-B promotion is:
+
+- the fixed-budget `v2 vs v3-A` result already shows that explicit transport-drift decomposition materially improves configured-step mechanism over the fixed-budget v2 control
+- the refined fixed-budget v3-B recompare then shows that `stage05_v3b_stronger_traj_curr_weight` materially improves configured-step mechanism again over the fixed-budget v3-A reference
+- the current Stage 05 line therefore already has evidence that:
+  - target entanglement matters
+  - trajectory-level supervision matters
+- the remaining fixed-budget gap is now more plausibly tied to a still-missing higher-level consistency contract than to another immediate branch-local or weight-local tweak
+
+Current ranked post-promotion mechanism suspects are:
+
+- endpoint / semigroup consistency contract
+- still-insufficient trajectory curriculum contract
+- corrected residual identity contract
+
+Stage 05 v3-C is opened because the first item is now the most credible next mechanism question.
+
+#### 18.13.2 Working hypothesis
+
+Stage 05 v3-C is motivated by the working hypothesis that, after:
+
+- explicit transport-drift decomposition in v3-A
+- promoted refined trajectory curriculum in v3-B
+
+the current Stage 05 family still lacks an explicit endpoint / semigroup consistency contract
+across split horizons, and that this missing contract is now a more credible configured-step
+limiter than another immediate trajectory-weight or identity-only refinement.
+
+This is a chartering hypothesis, not a proved repository conclusion.
+
+#### 18.13.3 Endpoint / semigroup consistency notation
+
+Stage 05 v3-C keeps the current Stage 05 remaining-horizon notation:
+
+- `t` is the current knot time
+- `r` is the remaining horizon
+- `alpha in (0, 1]`
+- `s = t + alpha * r`
+- `r_s = (1 - alpha) * r`
+
+Define the direct full-horizon endpoint prediction by:
+
+- `z_hat_direct = z_t + r * u_hat(z_t, r, t; c)`
+
+Define the split-horizon midpoint prediction by:
+
+- `z_hat_mid = z_t + alpha * r * u_hat(z_t, alpha * r, t; c)`
+
+Define the split-horizon endpoint prediction by:
+
+- `z_hat_split = z_t + alpha * r * u_hat(z_t, alpha * r, t; c) + (1 - alpha) * r * u_hat(z_hat_mid, r_s, s; c)`
+
+Define the semigroup consistency residual by:
+
+- `Delta_sg = z_hat_direct - z_hat_split`
+
+#### 18.13.4 v3-C contract definition
+
+Stage 05 v3-C is defined as an endpoint / semigroup consistency contract on top of the promoted
+refined v3-B scaffold.
+
+It preserves:
+
+- explicit transport-drift decomposition from v3-A
+- the promoted refined v3-B trajectory-curriculum scaffold
+- artifact-independent target construction
+- mechanism-first evaluation
+- task accuracy as a report-only signal
+
+It changes only the next higher-level consistency question:
+
+- whether direct full-horizon endpoint prediction and split-horizon endpoint prediction should be constrained more explicitly across the same interval family
+
+This charter does not yet fix:
+
+- the exact semigroup-consistency loss form
+- the exact weighting between existing trajectory-curriculum terms and any new semigroup term
+- whether the split endpoint should be enforced on velocity, endpoint state, or both
+- the exact schedule over `alpha`
+
+Those choices belong to the next implementation pass.
+
+#### 18.13.5 Why endpoint / semigroup consistency now ranks first
+
+Current repository evidence does not rank corrected residual identity as the lead next issue,
+because:
+
+- the current Stage 05 scaffold already uses an explicit corrected residual identity target
+- the current v2 and later scaffolds already keep anchor, trajectory, and state derivative terms explicit
+
+Current repository evidence also does not rank another immediate v3-B-only trajectory tweak as
+the lead next issue, because:
+
+- refined v3-B already became the active fixed-budget improvement reference
+- the remaining gap after that promotion is better described as a missing higher-level consistency layer than as an unanswered promotion question
+
+The current v3-B scaffold still lacks an explicit endpoint / semigroup consistency contract:
+
+- it adds trajectory curriculum
+- it still does not directly constrain `Delta_sg`
+
+This makes endpoint / semigroup consistency the most credible next charter from the current state.
+
+#### 18.13.6 Non-goals and required next deliverables
+
+Stage 05 v3-C must not be framed as:
+
+- a reopening of Stage 04 package-internal work
+- another pure same-family budget escalation
+- another pure same-family efficiency tweak
+- a broad v3-B parameter search
+- a default introduction of `muPC`, `iPC`, `DKP-PC`, or a full `AlphaFlow` family replacement
+- a promotion of task accuracy to the primary gate
+- a replacement claim against the frozen Stage 04 bridge result on `main`
+
+The next Stage 05 v3-C implementation pass must minimally add:
+
+- a new Stage 05 v3-C candidate codepath on top of `stage05_v3b_stronger_traj_curr_weight`
+- a new comparison entry or suite against:
+  - the fixed-budget Stage 05 v2 control
+  - the promoted refined Stage 05 v3-B reference
+- a matching smoke test
+- a dedicated artifact directory
+- aggregate summary fields that report:
+  - whether endpoint / semigroup consistency is enabled
+  - the split-horizon semigroup identity
+  - pairwise deltas versus the promoted refined v3-B reference
+  - pairwise deltas versus the fixed-budget v2 control
+  - a gap-closure style decision field
+  - `recommended_next_move`

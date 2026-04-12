@@ -199,6 +199,14 @@ Current interpretation:
   - it avoids an obvious report-only accuracy regression relative to v3-A
   - the current recompare decision is therefore:
     - `recommended_next_move = promote_refined_v3b_as_active_reference`
+- the post-promotion Stage 05 planning conclusion is now:
+  - the fixed-budget `v3-A -> refined v3-B` promotion question is closed
+  - current repo evidence ranks the remaining mechanism suspects as:
+    - endpoint / semigroup consistency contract
+    - still-insufficient trajectory curriculum contract
+    - corrected residual identity contract
+  - the most credible next charter is therefore a planning-only `Stage 05 v3-C`
+  - `Stage 05 v3-C` is defined by the working hypothesis that the current refined v3-B scaffold still lacks an explicit endpoint / semigroup consistency contract across split horizons
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -225,7 +233,8 @@ The next validation move is:
 - keep the fixed-budget Stage 05 v2 result as the immediate control
 - keep `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
 - treat the fixed-budget Stage 05 v3-A result as the previous comparison reference
-- do not open a Stage 05 v3-C charter automatically from this recompare alone
+- treat the `v3-A -> refined v3-B` promotion question as closed
+- open the next Stage 05 planning move as a working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency
 
 Any next narrower Stage 05 follow-up should preserve:
 
@@ -234,30 +243,31 @@ Any next narrower Stage 05 follow-up should preserve:
 - the fixed-budget v2 result as the immediate control
 - the mechanism-first validation contract for Stage 05
 - task accuracy as a secondary signal only
+- the promoted refined v3-B scaffold as the current Stage 05 improvement reference
 
 Any next narrower Stage 05 follow-up should be accepted only if it:
 
 - preserves explicit transport-drift decomposition from v3-A
+- preserves the promoted refined v3-B trajectory-curriculum scaffold as the active comparison reference
 - keeps artifact-independent target construction
 - keeps deterministic artifact generation
 - keeps one-step mechanism metrics positive under the current Stage 05 rule
 - reports explicit pairwise deltas versus:
-  - the fixed-budget v3-A result
+  - the promoted refined Stage 05 v3-B reference
   - the fixed-budget v2 control
-- makes the trajectory curriculum identity explicit
+- makes the trajectory or semigroup contract identity explicit
 - keeps task accuracy as a secondary signal only
 
 Any next narrower Stage 05 follow-up must minimally produce:
 
 - a comparison run or suite against:
   - the fixed-budget Stage 05 v2 control
-  - the fixed-budget Stage 05 v3-A result
-  - `stage05_v3b_trajectory_curriculum_contract`
+  - `stage05_v3b_stronger_traj_curr_weight`
 - a dedicated artifact directory
 - aggregate summary fields that report:
-  - whether trajectory curriculum is enabled
-  - the curriculum schedule identity
-  - pairwise deltas versus v3-A
+  - whether endpoint / semigroup consistency is enabled
+  - the split-horizon semigroup identity
+  - pairwise deltas versus the promoted refined v3-B reference
   - pairwise deltas versus v2
   - a gap-closure style decision field
   - `recommended_next_move`

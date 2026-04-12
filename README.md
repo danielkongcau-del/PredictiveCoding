@@ -30,6 +30,7 @@ Current working interpretation:
 - the current narrow Stage 05 exploratory reference is still the two-branch corrected residual MeanFlow v2 core
 - the current fixed-budget Stage 05 improvement reference is now `stage05_v3b_stronger_traj_curr_weight`
 - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the previous fixed-budget comparison reference
+- the next planning move is now a working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
 - the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed

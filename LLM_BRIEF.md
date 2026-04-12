@@ -123,7 +123,8 @@ Current known state:
 - use the fixed-budget v2 result as the immediate control and `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget improvement reference
 - do not continue pure same-family budget escalation from the current state
 - treat the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the previous comparison reference
-- do not open a Stage 05 v3-C charter automatically from this recompare alone
+- treat the `v3-A -> refined v3-B` promotion question as closed
+- the next planning move is now to open a working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency
 
 ## Current Code Entry Points
 
