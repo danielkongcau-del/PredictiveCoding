@@ -172,15 +172,22 @@ def test_stage05_v2_vs_v3a_comparison_writes_expected_artifacts(tmp_path: Path) 
     }
 
     assert summary["stage"] == "stage05_v2_vs_v3a_explicit_transport_drift_comparison"
+    assert summary["comparison_scope"] == "smoke_only"
     assert "comparison_protocol" in summary
     assert "by_method" in summary
     assert "pairwise_stage05_v3a_vs_v2" in summary
+    assert "pairwise_deltas_vs_stage05_v2_reference" in summary
+    assert "contextual_3072_reference" in summary
     assert "stage05_v3a_shows_positive_gap_closure_signal_vs_v2" in summary
+    assert "stage05_v3a_materially_improves_configured_step_mechanism" in summary
+    assert "stage05_v3a_avoids_obvious_report_accuracy_regression" in summary
     assert "recommended_next_move" in summary
     assert summary["comparison_report_json_path"] == "comparison_report.json"
     assert summary["comparison_report_md_path"] == "comparison_report.md"
 
     assert "decision" in report
+    assert "pairwise_deltas_vs_stage05_v2_reference" in report
+    assert "contextual_3072_reference" in report
     assert "supports" in report
     assert "does_not_support" in report
     assert "stage05_v3a_shows_positive_gap_closure_signal_vs_v2" in report["decision"]

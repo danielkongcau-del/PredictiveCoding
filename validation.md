@@ -165,49 +165,42 @@ Current interpretation:
     - `recommended_next_move = implement_stage05_v3a_candidate`
 - the current Stage 05 v3-A charter is now motivated by the working hypothesis that the current residual target may entangle transport residual and anchor-drift residual too tightly, limiting configured-step efficiency
 - the first minimal v3-A candidate codepath and smoke comparison entry now exist in-repo
+- the first real fixed-budget `v2 vs v3-A` comparison now also says:
+  - the fixed-budget v3-A candidate materially improves configured-step mechanism over the `1536`-epoch v2 reference
+  - it keeps one-step mechanism positive on every comparison seed
+  - it shows a positive gap-closure signal relative to the contextual `3072`-epoch v2 reference
+  - it avoids an obvious report-only accuracy regression under the current Stage 05 rule, although validation and test accuracy remain slightly below the fixed-budget v2 reference
+  - the current decision is therefore:
+    - `recommended_next_move = proceed_to_stage05_v3b_curriculum_charter`
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
 
 The next validation move is:
 
-- keep the current Stage 05 v2 transport family fixed as the exploratory reference
+- keep the fixed-budget Stage 05 v2 result as the immediate control
 - treat the latest same-family budget reference as the completed `1536 -> 3072 epochs` validation under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
 - treat the fixed-budget efficiency check as the closing same-family efficiency result under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
 - treat the smoke-level v2 vs v3-A artifact as the implementation sanity check under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_comparison/`
+- treat the fixed-budget v2 vs v3-A comparison as the current v3-A evidence base under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/`
 - do not continue pure same-family budget escalation from this state
 - do not continue pure same-family efficiency tweaking from this state
-- use the next Stage 05 pass to run a fixed-budget v2 vs v3-A comparison instead:
-  - `explicit transport-drift contract`
-  - still working-hypothesis driven, not yet a proved repair
+- use the next Stage 05 pass to open a Stage 05 `v3-B` charter instead:
+  - on top of the current fixed-budget v3-A result
   - still mechanism-first
   - still not a replacement claim against the frozen Stage 04 bridge
 
-The next fixed-budget v3-A comparison pass should be accepted only if it:
+That next v3-B chartering pass should preserve:
 
-- preserves artifact-independent target construction
-- preserves deterministic artifact generation
-- keeps one-step mechanism metrics positive under the current Stage 05 rule
-- reports explicit pairwise deltas versus the current Stage 05 v2 reference under a fixed shared budget
-- answers whether the v3-A contract closes any meaningful configured-step gap versus v2
-- reports task accuracy only as a secondary signal
-
-The next fixed-budget v3-A comparison pass must minimally produce:
-
-- a real fixed-budget comparison artifact directory
-- aggregate summary fields that report:
-  - whether explicit transport-drift decomposition is enabled
-  - pairwise deltas versus the current v2 reference
-  - a gap-closure style decision field
-  - `recommended_next_move`
-
-That next step should preserve:
-
-- the frozen Stage 04 bridge result on `main`
+- artifact-independent target construction
+- deterministic artifact generation
+- the fixed-budget v2 result as the immediate control
 - the mechanism-first validation contract for Stage 05
+- task accuracy as a secondary signal only
 
 It should not be framed as:
 

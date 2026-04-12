@@ -1,0 +1,230 @@
+{
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "explicit_transport_drift_decomposition_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3a_candidate": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "explicit_transport_drift_decomposition_enabled": true,
+      "lambda_drift": 1.0,
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_v3a_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "reference_reused_from_existing_artifacts": true
+    }
+  },
+  "decision": {
+    "stage05_v3a_shows_positive_gap_closure_signal_vs_v2": true,
+    "deterministic_artifact_checks_all_pass": true,
+    "stage05_v3a_keeps_one_step_mechanism_positive": true,
+    "stage05_v3a_mechanism_signal_positive_on_all_runs": true,
+    "stage05_v3a_materially_improves_configured_step_mechanism": true,
+    "stage05_v3a_avoids_obvious_report_accuracy_regression": true,
+    "configured_step_gain_fraction_vs_v2_reference": {
+      "energy": 0.09043999472467619,
+      "residual": 0.09991463466747608
+    },
+    "configured_step_seed_improvement_rate_vs_v2_reference": {
+      "energy": 1.0,
+      "residual": 1.0
+    },
+    "gap_closure_vs_contextual_3072_reference": {
+      "configured_step_energy": 0.36966230730808747,
+      "configured_step_residual": 0.17573315155025793,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "pairwise_gap_closure_vs_v2": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0004565189253461592,
+        "std": 0.0002120953774790905
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00045044131079835514,
+        "std": 0.00020780429557720439
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -1.8436036982318108e-06,
+        "std": 8.557246800682232e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -0.00011272245574538615,
+        "std": 7.266333796314923e-05
+      },
+      "val_accuracy_delta": {
+        "mean": -0.006172839506172867,
+        "std": 0.006295085819250353
+      },
+      "test_accuracy_delta": {
+        "mean": -0.006172839506172793,
+        "std": 0.009238660214256659
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": -3.5856895999992653,
+        "std": 16.99943628809316
+      }
+    },
+    "gap_closure_decision": "material_positive_gap_closure_signal",
+    "recommended_next_move": "proceed_to_stage05_v3b_curriculum_charter",
+    "decision_rationale": "The fixed-budget v3-A candidate materially improves configured-step mechanism over v2, narrows the gap to the contextual 3072-epoch reference, and does not show an obvious report-only accuracy regression."
+  },
+  "pairwise_deltas_vs_stage05_v2_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0004565189253461592,
+      "std": 0.0002120953774790905
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.00045044131079835514,
+      "std": 0.00020780429557720439
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -1.8436036982318108e-06,
+      "std": 8.557246800682232e-07
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00011272245574538615,
+      "std": 7.266333796314923e-05
+    },
+    "val_accuracy_delta": {
+      "mean": -0.006172839506172867,
+      "std": 0.006295085819250353
+    },
+    "test_accuracy_delta": {
+      "mean": -0.006172839506172793,
+      "std": 0.009238660214256659
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -3.5856895999992653,
+      "std": 16.99943628809316
+    }
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "supports": [
+    "The Stage 05 v3-A candidate path writes the standard Stage 05 artifacts.",
+    "The v3-A candidate keeps artifact-independent target construction and the existing aggregate residual identity target.",
+    "The comparison exposes explicit pairwise deltas versus the current Stage 05 v2 reference.",
+    "The fixed-budget v3-A candidate keeps one-step validation energy delta vs identity negative on every seed.",
+    "The fixed-budget v3-A candidate materially improves configured-step mechanism over the v2 reference.",
+    "The fixed-budget v3-A candidate avoids an obvious report-only accuracy regression.",
+    "Pairwise configured-step validation energy delta vs identity mean difference vs v2: -0.000450441311.",
+    "Pairwise configured-step validation fixed-point residual delta vs identity mean difference vs v2: -0.000001843604."
+  ],
+  "does_not_support": [
+    "This comparison does not justify replacing the frozen Stage 04 bridge on main.",
+    "This comparison does not promote task accuracy to the Stage 05 gate.",
+    "This comparison does not reopen Stage 04 package-internal work."
+  ]
+}

@@ -101,7 +101,7 @@ Current known state:
 
 - implementation exists
 - the current Stage 05 baseline contract is the corrected residual MeanFlow v1 probe
-- the current narrow Stage 05 candidate is the two-branch corrected residual MeanFlow v2 core
+- the fixed-budget Stage 05 control is the two-branch corrected residual MeanFlow v2 core
 - target construction is artifact-independent
 - the first probe shows positive mechanism signal on energy and fixed-point residual
 - the formal frozen-bridge vs corrected-core comparison now exists
@@ -112,15 +112,16 @@ Current known state:
 - the dedicated Stage 05 v2 diagnostics now say the current narrow diagnosis is `likely_undertrained`
 - the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
 - the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
+- the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference and should feed the next `v3-B` charter
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
-- use the Stage 05 v2 two-branch core as the current exploratory reference
+- use the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the active Stage 05 implementation branch and keep the fixed-budget v2 result as the immediate control
 - do not continue pure same-family budget escalation from the current state
-- if Stage 05 continues, run a fixed-budget comparison between the current v2 reference and `stage05_v3a_explicit_transport_drift_contract`
+- if Stage 05 continues, open the Stage 05 `v3-B` charter rather than another v2-only budget or efficiency pass
 
 ## Current Code Entry Points
 

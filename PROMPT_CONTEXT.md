@@ -80,7 +80,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - Stage 04 package-internal digging is closed from the current state
 - Stage 04 is treated as the frozen bridge result on `main`
 - the current Stage 05 baseline contract is the corrected residual MeanFlow v1 probe
-- the current narrow Stage 05 candidate is the two-branch corrected residual MeanFlow v2 core
+- the fixed-budget Stage 05 control is the two-branch corrected residual MeanFlow v2 core
 - the frozen-bridge vs corrected-core comparison is now complete
 - the Stage 05 v1 vs v2 comparison is now complete
 - the current comparison result says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first grounds
@@ -99,17 +99,20 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the first minimal working-hypothesis-driven `Stage 05 v3-A` candidate now exists:
   - `explicit transport-drift contract`
   - motivated by the hypothesis that the current residual target may entangle transport residual and anchor-drift residual too tightly
-- the next Stage 05 move is now to run a fixed-budget `v2 vs v3-A` comparison
+- the fixed-budget `v2 vs v3-A` comparison is now complete:
+  - the v3-A candidate materially improves configured-step mechanism over the fixed-budget v2 reference
+  - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the active Stage 05 implementation branch
+  - the next Stage 05 move is now to open the `v3-B` charter
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
-- use the Stage 05 v2 two-branch core as the current exploratory reference
+- use the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the active Stage 05 implementation branch and keep the fixed-budget v2 result as the immediate control
 - do not draft the next Stage 05 step as another pure same-family budget push
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
-- if Stage 05 continues, draft the next step as a fixed-budget `v2 vs v3-A` comparison around the implemented `explicit transport-drift contract`
+- if Stage 05 continues, draft the next step as the Stage 05 `v3-B` charter on top of the implemented `explicit transport-drift contract`
 
 ## What Prompt Writers Must Not Reopen
 

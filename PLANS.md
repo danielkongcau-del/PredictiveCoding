@@ -230,11 +230,25 @@ Completed outcome:
 
 ### 8. Run A Fixed-Budget V2 vs V3-A Comparison
 
+Completed outcome:
+
+- the fixed-budget comparison now exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/`
+- the fixed-budget v3-A candidate materially improves configured-step mechanism over the current `1536`-epoch v2 reference
+- the fixed-budget v3-A candidate keeps one-step mechanism positive on every comparison seed
+- the fixed-budget v3-A candidate shows a positive gap-closure signal relative to the contextual `3072`-epoch v2 reference
+- report-only validation and test accuracy remain slightly below the fixed-budget v2 reference, but not enough to count as an obvious regression under the current Stage 05 rule
+- the current decision is therefore:
+  - `recommended_next_move = proceed_to_stage05_v3b_curriculum_charter`
+
+### 9. Open The Stage 05 V3-B Charter
+
 Next pass objective:
 
-- run a real fixed-budget comparison between the current Stage 05 v2 exploratory reference and the new v3-A candidate
-- keep the comparison mechanism-first and keep task accuracy report-only
-- decide whether the explicit transport-drift contract closes any meaningful configured-step gap versus v2
+- define the next narrow Stage 05 mechanism charter on top of the successful fixed-budget v3-A result
+- keep Stage 04 frozen on `main`
+- keep Stage 05 mechanism-first and keep task accuracy report-only
+- use the fixed-budget v2 result as the immediate control when specifying the next v3-B comparison target
 
 ## Exploratory Acceptance Criteria
 

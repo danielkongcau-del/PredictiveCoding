@@ -152,16 +152,29 @@ Current probe status:
   - candidate name: `stage05_v3a_explicit_transport_drift_contract`
   - it reuses the current two-branch scaffold but replaces the bootstrap supervision with an explicit `q_boot / d_boot` split
   - a smoke-level `v2 vs v3-A` comparison entry now also exists and writes formal aggregate artifacts
+- the first real fixed-budget `v2 vs v3-A` comparison now also exists under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison)
+- current fixed-budget v3-A comparison result:
+  - the fixed-budget v3-A candidate materially improves configured-step mechanism over the `1536`-epoch v2 reference
+  - it keeps one-step mechanism positive on every comparison seed
+  - it shows a positive gap-closure signal relative to the contextual `3072`-epoch v2 reference
+  - it avoids an obvious report-only accuracy regression under the current Stage 05 rule, although validation and test accuracy remain slightly below the fixed-budget v2 reference
+  - the current comparison decision is:
+    - `stage05_v3a_shows_positive_gap_closure_signal_vs_v2 = true`
+    - `stage05_v3a_materially_improves_configured_step_mechanism = true`
+    - `recommended_next_move = proceed_to_stage05_v3b_curriculum_charter`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
-  - the two-branch corrected residual MeanFlow core is now the current narrow Stage 05 exploratory candidate
+  - the two-branch corrected residual MeanFlow core remains the fixed-budget Stage 05 control
+  - the fixed-budget v3-A result is now the active Stage 05 implementation branch for the next chartering step
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - the longer-training and budget-push validations showed real same-family budget upside
   - the fixed-budget efficiency diagnostic then showed that a narrow same-family schedule change does not recover a material fraction of that upside
   - on this simple task, further pure epoch escalation is now treated as economically unjustified from the current state
-  - the current operative next move is therefore to run a fixed-budget Stage 05 `v2 vs v3-A` comparison rather than another same-family budget or schedule push
+  - the fixed-budget Stage 05 `v2 vs v3-A` comparison now shows that v3-A is a stronger configured-step branch than the fixed-budget v2 reference under the current mechanism-first rule
+  - the current operative next move is therefore to open a Stage 05 `v3-B` charter on top of the v3-A branch rather than another same-family budget or schedule push
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -169,14 +182,14 @@ Current probe status:
 - Keep the Stage 04 bridge result frozen on `main`.
 - Do not open another package-internal Stage 04 diagnostic suite from this state.
 - Do not use any current Stage 05 comparison as a claim that Stage 05 should replace the frozen bridge result on `main`.
-- Use the current Stage 05 v2 candidate as the new exploratory reference.
+- Keep the fixed-budget Stage 05 v2 result as the immediate Stage 05 control.
 - Keep Stage 05 mechanism-first and task accuracy report-only.
 - Do not continue pure same-family budget escalation from the current state.
 - Do not continue pure same-family efficiency tweaking from the current state.
-- The next Stage 05 move should now be to run a fixed-budget comparison between:
-  - the current Stage 05 v2 exploratory reference
-  - `stage05_v3a_explicit_transport_drift_contract`
-  - still mechanism-first and still not a claim that the frozen bridge result on `main` should be replaced
+- Treat `stage05_v3a_explicit_transport_drift_contract` as the active Stage 05 implementation branch for the next chartering step, with the fixed-budget v2 result retained as the immediate control.
+- The next Stage 05 move should now be to open a Stage 05 `v3-B` charter:
+  - still mechanism-first
+  - still not a claim that the frozen bridge result on `main` should be replaced
 
 ## Reopen Conditions
 
