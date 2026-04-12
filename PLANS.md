@@ -277,15 +277,26 @@ Required framing:
 
 Immediate next move:
 
-- run the first real fixed-budget Stage 05 comparison across:
-  - the fixed-budget v2 control
-  - the fixed-budget v3-A reference
-  - the implemented `stage05_v3b_trajectory_curriculum_contract` candidate
+Completed outcome:
+
+- the first real fixed-budget `v2 vs v3-A vs v3-B` comparison now exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
+- the fixed-budget v3-B candidate keeps one-step mechanism positive on every comparison seed
+- it materially improves configured-step mechanism over the fixed-budget v2 control
+- it directionally improves configured-step mechanism over the fixed-budget v3-A reference on every comparison seed
+- its configured-step gain over v3-A remains below the current materiality threshold
+- it slightly lowers report-only validation and test accuracy relative to v3-A, but not enough to count as an obvious regression under the current Stage 05 rule
+- the current comparison decision is therefore:
+  - `recommended_next_move = retain_v3a_as_active_reference`
+
+Current planning implication:
+
 - keep Stage 04 frozen on `main`
 - keep Stage 05 mechanism-first and keep task accuracy report-only
-- use the fixed-budget v2 result as the immediate control
-- use the fixed-budget v3-A result as the current fixed-budget improvement reference
-- treat the implemented v3-B candidate as the active Stage 05 implementation branch for onward evaluation work
+- keep the fixed-budget v2 result as the immediate control
+- keep the fixed-budget v3-A result as the current fixed-budget improvement reference
+- do not open a Stage 05 v3-C charter from the current state
+- if Stage 05 continues, any narrower follow-up should be anchored on the fixed-budget v3-A reference rather than another same-family budget push
 
 ## Exploratory Acceptance Criteria
 

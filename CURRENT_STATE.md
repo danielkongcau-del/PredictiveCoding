@@ -174,19 +174,34 @@ Current probe status:
   - candidate name: `stage05_v3b_trajectory_curriculum_contract`
   - it keeps the v3-A explicit transport-drift decomposition and adds one aggregate trajectory curriculum loss
   - a smoke-ready `v2 vs v3-A vs v3-B` comparison entry now also exists
+- the first real fixed-budget `v2 vs v3-A vs v3-B` comparison now also exists under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison)
+- current fixed-budget v3-B comparison result:
+  - the fixed-budget v3-B candidate keeps one-step validation energy delta vs identity negative on every comparison seed
+  - it materially improves configured-step mechanism over the fixed-budget v2 control
+  - it directionally improves configured-step mechanism over the fixed-budget v3-A reference on every comparison seed
+  - its configured-step gain over v3-A remains below the current materiality threshold
+  - it slightly lowers report-only validation and test accuracy relative to v3-A, but not enough to count as an obvious regression under the current Stage 05 rule
+  - it improves contextual `3072`-epoch gap-closure fractions relative to v3-A, but not enough to justify promotion to the current fixed-budget Stage 05 improvement reference
+  - the current comparison decision is:
+    - `stage05_v3b_materially_improves_configured_step_mechanism_vs_v3a = false`
+    - `stage05_v3b_shows_positive_gap_closure_signal_vs_v3a = false`
+    - `recommended_next_move = retain_v3a_as_active_reference`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
   - the two-branch corrected residual MeanFlow core remains the fixed-budget Stage 05 control
   - the fixed-budget v3-A result remains the current fixed-budget Stage 05 improvement reference
-  - the first minimal v3-B candidate is now the active Stage 05 implementation branch for onward evaluation work
+  - the fixed-budget v3-B result is now a tested Stage 05 refinement branch, but not the current fixed-budget improvement reference
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - the longer-training and budget-push validations showed real same-family budget upside
   - the fixed-budget efficiency diagnostic then showed that a narrow same-family schedule change does not recover a material fraction of that upside
   - on this simple task, further pure epoch escalation is now treated as economically unjustified from the current state
   - the fixed-budget Stage 05 `v2 vs v3-A` comparison now shows that v3-A is a stronger configured-step branch than the fixed-budget v2 reference under the current mechanism-first rule
-  - the current operative next move is therefore to run the first real fixed-budget `v2 vs v3-A vs v3-B` comparison rather than another same-family budget or schedule push
+  - the fixed-budget Stage 05 `v2 vs v3-A vs v3-B` comparison now shows that v3-B is directionally stronger than v3-A on configured-step mechanism, but not yet strongly enough to replace v3-A as the current fixed-budget improvement reference
+  - the current operative next move is therefore no longer the first fixed-budget v3-B comparison
+  - from the current state, Stage 05 should keep v3-A as the active fixed-budget improvement reference and should not open a v3-C charter on the basis of the current v3-B result
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -199,13 +214,9 @@ Current probe status:
 - Do not continue pure same-family budget escalation from the current state.
 - Do not continue pure same-family efficiency tweaking from the current state.
 - Keep the fixed-budget Stage 05 v2 result as the immediate control and the fixed-budget v3-A result as the current fixed-budget improvement reference.
-- Treat `stage05_v3b_trajectory_curriculum_contract` as the active Stage 05 implementation branch for onward evaluation work.
-- The next Stage 05 move should now be to run the first real fixed-budget comparison across:
-  - the fixed-budget v2 control
-  - the fixed-budget v3-A reference
-  - `stage05_v3b_trajectory_curriculum_contract`
-  - still mechanism-first
-  - still not a claim that the frozen bridge result on `main` should be replaced
+- Treat `stage05_v3b_trajectory_curriculum_contract` as a tested refinement branch rather than the current fixed-budget improvement reference.
+- Do not open a Stage 05 v3-C charter from the current state on the basis of the present fixed-budget v3-B comparison.
+- If Stage 05 continues, keep the fixed-budget v3-A result as the reference point for any narrower follow-up on v3-B or later chartering.
 
 ## Reopen Conditions
 

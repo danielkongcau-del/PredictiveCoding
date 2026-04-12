@@ -1,0 +1,330 @@
+{
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": false,
+      "trajectory_curriculum_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3a_reference": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/runs/stage05_v3a_explicit_transport_drift_contract",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3b_candidate": {
+      "method_name": "stage05_v3b_trajectory_curriculum_contract",
+      "candidate_name": "stage05_v3b_trajectory_curriculum_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.1,
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "gap_closure_gain_threshold": 0.05,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_v3a_reference_artifacts": true
+    }
+  },
+  "decision": {
+    "deterministic_artifact_checks_all_pass": true,
+    "stage05_v3b_keeps_one_step_mechanism_positive": true,
+    "stage05_v3b_mechanism_signal_positive_on_all_runs": true,
+    "stage05_v3b_improves_configured_step_mechanism_vs_v2": true,
+    "stage05_v3b_materially_improves_configured_step_mechanism_vs_v3a": false,
+    "stage05_v3b_avoids_obvious_report_accuracy_regression": true,
+    "stage05_v3b_shows_positive_gap_closure_signal_vs_v3a": false,
+    "configured_step_gain_fraction_vs_stage05_v3a_reference": {
+      "energy": 0.02824568172549273,
+      "residual": 0.03467816312159853
+    },
+    "configured_step_gain_fraction_vs_stage05_v2_control": {
+      "energy": 0.12124021575641736,
+      "residual": 0.13805765378830825
+    },
+    "configured_step_seed_improvement_rate_vs_stage05_v3a_reference": {
+      "energy": 1.0,
+      "residual": 1.0
+    },
+    "configured_step_seed_improvement_rate_vs_stage05_v2_control": {
+      "energy": 1.0,
+      "residual": 1.0
+    },
+    "contextual_gap_closure_fractions_vs_3072_reference": {
+      "stage05_v3a": {
+        "configured_step_energy": 0.36966230730808747,
+        "configured_step_residual": 0.17573315155025793,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "stage05_v3b": {
+        "configured_step_energy": 0.49555440633853987,
+        "configured_step_residual": 0.24282035035805707,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "v3b_minus_v3a": {
+        "configured_step_energy": 0.1258920990304524,
+        "configured_step_residual": 0.06708719880779915,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      }
+    },
+    "gap_closure_decision": "no_material_gap_closure_signal_vs_v3a",
+    "recommended_next_move": "retain_v3a_as_active_reference",
+    "decision_rationale": "The fixed-budget v3-B candidate does not yet show a strong enough configured-step advantage over v3-A to replace it as the active fixed-budget improvement reference."
+  },
+  "pairwise_stage05_v3a_vs_v2": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0004565189253461592,
+      "std": 0.0002120953774790905
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.00045044131079835514,
+      "std": 0.00020780429557720439
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -1.8436036982318108e-06,
+      "std": 8.557246800682232e-07
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00011272245574538615,
+      "std": 7.266333796314923e-05
+    },
+    "val_accuracy_delta": {
+      "mean": -0.006172839506172867,
+      "std": 0.006295085819250353
+    },
+    "test_accuracy_delta": {
+      "mean": -0.006172839506172793,
+      "std": 0.009238660214256659
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -3.5856895999992653,
+      "std": 16.99943628809316
+    }
+  },
+  "pairwise_deltas_vs_stage05_v2_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0006125355598329274,
+      "std": 0.00028969112894565343
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0006038434862037367,
+      "std": 0.0002825749554683995
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -2.547410616476825e-06,
+      "std": 1.1061300060542468e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00011448657987984483,
+      "std": 0.00010281791788797949
+    },
+    "val_accuracy_delta": {
+      "mean": -0.008641975308642006,
+      "std": 0.010620154650669903
+    },
+    "test_accuracy_delta": {
+      "mean": -0.007407407407407381,
+      "std": 0.009072184232530303
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 103.59594723333551,
+      "std": 13.688661489231894
+    }
+  },
+  "pairwise_deltas_vs_stage05_v3a_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.00015601663448676825,
+      "std": 8.064007668339001e-05
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0001534021754053816,
+      "std": 7.813480954010271e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -7.038069182450143e-07,
+      "std": 2.513031442547031e-07
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -1.764124134458663e-06,
+      "std": 3.590505544963775e-05
+    },
+    "val_accuracy_delta": {
+      "mean": -0.0024691358024691392,
+      "std": 0.0046193301071283
+    },
+    "test_accuracy_delta": {
+      "mean": -0.0012345679012345883,
+      "std": 0.0017459426695964422
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 107.18163683333478,
+      "std": 16.67099995750716
+    }
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "stage05_v3a": {
+      "configured_step_energy": 0.36966230730808747,
+      "configured_step_residual": 0.17573315155025793,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b": {
+      "configured_step_energy": 0.49555440633853987,
+      "configured_step_residual": 0.24282035035805707,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "v3b_minus_v3a": {
+      "configured_step_energy": 0.1258920990304524,
+      "configured_step_residual": 0.06708719880779915,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    }
+  },
+  "supports": [
+    "The three-way comparison preserves the Stage 05 mechanism-first contract.",
+    "The comparison exposes explicit pairwise deltas versus both the fixed-budget v2 control and the fixed-budget v3-A reference.",
+    "The v3-B candidate keeps explicit transport-drift decomposition and makes trajectory curriculum identity explicit in artifacts.",
+    "The fixed-budget v3-B candidate keeps one-step validation energy delta vs identity negative on every seed.",
+    "The fixed-budget v3-B candidate does not materially improve configured-step mechanism over v3-A.",
+    "The fixed-budget v3-B candidate avoids an obvious report-only accuracy regression relative to v3-A.",
+    "Pairwise configured-step validation energy delta vs identity mean difference vs v3-A: -0.000153402175.",
+    "Pairwise configured-step validation fixed-point residual delta vs identity mean difference vs v3-A: -0.000000703807."
+  ],
+  "does_not_support": [
+    "This comparison does not justify replacing the frozen Stage 04 bridge on main.",
+    "This comparison does not promote task accuracy to the Stage 05 gate.",
+    "This comparison does not reopen Stage 04 package-internal work."
+  ]
+}

@@ -102,20 +102,21 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the fixed-budget `v2 vs v3-A` comparison is now complete:
   - the v3-A candidate materially improves configured-step mechanism over the fixed-budget v2 reference
   - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the active Stage 05 implementation branch
-  - the first minimal `stage05_v3b_trajectory_curriculum_contract` candidate now also exists
+  - the fixed-budget `v2 vs v3-A vs v3-B` comparison is now also complete
+  - the v3-B candidate improves configured-step mechanism over the fixed-budget v2 control and directionally over v3-A
+  - the v3-B candidate does not materially improve enough over v3-A to replace it as the active fixed-budget improvement reference
   - `v3-B = trajectory curriculum contract`
-  - motivated by the working hypothesis that the remaining fixed-budget inefficiency is now trajectory-level
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
-- use the fixed-budget v2 result as the immediate control, the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the current fixed-budget improvement reference, and `stage05_v3b_trajectory_curriculum_contract` as the active implementation branch
+- use the fixed-budget v2 result as the immediate control and the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the current fixed-budget improvement reference
 - do not draft the next Stage 05 step as another pure same-family budget push
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
-- if Stage 05 continues, draft the next step as the first real fixed-budget `v2 vs v3-A vs v3-B` comparison rather than another charter-only pass
-- for that v3-B comparison, treat the key mechanism hypothesis as trajectory-level direct-match vs recursive-continuation tension, not another branch-local tweak
+- do not draft the next Stage 05 step as if v3-B has already replaced v3-A as the active fixed-budget reference
+- if Stage 05 continues, draft the next step as a narrower v3-B follow-up or return-to-chartering pass anchored on the fixed-budget v3-A reference rather than another first three-way comparison
 
 ## What Prompt Writers Must Not Reopen
 

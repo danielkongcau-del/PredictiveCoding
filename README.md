@@ -49,8 +49,7 @@ Current working interpretation:
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it remains contextual evidence rather than the active next move
 - the fixed-budget same-family efficiency diagnostic closed the pure same-family schedule-tweak line and now serves as part of the evidence base behind the current Stage 05 `v3-B` line
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the first minimal `stage05_v3b_trajectory_curriculum_contract` candidate and smoke-ready three-way comparison entry now exist
-- the next narrow Stage 05 move is therefore the first real fixed-budget `v2 vs v3-A vs v3-B` comparison
+- the completed fixed-budget Stage 05 `v2 vs v3-A vs v3-B` comparison says the v3-B trajectory-curriculum candidate improves configured-step mechanism over v2 and directionally over v3-A, but not materially enough to replace v3-A as the current fixed-budget Stage 05 improvement reference
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 

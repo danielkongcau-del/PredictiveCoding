@@ -113,16 +113,17 @@ Current known state:
 - the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
 - the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the first minimal `stage05_v3b_trajectory_curriculum_contract` candidate and smoke-ready three-way comparison entry now also exist in-repo
+- the completed fixed-budget Stage 05 `v2 vs v3-A vs v3-B` comparison now says the v3-B candidate improves configured-step mechanism over v2 and directionally over v3-A, but not materially enough to replace v3-A as the active fixed-budget improvement reference
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
-- use the fixed-budget v2 result as the immediate control, the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the current fixed-budget improvement reference, and `stage05_v3b_trajectory_curriculum_contract` as the active implementation branch
+- use the fixed-budget v2 result as the immediate control and the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the current fixed-budget improvement reference
 - do not continue pure same-family budget escalation from the current state
-- if Stage 05 continues, run the first real fixed-budget `v2 vs v3-A vs v3-B` comparison rather than another v2-only budget or efficiency pass
+- do not open a Stage 05 v3-C charter from the current state on the basis of the present fixed-budget v3-B result
+- if Stage 05 continues, treat any narrower v3-B follow-up as subordinate to the fixed-budget v3-A reference rather than another budget or efficiency pass
 
 ## Current Code Entry Points
 

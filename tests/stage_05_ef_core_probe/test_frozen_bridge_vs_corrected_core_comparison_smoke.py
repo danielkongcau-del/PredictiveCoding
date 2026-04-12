@@ -19,6 +19,40 @@ def _read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def _write_stage05_contextual_summary(path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "by_method": {
+            "stage_05_two_branch_corrected_residual_core_v2_budget_push": {
+                "configured_transport_steps": 2,
+                "one_step_energy_delta_vs_identity": {"mean": -0.008, "std": 0.0},
+                "configured_step_energy_delta_vs_identity": {"mean": -0.0075, "std": 0.0},
+                "configured_step_fixed_point_residual_delta_vs_identity": {
+                    "mean": -3.0e-05,
+                    "std": 0.0,
+                },
+                "one_step_energy_delta_vs_local_field_only": {"mean": -0.0011, "std": 0.0},
+                "configured_step_energy_delta_vs_local_field_only": {
+                    "mean": -0.00105,
+                    "std": 0.0,
+                },
+                "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+                    "mean": -3.5e-06,
+                    "std": 0.0,
+                },
+                "val_accuracy": {"mean": 0.9, "std": 0.0},
+                "test_accuracy": {"mean": 0.9, "std": 0.0},
+                "val_output_mse": {"mean": 0.04, "std": 0.0},
+                "test_output_mse": {"mean": 0.04, "std": 0.0},
+                "selected_epoch": {"mean": 6.0, "std": 0.0},
+                "selection_hits_final_training_boundary_rate": 1.0,
+                "runtime_proxy_seconds": {"mean": 1.0, "std": 0.0},
+            }
+        }
+    }
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 def load_run():
     module = runpy.run_path(
         str(
@@ -238,7 +272,9 @@ def test_stage05_v2_v3a_v3b_comparison_writes_expected_artifacts(tmp_path: Path)
     assert "pairwise_stage05_v3b_vs_v3a" in summary
     assert "pairwise_deltas_vs_stage05_v2_reference" in summary
     assert "pairwise_deltas_vs_stage05_v3a_reference" in summary
-    assert "stage05_v3b_candidate_smoke_ready" in summary
+    assert "stage05_v3b_keeps_one_step_mechanism_positive" in summary
+    assert "stage05_v3b_materially_improves_configured_step_mechanism_vs_v3a" in summary
+    assert "stage05_v3b_shows_positive_gap_closure_signal_vs_v3a" in summary
     assert "gap_closure_decision" in summary
     assert "recommended_next_move" in summary
     assert summary["comparison_report_json_path"] == "comparison_report.json"
@@ -247,10 +283,92 @@ def test_stage05_v2_v3a_v3b_comparison_writes_expected_artifacts(tmp_path: Path)
     assert "decision" in report
     assert "pairwise_deltas_vs_stage05_v2_reference" in report
     assert "pairwise_deltas_vs_stage05_v3a_reference" in report
+    assert "supports" in report
+    assert "does_not_support" in report
     assert report["decision"]["recommended_next_move"] in {
         "run_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
         "another_v3b_implementation_pass",
     }
+
+
+def test_stage05_v2_v3a_v3b_fixed_budget_comparison_reuses_existing_reference_artifacts(
+    tmp_path: Path,
+) -> None:
+    contextual_path = tmp_path / "contextual_3072_summary.json"
+    _write_stage05_contextual_summary(contextual_path)
+
+    reference_result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_vs_v3a_reference",
+        comparison_variant="stage05_v2_vs_v3a",
+        comparison_scope="fixed_budget_comparison",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+        reuse_stage05_v2_reference_artifacts=False,
+        contextual_reference_summary_path=contextual_path,
+        contextual_reference_stage05_epochs=6,
+    )
+
+    run_dir = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_v3a_v3b_fixed_budget",
+        comparison_variant="stage05_v2_v3a_v3b",
+        comparison_scope="fixed_budget_comparison",
+        experiment_name="stage05_v2_v3a_v3b_fixed_budget_comparison",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+        lambda_traj_curr=0.1,
+        alpha_floor=0.5,
+        alpha_warmup_epochs=1,
+        alpha_ramp_epochs=1,
+        reuse_stage05_v2_reference_artifacts=True,
+        reference_artifact_root=(
+            reference_result.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2"
+        ),
+        reuse_stage05_v3a_reference_artifacts=True,
+        v3a_reference_artifact_root=(
+            reference_result.run_dir
+            / "runs"
+            / "stage05_v3a_explicit_transport_drift_contract"
+        ),
+        contextual_reference_summary_path=contextual_path,
+        contextual_reference_stage05_epochs=6,
+    ).run_dir
+
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert summary["stage"] == "stage05_v2_v3a_v3b_fixed_budget_comparison"
+    assert summary["comparison_scope"] == "fixed_budget_comparison"
+    assert (
+        summary["comparison_protocol"]["stage_05_v2_reference"]["reference_reused_from_existing_artifacts"]
+        is True
+    )
+    assert (
+        summary["comparison_protocol"]["stage_05_v3a_reference"]["reference_reused_from_existing_artifacts"]
+        is True
+    )
+    assert "contextual_gap_closure_fractions_vs_3072_reference" in summary
+    assert "stage05_v3b_materially_improves_configured_step_mechanism_vs_v3a" in summary
+    assert "stage05_v3b_shows_positive_gap_closure_signal_vs_v3a" in summary
+    assert summary["recommended_next_move"] in {
+        "proceed_to_stage05_v3c_charter",
+        "keep_v3b_and_refine_implementation",
+        "retain_v3a_as_active_reference",
+    }
+    assert "contextual_gap_closure_fractions_vs_3072_reference" in report
+    assert "supports" in report
+    assert "does_not_support" in report
 
 
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:

@@ -1,0 +1,95 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_v3a_v3b_fixed_budget_comparison",
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": false,
+      "trajectory_curriculum_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3a_reference": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/runs/stage05_v3a_explicit_transport_drift_contract",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3b_candidate": {
+      "method_name": "stage05_v3b_trajectory_curriculum_contract",
+      "candidate_name": "stage05_v3b_trajectory_curriculum_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.1,
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "gap_closure_gain_threshold": 0.05,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_v3a_reference_artifacts": true
+    }
+  },
+  "artifacts": {
+    "aggregate_runs_csv": "aggregate_runs.csv",
+    "aggregate_summary_json": "aggregate_summary.json",
+    "comparison_report_json": "comparison_report.json",
+    "comparison_report_md": "comparison_report.md"
+  }
+}

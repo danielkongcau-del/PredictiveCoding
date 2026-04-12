@@ -175,7 +175,14 @@ Current interpretation:
 - the first minimal Stage 05 v3-B candidate path and smoke-ready three-way comparison entry now also exist in-repo:
   - candidate name: `stage05_v3b_trajectory_curriculum_contract`
   - the candidate keeps the v3-A explicit transport-drift decomposition and adds one aggregate trajectory curriculum loss
-  - the current next validation move is therefore no longer to open the v3-B charter, but to run the first real fixed-budget `v2 vs v3-A vs v3-B` comparison
+  - the first real fixed-budget `v2 vs v3-A vs v3-B` comparison now also exists under:
+    - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
+  - that fixed-budget comparison says:
+    - the v3-B candidate materially improves configured-step mechanism over the fixed-budget v2 control
+    - the v3-B candidate directionally improves configured-step mechanism over the fixed-budget v3-A reference
+    - the v3-B candidate does not materially improve configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+    - the current decision is therefore:
+      - `recommended_next_move = retain_v3a_as_active_reference`
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -191,16 +198,15 @@ The next validation move is:
   - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_comparison/`
 - treat the fixed-budget v2 vs v3-A comparison as the current v3-A evidence base under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/`
+- treat the fixed-budget v2 vs v3-A vs v3-B comparison as the current v3-B evidence base under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
 - do not continue pure same-family budget escalation from this state
 - do not continue pure same-family efficiency tweaking from this state
-- use the next Stage 05 pass to run the first real fixed-budget comparison across:
-  - the fixed-budget Stage 05 v2 control
-  - the fixed-budget Stage 05 v3-A reference
-  - `stage05_v3b_trajectory_curriculum_contract`
-  - still mechanism-first
-  - still not a replacement claim against the frozen Stage 04 bridge
+- keep the fixed-budget Stage 05 v3-A result as the current fixed-budget improvement reference
+- do not open a Stage 05 v3-C charter from the current state on the basis of the present fixed-budget v3-B comparison
+- if Stage 05 continues, evaluate any narrower follow-up against the fixed-budget Stage 05 v3-A reference rather than reopening budget or efficiency sweeps
 
-That next fixed-budget v3-B evaluation pass should preserve:
+Any next narrower Stage 05 follow-up should preserve:
 
 - artifact-independent target construction
 - deterministic artifact generation
@@ -208,7 +214,7 @@ That next fixed-budget v3-B evaluation pass should preserve:
 - the mechanism-first validation contract for Stage 05
 - task accuracy as a secondary signal only
 
-That next fixed-budget v3-B evaluation pass should be accepted only if it:
+Any next narrower Stage 05 follow-up should be accepted only if it:
 
 - preserves explicit transport-drift decomposition from v3-A
 - keeps artifact-independent target construction
@@ -220,7 +226,7 @@ That next fixed-budget v3-B evaluation pass should be accepted only if it:
 - makes the trajectory curriculum identity explicit
 - keeps task accuracy as a secondary signal only
 
-That next fixed-budget v3-B evaluation pass must minimally produce:
+Any next narrower Stage 05 follow-up must minimally produce:
 
 - a comparison run or suite against:
   - the fixed-budget Stage 05 v2 control

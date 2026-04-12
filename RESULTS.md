@@ -306,6 +306,52 @@ Relevant artifacts:
 
 - `outputs/stage_05_ef_core_probe/corrected_residual_core_v1_vs_v2_comparison/`
 
+## FMPC Stage 05 V2 vs V3-A vs V3-B Fixed-Budget Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
+
+Current comparison result:
+
+- fixed-budget Stage 05 v2 control:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004980554368336933`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8451788412853327e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+- fixed-budget Stage 05 v3-A reference:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005430995679135288`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.0295392111085136e-05`
+  - mean validation accuracy:
+    - `0.8814814814814814`
+  - mean test accuracy:
+    - `0.8814814814814814`
+- fixed-budget Stage 05 v3-B candidate:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.00558439785454067`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.099919902933015e-05`
+  - mean validation accuracy:
+    - `0.8790123456790123`
+  - mean test accuracy:
+    - `0.880246913580247`
+
+Current interpretation:
+
+- the fixed-budget v3-B candidate materially improves configured-step mechanism over the fixed-budget v2 control
+- the fixed-budget v3-B candidate directionally improves configured-step mechanism over the fixed-budget v3-A reference
+- the fixed-budget v3-B candidate does not materially improve configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+- the fixed-budget v3-B candidate keeps one-step mechanism positive and avoids an obvious report-only accuracy regression relative to v3-A
+- the current decision is therefore:
+  - keep the fixed-budget v3-A result as the active Stage 05 improvement reference
+  - do not open a v3-C charter from the current state on the basis of the present fixed-budget v3-B result
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:
