@@ -519,6 +519,142 @@ def test_stage05_v3b_refinement_diagnostic_reuses_existing_reference_artifacts(
     }
 
 
+def test_stage05_v2_v3a_refined_v3b_recompare_uses_promoted_candidate_artifacts(
+    tmp_path: Path,
+) -> None:
+    contextual_path = tmp_path / "contextual_3072_summary.json"
+    _write_stage05_contextual_summary(contextual_path)
+
+    v3a_reference = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_refined_recompare_v3a_reference",
+        comparison_variant="stage05_v2_vs_v3a",
+        comparison_scope="fixed_budget_comparison",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+        reuse_stage05_v2_reference_artifacts=False,
+        contextual_reference_summary_path=contextual_path,
+        contextual_reference_stage05_epochs=6,
+    )
+
+    refinement = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_refined_recompare_refinement_fixture",
+        comparison_variant="stage05_v3b_refinement_diagnostic",
+        comparison_scope="fixed_budget_comparison",
+        experiment_name="stage05_refined_recompare_refinement_fixture",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+        reuse_stage05_v2_reference_artifacts=True,
+        reference_artifact_root=(
+            v3a_reference.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2"
+        ),
+        reuse_stage05_v3a_reference_artifacts=True,
+        v3a_reference_artifact_root=(
+            v3a_reference.run_dir
+            / "runs"
+            / "stage05_v3a_explicit_transport_drift_contract"
+        ),
+        contextual_reference_summary_path=contextual_path,
+        contextual_reference_stage05_epochs=6,
+    )
+
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_refined_recompare_smoke",
+        comparison_variant="stage05_v2_v3a_refined_v3b_recompare",
+        comparison_scope="fixed_budget_comparison",
+        experiment_name="stage05_v2_v3a_refined_v3b_recompare_smoke",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+        lambda_traj_curr=0.2,
+        alpha_floor=0.5,
+        alpha_warmup_epochs=3,
+        alpha_ramp_epochs=3,
+        reuse_stage05_v2_reference_artifacts=True,
+        reference_artifact_root=(
+            v3a_reference.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2"
+        ),
+        reuse_stage05_v3a_reference_artifacts=True,
+        v3a_reference_artifact_root=(
+            v3a_reference.run_dir
+            / "runs"
+            / "stage05_v3a_explicit_transport_drift_contract"
+        ),
+        reuse_stage05_v3b_candidate_artifacts=True,
+        v3b_candidate_artifact_root=(
+            refinement.run_dir
+            / "runs"
+            / "stage05_v3b_stronger_traj_curr_weight"
+        ),
+        v3b_candidate_method_name="stage05_v3b_stronger_traj_curr_weight",
+        contextual_reference_summary_path=contextual_path,
+        contextual_reference_stage05_epochs=6,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 3
+    assert {row["method_name"] for row in rows} == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3a_explicit_transport_drift_contract",
+        "stage05_v3b_stronger_traj_curr_weight",
+    }
+
+    assert summary["stage"] == "stage05_v2_v3a_refined_v3b_recompare_smoke"
+    assert summary["promoted_v3b_candidate_name"] == "stage05_v3b_stronger_traj_curr_weight"
+    assert (
+        summary["comparison_protocol"]["stage_05_v3b_candidate"]["method_name"]
+        == "stage05_v3b_stronger_traj_curr_weight"
+    )
+    assert (
+        summary["comparison_protocol"]["stage_05_v3b_candidate"]["reference_reused_from_existing_artifacts"]
+        is True
+    )
+    assert "pairwise_promoted_refined_v3b_vs_v2" in summary
+    assert "pairwise_promoted_refined_v3b_vs_v3a" in summary
+    assert "promoted_refined_v3b_materially_beats_v3a" in summary
+    assert "promoted_refined_v3b_avoids_obvious_report_accuracy_regression" in summary
+    assert "promoted_refined_v3b_replaces_v3a_as_active_reference" in summary
+    assert summary["recommended_next_move"] in {
+        "promote_refined_v3b_as_active_reference",
+        "retain_v3a_as_active_reference",
+    }
+
+    assert report["promoted_v3b_candidate_name"] == "stage05_v3b_stronger_traj_curr_weight"
+    assert "pairwise_promoted_refined_v3b_vs_v2" in report
+    assert "pairwise_promoted_refined_v3b_vs_v3a" in report
+    assert report["decision"]["recommended_next_move"] in {
+        "promote_refined_v3b_as_active_reference",
+        "retain_v3a_as_active_reference",
+    }
+
+
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(
         output_root=tmp_path,

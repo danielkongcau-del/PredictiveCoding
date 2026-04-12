@@ -113,17 +113,17 @@ Current known state:
 - the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
 - the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the completed fixed-budget Stage 05 `v2 vs v3-A vs v3-B` comparison now says the v3-B candidate improves configured-step mechanism over v2 and directionally over v3-A, but not materially enough to replace v3-A as the active fixed-budget improvement reference
+- the completed refined fixed-budget recompare now says `stage05_v3b_stronger_traj_curr_weight` materially improves configured-step mechanism over both the fixed-budget v2 control and the fixed-budget v3-A reference
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
-- use the fixed-budget v2 result as the immediate control and the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the current fixed-budget improvement reference
+- use the fixed-budget v2 result as the immediate control and `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget improvement reference
 - do not continue pure same-family budget escalation from the current state
-- do not open a Stage 05 v3-C charter from the current state on the basis of the present fixed-budget v3-B result
-- if Stage 05 continues, treat any narrower v3-B follow-up as subordinate to the fixed-budget v3-A reference rather than another budget or efficiency pass
+- treat the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the previous comparison reference
+- do not open a Stage 05 v3-C charter automatically from this recompare alone
 
 ## Current Code Entry Points
 

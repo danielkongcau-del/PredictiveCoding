@@ -67,6 +67,13 @@ def run(
             **overrides,
         )
         return run_stage05_v2_v3a_v3b_comparison(config)
+    if comparison_variant == "stage05_v2_v3a_refined_v3b_recompare":
+        config = Stage05V2V3AV3BComparisonConfig(
+            output_root=output_root,
+            run_id=run_id,
+            **overrides,
+        )
+        return run_stage05_v2_v3a_v3b_comparison(config)
     if comparison_variant == "stage04_vs_stage05_v2":
         config = FrozenBridgeVsStage05V2ComparisonConfig(
             output_root=output_root,

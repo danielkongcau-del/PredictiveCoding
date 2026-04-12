@@ -27,9 +27,9 @@ Current working interpretation:
 - Stage 04 is frozen as the current bridge result on `main`
 - Stage 04 package-internal digging is treated as closed from the current state
 - the current open work is no longer another Stage 04 repair
-- the current narrow Stage 05 exploratory reference is the two-branch corrected residual MeanFlow v2 core
-- the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result remains the current fixed-budget Stage 05 improvement reference
-- the first minimal `stage05_v3b_trajectory_curriculum_contract` candidate is now the active Stage 05 implementation branch for onward design work
+- the current narrow Stage 05 exploratory reference is still the two-branch corrected residual MeanFlow v2 core
+- the current fixed-budget Stage 05 improvement reference is now `stage05_v3b_stronger_traj_curr_weight`
+- the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the previous fixed-budget comparison reference
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
 - the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed
@@ -49,7 +49,7 @@ Current working interpretation:
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it remains contextual evidence rather than the active next move
 - the fixed-budget same-family efficiency diagnostic closed the pure same-family schedule-tweak line and now serves as part of the evidence base behind the current Stage 05 `v3-B` line
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the completed fixed-budget Stage 05 `v2 vs v3-A vs v3-B` comparison says the v3-B trajectory-curriculum candidate improves configured-step mechanism over v2 and directionally over v3-A, but not materially enough to replace v3-A as the current fixed-budget Stage 05 improvement reference
+- the completed fixed-budget Stage 05 refined recompare says `stage05_v3b_stronger_traj_curr_weight` materially improves configured-step mechanism over both the fixed-budget v2 control and the fixed-budget v3-A reference
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 

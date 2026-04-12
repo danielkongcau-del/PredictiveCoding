@@ -387,6 +387,53 @@ Current interpretation:
   - promote `stage05_v3b_stronger_traj_curr_weight` as the immediate refined v3-B recompare candidate
   - do not open a v3-C charter before that refined fixed-budget recompare
 
+## FMPC Stage 05 Refined V3-B Recompare Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
+
+Current comparison result:
+
+- fixed-budget Stage 05 v2 control:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004980554368336933`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8451788412853327e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+- fixed-budget Stage 05 v3-A reference:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005430995679135288`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.0295392111085136e-05`
+  - mean validation accuracy:
+    - `0.8814814814814814`
+  - mean test accuracy:
+    - `0.8814814814814814`
+- promoted refined v3-B candidate:
+  - `stage05_v3b_stronger_traj_curr_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005720360383603999`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.1608872426289415e-05`
+  - mean validation accuracy:
+    - `0.8827160493827161`
+  - mean test accuracy:
+    - `0.882716049382716`
+
+Current interpretation:
+
+- the promoted refined v3-B candidate materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+- it materially improves configured-step mechanism over the fixed-budget v2 control
+- it keeps one-step mechanism positive and avoids an obvious report-only accuracy regression relative to v3-A
+- the current decision is therefore:
+  - promote `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference
+  - keep the fixed-budget v2 result as the immediate control
+  - do not treat this as a replacement claim against the frozen Stage 04 bridge on `main`
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

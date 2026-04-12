@@ -176,7 +176,7 @@ Current probe status:
   - a smoke-ready `v2 vs v3-A vs v3-B` comparison entry now also exists
 - the first real fixed-budget `v2 vs v3-A vs v3-B` comparison now also exists under:
   - [outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison)
-- current fixed-budget v3-B comparison result:
+- original fixed-budget v3-B comparison result:
   - the fixed-budget v3-B candidate keeps one-step validation energy delta vs identity negative on every comparison seed
   - it materially improves configured-step mechanism over the fixed-budget v2 control
   - it directionally improves configured-step mechanism over the fixed-budget v3-A reference on every comparison seed
@@ -198,12 +198,24 @@ Current probe status:
   - the current refinement decision is:
     - `narrow_v3b_refinement_materially_beats_v3a_reference = true`
     - `recommended_next_move = promote_refined_v3b_and_recompare`
+- the fresh fixed-budget refined v3-B recompare now also exists under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare)
+- current refined v3-B recompare result:
+  - the promoted refined candidate is `stage05_v3b_stronger_traj_curr_weight`
+  - it materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+  - it materially improves configured-step mechanism over the fixed-budget v2 control
+  - it keeps one-step mechanism positive on every comparison seed
+  - it avoids an obvious report-only accuracy regression relative to v3-A
+  - the current recompare decision is:
+    - `promoted_refined_v3b_materially_beats_v3a = true`
+    - `recommended_next_move = promote_refined_v3b_as_active_reference`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
   - the two-branch corrected residual MeanFlow core remains the fixed-budget Stage 05 control
-  - the fixed-budget v3-A result remains the current fixed-budget Stage 05 improvement reference
-  - the original fixed-budget v3-B result is now a tested Stage 05 refinement branch, but not the current fixed-budget improvement reference
+  - the refined v3-B candidate `stage05_v3b_stronger_traj_curr_weight` is now the current fixed-budget Stage 05 improvement reference
+  - the fixed-budget v3-A result is now the previous fixed-budget Stage 05 improvement reference
+  - the original fixed-budget v3-B result remains a tested predecessor branch, not the current fixed-budget improvement reference
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - the longer-training and budget-push validations showed real same-family budget upside
@@ -211,9 +223,8 @@ Current probe status:
   - on this simple task, further pure epoch escalation is now treated as economically unjustified from the current state
   - the fixed-budget Stage 05 `v2 vs v3-A` comparison now shows that v3-A is a stronger configured-step branch than the fixed-budget v2 reference under the current mechanism-first rule
   - the original fixed-budget Stage 05 `v2 vs v3-A vs v3-B` comparison showed that v3-B was directionally stronger than v3-A on configured-step mechanism, but not yet strong enough for promotion
-  - the narrow v3-B refinement diagnostic now shows that `stage05_v3b_stronger_traj_curr_weight` materially beats the fixed-budget v3-A reference on configured-step mechanism under the current threshold
-  - the current operative next move is therefore to run a fresh fixed-budget recompare with the refined v3-B candidate, while keeping v3-A as the active fixed-budget improvement reference until that recompare is complete
-  - from the current state, Stage 05 should not open a v3-C charter until that refined fixed-budget recompare is complete
+  - the refined v3-B recompare now shows that `stage05_v3b_stronger_traj_curr_weight` materially beats the fixed-budget v3-A reference and should replace it as the active fixed-budget improvement reference
+  - from the current state, any next Stage 05 planning or implementation pass should start from the promoted refined v3-B reference rather than reopening the recompare question
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -225,10 +236,11 @@ Current probe status:
 - Keep Stage 05 mechanism-first and task accuracy report-only.
 - Do not continue pure same-family budget escalation from the current state.
 - Do not continue pure same-family efficiency tweaking from the current state.
-- Keep the fixed-budget Stage 05 v2 result as the immediate control and the fixed-budget v3-A result as the current fixed-budget improvement reference.
-- Treat `stage05_v3b_stronger_traj_curr_weight` as the immediate refined v3-B recompare candidate, not as the current fixed-budget improvement reference.
-- Do not open a Stage 05 v3-C charter from the current state before the refined v3-B recompare is complete.
-- If Stage 05 continues, the next pass should be a fresh fixed-budget recompare against the fixed-budget v2 control and v3-A reference using the refined v3-B candidate.
+- Keep the fixed-budget Stage 05 v2 result as the immediate control.
+- Use `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference.
+- Treat the fixed-budget v3-A result as the previous comparison reference, not as the current active improvement reference.
+- Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
+- If Stage 05 continues, the next pass should start from `stage05_v3b_stronger_traj_curr_weight` as the promoted fixed-budget reference rather than reopening the same recompare.
 
 ## Reopen Conditions
 
@@ -275,3 +287,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536)
 - Stage 05 v3-B refinement diagnostic artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic)
+- Stage 05 refined v3-B recompare artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare)

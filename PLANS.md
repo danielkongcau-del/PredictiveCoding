@@ -298,18 +298,28 @@ Completed outcome:
 - it avoids an obvious report-only accuracy regression relative to v3-A
 - the current refinement decision is therefore:
   - `recommended_next_move = promote_refined_v3b_and_recompare`
+- the fresh fixed-budget refined v3-B recompare now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
+- the promoted refined candidate is:
+  - `stage05_v3b_stronger_traj_curr_weight`
+- that refined recompare materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+- it also materially improves configured-step mechanism over the fixed-budget v2 control
+- it keeps one-step mechanism positive and avoids an obvious report-only accuracy regression relative to v3-A
+- the current recompare decision is therefore:
+  - `recommended_next_move = promote_refined_v3b_as_active_reference`
 
 Current planning implication:
 
 - keep Stage 04 frozen on `main`
 - keep Stage 05 mechanism-first and keep task accuracy report-only
 - keep the fixed-budget v2 result as the immediate control
-- keep the fixed-budget v3-A result as the current fixed-budget improvement reference until the refined v3-B recompare is complete
-- do not open a Stage 05 v3-C charter from the current state
-- the next Stage 05 pass should be a fresh fixed-budget recompare using:
+- promote `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
+- treat the fixed-budget v3-A result as the previous fixed-budget comparison reference
+- do not reopen the same fixed-budget recompare question as the immediate next move
+- do not open a Stage 05 v3-C charter automatically from this recompare alone
+- any next Stage 05 planning or implementation pass should start from the promoted refined v3-B reference and compare against:
   - the fixed-budget v2 control
   - the fixed-budget v3-A reference
-  - the refined v3-B candidate `stage05_v3b_stronger_traj_curr_weight`
 
 ## Exploratory Acceptance Criteria
 

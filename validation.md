@@ -191,6 +191,14 @@ Current interpretation:
   - it avoids an obvious report-only accuracy regression relative to v3-A
   - the current refinement decision is therefore:
     - `recommended_next_move = promote_refined_v3b_and_recompare`
+- the fresh fixed-budget refined v3-B recompare now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
+  - the promoted refined candidate is `stage05_v3b_stronger_traj_curr_weight`
+  - it materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+  - it materially improves configured-step mechanism over the fixed-budget v2 control
+  - it avoids an obvious report-only accuracy regression relative to v3-A
+  - the current recompare decision is therefore:
+    - `recommended_next_move = promote_refined_v3b_as_active_reference`
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -210,11 +218,14 @@ The next validation move is:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
 - treat the fixed-budget v3-B refinement diagnostic as the current immediate v3-B follow-up evidence under:
   - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
+- treat the fixed-budget refined v3-B recompare as the current active Stage 05 improvement-reference decision under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
 - do not continue pure same-family budget escalation from this state
 - do not continue pure same-family efficiency tweaking from this state
-- keep the fixed-budget Stage 05 v3-A result as the current fixed-budget improvement reference until the refined v3-B recompare is complete
-- do not open a Stage 05 v3-C charter from the current state before that refined v3-B recompare is complete
-- if Stage 05 continues, the next validation pass should be a fresh fixed-budget recompare of the refined v3-B candidate against the fixed-budget v2 control and v3-A reference
+- keep the fixed-budget Stage 05 v2 result as the immediate control
+- keep `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
+- treat the fixed-budget Stage 05 v3-A result as the previous comparison reference
+- do not open a Stage 05 v3-C charter automatically from this recompare alone
 
 Any next narrower Stage 05 follow-up should preserve:
 
@@ -278,6 +289,12 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
 - Stage 05 v2 efficiency diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
+- Stage 05 v2 vs v3-A fixed-budget comparison:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/`
+- Stage 05 v3-B refinement diagnostic:
+  - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
+- Stage 05 refined v3-B recompare:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
 
 ## Document Layering
 
