@@ -1,0 +1,334 @@
+{
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "fixed_budget_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "stage05_v3a_reference": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/runs/stage05_v3a_explicit_transport_drift_contract",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "stage05_v3b_control": {
+      "method_name": "stage05_v3b_trajectory_curriculum_contract",
+      "candidate_name": "stage05_v3b_trajectory_curriculum_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "lambda_traj_curr": 0.1,
+      "alpha_floor": 0.5,
+      "alpha_warmup_epochs": 3,
+      "alpha_ramp_epochs": 3,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/runs/stage05_v3b_trajectory_curriculum_contract",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "refinement_variants": [
+      {
+        "method_name": "stage05_v3b_alpha_earlier_transition",
+        "candidate_name": "stage05_v3b_alpha_earlier_transition",
+        "transport_family": "two_branch_residual_meanflow_core",
+        "residual_branch_structure": "two_branch",
+        "explicit_transport_drift_decomposition_enabled": true,
+        "trajectory_curriculum_enabled": true,
+        "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+        "lambda_traj_curr": 0.1,
+        "alpha_floor": 0.25,
+        "alpha_warmup_epochs": 1,
+        "alpha_ramp_epochs": 1,
+        "epochs": 1536,
+        "configured_transport_steps": 2
+      },
+      {
+        "method_name": "stage05_v3b_stronger_traj_curr_weight",
+        "candidate_name": "stage05_v3b_stronger_traj_curr_weight",
+        "transport_family": "two_branch_residual_meanflow_core",
+        "residual_branch_structure": "two_branch",
+        "explicit_transport_drift_decomposition_enabled": true,
+        "trajectory_curriculum_enabled": true,
+        "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+        "lambda_traj_curr": 0.2,
+        "alpha_floor": 0.5,
+        "alpha_warmup_epochs": 3,
+        "alpha_ramp_epochs": 3,
+        "epochs": 1536,
+        "configured_transport_steps": 2
+      }
+    ],
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v3b_refinement_attribution_diagnostic",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_v3a_reference_artifacts": true,
+      "reuse_stage05_v3b_control_artifacts": true
+    }
+  },
+  "decision": {
+    "best_variant_name": "stage05_v3b_stronger_traj_curr_weight",
+    "best_variant_keeps_one_step_mechanism_positive": true,
+    "best_variant_mechanism_signal_positive_on_all_runs": true,
+    "best_variant_avoids_obvious_report_accuracy_regression": true,
+    "narrow_v3b_refinement_materially_beats_v3b_control": false,
+    "narrow_v3b_refinement_materially_beats_v3a_reference": true,
+    "configured_step_gain_fraction_vs_v3b_control": {
+      "energy": 0.024346855758634472,
+      "residual": 0.029033173889523946
+    },
+    "configured_step_gain_fraction_vs_v3a_reference": {
+      "energy": 0.05328023102290207,
+      "residual": 0.06471815415120112
+    },
+    "configured_step_seed_improvement_rate_vs_v3b_control": {
+      "energy": 1.0,
+      "residual": 1.0
+    },
+    "configured_step_seed_improvement_rate_vs_v3a_reference": {
+      "energy": 1.0,
+      "residual": 1.0
+    },
+    "contextual_gap_closure_fractions_vs_3072_reference": {
+      "stage05_v3a_explicit_transport_drift_contract": {
+        "configured_step_energy": 0.36966230730808747,
+        "configured_step_residual": 0.17573315155025793,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "stage05_v3b_trajectory_curriculum_contract": {
+        "configured_step_energy": 0.49555440633853987,
+        "configured_step_residual": 0.24282035035805707,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "stage05_v3b_alpha_earlier_transition": {
+        "configured_step_energy": 0.487176840755329,
+        "configured_step_residual": 0.23735788115396936,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "stage05_v3b_stronger_traj_curr_weight": {
+        "configured_step_energy": 0.6071343635851628,
+        "configured_step_residual": 0.3009346986677075,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      }
+    },
+    "best_variant_contextual_gap_gain_vs_v3a_reference": {
+      "configured_step_energy": 0.23747205627707535,
+      "configured_step_residual": 0.12520154711744957,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "recommended_next_move": "promote_refined_v3b_and_recompare",
+    "decision_rationale": "A narrow v3-B refinement materially improves configured-step mechanism over the active v3-A reference without an obvious report-only accuracy regression, so it is worth promoting into a fresh fixed-budget re-comparison."
+  },
+  "pairwise_deltas_vs_v3b_control": {
+    "stage05_v3b_alpha_earlier_transition": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": 1.0474971647328468e-05,
+        "std": 1.1797911331922662e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": 1.0208240191110033e-05,
+        "std": 1.1349691024923024e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": 5.730636671165239e-08,
+        "std": 3.5217931509692315e-08
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -3.83276751478312e-06,
+        "std": 5.310745978643464e-06
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0024691358024691392,
+        "std": 0.0034918853391928324
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": -11.81280450000122,
+        "std": 19.33490112455757
+      }
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0001379628649244106,
+        "std": 6.396976524272945e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00013596252906332892,
+        "std": 6.22460247973401e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -6.096733969592636e-07,
+        "std": 1.8013149424607978e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -1.5438176241648154e-06,
+        "std": 2.9857143678937097e-05
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0037037037037037277,
+        "std": 0.005237828008789223
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0024691358024691392,
+        "std": 0.0046193301071283
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": -31.91008043333568,
+        "std": 11.471701596104515
+      }
+    }
+  },
+  "pairwise_deltas_vs_v3a_reference": {
+    "stage05_v3b_alpha_earlier_transition": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00014554166283943978,
+        "std": 6.88458434615546e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00014319393521427157,
+        "std": 6.67861145572572e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -6.465005515333619e-07,
+        "std": 2.1652140421418834e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -5.596891649241782e-06,
+        "std": 3.066375347898427e-05
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.003024061410843389
+      },
+      "test_accuracy_delta": {
+        "mean": -0.0012345679012345883,
+        "std": 0.0017459426695964422
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 95.36883233333356,
+        "std": 32.16471760337248
+      }
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00029397949941117885,
+        "std": 0.00014460982795814662
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0002893647044687105,
+        "std": 0.0001403808309571172
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -1.313480315204278e-06,
+        "std": 4.3134832275040063e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -3.3079417586234783e-06,
+        "std": 6.572735728609264e-05
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0012345679012345883,
+        "std": 0.0017459426695964422
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0012345679012345512,
+        "std": 0.00349188533919278
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 75.2715563999991,
+        "std": 17.223795515554194
+      }
+    }
+  },
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "stage05_v3a_explicit_transport_drift_contract": {
+      "configured_step_energy": 0.36966230730808747,
+      "configured_step_residual": 0.17573315155025793,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b_trajectory_curriculum_contract": {
+      "configured_step_energy": 0.49555440633853987,
+      "configured_step_residual": 0.24282035035805707,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b_alpha_earlier_transition": {
+      "configured_step_energy": 0.487176840755329,
+      "configured_step_residual": 0.23735788115396936,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "configured_step_energy": 0.6071343635851628,
+      "configured_step_residual": 0.3009346986677075,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    }
+  },
+  "supports": [
+    "The diagnostic keeps Stage 05 mechanism-first and reuses the existing fixed-budget references where possible.",
+    "The diagnostic stays within the current v3-B family and tests only narrow trajectory-curriculum refinements.",
+    "Best refined v3-B variant: `stage05_v3b_stronger_traj_curr_weight`.",
+    "A refined v3-B variant materially beats the v3-A reference on configured-step mechanism.",
+    "No refined v3-B variant materially beats the v3-B control on configured-step mechanism."
+  ],
+  "does_not_support": [
+    "This diagnostic does not reopen Stage 04 package-internal work.",
+    "This diagnostic does not introduce a new Stage 05 mechanism family.",
+    "This diagnostic does not justify replacing the frozen Stage 04 bridge on main."
+  ]
+}

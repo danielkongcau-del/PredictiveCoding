@@ -106,6 +106,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - the v3-B candidate improves configured-step mechanism over the fixed-budget v2 control and directionally over v3-A
   - the v3-B candidate does not materially improve enough over v3-A to replace it as the active fixed-budget improvement reference
   - `v3-B = trajectory curriculum contract`
+  - the narrow fixed-budget `v3-B` refinement diagnostic is now also complete
+  - the strongest tested refinement is `stage05_v3b_stronger_traj_curr_weight`
+  - that refined v3-B candidate materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+  - the fixed-budget v3-A result still remains the active Stage 05 improvement reference until the refined v3-B recompare is complete
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -116,7 +120,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family budget push
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as if v3-B has already replaced v3-A as the active fixed-budget reference
-- if Stage 05 continues, draft the next step as a narrower v3-B follow-up or return-to-chartering pass anchored on the fixed-budget v3-A reference rather than another first three-way comparison
+- if Stage 05 continues, draft the next step as a fresh fixed-budget recompare using:
+  - the fixed-budget v2 control
+  - the fixed-budget v3-A reference
+  - the refined v3-B candidate `stage05_v3b_stronger_traj_curr_weight`
 
 ## What Prompt Writers Must Not Reopen
 

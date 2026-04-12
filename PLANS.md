@@ -288,15 +288,28 @@ Completed outcome:
 - it slightly lowers report-only validation and test accuracy relative to v3-A, but not enough to count as an obvious regression under the current Stage 05 rule
 - the current comparison decision is therefore:
   - `recommended_next_move = retain_v3a_as_active_reference`
+- the narrow fixed-budget v3-B refinement diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
+- the strongest tested refinement is:
+  - `stage05_v3b_stronger_traj_curr_weight`
+- that refinement keeps one-step mechanism positive on every comparison seed
+- it materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+- it does not materially improve configured-step mechanism over the original v3-B control under the same threshold
+- it avoids an obvious report-only accuracy regression relative to v3-A
+- the current refinement decision is therefore:
+  - `recommended_next_move = promote_refined_v3b_and_recompare`
 
 Current planning implication:
 
 - keep Stage 04 frozen on `main`
 - keep Stage 05 mechanism-first and keep task accuracy report-only
 - keep the fixed-budget v2 result as the immediate control
-- keep the fixed-budget v3-A result as the current fixed-budget improvement reference
+- keep the fixed-budget v3-A result as the current fixed-budget improvement reference until the refined v3-B recompare is complete
 - do not open a Stage 05 v3-C charter from the current state
-- if Stage 05 continues, any narrower follow-up should be anchored on the fixed-budget v3-A reference rather than another same-family budget push
+- the next Stage 05 pass should be a fresh fixed-budget recompare using:
+  - the fixed-budget v2 control
+  - the fixed-budget v3-A reference
+  - the refined v3-B candidate `stage05_v3b_stronger_traj_curr_weight`
 
 ## Exploratory Acceptance Criteria
 

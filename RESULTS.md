@@ -352,6 +352,41 @@ Current interpretation:
   - keep the fixed-budget v3-A result as the active Stage 05 improvement reference
   - do not open a v3-C charter from the current state on the basis of the present fixed-budget v3-B result
 
+## FMPC Stage 05 V3-B Refinement Diagnostic Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
+
+Current comparison result:
+
+- strongest tested refinement:
+  - `stage05_v3b_stronger_traj_curr_weight`
+- fixed-budget Stage 05 v3-B control:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.00558439785454067`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.099919902933015e-05`
+- strongest refined Stage 05 v3-B candidate:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005720360383603999`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.1608872426289415e-05`
+  - mean validation accuracy:
+    - `0.8827160493827161`
+  - mean test accuracy:
+    - `0.882716049382716`
+
+Current interpretation:
+
+- the strongest refined v3-B candidate materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+- it does not materially improve configured-step mechanism over the original v3-B control under the same threshold
+- it keeps one-step mechanism positive and avoids an obvious report-only accuracy regression relative to v3-A
+- the current decision is therefore:
+  - keep the fixed-budget v3-A result as the active Stage 05 improvement reference until recompare completes
+  - promote `stage05_v3b_stronger_traj_curr_weight` as the immediate refined v3-B recompare candidate
+  - do not open a v3-C charter before that refined fixed-budget recompare
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

@@ -39,6 +39,8 @@ ComparisonMethodName = Literal[
     "stage_05_two_branch_corrected_residual_core_v2",
     "stage05_v3a_explicit_transport_drift_contract",
     "stage05_v3b_trajectory_curriculum_contract",
+    "stage05_v3b_alpha_earlier_transition",
+    "stage05_v3b_stronger_traj_curr_weight",
     "stage_05_two_branch_corrected_residual_core_v2_current_budget",
     "stage_05_two_branch_corrected_residual_core_v2_longer_training",
     "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
@@ -55,6 +57,12 @@ STAGE05_V1_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core
 STAGE05_V2_METHOD_NAME: ComparisonMethodName = "stage_05_two_branch_corrected_residual_core_v2"
 STAGE05_V3A_METHOD_NAME: ComparisonMethodName = "stage05_v3a_explicit_transport_drift_contract"
 STAGE05_V3B_METHOD_NAME: ComparisonMethodName = "stage05_v3b_trajectory_curriculum_contract"
+STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME: ComparisonMethodName = (
+    "stage05_v3b_alpha_earlier_transition"
+)
+STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME: ComparisonMethodName = (
+    "stage05_v3b_stronger_traj_curr_weight"
+)
 STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: ComparisonMethodName = (
     "stage_05_two_branch_corrected_residual_core_v2_current_budget"
 )
@@ -375,6 +383,104 @@ class Stage05V2V3AV3BComparisonConfig:
             raise ValueError("gap_narrowing_fraction_threshold must be non-negative.")
         if self.gap_closure_gain_threshold < 0.0:
             raise ValueError("gap_closure_gain_threshold must be non-negative.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
+class Stage05V3BRefinementDiagnosticConfig:
+    """Run a narrow fixed-budget attribution diagnostic around the current Stage 05 v3-B scaffold."""
+
+    experiment_name: str = "stage05_v3b_refinement_diagnostic"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    comparison_scope: ComparisonScope = "smoke_only"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0,)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    stage05_epochs: int = 4
+    stage05_eval_steps: int = 8
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+    lambda_drift: float = 1.0
+    reuse_stage05_v2_reference_artifacts: bool = False
+    reference_artifact_root: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v2_budget_push_validation_1536_to_3072/"
+        "runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference"
+    )
+    reuse_stage05_v3a_reference_artifacts: bool = False
+    v3a_reference_artifact_root: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/"
+        "runs/stage05_v3a_explicit_transport_drift_contract"
+    )
+    reuse_stage05_v3b_control_artifacts: bool = False
+    v3b_control_artifact_root: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v2_v3a_v3b_fixed_budget_comparison/"
+        "runs/stage05_v3b_trajectory_curriculum_contract"
+    )
+    control_lambda_traj_curr: float = 0.1
+    control_alpha_floor: float = 0.5
+    control_alpha_warmup_epochs: int = 3
+    control_alpha_ramp_epochs: int = 3
+    alpha_earlier_transition_alpha_floor: float = 0.25
+    alpha_earlier_transition_alpha_warmup_epochs: int = 1
+    alpha_earlier_transition_alpha_ramp_epochs: int = 1
+    stronger_traj_curr_lambda_traj_curr: float = 0.2
+    contextual_reference_summary_path: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json"
+    )
+    contextual_reference_stage05_epochs: int = 3072
+    configured_step_improvement_fraction_threshold: float = 0.05
+    allowed_accuracy_regression_threshold: float = 0.01
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The Stage 05 v3-B refinement diagnostic currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.stage05_epochs <= 0 or self.stage05_eval_steps <= 0:
+            raise ValueError("stage05_epochs and stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+        if self.lambda_drift < 0.0:
+            raise ValueError("lambda_drift must be non-negative.")
+        if self.control_lambda_traj_curr < 0.0 or self.stronger_traj_curr_lambda_traj_curr < 0.0:
+            raise ValueError("lambda_traj_curr values must be non-negative.")
+        for value in (
+            self.control_alpha_floor,
+            self.alpha_earlier_transition_alpha_floor,
+        ):
+            if not (0.0 < value < 1.0):
+                raise ValueError("alpha_floor values must satisfy 0 < alpha_floor < 1.")
+        for value in (
+            self.control_alpha_warmup_epochs,
+            self.control_alpha_ramp_epochs,
+            self.alpha_earlier_transition_alpha_warmup_epochs,
+            self.alpha_earlier_transition_alpha_ramp_epochs,
+        ):
+            if value < 0:
+                raise ValueError("alpha warmup/ramp epochs must be non-negative.")
+        if self.contextual_reference_stage05_epochs <= 0:
+            raise ValueError("contextual_reference_stage05_epochs must be positive.")
+        if self.configured_step_improvement_fraction_threshold < 0.0:
+            raise ValueError("configured_step_improvement_fraction_threshold must be non-negative.")
+        if self.allowed_accuracy_regression_threshold < 0.0:
+            raise ValueError("allowed_accuracy_regression_threshold must be non-negative.")
 
     def resolved_run_id(self) -> str:
         if self.run_id is not None:
@@ -743,7 +849,7 @@ def _load_budget_push_contextual_accuracy_snapshot(
 
 
 def _load_stage05_v2_contextual_reference(
-    config: Stage05V2EfficiencyDiagnosticConfig,
+    config: Stage05V2EfficiencyDiagnosticConfig | Stage05V3BRefinementDiagnosticConfig,
 ) -> dict[str, Any]:
     summary_path = _resolve_repo_path(config.contextual_reference_summary_path)
     if not summary_path.exists():
@@ -1059,6 +1165,40 @@ def _stage05_v3b_config(
     )
 
 
+def _stage05_v3b_variant_config(
+    config: Stage05V3BRefinementDiagnosticConfig,
+    *,
+    seed: int,
+    output_root: Path,
+    experiment_name: ComparisonMethodName,
+    lambda_traj_curr: float,
+    alpha_floor: float,
+    alpha_warmup_epochs: int,
+    alpha_ramp_epochs: int,
+) -> FMPCEFExploratoryProbeConfig:
+    return _build_stage05_v2_config(
+        output_root=output_root,
+        experiment_name=experiment_name,
+        seed=seed,
+        train_fraction=float(config.train_fraction),
+        val_fraction=float(config.val_fraction),
+        test_fraction=float(config.test_fraction),
+        batch_size=int(config.batch_size),
+        shuffle_batches=bool(config.shuffle_batches),
+        epochs=int(config.stage05_epochs),
+        eval_steps=int(config.stage05_eval_steps),
+        layer_dims=config.stage05_layer_dims,
+        transport_steps=int(config.stage05_transport_steps),
+        use_explicit_transport_drift_decomposition=True,
+        use_trajectory_curriculum_contract=True,
+        lambda_drift=float(config.lambda_drift),
+        lambda_traj_curr=float(lambda_traj_curr),
+        alpha_floor=float(alpha_floor),
+        alpha_warmup_epochs=int(alpha_warmup_epochs),
+        alpha_ramp_epochs=int(alpha_ramp_epochs),
+    )
+
+
 def _stage05_v2_bridge_config(
     config: FrozenBridgeVsStage05V2ComparisonConfig,
     *,
@@ -1329,6 +1469,7 @@ def _stage05_core_row(
         "run_id": str(result.run_dir.name),
         "run_config_path": _relative_posix(suite_run_dir, result.run_dir / "config.json"),
         "run_summary_path": _relative_posix(suite_run_dir, result.run_dir / "summary.json"),
+        "candidate_name": summary.get("candidate_name"),
         "transport_family": str(summary["transport_family"]),
         "residual_branch_structure": str(summary["residual_branch_structure"]),
         "explicit_transport_drift_decomposition_enabled": bool(
@@ -1338,7 +1479,10 @@ def _stage05_core_row(
         "trajectory_curriculum_schedule_identity": summary.get(
             "trajectory_curriculum_schedule_identity"
         ),
+        "lambda_traj_curr": summary.get("lambda_traj_curr"),
         "alpha_floor": summary.get("alpha_floor"),
+        "alpha_warmup_epochs": summary.get("alpha_warmup_epochs"),
+        "alpha_ramp_epochs": summary.get("alpha_ramp_epochs"),
         "configured_transport_steps": int(config.transport_steps),
         "one_step_energy_delta_vs_identity": float(val_one_step["energy_delta_vs_identity"]),
         "configured_step_energy_delta_vs_identity": float(val_configured["energy_delta_vs_identity"]),
@@ -1409,6 +1553,7 @@ def _load_existing_stage05_core_row(
         "run_id": str(existing_run_dir.name),
         "run_config_path": _repo_relative_posix(existing_run_dir / "config.json"),
         "run_summary_path": _repo_relative_posix(existing_run_dir / "summary.json"),
+        "candidate_name": summary.get("candidate_name"),
         "transport_family": str(summary["transport_family"]),
         "residual_branch_structure": str(summary["residual_branch_structure"]),
         "explicit_transport_drift_decomposition_enabled": bool(
@@ -1418,7 +1563,10 @@ def _load_existing_stage05_core_row(
         "trajectory_curriculum_schedule_identity": summary.get(
             "trajectory_curriculum_schedule_identity"
         ),
+        "lambda_traj_curr": summary.get("lambda_traj_curr"),
         "alpha_floor": summary.get("alpha_floor"),
+        "alpha_warmup_epochs": summary.get("alpha_warmup_epochs"),
+        "alpha_ramp_epochs": summary.get("alpha_ramp_epochs"),
         "configured_transport_steps": int(transport_payload["transport_steps"]),
         "one_step_energy_delta_vs_identity": float(val_one_step["energy_delta_vs_identity"]),
         "configured_step_energy_delta_vs_identity": float(val_configured["energy_delta_vs_identity"]),
@@ -4003,6 +4151,178 @@ def run_stage05_v2_v3a_v3b_comparison(
     )
 
 
+def _stage05_v3b_refinement_variant_specs(
+    config: Stage05V3BRefinementDiagnosticConfig,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "method_name": STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+            "stage_name": "FMPC Stage 05 EF Core Probe v3-B Alpha Earlier Transition Variant",
+            "lambda_traj_curr": float(config.control_lambda_traj_curr),
+            "alpha_floor": float(config.alpha_earlier_transition_alpha_floor),
+            "alpha_warmup_epochs": int(config.alpha_earlier_transition_alpha_warmup_epochs),
+            "alpha_ramp_epochs": int(config.alpha_earlier_transition_alpha_ramp_epochs),
+        },
+        {
+            "method_name": STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+            "stage_name": "FMPC Stage 05 EF Core Probe v3-B Stronger Trajectory Curriculum Weight Variant",
+            "lambda_traj_curr": float(config.stronger_traj_curr_lambda_traj_curr),
+            "alpha_floor": float(config.control_alpha_floor),
+            "alpha_warmup_epochs": int(config.control_alpha_warmup_epochs),
+            "alpha_ramp_epochs": int(config.control_alpha_ramp_epochs),
+        },
+    ]
+
+
+def _stage05_v3b_refinement_variant_payload(
+    *,
+    method_name: ComparisonMethodName,
+    lambda_traj_curr: float,
+    alpha_floor: float,
+    alpha_warmup_epochs: int,
+    alpha_ramp_epochs: int,
+) -> dict[str, Any]:
+    return {
+        "method_name": method_name,
+        "candidate_name": method_name,
+        "transport_family": "two_branch_residual_meanflow_core",
+        "residual_branch_structure": "two_branch",
+        "explicit_transport_drift_decomposition_enabled": True,
+        "trajectory_curriculum_enabled": True,
+        "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+        "lambda_traj_curr": float(lambda_traj_curr),
+        "alpha_floor": float(alpha_floor),
+        "alpha_warmup_epochs": int(alpha_warmup_epochs),
+        "alpha_ramp_epochs": int(alpha_ramp_epochs),
+    }
+
+
+def _stage05_v3b_refinement_protocol_payload(
+    config: Stage05V3BRefinementDiagnosticConfig,
+) -> dict[str, Any]:
+    if config.comparison_scope == "smoke_only":
+        decision_rule = {
+            "purpose": "smoke_ready_v3b_refinement_scaffold_check",
+            "task_accuracy_is_report_only": True,
+            "artifact_checks_required": True,
+            "smoke_only": True,
+        }
+    else:
+        decision_rule = {
+            "purpose": "fixed_budget_v3b_refinement_attribution_diagnostic",
+            "primary_split": "validation",
+            "task_accuracy_is_report_only": True,
+            "configured_step_improvement_fraction_threshold": float(
+                config.configured_step_improvement_fraction_threshold
+            ),
+            "allowed_accuracy_regression_threshold": float(
+                config.allowed_accuracy_regression_threshold
+            ),
+            "reuse_stage05_v2_reference_artifacts": bool(
+                config.reuse_stage05_v2_reference_artifacts
+            ),
+            "reuse_stage05_v3a_reference_artifacts": bool(
+                config.reuse_stage05_v3a_reference_artifacts
+            ),
+            "reuse_stage05_v3b_control_artifacts": bool(
+                config.reuse_stage05_v3b_control_artifacts
+            ),
+        }
+    return {
+        "comparison_scope": str(config.comparison_scope),
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "fixed_budget_v2_reference": {
+            "method_name": STAGE05_V2_METHOD_NAME,
+            "reference_reused_from_existing_artifacts": bool(
+                config.reuse_stage05_v2_reference_artifacts
+            ),
+            "source_artifact_root": (
+                _repo_relative_posix(_resolve_repo_path(config.reference_artifact_root))
+                if config.reuse_stage05_v2_reference_artifacts
+                else None
+            ),
+            "epochs": int(config.stage05_epochs),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+        },
+        "stage05_v3a_reference": {
+            "method_name": STAGE05_V3A_METHOD_NAME,
+            "reference_reused_from_existing_artifacts": bool(
+                config.reuse_stage05_v3a_reference_artifacts
+            ),
+            "source_artifact_root": (
+                _repo_relative_posix(_resolve_repo_path(config.v3a_reference_artifact_root))
+                if config.reuse_stage05_v3a_reference_artifacts
+                else None
+            ),
+            "epochs": int(config.stage05_epochs),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+        },
+        "stage05_v3b_control": {
+            **_stage05_v3b_refinement_variant_payload(
+                method_name=STAGE05_V3B_METHOD_NAME,
+                lambda_traj_curr=float(config.control_lambda_traj_curr),
+                alpha_floor=float(config.control_alpha_floor),
+                alpha_warmup_epochs=int(config.control_alpha_warmup_epochs),
+                alpha_ramp_epochs=int(config.control_alpha_ramp_epochs),
+            ),
+            "reference_reused_from_existing_artifacts": bool(
+                config.reuse_stage05_v3b_control_artifacts
+            ),
+            "source_artifact_root": (
+                _repo_relative_posix(_resolve_repo_path(config.v3b_control_artifact_root))
+                if config.reuse_stage05_v3b_control_artifacts
+                else None
+            ),
+            "epochs": int(config.stage05_epochs),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+        },
+        "refinement_variants": [
+            {
+                **_stage05_v3b_refinement_variant_payload(
+                    method_name=spec["method_name"],
+                    lambda_traj_curr=float(spec["lambda_traj_curr"]),
+                    alpha_floor=float(spec["alpha_floor"]),
+                    alpha_warmup_epochs=int(spec["alpha_warmup_epochs"]),
+                    alpha_ramp_epochs=int(spec["alpha_ramp_epochs"]),
+                ),
+                "epochs": int(config.stage05_epochs),
+                "configured_transport_steps": int(config.stage05_transport_steps),
+            }
+            for spec in _stage05_v3b_refinement_variant_specs(config)
+        ],
+        "contextual_3072_reference": {
+            "source_summary_path": _repo_relative_posix(
+                _resolve_repo_path(config.contextual_reference_summary_path)
+            ),
+            "method_name": STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+            "epochs": int(config.contextual_reference_stage05_epochs),
+        },
+        "decision_rule": decision_rule,
+    }
+
+
+def _stage05_v3b_refinement_suite_config_payload(
+    config: Stage05V3BRefinementDiagnosticConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_protocol": _stage05_v3b_refinement_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
 def _negative_magnitude_relative_gain(
     *,
     current_value: float,
@@ -4012,6 +4332,397 @@ def _negative_magnitude_relative_gain(
     candidate = abs(float(candidate_value))
     scale = max(baseline, 1e-12)
     return float((candidate - baseline) / scale)
+
+
+def _stage05_v3b_refinement_contextual_gap_payload(
+    *,
+    by_method: dict[str, dict[str, Any]],
+    contextual_reference: dict[str, Any],
+) -> dict[str, Any]:
+    v2_summary = by_method[STAGE05_V2_METHOD_NAME]
+    v2_configured_energy_mean = float(v2_summary["configured_step_energy_delta_vs_identity"]["mean"])
+    v2_configured_residual_mean = float(
+        v2_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    v2_val_accuracy_mean = float(v2_summary["val_accuracy"]["mean"])
+    v2_test_accuracy_mean = float(v2_summary["test_accuracy"]["mean"])
+
+    payload: dict[str, Any] = {}
+    for method_name, method_summary in by_method.items():
+        if method_name == STAGE05_V2_METHOD_NAME:
+            continue
+        payload[method_name] = {
+            "configured_step_energy": float(
+                _negative_gap_closed_fraction(
+                    reference_value=v2_configured_energy_mean,
+                    candidate_value=float(
+                        method_summary["configured_step_energy_delta_vs_identity"]["mean"]
+                    ),
+                    target_value=float(
+                        contextual_reference["configured_step_energy_delta_vs_identity"]["mean"]
+                    ),
+                )
+            ),
+            "configured_step_residual": float(
+                _negative_gap_closed_fraction(
+                    reference_value=v2_configured_residual_mean,
+                    candidate_value=float(
+                        method_summary["configured_step_fixed_point_residual_delta_vs_identity"][
+                            "mean"
+                        ]
+                    ),
+                    target_value=float(
+                        contextual_reference[
+                            "configured_step_fixed_point_residual_delta_vs_identity"
+                        ]["mean"]
+                    ),
+                )
+            ),
+            "val_accuracy": float(
+                _positive_gap_closed_fraction(
+                    reference_value=v2_val_accuracy_mean,
+                    candidate_value=float(method_summary["val_accuracy"]["mean"]),
+                    target_value=float(contextual_reference["val_accuracy"]["mean"]),
+                )
+            ),
+            "test_accuracy": float(
+                _positive_gap_closed_fraction(
+                    reference_value=v2_test_accuracy_mean,
+                    candidate_value=float(method_summary["test_accuracy"]["mean"]),
+                    target_value=float(contextual_reference["test_accuracy"]["mean"]),
+                )
+            ),
+        }
+    return payload
+
+
+def _best_stage05_v3b_refinement_method(
+    by_method: dict[str, dict[str, Any]],
+) -> ComparisonMethodName:
+    ranked = sorted(
+        (
+            STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+            STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+        ),
+        key=lambda method_name: (
+            float(by_method[method_name]["configured_step_energy_delta_vs_identity"]["mean"]),
+            float(
+                by_method[method_name]["configured_step_fixed_point_residual_delta_vs_identity"][
+                    "mean"
+                ]
+            ),
+        ),
+    )
+    return ranked[0]
+
+
+def _stage05_v3b_refinement_decision(
+    *,
+    rows: list[dict[str, Any]],
+    config: Stage05V3BRefinementDiagnosticConfig,
+    by_method: dict[str, dict[str, Any]],
+    pairwise_vs_control: dict[str, dict[str, Any]],
+    pairwise_vs_v3a: dict[str, dict[str, Any]],
+    contextual_reference: dict[str, Any] | None,
+) -> tuple[dict[str, Any], str]:
+    best_method = _best_stage05_v3b_refinement_method(by_method)
+    best_rows = _method_rows(rows, best_method)
+    best_vs_control = pairwise_vs_control[best_method]
+    best_vs_v3a = pairwise_vs_v3a[best_method]
+    best_by_seed = {int(row["seed"]): row for row in best_rows}
+    control_by_seed = {int(row["seed"]): row for row in _method_rows(rows, STAGE05_V3B_METHOD_NAME)}
+    v3a_by_seed = {int(row["seed"]): row for row in _method_rows(rows, STAGE05_V3A_METHOD_NAME)}
+    shared_control_seeds = sorted(set(best_by_seed).intersection(control_by_seed))
+    shared_v3a_seeds = sorted(set(best_by_seed).intersection(v3a_by_seed))
+
+    artifact_pass = all(bool(row["deterministic_artifact_checks_passed"]) for row in best_rows)
+    one_step_positive = all(
+        float(row["one_step_energy_delta_vs_identity"]) < 0.0 for row in best_rows
+    )
+    mechanism_positive = all(bool(row["mechanism_signal_positive"]) for row in best_rows)
+
+    energy_gain_vs_control = float(
+        _negative_magnitude_relative_gain(
+            current_value=float(
+                by_method[STAGE05_V3B_METHOD_NAME]["configured_step_energy_delta_vs_identity"][
+                    "mean"
+                ]
+            ),
+            candidate_value=float(
+                by_method[best_method]["configured_step_energy_delta_vs_identity"]["mean"]
+            ),
+        )
+    )
+    residual_gain_vs_control = float(
+        _negative_magnitude_relative_gain(
+            current_value=float(
+                by_method[STAGE05_V3B_METHOD_NAME][
+                    "configured_step_fixed_point_residual_delta_vs_identity"
+                ]["mean"]
+            ),
+            candidate_value=float(
+                by_method[best_method][
+                    "configured_step_fixed_point_residual_delta_vs_identity"
+                ]["mean"]
+            ),
+        )
+    )
+    energy_gain_vs_v3a = float(
+        _negative_magnitude_relative_gain(
+            current_value=float(
+                by_method[STAGE05_V3A_METHOD_NAME]["configured_step_energy_delta_vs_identity"][
+                    "mean"
+                ]
+            ),
+            candidate_value=float(
+                by_method[best_method]["configured_step_energy_delta_vs_identity"]["mean"]
+            ),
+        )
+    )
+    residual_gain_vs_v3a = float(
+        _negative_magnitude_relative_gain(
+            current_value=float(
+                by_method[STAGE05_V3A_METHOD_NAME][
+                    "configured_step_fixed_point_residual_delta_vs_identity"
+                ]["mean"]
+            ),
+            candidate_value=float(
+                by_method[best_method][
+                    "configured_step_fixed_point_residual_delta_vs_identity"
+                ]["mean"]
+            ),
+        )
+    )
+
+    energy_seed_improvement_rate_vs_control = _rate(
+        [
+            float(best_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            < float(control_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            for seed in shared_control_seeds
+        ]
+    )
+    residual_seed_improvement_rate_vs_control = _rate(
+        [
+            float(best_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            < float(control_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            for seed in shared_control_seeds
+        ]
+    )
+    energy_seed_improvement_rate_vs_v3a = _rate(
+        [
+            float(best_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            < float(v3a_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            for seed in shared_v3a_seeds
+        ]
+    )
+    residual_seed_improvement_rate_vs_v3a = _rate(
+        [
+            float(best_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            < float(v3a_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            for seed in shared_v3a_seeds
+        ]
+    )
+
+    materially_beats_control = bool(
+        energy_gain_vs_control >= float(config.configured_step_improvement_fraction_threshold)
+        and residual_gain_vs_control
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and energy_seed_improvement_rate_vs_control >= 0.5
+        and residual_seed_improvement_rate_vs_control >= 0.5
+    )
+    materially_beats_v3a = bool(
+        energy_gain_vs_v3a >= float(config.configured_step_improvement_fraction_threshold)
+        and residual_gain_vs_v3a >= float(config.configured_step_improvement_fraction_threshold)
+        and energy_seed_improvement_rate_vs_v3a >= 0.5
+        and residual_seed_improvement_rate_vs_v3a >= 0.5
+    )
+    directional_beats_control = bool(
+        float(best_vs_control["configured_step_energy_delta_vs_identity_delta"]["mean"]) < 0.0
+        and float(
+            best_vs_control["configured_step_fixed_point_residual_delta_vs_identity_delta"][
+                "mean"
+            ]
+        )
+        < 0.0
+    )
+    directional_beats_v3a = bool(
+        float(best_vs_v3a["configured_step_energy_delta_vs_identity_delta"]["mean"]) < 0.0
+        and float(
+            best_vs_v3a["configured_step_fixed_point_residual_delta_vs_identity_delta"]["mean"]
+        )
+        < 0.0
+    )
+    avoids_obvious_accuracy_regression = bool(
+        float(best_vs_v3a["val_accuracy_delta"]["mean"])
+        >= -float(config.allowed_accuracy_regression_threshold)
+        and float(best_vs_v3a["test_accuracy_delta"]["mean"])
+        >= -float(config.allowed_accuracy_regression_threshold)
+    )
+
+    contextual_gap = (
+        None
+        if contextual_reference is None
+        else _stage05_v3b_refinement_contextual_gap_payload(
+            by_method=by_method,
+            contextual_reference=contextual_reference,
+        )
+    )
+    best_contextual_gap_gain_vs_v3a = None
+    if contextual_gap is not None:
+        best_contextual_gap_gain_vs_v3a = {
+            "configured_step_energy": float(
+                contextual_gap[best_method]["configured_step_energy"]
+                - contextual_gap[STAGE05_V3A_METHOD_NAME]["configured_step_energy"]
+            ),
+            "configured_step_residual": float(
+                contextual_gap[best_method]["configured_step_residual"]
+                - contextual_gap[STAGE05_V3A_METHOD_NAME]["configured_step_residual"]
+            ),
+            "val_accuracy": float(
+                contextual_gap[best_method]["val_accuracy"]
+                - contextual_gap[STAGE05_V3A_METHOD_NAME]["val_accuracy"]
+            ),
+            "test_accuracy": float(
+                contextual_gap[best_method]["test_accuracy"]
+                - contextual_gap[STAGE05_V3A_METHOD_NAME]["test_accuracy"]
+            ),
+        }
+
+    if not artifact_pass or not one_step_positive or not mechanism_positive:
+        recommended_next_move = "retain_v3a_as_active_reference_and_stop_v3b"
+        rationale = (
+            "The best refined v3-B variant does not preserve the minimum artifact or mechanism "
+            "stability checks, so v3-A should remain the active reference and v3-B should stop here."
+        )
+    elif materially_beats_v3a and avoids_obvious_accuracy_regression:
+        recommended_next_move = "promote_refined_v3b_and_recompare"
+        rationale = (
+            "A narrow v3-B refinement materially improves configured-step mechanism over the active "
+            "v3-A reference without an obvious report-only accuracy regression, so it is worth "
+            "promoting into a fresh fixed-budget re-comparison."
+        )
+    elif directional_beats_control or directional_beats_v3a:
+        recommended_next_move = "retain_v3a_as_active_reference_but_keep_v3b_as_future_context"
+        rationale = (
+            "A narrow v3-B refinement nudges configured-step mechanism in the right direction, but "
+            "the gain is still not material enough to displace v3-A as the active reference."
+        )
+    else:
+        recommended_next_move = "retain_v3a_as_active_reference_and_stop_v3b"
+        rationale = (
+            "The tested narrow v3-B refinements do not materially improve configured-step mechanism "
+            "relative to v3-A, so continuing this line is not justified from the current evidence."
+        )
+
+    return {
+        "best_variant_name": str(best_method),
+        "best_variant_keeps_one_step_mechanism_positive": bool(one_step_positive),
+        "best_variant_mechanism_signal_positive_on_all_runs": bool(mechanism_positive),
+        "best_variant_avoids_obvious_report_accuracy_regression": bool(
+            avoids_obvious_accuracy_regression
+        ),
+        "narrow_v3b_refinement_materially_beats_v3b_control": bool(materially_beats_control),
+        "narrow_v3b_refinement_materially_beats_v3a_reference": bool(materially_beats_v3a),
+        "configured_step_gain_fraction_vs_v3b_control": {
+            "energy": float(energy_gain_vs_control),
+            "residual": float(residual_gain_vs_control),
+        },
+        "configured_step_gain_fraction_vs_v3a_reference": {
+            "energy": float(energy_gain_vs_v3a),
+            "residual": float(residual_gain_vs_v3a),
+        },
+        "configured_step_seed_improvement_rate_vs_v3b_control": {
+            "energy": float(energy_seed_improvement_rate_vs_control),
+            "residual": float(residual_seed_improvement_rate_vs_control),
+        },
+        "configured_step_seed_improvement_rate_vs_v3a_reference": {
+            "energy": float(energy_seed_improvement_rate_vs_v3a),
+            "residual": float(residual_seed_improvement_rate_vs_v3a),
+        },
+        "contextual_gap_closure_fractions_vs_3072_reference": contextual_gap,
+        "best_variant_contextual_gap_gain_vs_v3a_reference": best_contextual_gap_gain_vs_v3a,
+        "recommended_next_move": str(recommended_next_move),
+    }, rationale
+
+
+def _stage05_v3b_refinement_supports_lines(summary: dict[str, Any]) -> list[str]:
+    lines = [
+        "The diagnostic keeps Stage 05 mechanism-first and reuses the existing fixed-budget references where possible.",
+        "The diagnostic stays within the current v3-B family and tests only narrow trajectory-curriculum refinements.",
+    ]
+    if summary["comparison_scope"] != "smoke_only":
+        lines.extend(
+            [
+                f"Best refined v3-B variant: `{summary['best_variant_name']}`.",
+                (
+                    "A refined v3-B variant materially beats the v3-A reference on configured-step mechanism."
+                    if bool(summary["narrow_v3b_refinement_materially_beats_v3a_reference"])
+                    else "No refined v3-B variant materially beats the v3-A reference on configured-step mechanism."
+                ),
+                (
+                    "A refined v3-B variant materially beats the v3-B control on configured-step mechanism."
+                    if bool(summary["narrow_v3b_refinement_materially_beats_v3b_control"])
+                    else "No refined v3-B variant materially beats the v3-B control on configured-step mechanism."
+                ),
+            ]
+        )
+    return lines
+
+
+def _stage05_v3b_refinement_does_not_support_lines() -> list[str]:
+    return [
+        "This diagnostic does not reopen Stage 04 package-internal work.",
+        "This diagnostic does not introduce a new Stage 05 mechanism family.",
+        "This diagnostic does not justify replacing the frozen Stage 04 bridge on main.",
+    ]
+
+
+def _stage05_v3b_refinement_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    lines = [
+        "# Stage 05 v3-B Refinement Diagnostic",
+        "",
+        "## Protocol",
+        f"- comparison scope: `{protocol['comparison_scope']}`",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- Stage 05 epochs: `{protocol['stage05_v3b_control']['epochs']}`",
+        "",
+        "## Decision",
+        f"- best variant: `{decision['best_variant_name']}`",
+        f"- `narrow_v3b_refinement_materially_beats_v3b_control`: `{decision['narrow_v3b_refinement_materially_beats_v3b_control']}`",
+        f"- `narrow_v3b_refinement_materially_beats_v3a_reference`: `{decision['narrow_v3b_refinement_materially_beats_v3a_reference']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Pairwise Deltas Vs V3-B Control",
+    ]
+    for method_name, payload in report["pairwise_deltas_vs_v3b_control"].items():
+        lines.append(
+            f"- `{method_name}` configured-step energy delta vs identity delta: `{payload['configured_step_energy_delta_vs_identity_delta']['mean']}`"
+        )
+        lines.append(
+            f"- `{method_name}` configured-step fixed-point residual delta vs identity delta: `{payload['configured_step_fixed_point_residual_delta_vs_identity_delta']['mean']}`"
+        )
+    lines.extend(["", "## Pairwise Deltas Vs V3-A"])
+    for method_name, payload in report["pairwise_deltas_vs_v3a_reference"].items():
+        lines.append(
+            f"- `{method_name}` configured-step energy delta vs identity delta: `{payload['configured_step_energy_delta_vs_identity_delta']['mean']}`"
+        )
+        lines.append(
+            f"- `{method_name}` configured-step fixed-point residual delta vs identity delta: `{payload['configured_step_fixed_point_residual_delta_vs_identity_delta']['mean']}`"
+        )
+    contextual_gap = report.get("contextual_gap_closure_fractions_vs_3072_reference")
+    if isinstance(contextual_gap, dict):
+        lines.extend(["", "## Contextual 3072 Gap Closure"])
+        for method_name, payload in contextual_gap.items():
+            lines.append(
+                f"- `{method_name}` configured-step energy / residual gap closure: `{payload['configured_step_energy']}` / `{payload['configured_step_residual']}`"
+            )
+        return "\n".join(lines)
+    return "\n".join(lines)
 
 
 def _stage05_v2_longer_training_protocol_payload(
@@ -5411,6 +6122,328 @@ def run_stage05_v2_efficiency_diagnostic(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_stage05_v2_efficiency_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def run_stage05_v3b_refinement_diagnostic(
+    config: Stage05V3BRefinementDiagnosticConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run a narrow fixed-budget attribution diagnostic around the current Stage 05 v3-B scaffold."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v3b_refinement_suite_config_payload(config))
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+    reuse_v2_root = _resolve_repo_path(config.reference_artifact_root)
+    reuse_v3a_root = _resolve_repo_path(config.v3a_reference_artifact_root)
+    reuse_v3b_root = _resolve_repo_path(config.v3b_control_artifact_root)
+
+    if config.reuse_stage05_v2_reference_artifacts and not reuse_v2_root.exists():
+        raise FileNotFoundError(
+            f"Missing Stage 05 v2 reference artifacts at '{reuse_v2_root}'."
+        )
+    if config.reuse_stage05_v3a_reference_artifacts and not reuse_v3a_root.exists():
+        raise FileNotFoundError(
+            f"Missing Stage 05 v3-A reference artifacts at '{reuse_v3a_root}'."
+        )
+    if config.reuse_stage05_v3b_control_artifacts and not reuse_v3b_root.exists():
+        raise FileNotFoundError(
+            f"Missing Stage 05 v3-B control artifacts at '{reuse_v3b_root}'."
+        )
+
+    for seed in config.seeds:
+        run_index += 1
+        if config.reuse_stage05_v2_reference_artifacts:
+            rows.append(
+                _load_existing_stage05_core_row(
+                    run_index=run_index,
+                    existing_run_dir=reuse_v2_root / f"seed_{seed}",
+                    seed=seed,
+                    expected_dataset_name=config.dataset_name,
+                    expected_batch_size=int(config.batch_size),
+                    expected_shuffle_batches=bool(config.shuffle_batches),
+                    method_name=STAGE05_V2_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v2 Fixed-Budget Context Reference",
+                )
+            )
+        else:
+            v2_config = _build_stage05_v2_config(
+                output_root=runs_root,
+                experiment_name=STAGE05_V2_METHOD_NAME,
+                seed=seed,
+                train_fraction=float(config.train_fraction),
+                val_fraction=float(config.val_fraction),
+                test_fraction=float(config.test_fraction),
+                batch_size=int(config.batch_size),
+                shuffle_batches=bool(config.shuffle_batches),
+                epochs=int(config.stage05_epochs),
+                eval_steps=int(config.stage05_eval_steps),
+                layer_dims=config.stage05_layer_dims,
+                transport_steps=int(config.stage05_transport_steps),
+            )
+            v2_result = run_fmpc_ef_exploratory_probe(v2_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=v2_result,
+                    config=v2_config,
+                    method_name=STAGE05_V2_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v2 Fixed-Budget Context Reference",
+                )
+            )
+
+        run_index += 1
+        if config.reuse_stage05_v3a_reference_artifacts:
+            rows.append(
+                _load_existing_stage05_core_row(
+                    run_index=run_index,
+                    existing_run_dir=reuse_v3a_root / f"seed_{seed}",
+                    seed=seed,
+                    expected_dataset_name=config.dataset_name,
+                    expected_batch_size=int(config.batch_size),
+                    expected_shuffle_batches=bool(config.shuffle_batches),
+                    method_name=STAGE05_V3A_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v3-A Fixed-Budget Reference",
+                )
+            )
+        else:
+            v3a_config = _build_stage05_v2_config(
+                output_root=runs_root,
+                experiment_name=STAGE05_V3A_METHOD_NAME,
+                seed=seed,
+                train_fraction=float(config.train_fraction),
+                val_fraction=float(config.val_fraction),
+                test_fraction=float(config.test_fraction),
+                batch_size=int(config.batch_size),
+                shuffle_batches=bool(config.shuffle_batches),
+                epochs=int(config.stage05_epochs),
+                eval_steps=int(config.stage05_eval_steps),
+                layer_dims=config.stage05_layer_dims,
+                transport_steps=int(config.stage05_transport_steps),
+                use_explicit_transport_drift_decomposition=True,
+                lambda_drift=float(config.lambda_drift),
+            )
+            v3a_result = run_fmpc_ef_exploratory_probe(v3a_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=v3a_result,
+                    config=v3a_config,
+                    method_name=STAGE05_V3A_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v3-A Fixed-Budget Reference",
+                )
+            )
+
+        run_index += 1
+        if config.reuse_stage05_v3b_control_artifacts:
+            rows.append(
+                _load_existing_stage05_core_row(
+                    run_index=run_index,
+                    existing_run_dir=reuse_v3b_root / f"seed_{seed}",
+                    seed=seed,
+                    expected_dataset_name=config.dataset_name,
+                    expected_batch_size=int(config.batch_size),
+                    expected_shuffle_batches=bool(config.shuffle_batches),
+                    method_name=STAGE05_V3B_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v3-B Control",
+                )
+            )
+        else:
+            v3b_control_config = _stage05_v3b_variant_config(
+                config,
+                seed=seed,
+                output_root=runs_root,
+                experiment_name=STAGE05_V3B_METHOD_NAME,
+                lambda_traj_curr=float(config.control_lambda_traj_curr),
+                alpha_floor=float(config.control_alpha_floor),
+                alpha_warmup_epochs=int(config.control_alpha_warmup_epochs),
+                alpha_ramp_epochs=int(config.control_alpha_ramp_epochs),
+            )
+            v3b_control_result = run_fmpc_ef_exploratory_probe(v3b_control_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=v3b_control_result,
+                    config=v3b_control_config,
+                    method_name=STAGE05_V3B_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v3-B Control",
+                )
+            )
+
+        for spec in _stage05_v3b_refinement_variant_specs(config):
+            run_index += 1
+            variant_config = _stage05_v3b_variant_config(
+                config,
+                seed=seed,
+                output_root=runs_root,
+                experiment_name=spec["method_name"],
+                lambda_traj_curr=float(spec["lambda_traj_curr"]),
+                alpha_floor=float(spec["alpha_floor"]),
+                alpha_warmup_epochs=int(spec["alpha_warmup_epochs"]),
+                alpha_ramp_epochs=int(spec["alpha_ramp_epochs"]),
+            )
+            variant_result = run_fmpc_ef_exploratory_probe(variant_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=variant_result,
+                    config=variant_config,
+                    method_name=spec["method_name"],
+                    stage_name=str(spec["stage_name"]),
+                )
+            )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    method_names = [
+        STAGE05_V2_METHOD_NAME,
+        STAGE05_V3A_METHOD_NAME,
+        STAGE05_V3B_METHOD_NAME,
+        STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+        STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+    ]
+    by_method = {
+        method_name: _method_summary(_method_rows(rows, method_name)) for method_name in method_names
+    }
+    pairwise_vs_control = {
+        method_name: _pairwise_summary(
+            rows,
+            candidate_method=method_name,
+            reference_method=STAGE05_V3B_METHOD_NAME,
+        )
+        for method_name in (
+            STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+            STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+        )
+    }
+    pairwise_vs_v3a = {
+        method_name: _pairwise_summary(
+            rows,
+            candidate_method=method_name,
+            reference_method=STAGE05_V3A_METHOD_NAME,
+        )
+        for method_name in (
+            STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+            STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+        )
+    }
+    contextual_reference = (
+        None
+        if config.comparison_scope == "smoke_only"
+        else _load_stage05_v2_contextual_reference(config)
+    )
+    decision, decision_rationale = _stage05_v3b_refinement_decision(
+        rows=rows,
+        config=config,
+        by_method=by_method,
+        pairwise_vs_control=pairwise_vs_control,
+        pairwise_vs_v3a=pairwise_vs_v3a,
+        contextual_reference=contextual_reference,
+    )
+    configured_step_mechanism_ranking = [
+        {
+            "method_name": method_name,
+            "configured_step_energy_delta_vs_identity_mean": float(
+                by_method[method_name]["configured_step_energy_delta_vs_identity"]["mean"]
+            ),
+            "configured_step_fixed_point_residual_delta_vs_identity_mean": float(
+                by_method[method_name]["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+            ),
+        }
+        for method_name in sorted(
+            (
+                STAGE05_V3A_METHOD_NAME,
+                STAGE05_V3B_METHOD_NAME,
+                STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+                STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+            ),
+            key=lambda method_name: (
+                float(by_method[method_name]["configured_step_energy_delta_vs_identity"]["mean"]),
+                float(
+                    by_method[method_name]["configured_step_fixed_point_residual_delta_vs_identity"][
+                        "mean"
+                    ]
+                ),
+            ),
+        )
+    ]
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_scope": str(config.comparison_scope),
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v3b_refinement_protocol_payload(config),
+        "tested_variant_names": [
+            STAGE05_V3B_METHOD_NAME,
+            STAGE05_V3B_ALPHA_EARLIER_METHOD_NAME,
+            STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+        ],
+        "by_method": by_method,
+        "pairwise_deltas_vs_v3b_control": pairwise_vs_control,
+        "pairwise_deltas_vs_v3a_reference": pairwise_vs_v3a,
+        "configured_step_mechanism_ranking": configured_step_mechanism_ranking,
+        "contextual_3072_reference": contextual_reference,
+        **decision,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v3b_refinement_protocol_payload(config),
+        "decision": {
+            **decision,
+            "decision_rationale": decision_rationale,
+        },
+        "pairwise_deltas_vs_v3b_control": pairwise_vs_control,
+        "pairwise_deltas_vs_v3a_reference": pairwise_vs_v3a,
+        "contextual_gap_closure_fractions_vs_3072_reference": decision.get(
+            "contextual_gap_closure_fractions_vs_3072_reference"
+        ),
+        "supports": _stage05_v3b_refinement_supports_lines(summary),
+        "does_not_support": _stage05_v3b_refinement_does_not_support_lines(),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v3b_refinement_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v3b_refinement_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

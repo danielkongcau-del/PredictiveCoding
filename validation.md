@@ -183,6 +183,14 @@ Current interpretation:
     - the v3-B candidate does not materially improve configured-step mechanism over the fixed-budget v3-A reference under the current threshold
     - the current decision is therefore:
       - `recommended_next_move = retain_v3a_as_active_reference`
+- the narrow fixed-budget v3-B refinement diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
+  - the strongest tested refinement variant is `stage05_v3b_stronger_traj_curr_weight`
+  - it materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
+  - it does not materially improve configured-step mechanism over the original v3-B control under the same threshold
+  - it avoids an obvious report-only accuracy regression relative to v3-A
+  - the current refinement decision is therefore:
+    - `recommended_next_move = promote_refined_v3b_and_recompare`
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -200,11 +208,13 @@ The next validation move is:
   - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/`
 - treat the fixed-budget v2 vs v3-A vs v3-B comparison as the current v3-B evidence base under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
+- treat the fixed-budget v3-B refinement diagnostic as the current immediate v3-B follow-up evidence under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
 - do not continue pure same-family budget escalation from this state
 - do not continue pure same-family efficiency tweaking from this state
-- keep the fixed-budget Stage 05 v3-A result as the current fixed-budget improvement reference
-- do not open a Stage 05 v3-C charter from the current state on the basis of the present fixed-budget v3-B comparison
-- if Stage 05 continues, evaluate any narrower follow-up against the fixed-budget Stage 05 v3-A reference rather than reopening budget or efficiency sweeps
+- keep the fixed-budget Stage 05 v3-A result as the current fixed-budget improvement reference until the refined v3-B recompare is complete
+- do not open a Stage 05 v3-C charter from the current state before that refined v3-B recompare is complete
+- if Stage 05 continues, the next validation pass should be a fresh fixed-budget recompare of the refined v3-B candidate against the fixed-budget v2 control and v3-A reference
 
 Any next narrower Stage 05 follow-up should preserve:
 

@@ -1,0 +1,665 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v3b_refinement_diagnostic",
+  "comparison_scope": "fixed_budget_comparison",
+  "num_runs": 15,
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "fixed_budget_v2_reference": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "stage05_v3a_reference": {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/runs/stage05_v3a_explicit_transport_drift_contract",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "stage05_v3b_control": {
+      "method_name": "stage05_v3b_trajectory_curriculum_contract",
+      "candidate_name": "stage05_v3b_trajectory_curriculum_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "lambda_traj_curr": 0.1,
+      "alpha_floor": 0.5,
+      "alpha_warmup_epochs": 3,
+      "alpha_ramp_epochs": 3,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/runs/stage05_v3b_trajectory_curriculum_contract",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "refinement_variants": [
+      {
+        "method_name": "stage05_v3b_alpha_earlier_transition",
+        "candidate_name": "stage05_v3b_alpha_earlier_transition",
+        "transport_family": "two_branch_residual_meanflow_core",
+        "residual_branch_structure": "two_branch",
+        "explicit_transport_drift_decomposition_enabled": true,
+        "trajectory_curriculum_enabled": true,
+        "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+        "lambda_traj_curr": 0.1,
+        "alpha_floor": 0.25,
+        "alpha_warmup_epochs": 1,
+        "alpha_ramp_epochs": 1,
+        "epochs": 1536,
+        "configured_transport_steps": 2
+      },
+      {
+        "method_name": "stage05_v3b_stronger_traj_curr_weight",
+        "candidate_name": "stage05_v3b_stronger_traj_curr_weight",
+        "transport_family": "two_branch_residual_meanflow_core",
+        "residual_branch_structure": "two_branch",
+        "explicit_transport_drift_decomposition_enabled": true,
+        "trajectory_curriculum_enabled": true,
+        "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+        "lambda_traj_curr": 0.2,
+        "alpha_floor": 0.5,
+        "alpha_warmup_epochs": 3,
+        "alpha_ramp_epochs": 3,
+        "epochs": 1536,
+        "configured_transport_steps": 2
+      }
+    ],
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v3b_refinement_attribution_diagnostic",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_v3a_reference_artifacts": true,
+      "reuse_stage05_v3b_control_artifacts": true
+    }
+  },
+  "tested_variant_names": [
+    "stage05_v3b_trajectory_curriculum_contract",
+    "stage05_v3b_alpha_earlier_transition",
+    "stage05_v3b_stronger_traj_curr_weight"
+  ],
+  "by_method": {
+    "stage_05_two_branch_corrected_residual_core_v2": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.004993063453529826,
+        "std": 0.0004497886244058906
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.004980554368336933,
+        "std": 0.0004619010522770305
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.8451788412853327e-05,
+        "std": 1.7042211944327626e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0007782552556208818,
+        "std": 0.0001066222708630268
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0007828017566811433,
+        "std": 0.00011445825630689142
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.370544746595761e-06,
+        "std": 5.800356555165735e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8876543209876543,
+        "std": 0.020135193123827277
+      },
+      "test_accuracy": {
+        "mean": 0.8876543209876543,
+        "std": 0.007610387657986378
+      },
+      "val_output_mse": {
+        "mean": 0.043408228822216455,
+        "std": 0.00014474751820407094
+      },
+      "test_output_mse": {
+        "mean": 0.042297337021277574,
+        "std": 0.0005151723569268052
+      },
+      "runtime_proxy_seconds": {
+        "mean": 240.9623000333328,
+        "std": 1.4256820311816305
+      }
+    },
+    "stage05_v3a_explicit_transport_drift_contract": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.005449582378875985,
+        "std": 0.0006500824140019131
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.005430995679135288,
+        "std": 0.0006574365784331338
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.0295392111085136e-05,
+        "std": 2.5333088916285443e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0008946893313222052,
+        "std": 0.00011900245560053712
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0008955242124265295,
+        "std": 0.00012838292710738573
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.706142613515685e-06,
+        "std": 6.457711887160446e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8814814814814814,
+        "std": 0.025837592020316498
+      },
+      "test_accuracy": {
+        "mean": 0.8814814814814814,
+        "std": 0.008000914442478834
+      },
+      "val_output_mse": {
+        "mean": 0.044094968291761155,
+        "std": 0.00039486248374322587
+      },
+      "test_output_mse": {
+        "mean": 0.043045381253107334,
+        "std": 0.0006388632300611178
+      },
+      "runtime_proxy_seconds": {
+        "mean": 237.37661043333355,
+        "std": 18.03439518847002
+      }
+    },
+    "stage05_v3b_trajectory_curriculum_contract": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.005605599013362754,
+        "std": 0.0007306437841465977
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.00558439785454067,
+        "std": 0.0007354546702133749
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.099919902933015e-05,
+        "std": 2.7832786766419466e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.000897975864898278,
+        "std": 0.00015433467872888164
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0008972883365609882,
+        "std": 0.00016215174053184618
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.7267799733329055e-06,
+        "std": 7.297266752098093e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8790123456790123,
+        "std": 0.03044155063194556
+      },
+      "test_accuracy": {
+        "mean": 0.880246913580247,
+        "std": 0.009238660214256659
+      },
+      "val_output_mse": {
+        "mean": 0.044295762661443285,
+        "std": 0.0005551018240354013
+      },
+      "test_output_mse": {
+        "mean": 0.04320830880291901,
+        "std": 0.0008548019936136471
+      },
+      "runtime_proxy_seconds": {
+        "mean": 344.55824726666833,
+        "std": 15.038727959948279
+      }
+    },
+    "stage05_v3b_alpha_earlier_transition": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.005595124041715425,
+        "std": 0.0007188479480438767
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.00557418961434956,
+        "std": 0.000724113940660834
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.0941892662618498e-05,
+        "std": 2.749120982221873e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009016460123967748,
+        "std": 0.00014875310730708268
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009011211040757713,
+        "std": 0.0001569088206668624
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.734002588662904e-06,
+        "std": 7.169069951391744e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8814814814814814,
+        "std": 0.027715980642769925
+      },
+      "test_accuracy": {
+        "mean": 0.880246913580247,
+        "std": 0.009238660214256659
+      },
+      "val_output_mse": {
+        "mean": 0.044292468400357915,
+        "std": 0.000535451528330307
+      },
+      "test_output_mse": {
+        "mean": 0.04321257951178865,
+        "std": 0.0008175906334052269
+      },
+      "runtime_proxy_seconds": {
+        "mean": 332.7454427666671,
+        "std": 16.91256544385822
+      }
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.005743561878287164,
+        "std": 0.000794564617167504
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.005720360383603999,
+        "std": 0.0007976253689137121
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.1608872426289415e-05,
+        "std": 2.9617810709106014e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009005483716518677,
+        "std": 0.00018366002200858196
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0008988321541851529,
+        "std": 0.00019027416334954395
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.7396313433062044e-06,
+        "std": 8.013535774916949e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8827160493827161,
+        "std": 0.025719341550616875
+      },
+      "test_accuracy": {
+        "mean": 0.882716049382716,
+        "std": 0.009720997375323195
+      },
+      "val_output_mse": {
+        "mean": 0.044485324947808824,
+        "std": 0.0007270918509267025
+      },
+      "test_output_mse": {
+        "mean": 0.04336723809036716,
+        "std": 0.0010664706444538084
+      },
+      "runtime_proxy_seconds": {
+        "mean": 312.64816683333265,
+        "std": 3.668278940722804
+      }
+    }
+  },
+  "pairwise_deltas_vs_v3b_control": {
+    "stage05_v3b_alpha_earlier_transition": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": 1.0474971647328468e-05,
+        "std": 1.1797911331922662e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": 1.0208240191110033e-05,
+        "std": 1.1349691024923024e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": 5.730636671165239e-08,
+        "std": 3.5217931509692315e-08
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -3.83276751478312e-06,
+        "std": 5.310745978643464e-06
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0024691358024691392,
+        "std": 0.0034918853391928324
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": -11.81280450000122,
+        "std": 19.33490112455757
+      }
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0001379628649244106,
+        "std": 6.396976524272945e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00013596252906332892,
+        "std": 6.22460247973401e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -6.096733969592636e-07,
+        "std": 1.8013149424607978e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -1.5438176241648154e-06,
+        "std": 2.9857143678937097e-05
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0037037037037037277,
+        "std": 0.005237828008789223
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0024691358024691392,
+        "std": 0.0046193301071283
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": -31.91008043333568,
+        "std": 11.471701596104515
+      }
+    }
+  },
+  "pairwise_deltas_vs_v3a_reference": {
+    "stage05_v3b_alpha_earlier_transition": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00014554166283943978,
+        "std": 6.88458434615546e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00014319393521427157,
+        "std": 6.67861145572572e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -6.465005515333619e-07,
+        "std": 2.1652140421418834e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -5.596891649241782e-06,
+        "std": 3.066375347898427e-05
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.003024061410843389
+      },
+      "test_accuracy_delta": {
+        "mean": -0.0012345679012345883,
+        "std": 0.0017459426695964422
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 95.36883233333356,
+        "std": 32.16471760337248
+      }
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00029397949941117885,
+        "std": 0.00014460982795814662
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0002893647044687105,
+        "std": 0.0001403808309571172
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -1.313480315204278e-06,
+        "std": 4.3134832275040063e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -3.3079417586234783e-06,
+        "std": 6.572735728609264e-05
+      },
+      "val_accuracy_delta": {
+        "mean": 0.0012345679012345883,
+        "std": 0.0017459426695964422
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0012345679012345512,
+        "std": 0.00349188533919278
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 75.2715563999991,
+        "std": 17.223795515554194
+      }
+    }
+  },
+  "configured_step_mechanism_ranking": [
+    {
+      "method_name": "stage05_v3b_stronger_traj_curr_weight",
+      "configured_step_energy_delta_vs_identity_mean": -0.005720360383603999,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.1608872426289415e-05
+    },
+    {
+      "method_name": "stage05_v3b_trajectory_curriculum_contract",
+      "configured_step_energy_delta_vs_identity_mean": -0.00558439785454067,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.099919902933015e-05
+    },
+    {
+      "method_name": "stage05_v3b_alpha_earlier_transition",
+      "configured_step_energy_delta_vs_identity_mean": -0.00557418961434956,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.0941892662618498e-05
+    },
+    {
+      "method_name": "stage05_v3a_explicit_transport_drift_contract",
+      "configured_step_energy_delta_vs_identity_mean": -0.005430995679135288,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.0295392111085136e-05
+    }
+  ],
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "best_variant_name": "stage05_v3b_stronger_traj_curr_weight",
+  "best_variant_keeps_one_step_mechanism_positive": true,
+  "best_variant_mechanism_signal_positive_on_all_runs": true,
+  "best_variant_avoids_obvious_report_accuracy_regression": true,
+  "narrow_v3b_refinement_materially_beats_v3b_control": false,
+  "narrow_v3b_refinement_materially_beats_v3a_reference": true,
+  "configured_step_gain_fraction_vs_v3b_control": {
+    "energy": 0.024346855758634472,
+    "residual": 0.029033173889523946
+  },
+  "configured_step_gain_fraction_vs_v3a_reference": {
+    "energy": 0.05328023102290207,
+    "residual": 0.06471815415120112
+  },
+  "configured_step_seed_improvement_rate_vs_v3b_control": {
+    "energy": 1.0,
+    "residual": 1.0
+  },
+  "configured_step_seed_improvement_rate_vs_v3a_reference": {
+    "energy": 1.0,
+    "residual": 1.0
+  },
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "stage05_v3a_explicit_transport_drift_contract": {
+      "configured_step_energy": 0.36966230730808747,
+      "configured_step_residual": 0.17573315155025793,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b_trajectory_curriculum_contract": {
+      "configured_step_energy": 0.49555440633853987,
+      "configured_step_residual": 0.24282035035805707,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b_alpha_earlier_transition": {
+      "configured_step_energy": 0.487176840755329,
+      "configured_step_residual": 0.23735788115396936,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "configured_step_energy": 0.6071343635851628,
+      "configured_step_residual": 0.3009346986677075,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    }
+  },
+  "best_variant_contextual_gap_gain_vs_v3a_reference": {
+    "configured_step_energy": 0.23747205627707535,
+    "configured_step_residual": 0.12520154711744957,
+    "val_accuracy": 0.0,
+    "test_accuracy": 0.0
+  },
+  "recommended_next_move": "promote_refined_v3b_and_recompare",
+  "decision_rationale": "A narrow v3-B refinement materially improves configured-step mechanism over the active v3-A reference without an obvious report-only accuracy regression, so it is worth promoting into a fresh fixed-budget re-comparison.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}
