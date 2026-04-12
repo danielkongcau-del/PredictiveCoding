@@ -194,6 +194,65 @@ def test_stage05_v2_vs_v3a_comparison_writes_expected_artifacts(tmp_path: Path) 
     assert "recommended_next_move" in report["decision"]
 
 
+def test_stage05_v2_v3a_v3b_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_v3a_v3b_smoke",
+        comparison_variant="stage05_v2_v3a_v3b",
+        seeds=(0,),
+        stage05_epochs=3,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_drift=1.0,
+        lambda_traj_curr=0.1,
+        alpha_floor=0.5,
+        alpha_warmup_epochs=1,
+        alpha_ramp_epochs=1,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 3
+    method_names = {row["method_name"] for row in rows}
+    assert method_names == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3a_explicit_transport_drift_contract",
+        "stage05_v3b_trajectory_curriculum_contract",
+    }
+
+    assert summary["stage"] == "stage05_v2_v3a_v3b_trajectory_curriculum_comparison"
+    assert summary["comparison_scope"] == "smoke_only"
+    assert "comparison_protocol" in summary
+    assert "by_method" in summary
+    assert "pairwise_stage05_v3b_vs_v2" in summary
+    assert "pairwise_stage05_v3b_vs_v3a" in summary
+    assert "pairwise_deltas_vs_stage05_v2_reference" in summary
+    assert "pairwise_deltas_vs_stage05_v3a_reference" in summary
+    assert "stage05_v3b_candidate_smoke_ready" in summary
+    assert "gap_closure_decision" in summary
+    assert "recommended_next_move" in summary
+    assert summary["comparison_report_json_path"] == "comparison_report.json"
+    assert summary["comparison_report_md_path"] == "comparison_report.md"
+
+    assert "decision" in report
+    assert "pairwise_deltas_vs_stage05_v2_reference" in report
+    assert "pairwise_deltas_vs_stage05_v3a_reference" in report
+    assert report["decision"]["recommended_next_move"] in {
+        "run_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+        "another_v3b_implementation_pass",
+    }
+
+
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(
         output_root=tmp_path,

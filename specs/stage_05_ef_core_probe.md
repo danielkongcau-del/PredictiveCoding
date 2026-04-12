@@ -393,13 +393,14 @@ The next Stage 05 v3-A implementation pass must minimally add:
 
 ### 18.12 Stage 05 v3-B charter
 
-This section opens the next Stage 05 charter only.
+This section opens the next Stage 05 charter and now also records the first minimal candidate
+implementation contract.
 
-It does not itself modify:
+It still does not redefine:
 
-- the current Stage 05 v3-A implementation
-- the current Stage 05 experiment entrypoints
-- the current Stage 05 smoke or fixed-budget comparison code
+- the current Stage 05 transport family
+- the explicit transport-drift decomposition from v3-A
+- the Stage 05 mechanism-first acceptance framing
 
 Current evidence motivating this charter:
 
@@ -474,7 +475,7 @@ This charter does not yet fix:
 - the exact weighting between direct and recursive trajectory terms
 - the final rollout-consistency implementation details
 
-Those choices belong to the next implementation pass.
+Those choices can now be explored only inside narrow, explicitly documented candidate paths.
 
 #### 18.12.4 Non-goals and required next deliverables
 
@@ -503,3 +504,64 @@ The next Stage 05 v3-B implementation pass must minimally add:
   - pairwise deltas versus the current v2 control
   - a gap-closure style decision field
   - `recommended_next_move`
+
+#### 18.12.5 First minimal v3-B candidate contract
+
+The first implemented Stage 05 v3-B candidate is intentionally narrow.
+
+It keeps the v3-A decomposition unchanged:
+
+- `u_hat(z_t, r, t; c) = g_t + q_psi + d_psi`
+
+It also keeps the current v3-A branchwise supervision unchanged:
+
+- `L_transport`
+- `L_drift`
+- aggregate `L_id`
+
+The new v3-B ingredient is one additional aggregate trajectory curriculum loss:
+
+- `L_traj_curr`
+
+For the first candidate, define:
+
+- `u_boot_short = u_boot(z_t, alpha * r, t; c)`
+- `z_s_boot = z_t + alpha * r * u_boot_short`
+- `u_hat_cont = u_hat(z_s_boot, r_s, s; c)` evaluated on the target side only
+- `u_curr_target = alpha * u_boot_short + (1 - alpha) * u_hat_cont`
+
+The first candidate then uses:
+
+- `L_traj_curr = || u_hat(z_t, r, t; c) - u_curr_target ||^2`
+
+Equivalent residual-side form used by the implementation:
+
+- `m_curr_target = u_curr_target - g_t`
+- `L_traj_curr = || (q_psi + d_psi) - m_curr_target ||^2`
+
+Normative first-pass implementation constraints:
+
+- keep the continuation target aggregate, not branchwise
+- keep the continuation evaluation detached on the target side
+- do not add a new branchwise identity derivation in this pass
+- do not add endpoint semigroup losses in this pass
+- do not alter the v3-A explicit `q_boot / d_boot` decomposition in this pass
+
+The first curriculum schedule is intentionally simple and inspectable:
+
+- phase 1:
+  - `alpha = 1`
+  - `lambda_traj_curr = 0`
+- phase 2:
+  - `alpha` decreases smoothly toward a fixed `alpha_floor`
+  - `lambda_traj_curr` ramps up smoothly
+- phase 3:
+  - `alpha = alpha_floor`
+  - `lambda_traj_curr` stays fixed
+
+The first implemented schedule must keep:
+
+- `0 < alpha_floor < 1`
+- no collapse to `alpha = 0`
+
+This first v3-B candidate is still a working-hypothesis test, not a proved superior family.

@@ -241,15 +241,15 @@ Completed outcome:
 - the current decision is therefore:
   - `recommended_next_move = proceed_to_stage05_v3b_curriculum_charter`
 
-### 9. Open The Stage 05 V3-B Charter
+### 9. Implement The First Stage 05 V3-B Candidate
 
-Next pass objective:
+Completed outcome:
 
-- define the next narrow Stage 05 mechanism charter on top of the successful fixed-budget v3-A result
-- keep Stage 04 frozen on `main`
-- keep Stage 05 mechanism-first and keep task accuracy report-only
-- use the fixed-budget v2 result as the immediate control when specifying the next v3-B comparison target
-- treat the fixed-budget v3-A result as the active implementation branch for onward design work
+- the first minimal Stage 05 v3-B candidate now exists:
+  - `stage05_v3b_trajectory_curriculum_contract`
+- it keeps the v3-A explicit transport-drift decomposition intact
+- it adds one aggregate trajectory curriculum loss on top of the v3-A scaffold
+- a smoke-ready `v2 vs v3-A vs v3-B` comparison entry now also exists
 
 Working hypothesis:
 
@@ -275,20 +275,17 @@ Required framing:
 - do not frame v3-B as replacing the frozen Stage 04 bridge result on `main`
 - do not treat task accuracy as the primary gate
 
-Required next implementation deliverables:
+Immediate next move:
 
-- a new Stage 05 v3-B candidate codepath on top of the current v3-A branch
-- a new comparison entry against:
+- run the first real fixed-budget Stage 05 comparison across:
   - the fixed-budget v2 control
-  - the fixed-budget v3-A result
-- a matching smoke test
-- aggregate summary fields for:
-  - whether trajectory curriculum is enabled
-  - the curriculum schedule identity
-  - pairwise deltas versus v3-A
-  - pairwise deltas versus v2
-  - a gap-closure decision field
-  - `recommended_next_move`
+  - the fixed-budget v3-A reference
+  - the implemented `stage05_v3b_trajectory_curriculum_contract` candidate
+- keep Stage 04 frozen on `main`
+- keep Stage 05 mechanism-first and keep task accuracy report-only
+- use the fixed-budget v2 result as the immediate control
+- use the fixed-budget v3-A result as the current fixed-budget improvement reference
+- treat the implemented v3-B candidate as the active Stage 05 implementation branch for onward evaluation work
 
 ## Exploratory Acceptance Criteria
 

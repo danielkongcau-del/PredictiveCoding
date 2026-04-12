@@ -170,18 +170,23 @@ Current probe status:
   - it is driven by the working hypothesis that, after explicit transport-drift decomposition, the main remaining fixed-budget inefficiency is trajectory-level
   - more specifically, the current remaining weakness may come from optimization conflict between direct horizon matching and recursive continuation consistency
   - that hypothesis is being treated as charter motivation, not as a proved repository conclusion
+- the first minimal v3-B candidate path now also exists in the Stage 05 probe:
+  - candidate name: `stage05_v3b_trajectory_curriculum_contract`
+  - it keeps the v3-A explicit transport-drift decomposition and adds one aggregate trajectory curriculum loss
+  - a smoke-ready `v2 vs v3-A vs v3-B` comparison entry now also exists
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
   - the two-branch corrected residual MeanFlow core remains the fixed-budget Stage 05 control
-  - the fixed-budget v3-A result is now the active Stage 05 implementation branch for the next chartering step
+  - the fixed-budget v3-A result remains the current fixed-budget Stage 05 improvement reference
+  - the first minimal v3-B candidate is now the active Stage 05 implementation branch for onward evaluation work
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
   - the longer-training and budget-push validations showed real same-family budget upside
   - the fixed-budget efficiency diagnostic then showed that a narrow same-family schedule change does not recover a material fraction of that upside
   - on this simple task, further pure epoch escalation is now treated as economically unjustified from the current state
   - the fixed-budget Stage 05 `v2 vs v3-A` comparison now shows that v3-A is a stronger configured-step branch than the fixed-budget v2 reference under the current mechanism-first rule
-  - the current operative next move is therefore to open a Stage 05 `v3-B` trajectory curriculum charter on top of the v3-A branch rather than another same-family budget or schedule push
+  - the current operative next move is therefore to run the first real fixed-budget `v2 vs v3-A vs v3-B` comparison rather than another same-family budget or schedule push
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -193,10 +198,12 @@ Current probe status:
 - Keep Stage 05 mechanism-first and task accuracy report-only.
 - Do not continue pure same-family budget escalation from the current state.
 - Do not continue pure same-family efficiency tweaking from the current state.
-- Treat `stage05_v3a_explicit_transport_drift_contract` as the active Stage 05 implementation branch for the next chartering step, with the fixed-budget v2 result retained as the immediate control.
-- The next Stage 05 move should now be to open a Stage 05 `v3-B` charter:
-  - `trajectory curriculum contract`
-  - working-hypothesis driven, not yet an implemented mechanism
+- Keep the fixed-budget Stage 05 v2 result as the immediate control and the fixed-budget v3-A result as the current fixed-budget improvement reference.
+- Treat `stage05_v3b_trajectory_curriculum_contract` as the active Stage 05 implementation branch for onward evaluation work.
+- The next Stage 05 move should now be to run the first real fixed-budget comparison across:
+  - the fixed-budget v2 control
+  - the fixed-budget v3-A reference
+  - `stage05_v3b_trajectory_curriculum_contract`
   - still mechanism-first
   - still not a claim that the frozen bridge result on `main` should be replaced
 

@@ -25,11 +25,14 @@ from pc.stage_03_transport_core_v1.fmpc_tf1_flow import (
 from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     _make_pc_model,
     _make_psi_network,
+    alpha_for_epoch,
     build_corrected_residual_identity_target,
     build_explicit_transport_drift_bootstrap_targets,
+    build_trajectory_curriculum_targets,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
     lambda_id_for_epoch,
+    lambda_traj_curr_for_epoch,
 )
 
 
@@ -251,6 +254,108 @@ def test_v3a_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     assert "train_drift_loss" in epoch_rows[0]
 
 
+def test_trajectory_curriculum_targets_have_expected_shapes() -> None:
+    config = build_fmpc_ef_exploratory_probe_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+        use_explicit_transport_drift_decomposition=True,
+        use_trajectory_curriculum_contract=True,
+        alpha_floor=0.5,
+        alpha_warmup_epochs=1,
+        alpha_ramp_epochs=2,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    psi_network = _make_psi_network(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    targets = build_trajectory_curriculum_targets(
+        context,
+        psi_network,
+        config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+    )
+
+    assert targets.short_horizon_bootstrap_velocity.shape == context.z0.shape
+    assert targets.bootstrap_intermediate_state.shape == context.z0.shape
+    assert targets.continuation_velocity.shape == context.z0.shape
+    assert targets.current_velocity_target.shape == context.z0.shape
+    assert targets.residual_target.shape == context.z0.shape
+    assert targets.alpha == pytest.approx(0.5)
+    assert targets.split_time == pytest.approx(0.625)
+    assert targets.continuation_remaining_horizon == pytest.approx(0.375)
+
+
+def test_v3b_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3b_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        use_two_branch_residual_core=True,
+        feature_aware_state_branch_tangents=True,
+        use_explicit_transport_drift_decomposition=True,
+        use_trajectory_curriculum_contract=True,
+        lambda_drift=1.0,
+        lambda_traj_curr=0.1,
+        alpha_floor=0.5,
+        alpha_warmup_epochs=1,
+        alpha_ramp_epochs=2,
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert summary["candidate_name"] == "stage05_v3b_trajectory_curriculum_contract"
+    assert summary["explicit_transport_drift_decomposition_enabled"] is True
+    assert summary["trajectory_curriculum_enabled"] is True
+    assert summary["trajectory_curriculum_schedule_identity"] == "warmup_sigmoid_to_alpha_floor"
+    assert summary["trajectory_curriculum_target_contract"] == (
+        "u_curr_target = alpha * u_boot(z_t, alpha * r, t; c) + "
+        "(1 - alpha) * u_hat(z_s_boot, r_s, s; c) [detached target side]"
+    )
+    assert summary["alpha_floor"] == pytest.approx(0.5)
+    assert summary["pairwise_deltas_vs_stage05_v2_reference"]["status"] == (
+        "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
+    )
+    assert summary["pairwise_deltas_vs_stage05_v3a_reference"]["status"] == (
+        "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
+    )
+    assert summary["recommended_next_move"] == "run_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
+
+    assert config["transport"]["candidate_name"] == "stage05_v3b_trajectory_curriculum_contract"
+    assert config["transport"]["trajectory_curriculum_enabled"] is True
+    assert config["transport"]["trajectory_curriculum_schedule_identity"] == (
+        "warmup_sigmoid_to_alpha_floor"
+    )
+    assert config["transport"]["alpha_floor"] == pytest.approx(0.5)
+    assert config["transport"]["lambda_traj_curr"] == pytest.approx(0.1)
+
+    assert "alpha" in epoch_rows[0]
+    assert "lambda_traj_curr" in epoch_rows[0]
+    assert "train_traj_curr_loss" in epoch_rows[0]
+
+
 def test_corrected_residual_identity_target_includes_anchor_derivative_term() -> None:
     config = build_fmpc_ef_exploratory_probe_config(
         run_seed=0,
@@ -403,6 +508,35 @@ def test_lambda_id_schedule_has_zero_warmup_and_positive_ramp() -> None:
     assert lambda_1 == pytest.approx(0.0)
     assert 0.0 < lambda_2 < lambda_3 < lambda_4 <= 0.2
     assert lambda_5 == pytest.approx(0.2)
+
+
+def test_v3b_alpha_and_lambda_traj_schedule_are_explicit() -> None:
+    config = build_fmpc_ef_exploratory_probe_config(
+        use_two_branch_residual_core=True,
+        use_explicit_transport_drift_decomposition=True,
+        use_trajectory_curriculum_contract=True,
+        alpha_floor=0.5,
+        alpha_warmup_epochs=1,
+        alpha_ramp_epochs=2,
+        lambda_traj_curr=0.2,
+    )
+
+    alpha_0 = alpha_for_epoch(config, 0)
+    alpha_1 = alpha_for_epoch(config, 1)
+    alpha_2 = alpha_for_epoch(config, 2)
+    alpha_3 = alpha_for_epoch(config, 3)
+    lambda_0 = lambda_traj_curr_for_epoch(config, 0)
+    lambda_1 = lambda_traj_curr_for_epoch(config, 1)
+    lambda_2 = lambda_traj_curr_for_epoch(config, 2)
+    lambda_3 = lambda_traj_curr_for_epoch(config, 3)
+
+    assert alpha_0 == pytest.approx(1.0)
+    assert 1.0 > alpha_1 > 0.5
+    assert alpha_2 == pytest.approx(0.5)
+    assert alpha_3 == pytest.approx(0.5)
+    assert lambda_0 == pytest.approx(0.0)
+    assert 0.0 < lambda_1 < lambda_2 <= 0.2
+    assert lambda_3 == pytest.approx(0.2)
 
 
 def test_exploratory_probe_is_deterministic_under_fixed_seeds(tmp_path: Path) -> None:

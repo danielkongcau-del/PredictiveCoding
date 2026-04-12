@@ -47,6 +47,7 @@ RESIDUAL_IDENTITY_MODE = "residual_corrected_meanflow"
 STAGE05_V1_CANDIDATE_NAME = "stage05_v1_corrected_residual_meanflow_core"
 STAGE05_V2_CANDIDATE_NAME = "stage05_v2_two_branch_corrected_residual_meanflow_core"
 STAGE05_V3A_CANDIDATE_NAME = "stage05_v3a_explicit_transport_drift_contract"
+STAGE05_V3B_CANDIDATE_NAME = "stage05_v3b_trajectory_curriculum_contract"
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
@@ -59,6 +60,11 @@ EXPLICIT_TRANSPORT_DRIFT_TARGET_CONTRACT = (
     "gbar_boot = avg local flow over the same bootstrap interval; "
     "d_boot = gbar_boot - g_t; q_boot = u_boot - gbar_boot"
 )
+TRAJECTORY_CURRICULUM_TARGET_CONTRACT = (
+    "u_curr_target = alpha * u_boot(z_t, alpha * r, t; c) + "
+    "(1 - alpha) * u_hat(z_s_boot, r_s, s; c) [detached target side]"
+)
+TRAJECTORY_CURRICULUM_SCHEDULE_IDENTITY = "warmup_sigmoid_to_alpha_floor"
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -108,7 +114,13 @@ class FMPCEFExploratoryProbeConfig:
     use_two_branch_residual_core: bool = False
     feature_aware_state_branch_tangents: bool = False
     use_explicit_transport_drift_decomposition: bool = False
+    use_trajectory_curriculum_contract: bool = False
     lambda_drift: float = 1.0
+    lambda_traj_curr: float = 0.1
+    alpha_floor: float = 0.5
+    alpha_warmup_epochs: int = 3
+    alpha_ramp_epochs: int = 3
+    trajectory_curriculum_schedule: str = TRAJECTORY_CURRICULUM_SCHEDULE_IDENTITY
     psi_hidden_dims: tuple[int, ...] = (128,)
     psi_weight_scale: float = 0.01
     psi_eta_w: float = 0.01
@@ -142,8 +154,19 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError("identity_loss_weight must be non-negative.")
         if self.lambda_drift < 0.0:
             raise ValueError("lambda_drift must be non-negative.")
+        if self.lambda_traj_curr < 0.0:
+            raise ValueError("lambda_traj_curr must be non-negative.")
         if self.tangent_epsilon <= 0.0:
             raise ValueError("tangent_epsilon must be positive.")
+        if self.alpha_warmup_epochs < 0:
+            raise ValueError("alpha_warmup_epochs must be non-negative.")
+        if self.alpha_ramp_epochs < 0:
+            raise ValueError("alpha_ramp_epochs must be non-negative.")
+        if self.trajectory_curriculum_schedule != TRAJECTORY_CURRICULUM_SCHEDULE_IDENTITY:
+            raise ValueError(
+                "Stage 05 currently supports trajectory_curriculum_schedule="
+                f"'{TRAJECTORY_CURRICULUM_SCHEDULE_IDENTITY}' only."
+            )
         if self.identity_mode != RESIDUAL_IDENTITY_MODE:
             raise ValueError(
                 f"Stage 05 currently supports identity_mode='{RESIDUAL_IDENTITY_MODE}' only."
@@ -153,6 +176,16 @@ class FMPCEFExploratoryProbeConfig:
         if self.use_explicit_transport_drift_decomposition and not self.use_two_branch_residual_core:
             raise ValueError(
                 "use_explicit_transport_drift_decomposition requires use_two_branch_residual_core=True."
+            )
+        if self.use_trajectory_curriculum_contract and not self.use_explicit_transport_drift_decomposition:
+            raise ValueError(
+                "use_trajectory_curriculum_contract requires "
+                "use_explicit_transport_drift_decomposition=True."
+            )
+        if self.use_trajectory_curriculum_contract and not (0.0 < self.alpha_floor < 1.0):
+            raise ValueError(
+                "alpha_floor must satisfy 0 < alpha_floor < 1 when "
+                "use_trajectory_curriculum_contract=True."
             )
 
     def resolved_run_id(self) -> str:
@@ -309,6 +342,59 @@ class ExplicitTransportDriftBootstrapTargets:
 
 
 @dataclass(frozen=True)
+class TrajectoryCurriculumTargets:
+    """Detached aggregate trajectory target for the first Stage 05 v3-B candidate."""
+
+    alpha: float
+    split_time: float
+    continuation_remaining_horizon: float
+    short_horizon_bootstrap_velocity: np.ndarray
+    bootstrap_intermediate_state: np.ndarray
+    continuation_velocity: np.ndarray
+    current_velocity_target: np.ndarray
+    residual_target: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "short_horizon_bootstrap_velocity",
+            _as_batch_first(
+                "short_horizon_bootstrap_velocity",
+                self.short_horizon_bootstrap_velocity,
+            ),
+        )
+        object.__setattr__(
+            self,
+            "bootstrap_intermediate_state",
+            _as_batch_first("bootstrap_intermediate_state", self.bootstrap_intermediate_state),
+        )
+        object.__setattr__(
+            self,
+            "continuation_velocity",
+            _as_batch_first("continuation_velocity", self.continuation_velocity),
+        )
+        object.__setattr__(
+            self,
+            "current_velocity_target",
+            _as_batch_first("current_velocity_target", self.current_velocity_target),
+        )
+        object.__setattr__(
+            self,
+            "residual_target",
+            _as_batch_first("residual_target", self.residual_target),
+        )
+        reference_shape = self.short_horizon_bootstrap_velocity.shape
+        for name in (
+            "bootstrap_intermediate_state",
+            "continuation_velocity",
+            "current_velocity_target",
+            "residual_target",
+        ):
+            if getattr(self, name).shape != reference_shape:
+                raise ValueError(f"{name} must share the same shape as short_horizon_bootstrap_velocity.")
+
+
+@dataclass(frozen=True)
 class ResidualSupervisionBatch:
     """Stage 05 supervision tensors, with optional v2 state-branch inputs."""
 
@@ -319,7 +405,9 @@ class ResidualSupervisionBatch:
     gbar_boot: np.ndarray | None = None
     transport_targets: np.ndarray | None = None
     drift_targets: np.ndarray | None = None
+    trajectory_curriculum_targets: np.ndarray | None = None
     explicit_transport_drift_decomposition_enabled: bool = False
+    trajectory_curriculum_enabled: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -345,6 +433,12 @@ class ResidualSupervisionBatch:
                 "drift_targets",
                 _as_batch_first("drift_targets", self.drift_targets),
             )
+        if self.trajectory_curriculum_targets is not None:
+            object.__setattr__(
+                self,
+                "trajectory_curriculum_targets",
+                _as_batch_first("trajectory_curriculum_targets", self.trajectory_curriculum_targets),
+            )
         if self.trajectory_inputs.shape[0] != self.boot_targets.shape[0]:
             raise ValueError("trajectory_inputs and boot_targets must share the same batch size.")
         if self.trajectory_inputs.shape[0] != self.identity_targets.shape[0]:
@@ -357,6 +451,13 @@ class ResidualSupervisionBatch:
             raise ValueError("transport_targets must share the same shape as boot_targets.")
         if self.drift_targets is not None and self.drift_targets.shape != self.boot_targets.shape:
             raise ValueError("drift_targets must share the same shape as boot_targets.")
+        if (
+            self.trajectory_curriculum_targets is not None
+            and self.trajectory_curriculum_targets.shape != self.boot_targets.shape
+        ):
+            raise ValueError(
+                "trajectory_curriculum_targets must share the same shape as boot_targets."
+            )
 
 
 @dataclass(frozen=True)
@@ -364,11 +465,14 @@ class FMPCEFExploratoryProbeEpochMetrics:
     epoch: int
     stage: str
     lambda_id: float
+    alpha: float
+    lambda_traj_curr: float
     train_total_loss: float
     train_boot_loss: float
     train_transport_loss: float
     train_drift_loss: float
     train_identity_loss: float
+    train_traj_curr_loss: float
     train_transported_final_energy: float
     val_one_step_transported_final_energy: float
     val_one_step_energy_delta_vs_identity: float
@@ -428,6 +532,8 @@ def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
 
 
 def _candidate_name(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_trajectory_curriculum_contract:
+        return STAGE05_V3B_CANDIDATE_NAME
     if config.use_explicit_transport_drift_decomposition:
         return STAGE05_V3A_CANDIDATE_NAME
     if config.use_two_branch_residual_core:
@@ -490,22 +596,48 @@ def _explicit_transport_drift_target_contract(
 def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
     if not config.use_explicit_transport_drift_decomposition:
         return None
+    if config.use_trajectory_curriculum_contract:
+        return {
+            "status": "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+            "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+        }
     return {
         "status": "pending_formal_v2_vs_v3a_comparison",
         "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
     }
 
 
+def _pairwise_v3a_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
+    if not config.use_trajectory_curriculum_contract:
+        return None
+    return {
+        "status": "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+        "reference_candidate_name": STAGE05_V3A_CANDIDATE_NAME,
+    }
+
+
 def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_trajectory_curriculum_contract:
+        return "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
     if not config.use_explicit_transport_drift_decomposition:
         return None
     return "pending_formal_v2_vs_v3a_comparison"
 
 
 def _recommended_next_move(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_trajectory_curriculum_contract:
+        return "run_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
     if config.use_explicit_transport_drift_decomposition:
         return "run_fixed_budget_v2_vs_v3a_comparison"
     return "no_change"
+
+
+def _trajectory_curriculum_target_contract(
+    config: FMPCEFExploratoryProbeConfig,
+) -> str | None:
+    if not config.use_trajectory_curriculum_contract:
+        return None
+    return TRAJECTORY_CURRICULUM_TARGET_CONTRACT
 
 
 def build_exploratory_probe_input(
@@ -617,6 +749,72 @@ def build_explicit_transport_drift_bootstrap_targets(
         transport_target=transport_target,
         drift_target=drift_target,
         residual_target=transport_target + drift_target,
+    )
+
+
+def build_trajectory_curriculum_targets(
+    context: FMPCTF1Context,
+    psi_network: Stage05ResidualCoreNetworks,
+    config: FMPCEFExploratoryProbeConfig,
+    z_t: np.ndarray,
+    *,
+    t: float,
+    r: float,
+    alpha: float,
+) -> TrajectoryCurriculumTargets:
+    """Return the first detached v3-B trajectory curriculum target.
+
+    This helper keeps the current Stage 05 remaining-horizon semantics intact. The
+    continuation target is evaluated on the target side only and treated as a fixed
+    array during the update step.
+    """
+
+    validate_tf1_time_pair(t, r)
+    if not config.use_trajectory_curriculum_contract:
+        raise ValueError("Trajectory curriculum targets require use_trajectory_curriculum_contract=True.")
+    alpha_value = float(alpha)
+    if not (0.0 < alpha_value < 1.0):
+        raise ValueError("Trajectory curriculum targets require 0 < alpha < 1.")
+
+    z_array = _as_batch_first("z_t", z_t)
+    short_r = alpha_value * float(r)
+    split_time = float(t) + short_r
+    continuation_r = (1.0 - alpha_value) * float(r)
+    validate_tf1_time_pair(t, short_r)
+    validate_tf1_time_pair(split_time, continuation_r)
+
+    short_boot = bootstrap_average_velocity_target(
+        context,
+        z_array,
+        t=t,
+        r=short_r,
+        integrator=config.bootstrap_integrator,
+        substeps=config.bootstrap_substeps,
+    )
+    z_s_boot = z_array + short_r * short_boot
+    continuation_velocity = _predict_total_velocity_at_state(
+        context,
+        psi_network,
+        config,
+        z_s_boot,
+        t=split_time,
+        r=continuation_r,
+    )
+    current_velocity_target = (
+        alpha_value * short_boot
+        + (1.0 - alpha_value) * continuation_velocity
+    )
+    g_t = hidden_local_flow(context, z_array)
+    residual_target = current_velocity_target - g_t
+    return TrajectoryCurriculumTargets(
+        alpha=alpha_value,
+        split_time=split_time,
+        continuation_remaining_horizon=continuation_r,
+        short_horizon_bootstrap_velocity=short_boot,
+        bootstrap_intermediate_state=z_s_boot,
+        continuation_velocity=continuation_velocity,
+        current_velocity_target=current_velocity_target,
+        residual_target=residual_target,
     )
 
 
@@ -793,6 +991,31 @@ def lambda_id_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) 
         config.lambda_id_ramp_epochs
     )
     return float(config.identity_loss_weight) * _sigmoid_unit_interval(progress)
+
+
+def alpha_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> float:
+    if not config.use_trajectory_curriculum_contract:
+        return 1.0
+    if epoch_index < config.alpha_warmup_epochs:
+        return 1.0
+    if config.alpha_ramp_epochs <= 0:
+        return float(config.alpha_floor)
+    progress = (epoch_index - config.alpha_warmup_epochs + 1) / float(config.alpha_ramp_epochs)
+    mix = _sigmoid_unit_interval(progress)
+    return 1.0 - ((1.0 - float(config.alpha_floor)) * mix)
+
+
+def lambda_traj_curr_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> float:
+    if not config.use_trajectory_curriculum_contract:
+        return 0.0
+    if config.lambda_traj_curr <= 0.0:
+        return 0.0
+    if epoch_index < config.alpha_warmup_epochs:
+        return 0.0
+    if config.alpha_ramp_epochs <= 0:
+        return float(config.lambda_traj_curr)
+    progress = (epoch_index - config.alpha_warmup_epochs + 1) / float(config.alpha_ramp_epochs)
+    return float(config.lambda_traj_curr) * _sigmoid_unit_interval(progress)
 
 
 def _stage_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> ProbeStage:
@@ -1151,12 +1374,25 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "explicit_transport_drift_target_contract": _explicit_transport_drift_target_contract(
                 config
             ),
+            "trajectory_curriculum_target_contract": _trajectory_curriculum_target_contract(config),
             "residual_identity_target_contract": _residual_identity_target_contract(config),
             "identity_loss_weight": float(config.identity_loss_weight),
             "lambda_drift": float(config.lambda_drift),
+            "lambda_traj_curr": float(config.lambda_traj_curr),
             "tangent_epsilon": float(config.tangent_epsilon),
             "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
             "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
+            "alpha_floor": (
+                float(config.alpha_floor) if config.use_trajectory_curriculum_contract else None
+            ),
+            "alpha_warmup_epochs": int(config.alpha_warmup_epochs),
+            "alpha_ramp_epochs": int(config.alpha_ramp_epochs),
+            "trajectory_curriculum_enabled": bool(config.use_trajectory_curriculum_contract),
+            "trajectory_curriculum_schedule_identity": (
+                config.trajectory_curriculum_schedule
+                if config.use_trajectory_curriculum_contract
+                else None
+            ),
             "no_teacher_dependency_in_target_construction": True,
             "use_teacher_free_features": bool(config.use_two_branch_residual_core),
             "uses_current_state_features": bool(config.use_two_branch_residual_core),
@@ -1164,6 +1400,7 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "explicit_transport_drift_decomposition_enabled": bool(
                 config.use_explicit_transport_drift_decomposition
             ),
+            "pairwise_deltas_vs_stage05_v3a_reference": _pairwise_v3a_placeholder(config),
             "feature_aware_state_branch_tangents": bool(
                 config.feature_aware_state_branch_tangents
             ),
@@ -1205,6 +1442,7 @@ def _collect_residual_supervision(
     *,
     z_knots: list[np.ndarray],
     knot_times: np.ndarray,
+    trajectory_alpha: float | None = None,
 ) -> ResidualSupervisionBatch:
     trajectory_input_blocks: list[np.ndarray] = []
     state_input_blocks: list[np.ndarray] = []
@@ -1213,6 +1451,12 @@ def _collect_residual_supervision(
     gbar_boot_blocks: list[np.ndarray] = []
     transport_targets: list[np.ndarray] = []
     drift_targets: list[np.ndarray] = []
+    trajectory_curriculum_targets: list[np.ndarray] = []
+    trajectory_curriculum_active = bool(
+        config.use_trajectory_curriculum_contract
+        and trajectory_alpha is not None
+        and float(trajectory_alpha) < 1.0 - 1e-12
+    )
     for knot_index, t_k in enumerate(knot_times[:-1]):
         z_t = z_knots[knot_index]
         t_float = float(t_k)
@@ -1265,6 +1509,17 @@ def _collect_residual_supervision(
         if state_input is not None:
             state_input_blocks.append(state_input)
         identity_targets.append(corrected_identity.target)
+        if trajectory_curriculum_active:
+            trajectory_targets = build_trajectory_curriculum_targets(
+                context,
+                psi_network,
+                config,
+                z_t,
+                t=t_float,
+                r=r_k,
+                alpha=float(trajectory_alpha),
+            )
+            trajectory_curriculum_targets.append(trajectory_targets.residual_target)
     return ResidualSupervisionBatch(
         trajectory_inputs=np.concatenate(trajectory_input_blocks, axis=0).astype(
             np.float64,
@@ -1292,9 +1547,44 @@ def _collect_residual_supervision(
             if drift_targets
             else None
         ),
+        trajectory_curriculum_targets=(
+            np.concatenate(trajectory_curriculum_targets, axis=0).astype(np.float64, copy=False)
+            if trajectory_curriculum_targets
+            else None
+        ),
         explicit_transport_drift_decomposition_enabled=bool(
             config.use_explicit_transport_drift_decomposition
         ),
+        trajectory_curriculum_enabled=trajectory_curriculum_active,
+    )
+
+
+def _predict_total_velocity_at_state(
+    context: FMPCTF1Context,
+    psi_network: Stage05ResidualCoreNetworks,
+    config: FMPCEFExploratoryProbeConfig,
+    z_t: np.ndarray,
+    *,
+    t: float,
+    r: float,
+) -> np.ndarray:
+    z_array = _as_batch_first("z_t", z_t)
+    trajectory_input, state_input, _ = _residual_core_inputs_for_state(
+        context,
+        config,
+        z_array,
+        context.targets,
+        t=t,
+        r=r,
+    )
+    residual_predictions = _predict_residual_from_inputs(
+        psi_network,
+        trajectory_input,
+        state_inputs=state_input,
+    )
+    return _as_batch_first(
+        "total_velocity",
+        hidden_local_flow(context, z_array) + residual_predictions.total_residual,
     )
 
 
@@ -1304,23 +1594,14 @@ def _learned_velocity_fn(
     config: FMPCEFExploratoryProbeConfig,
 ):
     def _velocity(z_t: np.ndarray, t_k: float, r_k: float) -> np.ndarray:
-        z_array = _as_batch_first("z_t", z_t)
-        trajectory_input, state_input, _ = _residual_core_inputs_for_state(
+        return _predict_total_velocity_at_state(
             context,
+            psi_network,
             config,
-            z_array,
-            context.targets,
+            z_t,
             t=t_k,
             r=r_k,
         )
-        residual_predictions = _predict_residual_from_inputs(
-            psi_network,
-            trajectory_input,
-            state_inputs=state_input,
-        )
-        residual = residual_predictions.total_residual
-        velocity = hidden_local_flow(context, z_array) + residual
-        return _as_batch_first("velocity", velocity)
 
     return _velocity
 
@@ -1429,8 +1710,10 @@ def _train_one_batch(
     y_batch: np.ndarray,
     *,
     lambda_id: float,
+    lambda_traj_curr: float,
+    trajectory_alpha: float,
     stage: ProbeStage,
-) -> tuple[float, float, float, float, float, float]:
+) -> tuple[float, float, float, float, float, float, float]:
     context = build_tf1_context(model, x_batch, y_batch)
     source_rollout = rollout_hidden_transport(
         context,
@@ -1444,6 +1727,7 @@ def _train_one_batch(
         config,
         z_knots=source_rollout.z_knots,
         knot_times=source_rollout.knot_times,
+        trajectory_alpha=trajectory_alpha,
     )
     predictions = _predict_residual_from_inputs(
         psi_network,
@@ -1455,6 +1739,7 @@ def _train_one_batch(
     drift_loss = 0.0
     boot_loss = transport_loss
     identity_loss = float(np.mean((psi_predictions - supervision.identity_targets) ** 2))
+    traj_curr_loss = 0.0
     if config.use_explicit_transport_drift_decomposition:
         if supervision.state_inputs is None:
             raise ValueError("Stage 05 v3-A requires state_inputs for the drift branch.")
@@ -1478,6 +1763,25 @@ def _train_one_batch(
             lambda_drift=float(config.lambda_drift),
             lambda_id=float(lambda_id),
         )
+        if (
+            config.use_trajectory_curriculum_contract
+            and lambda_traj_curr > 0.0
+            and supervision.trajectory_curriculum_targets is not None
+            and supervision.state_inputs is not None
+        ):
+            traj_curr_loss = float(
+                np.mean(
+                    (psi_predictions - supervision.trajectory_curriculum_targets) ** 2
+                )
+            )
+            total_loss += float(lambda_traj_curr) * traj_curr_loss
+            _weighted_two_branch_mse_step(
+                psi_network,
+                supervision.trajectory_inputs,
+                supervision.state_inputs,
+                supervision.trajectory_curriculum_targets,
+                loss_scale=float(lambda_traj_curr),
+            )
     else:
         if lambda_id > 0.0:
             combined_target = (
@@ -1520,7 +1824,15 @@ def _train_one_batch(
         context,
         theta_rollout.z_knots[-1],
     )
-    return total_loss, boot_loss, transport_loss, drift_loss, identity_loss, transported_energy
+    return (
+        total_loss,
+        boot_loss,
+        transport_loss,
+        drift_loss,
+        identity_loss,
+        traj_curr_loss,
+        transported_energy,
+    )
 
 
 def run_fmpc_ef_exploratory_probe(
@@ -1555,11 +1867,14 @@ def run_fmpc_ef_exploratory_probe(
     for epoch_index in range(config.epochs):
         stage = _stage_for_epoch(config, epoch_index)
         lambda_id = lambda_id_for_epoch(config, epoch_index)
+        alpha = alpha_for_epoch(config, epoch_index)
+        lambda_traj_curr = lambda_traj_curr_for_epoch(config, epoch_index)
         batch_total_losses: list[float] = []
         batch_boot_losses: list[float] = []
         batch_transport_losses: list[float] = []
         batch_drift_losses: list[float] = []
         batch_identity_losses: list[float] = []
+        batch_traj_curr_losses: list[float] = []
         batch_transport_energies: list[float] = []
         batch_seed = config.batch_order_seed + epoch_index
         for x_batch, y_batch in iter_minibatches(
@@ -1575,6 +1890,7 @@ def run_fmpc_ef_exploratory_probe(
                 transport_loss,
                 drift_loss,
                 identity_loss,
+                traj_curr_loss,
                 transported_energy,
             ) = _train_one_batch(
                 model,
@@ -1583,6 +1899,8 @@ def run_fmpc_ef_exploratory_probe(
                 x_batch,
                 y_batch,
                 lambda_id=lambda_id,
+                lambda_traj_curr=lambda_traj_curr,
+                trajectory_alpha=alpha,
                 stage=stage,
             )
             batch_total_losses.append(total_loss)
@@ -1590,6 +1908,7 @@ def run_fmpc_ef_exploratory_probe(
             batch_transport_losses.append(transport_loss)
             batch_drift_losses.append(drift_loss)
             batch_identity_losses.append(identity_loss)
+            batch_traj_curr_losses.append(traj_curr_loss)
             batch_transport_energies.append(transported_energy)
 
         val_one_step = _evaluate_mechanism_metrics(
@@ -1615,11 +1934,14 @@ def run_fmpc_ef_exploratory_probe(
                 epoch=epoch_index + 1,
                 stage=stage,
                 lambda_id=float(lambda_id),
+                alpha=float(alpha),
+                lambda_traj_curr=float(lambda_traj_curr),
                 train_total_loss=float(np.mean(batch_total_losses)),
                 train_boot_loss=float(np.mean(batch_boot_losses)),
                 train_transport_loss=float(np.mean(batch_transport_losses)),
                 train_drift_loss=float(np.mean(batch_drift_losses)),
                 train_identity_loss=float(np.mean(batch_identity_losses)),
+                train_traj_curr_loss=float(np.mean(batch_traj_curr_losses)),
                 train_transported_final_energy=float(np.mean(batch_transport_energies)),
                 val_one_step_transported_final_energy=val_one_step.transported_final_energy,
                 val_one_step_energy_delta_vs_identity=val_one_step.energy_delta_vs_identity,
@@ -1729,16 +2051,30 @@ def run_fmpc_ef_exploratory_probe(
         "explicit_transport_drift_target_contract": _explicit_transport_drift_target_contract(
             config
         ),
+        "trajectory_curriculum_target_contract": _trajectory_curriculum_target_contract(config),
         "residual_identity_target_contract": _residual_identity_target_contract(config),
         "identity_loss_weight": float(config.identity_loss_weight),
         "lambda_drift": float(config.lambda_drift),
+        "lambda_traj_curr": float(config.lambda_traj_curr),
         "tangent_epsilon": float(config.tangent_epsilon),
         "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
         "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
+        "alpha_floor": (
+            float(config.alpha_floor) if config.use_trajectory_curriculum_contract else None
+        ),
+        "alpha_warmup_epochs": int(config.alpha_warmup_epochs),
+        "alpha_ramp_epochs": int(config.alpha_ramp_epochs),
+        "trajectory_curriculum_enabled": bool(config.use_trajectory_curriculum_contract),
+        "trajectory_curriculum_schedule_identity": (
+            config.trajectory_curriculum_schedule
+            if config.use_trajectory_curriculum_contract
+            else None
+        ),
         "use_two_branch_residual_core": bool(config.use_two_branch_residual_core),
         "explicit_transport_drift_decomposition_enabled": bool(
             config.use_explicit_transport_drift_decomposition
         ),
+        "pairwise_deltas_vs_stage05_v3a_reference": _pairwise_v3a_placeholder(config),
         "uses_current_state_features": bool(config.use_two_branch_residual_core),
         "feature_aware_state_branch_tangents": bool(
             config.feature_aware_state_branch_tangents
@@ -1752,6 +2088,8 @@ def run_fmpc_ef_exploratory_probe(
         "selected_epoch": int(selected_epoch),
         "selected_epoch_stage": str(best_row["stage"]),
         "selected_epoch_lambda_id": float(best_row["lambda_id"]),
+        "selected_epoch_alpha": float(best_row["alpha"]),
+        "selected_epoch_lambda_traj_curr": float(best_row["lambda_traj_curr"]),
         "train_wall_time_seconds": train_wall_time_seconds,
         "evaluation_wall_time_seconds": evaluation_wall_time_seconds,
         "val_accuracy": float(val_accuracy),
@@ -1800,6 +2138,7 @@ def run_fmpc_ef_exploratory_probe(
         "task_accuracy_is_gate": False,
         "no_teacher_dependency_in_target_construction": True,
         "pairwise_deltas_vs_stage05_v2_reference": _pairwise_v2_placeholder(config),
+        "pairwise_deltas_vs_stage05_v3a_reference": _pairwise_v3a_placeholder(config),
         "gap_closure_decision": _gap_closure_decision_placeholder(config),
         "recommended_next_move": _recommended_next_move(config),
         "run_artifacts": {

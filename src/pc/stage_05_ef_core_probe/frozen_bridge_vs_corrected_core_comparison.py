@@ -38,6 +38,7 @@ ComparisonMethodName = Literal[
     "stage_05_corrected_residual_core_v1",
     "stage_05_two_branch_corrected_residual_core_v2",
     "stage05_v3a_explicit_transport_drift_contract",
+    "stage05_v3b_trajectory_curriculum_contract",
     "stage_05_two_branch_corrected_residual_core_v2_current_budget",
     "stage_05_two_branch_corrected_residual_core_v2_longer_training",
     "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
@@ -53,6 +54,7 @@ STAGE05_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core"
 STAGE05_V1_METHOD_NAME: ComparisonMethodName = "stage_05_corrected_residual_core_v1"
 STAGE05_V2_METHOD_NAME: ComparisonMethodName = "stage_05_two_branch_corrected_residual_core_v2"
 STAGE05_V3A_METHOD_NAME: ComparisonMethodName = "stage05_v3a_explicit_transport_drift_contract"
+STAGE05_V3B_METHOD_NAME: ComparisonMethodName = "stage05_v3b_trajectory_curriculum_contract"
 STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: ComparisonMethodName = (
     "stage_05_two_branch_corrected_residual_core_v2_current_budget"
 )
@@ -298,6 +300,59 @@ class Stage05V2VsV3AComparisonConfig:
 
 
 @dataclass
+class Stage05V2V3AV3BComparisonConfig:
+    """Smoke-ready Stage 05 comparison across the current v2 control, v3-A, and v3-B."""
+
+    experiment_name: str = "stage05_v2_v3a_v3b_trajectory_curriculum_comparison"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    comparison_scope: ComparisonScope = "smoke_only"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0,)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    stage05_epochs: int = 4
+    stage05_eval_steps: int = 8
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+    lambda_drift: float = 1.0
+    lambda_traj_curr: float = 0.1
+    alpha_floor: float = 0.5
+    alpha_warmup_epochs: int = 1
+    alpha_ramp_epochs: int = 2
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The Stage 05 v2/v3-A/v3-B comparison currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.stage05_epochs <= 0 or self.stage05_eval_steps <= 0:
+            raise ValueError("stage05_epochs and stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+        if self.lambda_drift < 0.0:
+            raise ValueError("lambda_drift must be non-negative.")
+        if self.lambda_traj_curr < 0.0:
+            raise ValueError("lambda_traj_curr must be non-negative.")
+        if not (0.0 < self.alpha_floor < 1.0):
+            raise ValueError("alpha_floor must satisfy 0 < alpha_floor < 1.")
+        if self.alpha_warmup_epochs < 0 or self.alpha_ramp_epochs < 0:
+            raise ValueError("alpha_warmup_epochs and alpha_ramp_epochs must be non-negative.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
 class Stage05V2LongerTrainingValidationConfig:
     """Compare the current Stage 05 v2 budget against a longer-training budget."""
 
@@ -505,7 +560,11 @@ def _read_json(path: Path) -> dict[str, Any]:
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise ValueError("rows must contain at least one entry.")
-    fieldnames = list(rows[0].keys())
+    fieldnames: list[str] = []
+    for row in rows:
+        for key in row.keys():
+            if key not in fieldnames:
+                fieldnames.append(key)
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -940,6 +999,35 @@ def _stage05_v3a_config(
     )
 
 
+def _stage05_v3b_config(
+    config: Stage05V2V3AV3BComparisonConfig,
+    *,
+    seed: int,
+    output_root: Path,
+) -> FMPCEFExploratoryProbeConfig:
+    return _build_stage05_v2_config(
+        output_root=output_root,
+        experiment_name=STAGE05_V3B_METHOD_NAME,
+        seed=seed,
+        train_fraction=float(config.train_fraction),
+        val_fraction=float(config.val_fraction),
+        test_fraction=float(config.test_fraction),
+        batch_size=int(config.batch_size),
+        shuffle_batches=bool(config.shuffle_batches),
+        epochs=int(config.stage05_epochs),
+        eval_steps=int(config.stage05_eval_steps),
+        layer_dims=config.stage05_layer_dims,
+        transport_steps=int(config.stage05_transport_steps),
+        use_explicit_transport_drift_decomposition=True,
+        use_trajectory_curriculum_contract=True,
+        lambda_drift=float(config.lambda_drift),
+        lambda_traj_curr=float(config.lambda_traj_curr),
+        alpha_floor=float(config.alpha_floor),
+        alpha_warmup_epochs=int(config.alpha_warmup_epochs),
+        alpha_ramp_epochs=int(config.alpha_ramp_epochs),
+    )
+
+
 def _stage05_v2_bridge_config(
     config: FrozenBridgeVsStage05V2ComparisonConfig,
     *,
@@ -1212,6 +1300,14 @@ def _stage05_core_row(
         "run_summary_path": _relative_posix(suite_run_dir, result.run_dir / "summary.json"),
         "transport_family": str(summary["transport_family"]),
         "residual_branch_structure": str(summary["residual_branch_structure"]),
+        "explicit_transport_drift_decomposition_enabled": bool(
+            summary.get("explicit_transport_drift_decomposition_enabled", False)
+        ),
+        "trajectory_curriculum_enabled": bool(summary.get("trajectory_curriculum_enabled", False)),
+        "trajectory_curriculum_schedule_identity": summary.get(
+            "trajectory_curriculum_schedule_identity"
+        ),
+        "alpha_floor": summary.get("alpha_floor"),
         "configured_transport_steps": int(config.transport_steps),
         "one_step_energy_delta_vs_identity": float(val_one_step["energy_delta_vs_identity"]),
         "configured_step_energy_delta_vs_identity": float(val_configured["energy_delta_vs_identity"]),
@@ -1284,6 +1380,14 @@ def _load_existing_stage05_core_row(
         "run_summary_path": _repo_relative_posix(existing_run_dir / "summary.json"),
         "transport_family": str(summary["transport_family"]),
         "residual_branch_structure": str(summary["residual_branch_structure"]),
+        "explicit_transport_drift_decomposition_enabled": bool(
+            summary.get("explicit_transport_drift_decomposition_enabled", False)
+        ),
+        "trajectory_curriculum_enabled": bool(summary.get("trajectory_curriculum_enabled", False)),
+        "trajectory_curriculum_schedule_identity": summary.get(
+            "trajectory_curriculum_schedule_identity"
+        ),
+        "alpha_floor": summary.get("alpha_floor"),
         "configured_transport_steps": int(transport_payload["transport_steps"]),
         "one_step_energy_delta_vs_identity": float(val_one_step["energy_delta_vs_identity"]),
         "configured_step_energy_delta_vs_identity": float(val_configured["energy_delta_vs_identity"]),
@@ -3041,6 +3145,307 @@ def run_stage05_v2_vs_v3a_comparison(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_stage05_v2_vs_v3a_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _stage05_v2_v3a_v3b_protocol_payload(
+    config: Stage05V2V3AV3BComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "comparison_scope": str(config.comparison_scope),
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "stage_05_v2_reference": {
+            "method_name": STAGE05_V2_METHOD_NAME,
+            "candidate_name": "stage05_v2_two_branch_corrected_residual_meanflow_core",
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "explicit_transport_drift_decomposition_enabled": False,
+            "trajectory_curriculum_enabled": False,
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "stage_05_v3a_reference": {
+            "method_name": STAGE05_V3A_METHOD_NAME,
+            "candidate_name": "stage05_v3a_explicit_transport_drift_contract",
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "explicit_transport_drift_decomposition_enabled": True,
+            "trajectory_curriculum_enabled": False,
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "stage_05_v3b_candidate": {
+            "method_name": STAGE05_V3B_METHOD_NAME,
+            "candidate_name": "stage05_v3b_trajectory_curriculum_contract",
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "explicit_transport_drift_decomposition_enabled": True,
+            "trajectory_curriculum_enabled": True,
+            "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+            "alpha_floor": float(config.alpha_floor),
+            "lambda_traj_curr": float(config.lambda_traj_curr),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "decision_rule": {
+            "purpose": "smoke_ready_v3b_scaffold_check",
+            "primary_split": "validation",
+            "task_accuracy_is_report_only": True,
+            "artifact_checks_required": True,
+            "one_step_mechanism_should_remain_positive": True,
+            "configured_step_mechanism_should_remain_positive": True,
+            "smoke_only": True,
+        },
+    }
+
+
+def _stage05_v2_v3a_v3b_suite_config_payload(
+    config: Stage05V2V3AV3BComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_protocol": _stage05_v2_v3a_v3b_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
+def _stage05_v2_v3a_v3b_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    lines = [
+        "# Stage 05 v2 vs v3-A vs v3-B Trajectory Curriculum Comparison",
+        "",
+        "## Protocol",
+        f"- comparison scope: `{protocol['comparison_scope']}`",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- Stage 05 epochs: `{protocol['stage_05_v3b_candidate']['epochs']}`",
+        "",
+        "## Decision",
+        f"- `stage05_v3b_candidate_smoke_ready`: `{decision['stage05_v3b_candidate_smoke_ready']}`",
+        f"- gap_closure_decision: `{decision['gap_closure_decision']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Pairwise Deltas Vs V2",
+        f"- configured-step validation energy delta vs identity delta: `{report['pairwise_deltas_vs_stage05_v2_reference']['configured_step_energy_delta_vs_identity_delta']['mean']}`",
+        f"- configured-step validation fixed-point residual delta vs identity delta: `{report['pairwise_deltas_vs_stage05_v2_reference']['configured_step_fixed_point_residual_delta_vs_identity_delta']['mean']}`",
+        "",
+        "## Pairwise Deltas Vs V3-A",
+        f"- configured-step validation energy delta vs identity delta: `{report['pairwise_deltas_vs_stage05_v3a_reference']['configured_step_energy_delta_vs_identity_delta']['mean']}`",
+        f"- configured-step validation fixed-point residual delta vs identity delta: `{report['pairwise_deltas_vs_stage05_v3a_reference']['configured_step_fixed_point_residual_delta_vs_identity_delta']['mean']}`",
+    ]
+    return "\n".join(lines)
+
+
+def run_stage05_v2_v3a_v3b_comparison(
+    config: Stage05V2V3AV3BComparisonConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run a smoke-ready three-way Stage 05 comparison across v2, v3-A, and v3-B."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v2_v3a_v3b_suite_config_payload(config))
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+
+    for seed in config.seeds:
+        run_index += 1
+        v2_config = _build_stage05_v2_config(
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_METHOD_NAME,
+            seed=seed,
+            train_fraction=float(config.train_fraction),
+            val_fraction=float(config.val_fraction),
+            test_fraction=float(config.test_fraction),
+            batch_size=int(config.batch_size),
+            shuffle_batches=bool(config.shuffle_batches),
+            epochs=int(config.stage05_epochs),
+            eval_steps=int(config.stage05_eval_steps),
+            layer_dims=config.stage05_layer_dims,
+            transport_steps=int(config.stage05_transport_steps),
+        )
+        v2_result = run_fmpc_ef_exploratory_probe(v2_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=v2_result,
+                config=v2_config,
+                method_name=STAGE05_V2_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v2 Reference",
+            )
+        )
+
+        run_index += 1
+        v3a_config = _stage05_v3a_config(
+            Stage05V2VsV3AComparisonConfig(
+                output_root=config.output_root,
+                run_id=config.run_id,
+                output_layout=config.output_layout,
+                comparison_scope=config.comparison_scope,
+                dataset_name=config.dataset_name,
+                seeds=config.seeds,
+                train_fraction=config.train_fraction,
+                val_fraction=config.val_fraction,
+                test_fraction=config.test_fraction,
+                batch_size=config.batch_size,
+                shuffle_batches=config.shuffle_batches,
+                stage05_epochs=config.stage05_epochs,
+                stage05_eval_steps=config.stage05_eval_steps,
+                stage05_layer_dims=config.stage05_layer_dims,
+                stage05_transport_steps=config.stage05_transport_steps,
+                lambda_drift=config.lambda_drift,
+            ),
+            seed=seed,
+            output_root=runs_root,
+        )
+        v3a_result = run_fmpc_ef_exploratory_probe(v3a_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=v3a_result,
+                config=v3a_config,
+                method_name=STAGE05_V3A_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v3-A Explicit Transport-Drift Candidate",
+            )
+        )
+
+        run_index += 1
+        v3b_config = _stage05_v3b_config(config, seed=seed, output_root=runs_root)
+        v3b_result = run_fmpc_ef_exploratory_probe(v3b_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=v3b_result,
+                config=v3b_config,
+                method_name=STAGE05_V3B_METHOD_NAME,
+                stage_name="FMPC Stage 05 EF Core Probe v3-B Trajectory Curriculum Candidate",
+            )
+        )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE05_V2_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V2_METHOD_NAME)),
+        STAGE05_V3A_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V3A_METHOD_NAME)),
+        STAGE05_V3B_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V3B_METHOD_NAME)),
+    }
+    pairwise_v3a_vs_v2 = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3A_METHOD_NAME,
+        reference_method=STAGE05_V2_METHOD_NAME,
+    )
+    pairwise_v3b_vs_v2 = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3B_METHOD_NAME,
+        reference_method=STAGE05_V2_METHOD_NAME,
+    )
+    pairwise_v3b_vs_v3a = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3B_METHOD_NAME,
+        reference_method=STAGE05_V3A_METHOD_NAME,
+    )
+    v3b_rows = _method_rows(rows, STAGE05_V3B_METHOD_NAME)
+    artifact_pass = all(bool(row["deterministic_artifact_checks_passed"]) for row in v3b_rows)
+    mechanism_positive = all(bool(row["mechanism_signal_positive"]) for row in v3b_rows)
+    smoke_ready = bool(artifact_pass and mechanism_positive)
+    recommended_next_move = (
+        "run_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
+        if smoke_ready
+        else "another_v3b_implementation_pass"
+    )
+    decision_rationale = (
+        "The minimal v3-B candidate writes deterministic artifacts and keeps mechanism metrics positive in smoke scope."
+        if smoke_ready
+        else "The minimal v3-B candidate does not yet clear the smoke-ready artifact or mechanism checks."
+    )
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_scope": str(config.comparison_scope),
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_v3a_v3b_protocol_payload(config),
+        "by_method": by_method,
+        "pairwise_stage05_v3a_vs_v2": pairwise_v3a_vs_v2,
+        "pairwise_stage05_v3b_vs_v2": pairwise_v3b_vs_v2,
+        "pairwise_stage05_v3b_vs_v3a": pairwise_v3b_vs_v3a,
+        "pairwise_deltas_vs_stage05_v2_reference": pairwise_v3b_vs_v2,
+        "pairwise_deltas_vs_stage05_v3a_reference": pairwise_v3b_vs_v3a,
+        "stage05_v3b_candidate_smoke_ready": bool(smoke_ready),
+        "gap_closure_decision": "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+        "recommended_next_move": recommended_next_move,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_v3a_v3b_protocol_payload(config),
+        "decision": {
+            "stage05_v3b_candidate_smoke_ready": bool(smoke_ready),
+            "gap_closure_decision": "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
+            "recommended_next_move": recommended_next_move,
+            "decision_rationale": decision_rationale,
+        },
+        "pairwise_deltas_vs_stage05_v2_reference": pairwise_v3b_vs_v2,
+        "pairwise_deltas_vs_stage05_v3a_reference": pairwise_v3b_vs_v3a,
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v2_v3a_v3b_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_v3a_v3b_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

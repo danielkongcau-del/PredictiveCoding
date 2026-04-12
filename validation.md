@@ -172,6 +172,10 @@ Current interpretation:
   - it avoids an obvious report-only accuracy regression under the current Stage 05 rule, although validation and test accuracy remain slightly below the fixed-budget v2 reference
   - the current decision is therefore:
     - `recommended_next_move = proceed_to_stage05_v3b_curriculum_charter`
+- the first minimal Stage 05 v3-B candidate path and smoke-ready three-way comparison entry now also exist in-repo:
+  - candidate name: `stage05_v3b_trajectory_curriculum_contract`
+  - the candidate keeps the v3-A explicit transport-drift decomposition and adds one aggregate trajectory curriculum loss
+  - the current next validation move is therefore no longer to open the v3-B charter, but to run the first real fixed-budget `v2 vs v3-A vs v3-B` comparison
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -189,12 +193,14 @@ The next validation move is:
   - `outputs/stage_05_ef_core_probe/stage05_v2_vs_v3a_explicit_transport_drift_fixed_budget_comparison/`
 - do not continue pure same-family budget escalation from this state
 - do not continue pure same-family efficiency tweaking from this state
-- use the next Stage 05 pass to open a Stage 05 `v3-B` charter instead:
-  - on top of the current fixed-budget v3-A result
+- use the next Stage 05 pass to run the first real fixed-budget comparison across:
+  - the fixed-budget Stage 05 v2 control
+  - the fixed-budget Stage 05 v3-A reference
+  - `stage05_v3b_trajectory_curriculum_contract`
   - still mechanism-first
   - still not a replacement claim against the frozen Stage 04 bridge
 
-That next v3-B chartering pass should preserve:
+That next fixed-budget v3-B evaluation pass should preserve:
 
 - artifact-independent target construction
 - deterministic artifact generation
@@ -202,7 +208,7 @@ That next v3-B chartering pass should preserve:
 - the mechanism-first validation contract for Stage 05
 - task accuracy as a secondary signal only
 
-The next future v3-B implementation pass should be accepted only if it:
+That next fixed-budget v3-B evaluation pass should be accepted only if it:
 
 - preserves explicit transport-drift decomposition from v3-A
 - keeps artifact-independent target construction
@@ -214,13 +220,12 @@ The next future v3-B implementation pass should be accepted only if it:
 - makes the trajectory curriculum identity explicit
 - keeps task accuracy as a secondary signal only
 
-The next future v3-B implementation pass must minimally produce:
+That next fixed-budget v3-B evaluation pass must minimally produce:
 
-- a new Stage 05 v3-B candidate codepath
-- a new comparison entry or suite against:
+- a comparison run or suite against:
   - the fixed-budget Stage 05 v2 control
   - the fixed-budget Stage 05 v3-A result
-- a matching smoke test
+  - `stage05_v3b_trajectory_curriculum_contract`
 - a dedicated artifact directory
 - aggregate summary fields that report:
   - whether trajectory curriculum is enabled
