@@ -92,6 +92,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the completed Stage 05 v2 longer-training validation now concludes:
   - the stronger same-family budget materially improves configured-step mechanism and report-only accuracy
   - the stronger budget still hits the final training boundary on every seed
+- the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now concludes:
+  - the tested same-family schedule change does not materially improve configured-step mechanism
+  - it does not materially improve report-only accuracy
+  - it does not materially narrow the gap to the contextual `3072`-epoch reference
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -99,7 +103,8 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- if Stage 05 continues, draft the next narrow step as another budget push on the current v2 reference before inventing a new family or opening a true v3 charter
+- do not draft the next Stage 05 step as another pure same-family budget push
+- if Stage 05 continues, draft the next step as a true Stage 05 v3 mechanism charter
 
 ## What Prompt Writers Must Not Reopen
 

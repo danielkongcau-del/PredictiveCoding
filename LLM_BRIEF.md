@@ -111,6 +111,7 @@ Current known state:
 - that refreshed comparison supports using Stage 05 v2 as the new exploratory reference
 - the dedicated Stage 05 v2 diagnostics now say the current narrow diagnosis is `likely_undertrained`
 - the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
+- the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
@@ -118,7 +119,8 @@ Current known state:
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
 - use the Stage 05 v2 two-branch core as the current exploratory reference
-- if Stage 05 continues, keep pushing budget on the current v2 reference before inventing a new family or opening a true v3 charter
+- do not continue pure same-family budget escalation from the current state
+- if Stage 05 continues, open a true Stage 05 v3 mechanism charter next
 
 ## Current Code Entry Points
 

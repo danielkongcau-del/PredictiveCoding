@@ -204,7 +204,17 @@ Completed outcome:
 Current execution plan:
 
 - keep the current Stage 05 v2 family fixed
-- if Stage 05 continues, run the next narrow budget push beyond the current `3072`-epoch reference on the same:
+- the narrow same-family efficiency diagnostic at the current `1536`-epoch budget ceiling now exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
+- that efficiency result says:
+  - the tested same-family schedule change does not materially improve configured-step mechanism over the current `1536`-epoch default
+  - it does not materially improve report-only accuracy
+  - it does not materially narrow the gap to the contextual `3072`-epoch reference
+  - `recommended_next_move = open_stage05_v3_charter`
+- keep the current Stage 05 v2 family fixed as the exploratory reference while the next charter is being defined
+- do not increase epochs beyond the current `3072`-epoch reference from this state
+- treat the current `3072`-epoch result as contextual same-family evidence, not as another new training target
+- use the next Stage 05 pass to draft a true v3 mechanism charter on top of the same:
   - `transport_family = two_branch_residual_meanflow_core`
   - `feature_aware_state_branch_tangents = true`
   - residual branch structure
@@ -217,24 +227,15 @@ Current execution plan:
   - `layer_dims = (64, 16, 10)`
   - `transport_steps = 2`
   - `eval_steps = 15`
-- require the next budget pass to report again:
-  - configured-step validation mechanism metrics
-  - val/test accuracy
-  - selected epoch
-  - whether selection still hits the final training boundary
-  - runtime
-- require the next budget pass to add an explicit stop-rule layer that answers:
-  - whether the same-family budget line still looks boundary-limited
-  - whether the budget line should continue
-  - or whether budget should stop and a true Stage 05 v3 charter should be opened
-- use the next formal budget comparison:
-  - current reference: `3072 epochs`
-  - stronger candidate: still to be chosen by the same hard stop rule, only if this same-family line remains open
-- enforce the hard stop rule:
-  - continue budget only if the stronger budget still materially improves configured-step mechanism
-  - and still materially improves report-only accuracy
-  - and still selects the final training epoch on all seeds
-- otherwise stop same-family budget escalation and open a true Stage 05 v3 charter
+- compare exactly:
+  - the completed `1536`-epoch default
+  - the completed narrow `1536`-epoch efficiency candidate
+  - the completed `3072`-epoch same-family reference as context only
+- require the next chartering pass to answer:
+  - what real mechanism change should define Stage 05 v3
+  - why that change is justified beyond same-family budget scaling and same-family schedule tuning
+  - how that new mechanism will still preserve the Stage 05 mechanism-first contract
+  - how the new charter will avoid reopening Stage 04 package-internal work
 
 ## Exploratory Acceptance Criteria
 

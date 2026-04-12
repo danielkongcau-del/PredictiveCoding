@@ -128,15 +128,29 @@ Current probe status:
     - `budget_line_should_stop_and_open_v3 = false`
     - `budget_line_interpretation = boundary_limited_mechanism_prototype`
   - the stronger budget now sits above the frozen Stage 04 bridge accuracy level in the diagnostic context, while remaining mixed relative to the standalone `digits_pc` baseline and below the standalone `digits_mlp` baseline
-  - the budget question is therefore still not closed
+  - that budget result remains useful as contextual same-family evidence, not as the active next move
+- the narrow Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now also exists under:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536)
+- current efficiency result:
+  - the tested same-family schedule change only moves configured-step validation energy delta vs identity from `-0.004980554368336933` to `-0.004984766983336293`
+  - configured-step validation fixed-point residual delta vs identity only moves from `-1.8451788412853327e-05` to `-1.8460725447955813e-05`
+  - report-only validation and test accuracy remain unchanged at `0.8876543209876543 / 0.8876543209876543`
+  - the gap-closure fractions versus the contextual `3072`-epoch reference remain negligible
+  - the optimized `1536`-epoch candidate still selects the final training epoch on every seed
+  - the diagnostic conclusion is therefore:
+    - `same_family_efficiency_change_materially_improves_configured_step_mechanism = false`
+    - `same_family_efficiency_change_materially_improves_report_only_accuracy = false`
+    - `same_family_efficiency_change_materially_narrows_gap_to_3072_reference = false`
+    - `recommended_next_move = open_stage05_v3_charter`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 - current interpretation:
   - the two-branch corrected residual MeanFlow core is now the current narrow Stage 05 exploratory candidate
   - it improves mechanism magnitude over the Stage 05 v1 baseline under the current multiseed rule
   - the refreshed bridge comparison now also supports treating Stage 05 v2 as the current exploratory reference
-  - the current evidence points first to training / budget limitation on the v2 reference, not to state-branch removal or selection-rule misalignment
-  - the completed longer-training and budget-push validations both strengthen that interpretation rather than closing it
+  - the longer-training and budget-push validations showed real same-family budget upside
+  - the fixed-budget efficiency diagnostic then showed that a narrow same-family schedule change does not recover a material fraction of that upside
+  - on this simple task, further pure epoch escalation is now treated as economically unjustified from the current state
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -146,7 +160,8 @@ Current probe status:
 - Do not use any current Stage 05 comparison as a claim that Stage 05 should replace the frozen bridge result on `main`.
 - Use the current Stage 05 v2 candidate as the new exploratory reference.
 - Keep Stage 05 mechanism-first and task accuracy report-only.
-- If Stage 05 continues from the current state, continue pushing budget on the existing v2 reference before inventing a new mechanism family or opening a true v3 charter.
+- Do not continue pure same-family budget escalation from the current state.
+- The next Stage 05 move should now be to open a true v3 mechanism charter.
 
 ## Reopen Conditions
 
@@ -189,3 +204,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation)
 - Stage 05 v2 budget-push validation artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072)
+- Stage 05 v2 efficiency diagnostic artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536)

@@ -349,3 +349,97 @@ def test_stage05_v2_budget_push_validation_writes_expected_artifacts(
     assert "budget_line_should_continue" in report["decision"]
     assert "budget_line_interpretation" in report["decision"]
     assert "recommended_next_move" in report["decision"]
+
+
+def test_stage05_v2_efficiency_diagnostic_writes_expected_artifacts(
+    tmp_path: Path,
+) -> None:
+    reference_fixture = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_efficiency_reference_fixture",
+        comparison_variant="stage05_v2_budget_push_validation",
+        experiment_name="stage05_v2_efficiency_reference_fixture",
+        seeds=(0,),
+        reference_stage05_epochs=4,
+        stronger_stage05_epochs=6,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+    )
+
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_efficiency_smoke",
+        comparison_variant="stage05_v2_efficiency_diagnostic_at_1536",
+        experiment_name="stage05_v2_efficiency_diagnostic_smoke_custom",
+        seeds=(0,),
+        reference_stage05_epochs=4,
+        contextual_reference_stage05_epochs=6,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        optimized_lambda_id_warmup_epochs=1,
+        optimized_lambda_id_ramp_epochs=1,
+        reference_artifact_root=(
+            reference_fixture.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2_budget_reference"
+        ),
+        contextual_reference_summary_path=reference_fixture.run_dir / "aggregate_summary.json",
+    )
+
+    run_dir = result.run_dir
+    assert run_dir.name == "stage05_v2_efficiency_diagnostic_smoke_custom"
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 2
+    method_names = {row["method_name"] for row in rows}
+    assert method_names == {
+        "stage_05_two_branch_corrected_residual_core_v2_efficiency_reference",
+        "stage_05_two_branch_corrected_residual_core_v2_efficiency_candidate",
+    }
+
+    first_row = rows[0]
+    assert "selected_epoch" in first_row
+    assert "total_training_epochs" in first_row
+    assert "selection_hits_final_training_boundary" in first_row
+    assert "configured_step_energy_delta_vs_identity" in first_row
+    assert "configured_step_fixed_point_residual_delta_vs_identity" in first_row
+    assert "val_accuracy" in first_row
+    assert "test_accuracy" in first_row
+    assert "runtime_proxy_seconds" in first_row
+
+    assert summary["stage"] == "stage05_v2_efficiency_diagnostic_smoke_custom"
+    assert "comparison_protocol" in summary
+    assert "by_method" in summary
+    assert "contextual_3072_reference" in summary
+    assert "pairwise_best_optimized_1536_vs_current_1536_default" in summary
+    assert (
+        "same_family_efficiency_change_materially_improves_configured_step_mechanism"
+        in summary
+    )
+    assert "same_family_efficiency_change_materially_improves_report_only_accuracy" in summary
+    assert "same_family_efficiency_change_materially_narrows_gap_to_3072_reference" in summary
+    assert "configured_step_gap_closed_fraction_vs_3072_reference" in summary
+    assert "report_accuracy_gap_closed_fraction_vs_3072_reference" in summary
+    assert "recommended_next_move" in summary
+    assert "decision_rationale" in summary
+
+    assert "decision" in report
+    assert "contextual_3072_reference" in report
+    assert "supports" in report
+    assert "does_not_support" in report
+    assert (
+        "same_family_efficiency_change_materially_improves_configured_step_mechanism"
+        in report["decision"]
+    )
+    assert "same_family_efficiency_change_materially_narrows_gap_to_3072_reference" in report["decision"]
+    assert "recommended_next_move" in report["decision"]

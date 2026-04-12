@@ -14,11 +14,13 @@ from pc.stage_05_ef_core_probe.frozen_bridge_vs_corrected_core_comparison import
     FrozenBridgeVsCorrectedCoreComparisonRunResult,
     FrozenBridgeVsStage05V2ComparisonConfig,
     Stage05V2BudgetPushValidationConfig,
+    Stage05V2EfficiencyDiagnosticConfig,
     Stage05V2LongerTrainingValidationConfig,
     run_frozen_bridge_vs_corrected_core_comparison,
     run_corrected_residual_core_v1_vs_v2_comparison,
     run_frozen_bridge_vs_stage05_v2_comparison,
     run_stage05_v2_budget_push_validation,
+    run_stage05_v2_efficiency_diagnostic,
     run_stage05_v2_longer_training_validation,
 )
 
@@ -66,6 +68,13 @@ def run(
             **overrides,
         )
         return run_stage05_v2_budget_push_validation(config)
+    if comparison_variant == "stage05_v2_efficiency_diagnostic_at_1536":
+        config = Stage05V2EfficiencyDiagnosticConfig(
+            output_root=output_root,
+            run_id=run_id,
+            **overrides,
+        )
+        return run_stage05_v2_efficiency_diagnostic(config)
     raise ValueError(f"Unsupported comparison_variant '{comparison_variant}'.")
 
 

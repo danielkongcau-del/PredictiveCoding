@@ -1,0 +1,155 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "budget_ceiling_epochs": 1536,
+    "current_1536_default": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_efficiency_reference",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 1536,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "optimized_1536_candidate": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_efficiency_candidate",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "feature_aware_state_branch_tangents": true,
+      "epochs": 1536,
+      "configured_transport_steps": 2,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ],
+      "optimization_hypothesis": "faster corrected residual identity curriculum at the same 1536-epoch ceiling",
+      "tested_axes": {
+        "lambda_id_warmup_epochs": 1,
+        "lambda_id_ramp_epochs": 1
+      }
+    },
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "report_accuracy_improvement_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.2,
+      "selection_rule_unchanged": true
+    }
+  },
+  "decision": {
+    "same_family_efficiency_change_materially_improves_configured_step_mechanism": false,
+    "same_family_efficiency_change_materially_improves_report_only_accuracy": false,
+    "same_family_efficiency_change_materially_narrows_gap_to_3072_reference": false,
+    "configured_step_gain_fraction_vs_reference": 0.00048434519746932834,
+    "report_accuracy_gain_vs_reference": {
+      "val_accuracy_delta": 0.0,
+      "test_accuracy_delta": 0.0
+    },
+    "configured_step_gap_closed_fraction_vs_3072_reference": {
+      "energy": 0.0034571540023809045,
+      "residual": 0.0008518822920464886
+    },
+    "report_accuracy_gap_closed_fraction_vs_3072_reference": {
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "optimized_candidate_selection_hits_final_training_boundary_on_all_seeds": true,
+    "recommended_next_move": "open_stage05_v3_charter",
+    "decision_rationale": "The narrow same-family schedule change does not materially improve the 1536-epoch reference, so same-family efficiency tuning is not a strong enough next move and a true Stage 05 v3 mechanism charter is now justified."
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "supports": [
+    "The optimized 1536-epoch Stage 05 v2 candidate does not materially improve configured-step mechanism over the current 1536-epoch default.",
+    "The optimized 1536-epoch Stage 05 v2 candidate does not materially improve report-only accuracy over the current 1536-epoch default.",
+    "The optimized 1536-epoch Stage 05 v2 candidate does not materially narrow the gap to the contextual 3072-epoch reference.",
+    "Current 1536-epoch default configured-step validation energy delta vs identity mean: -0.004980554368.",
+    "Optimized 1536-epoch candidate configured-step validation energy delta vs identity mean: -0.004984766983.",
+    "Contextual 3072-epoch reference configured-step validation energy delta vs identity mean: -0.006199075440.",
+    "Current 1536-epoch default validation/test accuracy means: 0.887654 / 0.887654.",
+    "Optimized 1536-epoch candidate validation/test accuracy means: 0.887654 / 0.887654.",
+    "Contextual 3072-epoch reference validation/test accuracy means: 0.908642 / 0.916049."
+  ],
+  "does_not_support": [
+    "This diagnostic does not reopen Stage 04 package-internal work.",
+    "This diagnostic does not change the Stage 05 v2 transport family, residual branch structure, corrected residual identity contract, or selection rule.",
+    "This diagnostic does not claim that Stage 05 replaces the frozen Stage 04 bridge result on main."
+  ]
+}

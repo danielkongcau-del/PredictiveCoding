@@ -167,9 +167,57 @@ Current interpretation:
   - above the frozen Stage 04 bridge accuracy level
   - mixed relative to the standalone `digits_pc` baseline
   - below the standalone `digits_mlp` baseline
-- the next move therefore remains:
-  - continue pushing budget on the same v2 family
-  - do not open a true Stage 05 v3 mechanism charter yet
+- that budget result remains important as contextual same-family evidence, but it is no longer the active next move after the efficiency check below
+
+## FMPC Stage 05 Efficiency Diagnostic Snapshot
+
+Current formal validation:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
+
+Current comparison result:
+
+- current `1536`-epoch Stage 05 v2 default:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004980554368336933`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8451788412853327e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+- tested optimized `1536`-epoch Stage 05 v2 candidate:
+  - tested axes:
+    - `lambda_id_warmup_epochs = 1`
+    - `lambda_id_ramp_epochs = 1`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004984766983336293`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8460725447955813e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+- contextual `3072`-epoch Stage 05 v2 reference:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.006199075439848138`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.8942715605407296e-05`
+  - mean validation accuracy:
+    - `0.908641975308642`
+  - mean test accuracy:
+    - `0.9160493827160495`
+
+Current interpretation:
+
+- the tested same-family schedule change does not materially improve configured-step mechanism
+- it does not materially improve report-only accuracy
+- it does not materially narrow the gap to the contextual `3072`-epoch reference
+- the optimized `1536`-epoch candidate still selects the final training epoch on every seed
+- the next move therefore becomes:
+  - stop pure same-family budget escalation from the current state
+  - open a true Stage 05 v3 mechanism charter
+  - do not treat this as any claim that Stage 05 replaces the frozen Stage 04 bridge result on `main`
 
 ## FMPC Stage 05 Frozen-Bridge Comparison Snapshot
 

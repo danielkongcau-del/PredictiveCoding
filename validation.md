@@ -156,15 +156,26 @@ Current interpretation:
     - above the frozen Stage 04 bridge accuracy level
     - mixed relative to the standalone `digits_pc` baseline
     - below the standalone `digits_mlp` baseline
+- the Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now also says:
+  - the tested same-family schedule change does not materially improve configured-step mechanism over the current `1536`-epoch default
+  - it does not materially improve report-only validation and test accuracy
+  - it does not materially narrow the gap to the contextual `3072`-epoch reference
+  - the optimized `1536`-epoch candidate still selects the final training epoch on every seed
+  - the current decision is therefore:
+    - `recommended_next_move = open_stage05_v3_charter`
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
 
 The next validation move is:
 
-- keep the current Stage 05 v2 transport family fixed and continue pushing budget on the same v2 family before inventing a new Stage 05 family
-- the latest same-family budget reference is now the `1536 -> 3072 epochs` validation under:
+- keep the current Stage 05 v2 transport family fixed as the exploratory reference
+- treat the latest same-family budget reference as the completed `1536 -> 3072 epochs` validation under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
+- treat the fixed-budget efficiency check as the closing same-family efficiency result under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
+- do not continue pure same-family budget escalation from this state
+- use the next Stage 05 pass to draft and validate a true v3 mechanism charter instead
 
 That next step should preserve:
 
@@ -194,6 +205,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
 - Stage 05 v2 budget-push validation:
   - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
+- Stage 05 v2 efficiency diagnostic:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
 
 ## Document Layering
 

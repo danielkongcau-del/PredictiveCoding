@@ -41,6 +41,8 @@ ComparisonMethodName = Literal[
     "stage_05_two_branch_corrected_residual_core_v2_longer_training",
     "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
     "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "stage_05_two_branch_corrected_residual_core_v2_efficiency_reference",
+    "stage_05_two_branch_corrected_residual_core_v2_efficiency_candidate",
 ]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 
@@ -60,6 +62,12 @@ STAGE05_V2_BUDGET_REFERENCE_METHOD_NAME: ComparisonMethodName = (
 STAGE05_V2_BUDGET_PUSH_METHOD_NAME: ComparisonMethodName = (
     "stage_05_two_branch_corrected_residual_core_v2_budget_push"
 )
+STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME: ComparisonMethodName = (
+    "stage_05_two_branch_corrected_residual_core_v2_efficiency_reference"
+)
+STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME: ComparisonMethodName = (
+    "stage_05_two_branch_corrected_residual_core_v2_efficiency_candidate"
+)
 JUSTIFY_V2_DECISION_NAME = "stage05_corrected_residual_core_justifies_v2_charter"
 STAGE05_V2_FAVORABLE_DECISION_NAME = "stage05_v2_improves_mechanism_magnitude_over_v1"
 STAGE05_V2_LONGER_TRAINING_DECISION_NAME = (
@@ -73,6 +81,15 @@ STAGE05_V2_BUDGET_PUSH_DECISION_NAME = (
 )
 STAGE05_V2_BUDGET_PUSH_ACCURACY_DECISION_NAME = (
     "stage05_v2_budget_push_materially_improves_report_only_accuracy"
+)
+STAGE05_V2_EFFICIENCY_DECISION_NAME = (
+    "same_family_efficiency_change_materially_improves_configured_step_mechanism"
+)
+STAGE05_V2_EFFICIENCY_ACCURACY_DECISION_NAME = (
+    "same_family_efficiency_change_materially_improves_report_only_accuracy"
+)
+STAGE05_V2_EFFICIENCY_GAP_DECISION_NAME = (
+    "same_family_efficiency_change_materially_narrows_gap_to_3072_reference"
 )
 BOUNDARY_LIMITED_INTERPRETATION = "boundary_limited_mechanism_prototype"
 STRUCTURALLY_INEFFICIENT_INTERPRETATION = "structurally_inefficient_same_family_line"
@@ -311,6 +328,78 @@ class Stage05V2BudgetPushValidationConfig:
         return f"{timestamp}_seed_{self.seeds[0]}"
 
 
+@dataclass
+class Stage05V2EfficiencyDiagnosticConfig:
+    """Diagnose whether a narrow same-family schedule change improves 1536-epoch efficiency."""
+
+    experiment_name: str = "stage05_v2_efficiency_diagnostic_at_1536"
+    output_root: str | Path = "outputs/stage_05_ef_core_probe"
+    run_id: str | None = None
+    output_layout: OutputLayout = "single_dir"
+    dataset_name: str = "digits"
+    seeds: tuple[int, ...] = (0, 1, 2)
+    train_fraction: float = 0.7
+    val_fraction: float = 0.15
+    test_fraction: float = 0.15
+    batch_size: int = 128
+    shuffle_batches: bool = True
+    reference_stage05_epochs: int = 1536
+    contextual_reference_stage05_epochs: int = 3072
+    stage05_eval_steps: int = 15
+    stage05_layer_dims: tuple[int, ...] = (64, 16, 10)
+    stage05_transport_steps: int = 2
+    optimized_lambda_id_warmup_epochs: int = 1
+    optimized_lambda_id_ramp_epochs: int = 1
+    reference_artifact_root: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v2_budget_push_validation_1536_to_3072/"
+        "runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference"
+    )
+    contextual_reference_summary_path: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json"
+    )
+    configured_step_improvement_fraction_threshold: float = 0.05
+    report_accuracy_improvement_threshold: float = 0.01
+    gap_narrowing_fraction_threshold: float = 0.2
+
+    def __post_init__(self) -> None:
+        if self.dataset_name != "digits":
+            raise ValueError("The Stage 05 v2 efficiency diagnostic currently supports digits only.")
+        if not self.seeds:
+            raise ValueError("seeds must contain at least one seed.")
+        if self.batch_size <= 0:
+            raise ValueError("batch_size must be positive.")
+        if self.reference_stage05_epochs <= 0 or self.contextual_reference_stage05_epochs <= 0:
+            raise ValueError(
+                "reference_stage05_epochs and contextual_reference_stage05_epochs must be positive."
+            )
+        if self.contextual_reference_stage05_epochs <= self.reference_stage05_epochs:
+            raise ValueError(
+                "contextual_reference_stage05_epochs must be greater than reference_stage05_epochs."
+            )
+        if self.stage05_eval_steps <= 0:
+            raise ValueError("stage05_eval_steps must be positive.")
+        if self.stage05_transport_steps <= 0:
+            raise ValueError("stage05_transport_steps must be positive.")
+        if self.optimized_lambda_id_warmup_epochs < 0:
+            raise ValueError("optimized_lambda_id_warmup_epochs must be non-negative.")
+        if self.optimized_lambda_id_ramp_epochs < 0:
+            raise ValueError("optimized_lambda_id_ramp_epochs must be non-negative.")
+        if self.configured_step_improvement_fraction_threshold < 0.0:
+            raise ValueError("configured_step_improvement_fraction_threshold must be non-negative.")
+        if self.report_accuracy_improvement_threshold < 0.0:
+            raise ValueError("report_accuracy_improvement_threshold must be non-negative.")
+        if self.gap_narrowing_fraction_threshold < 0.0:
+            raise ValueError("gap_narrowing_fraction_threshold must be non-negative.")
+
+    def resolved_run_id(self) -> str:
+        if self.run_id is not None:
+            return self.run_id
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return f"{timestamp}_seed_{self.seeds[0]}"
+
+
 def _resolve_run_dir(
     output_root: str | Path,
     experiment_name: str,
@@ -385,6 +474,20 @@ def _rate(values: list[bool]) -> float:
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
+
+
+def _resolve_repo_path(path_like: str | Path) -> Path:
+    path = Path(path_like)
+    if path.is_absolute():
+        return path
+    return _repo_root() / path
+
+
+def _repo_relative_posix(target: Path) -> str:
+    try:
+        return target.resolve().relative_to(_repo_root().resolve()).as_posix()
+    except ValueError:
+        return target.as_posix()
 
 
 def _load_results_md_accuracy_snapshot(name: str) -> dict[str, float | str]:
@@ -477,6 +580,58 @@ def _load_budget_push_contextual_accuracy_snapshot(
         "digits_pc": digits_pc,
         "digits_mlp": digits_mlp,
         "note": note,
+    }
+
+
+def _load_stage05_v2_contextual_reference(
+    config: Stage05V2EfficiencyDiagnosticConfig,
+) -> dict[str, Any]:
+    summary_path = _resolve_repo_path(config.contextual_reference_summary_path)
+    if not summary_path.exists():
+        raise FileNotFoundError(
+            f"Missing contextual Stage 05 reference summary at '{summary_path}'."
+        )
+    payload = _read_json(summary_path)
+    by_method = payload.get("by_method")
+    if not isinstance(by_method, dict):
+        raise ValueError("Contextual Stage 05 reference summary is missing 'by_method'.")
+    contextual_summary = by_method.get(STAGE05_V2_BUDGET_PUSH_METHOD_NAME)
+    if not isinstance(contextual_summary, dict):
+        raise ValueError(
+            "Contextual Stage 05 reference summary is missing the stronger-budget Stage 05 v2 method."
+        )
+    return {
+        "source": _repo_relative_posix(summary_path),
+        "method_name": STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+        "epochs": int(config.contextual_reference_stage05_epochs),
+        "configured_transport_steps": int(
+            contextual_summary.get("configured_transport_steps", config.stage05_transport_steps)
+        ),
+        "one_step_energy_delta_vs_identity": contextual_summary["one_step_energy_delta_vs_identity"],
+        "configured_step_energy_delta_vs_identity": contextual_summary[
+            "configured_step_energy_delta_vs_identity"
+        ],
+        "configured_step_fixed_point_residual_delta_vs_identity": contextual_summary[
+            "configured_step_fixed_point_residual_delta_vs_identity"
+        ],
+        "one_step_energy_delta_vs_local_field_only": contextual_summary[
+            "one_step_energy_delta_vs_local_field_only"
+        ],
+        "configured_step_energy_delta_vs_local_field_only": contextual_summary[
+            "configured_step_energy_delta_vs_local_field_only"
+        ],
+        "configured_step_fixed_point_residual_delta_vs_local_field_only": contextual_summary[
+            "configured_step_fixed_point_residual_delta_vs_local_field_only"
+        ],
+        "val_accuracy": contextual_summary["val_accuracy"],
+        "test_accuracy": contextual_summary["test_accuracy"],
+        "val_output_mse": contextual_summary["val_output_mse"],
+        "test_output_mse": contextual_summary["test_output_mse"],
+        "selected_epoch": contextual_summary["selected_epoch"],
+        "selection_hits_final_training_boundary_rate": float(
+            contextual_summary.get("selection_hits_final_training_boundary_rate", 0.0)
+        ),
+        "runtime_proxy_seconds": contextual_summary["runtime_proxy_seconds"],
     }
 
 
@@ -643,6 +798,7 @@ def _build_stage05_v2_config(
     eval_steps: int,
     layer_dims: tuple[int, ...],
     transport_steps: int,
+    **overrides: Any,
 ) -> FMPCEFExploratoryProbeConfig:
     return build_fmpc_ef_exploratory_probe_config(
         output_root=output_root,
@@ -665,6 +821,7 @@ def _build_stage05_v2_config(
         transport_steps=int(transport_steps),
         use_two_branch_residual_core=True,
         feature_aware_state_branch_tangents=True,
+        **overrides,
     )
 
 
@@ -713,12 +870,17 @@ def _stage05_v2_bridge_config(
 
 
 def _stage05_v2_budget_config(
-    config: Stage05V2LongerTrainingValidationConfig | Stage05V2BudgetPushValidationConfig,
+    config: (
+        Stage05V2LongerTrainingValidationConfig
+        | Stage05V2BudgetPushValidationConfig
+        | Stage05V2EfficiencyDiagnosticConfig
+    ),
     *,
     seed: int,
     output_root: Path,
     experiment_name: str,
     epochs: int,
+    **overrides: Any,
 ) -> FMPCEFExploratoryProbeConfig:
     return _build_stage05_v2_config(
         output_root=output_root,
@@ -733,6 +895,7 @@ def _stage05_v2_budget_config(
         eval_steps=int(config.stage05_eval_steps),
         layer_dims=config.stage05_layer_dims,
         transport_steps=int(config.stage05_transport_steps),
+        **overrides,
     )
 
 
@@ -987,6 +1150,107 @@ def _stage05_core_row(
         ),
         **artifact_checks,
     }
+
+
+def _load_existing_stage05_core_row(
+    *,
+    run_index: int,
+    existing_run_dir: Path,
+    seed: int,
+    expected_dataset_name: str,
+    expected_batch_size: int,
+    expected_shuffle_batches: bool,
+    method_name: ComparisonMethodName,
+    stage_name: str,
+) -> dict[str, Any]:
+    summary = _read_json(existing_run_dir / "summary.json")
+    config_payload = _read_json(existing_run_dir / "config.json")
+    val_one_step = summary["mechanism_metrics"]["one_step"]
+    val_configured = summary["mechanism_metrics"]["configured_steps"]
+    run_payload = config_payload["run"]
+    transport_payload = config_payload["transport"]
+    artifact_checks = _artifact_checks(
+        existing_run_dir,
+        seed=seed,
+        expected_dataset_name=expected_dataset_name,
+        expected_batch_size=expected_batch_size,
+        expected_shuffle_batches=expected_shuffle_batches,
+    )
+    runtime_proxy = float(summary.get("train_wall_time_seconds", 0.0)) + float(
+        summary.get("evaluation_wall_time_seconds", 0.0)
+    )
+    total_training_epochs = int(run_payload["epochs"])
+    selected_epoch = int(summary["selected_epoch"])
+    return {
+        "run_index": int(run_index),
+        "method_name": method_name,
+        "stage_name": stage_name,
+        "seed": int(seed),
+        "run_id": str(existing_run_dir.name),
+        "run_config_path": _repo_relative_posix(existing_run_dir / "config.json"),
+        "run_summary_path": _repo_relative_posix(existing_run_dir / "summary.json"),
+        "transport_family": str(summary["transport_family"]),
+        "residual_branch_structure": str(summary["residual_branch_structure"]),
+        "configured_transport_steps": int(transport_payload["transport_steps"]),
+        "one_step_energy_delta_vs_identity": float(val_one_step["energy_delta_vs_identity"]),
+        "configured_step_energy_delta_vs_identity": float(val_configured["energy_delta_vs_identity"]),
+        "configured_step_fixed_point_residual_delta_vs_identity": float(
+            val_configured["fixed_point_residual_delta_vs_identity"]
+        ),
+        "one_step_energy_delta_vs_local_field_only": float(
+            val_one_step["energy_delta_vs_local_field_only"]
+        ),
+        "configured_step_energy_delta_vs_local_field_only": float(
+            val_configured["energy_delta_vs_local_field_only"]
+        ),
+        "configured_step_fixed_point_residual_delta_vs_local_field_only": float(
+            val_configured["fixed_point_residual_delta_vs_local_field_only"]
+        ),
+        "val_accuracy": float(summary["val_accuracy"]),
+        "test_accuracy": float(summary["test_accuracy"]),
+        "val_output_mse": float(summary["val_output_mse"]),
+        "test_output_mse": float(summary["test_output_mse"]),
+        "selected_epoch": int(selected_epoch),
+        "total_training_epochs": int(total_training_epochs),
+        "selection_hits_final_training_boundary": bool(selected_epoch >= total_training_epochs),
+        "runtime_proxy_seconds": float(runtime_proxy),
+        "acceptance_contract": str(summary["acceptance_contract"]),
+        "mechanism_signal_positive": bool(
+            float(val_one_step["energy_delta_vs_identity"]) < 0.0
+            and float(val_configured["energy_delta_vs_identity"]) < 0.0
+            and float(val_configured["fixed_point_residual_delta_vs_identity"]) < 0.0
+        ),
+        **artifact_checks,
+    }
+
+
+def _positive_gap_closed_fraction(
+    *,
+    reference_value: float,
+    candidate_value: float,
+    target_value: float,
+) -> float:
+    remaining_gap = float(target_value - reference_value)
+    if remaining_gap <= 0.0:
+        return 1.0 if candidate_value >= reference_value else 0.0
+    improvement = max(float(candidate_value - reference_value), 0.0)
+    return float(min(improvement / remaining_gap, 1.0))
+
+
+def _negative_gap_closed_fraction(
+    *,
+    reference_value: float,
+    candidate_value: float,
+    target_value: float,
+) -> float:
+    reference_magnitude = abs(float(reference_value))
+    candidate_magnitude = abs(float(candidate_value))
+    target_magnitude = abs(float(target_value))
+    remaining_gap = float(target_magnitude - reference_magnitude)
+    if remaining_gap <= 0.0:
+        return 1.0 if candidate_magnitude >= reference_magnitude else 0.0
+    improvement = max(float(candidate_magnitude - reference_magnitude), 0.0)
+    return float(min(improvement / remaining_gap, 1.0))
 
 
 def _method_rows(rows: list[dict[str, Any]], method_name: ComparisonMethodName) -> list[dict[str, Any]]:
@@ -2981,6 +3245,508 @@ def run_stage05_v2_budget_push_validation(
     return FrozenBridgeVsCorrectedCoreComparisonRunResult(
         run_dir=run_dir,
         config=_stage05_v2_budget_push_suite_config_payload(config),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _stage05_v2_efficiency_protocol_payload(
+    config: Stage05V2EfficiencyDiagnosticConfig,
+) -> dict[str, Any]:
+    return {
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "budget_ceiling_epochs": int(config.reference_stage05_epochs),
+        "current_1536_default": {
+            "method_name": STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "epochs": int(config.reference_stage05_epochs),
+            "source_artifact_root": _repo_relative_posix(
+                _resolve_repo_path(config.reference_artifact_root)
+            ),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "optimized_1536_candidate": {
+            "method_name": STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "residual_branch_structure": "two_branch",
+            "feature_aware_state_branch_tangents": True,
+            "epochs": int(config.reference_stage05_epochs),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+            "optimization_hypothesis": (
+                "faster corrected residual identity curriculum at the same 1536-epoch ceiling"
+            ),
+            "tested_axes": {
+                "lambda_id_warmup_epochs": int(config.optimized_lambda_id_warmup_epochs),
+                "lambda_id_ramp_epochs": int(config.optimized_lambda_id_ramp_epochs),
+            },
+        },
+        "contextual_3072_reference": {
+            "source_summary_path": _repo_relative_posix(
+                _resolve_repo_path(config.contextual_reference_summary_path)
+            ),
+            "method_name": STAGE05_V2_BUDGET_PUSH_METHOD_NAME,
+            "epochs": int(config.contextual_reference_stage05_epochs),
+        },
+        "decision_rule": {
+            "primary_split": "validation",
+            "task_accuracy_is_report_only": True,
+            "configured_step_improvement_fraction_threshold": float(
+                config.configured_step_improvement_fraction_threshold
+            ),
+            "report_accuracy_improvement_threshold": float(
+                config.report_accuracy_improvement_threshold
+            ),
+            "gap_narrowing_fraction_threshold": float(
+                config.gap_narrowing_fraction_threshold
+            ),
+            "selection_rule_unchanged": True,
+        },
+    }
+
+
+def _stage05_v2_efficiency_decision(
+    *,
+    rows: list[dict[str, Any]],
+    config: Stage05V2EfficiencyDiagnosticConfig,
+    by_method: dict[str, dict[str, Any]],
+    contextual_reference: dict[str, Any],
+) -> tuple[dict[str, Any], str]:
+    reference_rows = _method_rows(rows, STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME)
+    candidate_rows = _method_rows(rows, STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME)
+    reference_by_seed = {int(row["seed"]): row for row in reference_rows}
+    candidate_by_seed = {int(row["seed"]): row for row in candidate_rows}
+    shared_seeds = sorted(set(reference_by_seed).intersection(candidate_by_seed))
+    if not shared_seeds:
+        raise ValueError("Efficiency diagnostic requires shared seeds.")
+
+    reference_summary = by_method[STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME]
+    candidate_summary = by_method[STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME]
+    contextual_energy_mean = float(
+        contextual_reference["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    contextual_residual_mean = float(
+        contextual_reference["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    contextual_val_accuracy_mean = float(contextual_reference["val_accuracy"]["mean"])
+    contextual_test_accuracy_mean = float(contextual_reference["test_accuracy"]["mean"])
+
+    reference_energy_mean = float(
+        reference_summary["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    candidate_energy_mean = float(
+        candidate_summary["configured_step_energy_delta_vs_identity"]["mean"]
+    )
+    reference_residual_mean = float(
+        reference_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    candidate_residual_mean = float(
+        candidate_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+    )
+    reference_val_accuracy_mean = float(reference_summary["val_accuracy"]["mean"])
+    candidate_val_accuracy_mean = float(candidate_summary["val_accuracy"]["mean"])
+    reference_test_accuracy_mean = float(reference_summary["test_accuracy"]["mean"])
+    candidate_test_accuracy_mean = float(candidate_summary["test_accuracy"]["mean"])
+
+    configured_energy_gain_fraction = _negative_magnitude_relative_gain(
+        current_value=reference_energy_mean,
+        candidate_value=candidate_energy_mean,
+    )
+    configured_residual_gain_fraction = _negative_magnitude_relative_gain(
+        current_value=reference_residual_mean,
+        candidate_value=candidate_residual_mean,
+    )
+    energy_seed_improvement_rate = _rate(
+        [
+            float(candidate_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            < float(reference_by_seed[seed]["configured_step_energy_delta_vs_identity"])
+            for seed in shared_seeds
+        ]
+    )
+    residual_seed_improvement_rate = _rate(
+        [
+            float(candidate_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            < float(reference_by_seed[seed]["configured_step_fixed_point_residual_delta_vs_identity"])
+            for seed in shared_seeds
+        ]
+    )
+    configured_step_mechanism_improved_materially = bool(
+        configured_energy_gain_fraction
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and configured_residual_gain_fraction
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and energy_seed_improvement_rate >= 0.5
+        and residual_seed_improvement_rate >= 0.5
+    )
+
+    val_accuracy_gain = float(candidate_val_accuracy_mean - reference_val_accuracy_mean)
+    test_accuracy_gain = float(candidate_test_accuracy_mean - reference_test_accuracy_mean)
+    report_only_accuracy_improved_materially = bool(
+        val_accuracy_gain >= float(config.report_accuracy_improvement_threshold)
+        and test_accuracy_gain >= float(config.report_accuracy_improvement_threshold)
+    )
+
+    configured_energy_gap_closed_fraction = _negative_gap_closed_fraction(
+        reference_value=reference_energy_mean,
+        candidate_value=candidate_energy_mean,
+        target_value=contextual_energy_mean,
+    )
+    configured_residual_gap_closed_fraction = _negative_gap_closed_fraction(
+        reference_value=reference_residual_mean,
+        candidate_value=candidate_residual_mean,
+        target_value=contextual_residual_mean,
+    )
+    val_accuracy_gap_closed_fraction = _positive_gap_closed_fraction(
+        reference_value=reference_val_accuracy_mean,
+        candidate_value=candidate_val_accuracy_mean,
+        target_value=contextual_val_accuracy_mean,
+    )
+    test_accuracy_gap_closed_fraction = _positive_gap_closed_fraction(
+        reference_value=reference_test_accuracy_mean,
+        candidate_value=candidate_test_accuracy_mean,
+        target_value=contextual_test_accuracy_mean,
+    )
+    same_family_gap_narrowed_materially = bool(
+        min(
+            configured_energy_gap_closed_fraction,
+            configured_residual_gap_closed_fraction,
+            val_accuracy_gap_closed_fraction,
+            test_accuracy_gap_closed_fraction,
+        )
+        >= float(config.gap_narrowing_fraction_threshold)
+    )
+    candidate_boundary_all = bool(
+        all(bool(row["selection_hits_final_training_boundary"]) for row in candidate_rows)
+    )
+
+    if (
+        configured_step_mechanism_improved_materially
+        and report_only_accuracy_improved_materially
+        and same_family_gap_narrowed_materially
+    ):
+        recommended_next_move = "adopt_better_same_family_optimization_and_stop_pure_budget_escalation"
+        rationale = (
+            "The narrow same-family schedule change materially improves configured-step mechanism and "
+            "report-only accuracy at the same 1536-epoch ceiling while also closing a material fraction "
+            "of the gap to the contextual 3072-epoch reference, so the better same-family setup should "
+            "be adopted before any further pure budget escalation."
+        )
+    elif configured_step_mechanism_improved_materially or report_only_accuracy_improved_materially:
+        recommended_next_move = "continue_with_budget"
+        rationale = (
+            "The narrow same-family schedule change improves the 1536-epoch reference but does not close "
+            "enough of the gap to the 3072-epoch reference to justify replacing pure budget escalation yet."
+        )
+    else:
+        recommended_next_move = "open_stage05_v3_charter"
+        rationale = (
+            "The narrow same-family schedule change does not materially improve the 1536-epoch reference, "
+            "so same-family efficiency tuning is not a strong enough next move and a true Stage 05 v3 "
+            "mechanism charter is now justified."
+        )
+
+    decision = {
+        STAGE05_V2_EFFICIENCY_DECISION_NAME: bool(
+            configured_step_mechanism_improved_materially
+        ),
+        STAGE05_V2_EFFICIENCY_ACCURACY_DECISION_NAME: bool(
+            report_only_accuracy_improved_materially
+        ),
+        STAGE05_V2_EFFICIENCY_GAP_DECISION_NAME: bool(same_family_gap_narrowed_materially),
+        "configured_step_gain_fraction_vs_reference": float(
+            min(configured_energy_gain_fraction, configured_residual_gain_fraction)
+        ),
+        "report_accuracy_gain_vs_reference": {
+            "val_accuracy_delta": float(val_accuracy_gain),
+            "test_accuracy_delta": float(test_accuracy_gain),
+        },
+        "configured_step_gap_closed_fraction_vs_3072_reference": {
+            "energy": float(configured_energy_gap_closed_fraction),
+            "residual": float(configured_residual_gap_closed_fraction),
+        },
+        "report_accuracy_gap_closed_fraction_vs_3072_reference": {
+            "val_accuracy": float(val_accuracy_gap_closed_fraction),
+            "test_accuracy": float(test_accuracy_gap_closed_fraction),
+        },
+        "optimized_candidate_selection_hits_final_training_boundary_on_all_seeds": bool(
+            candidate_boundary_all
+        ),
+        "recommended_next_move": str(recommended_next_move),
+    }
+    return decision, rationale
+
+
+def _stage05_v2_efficiency_supports_lines(
+    *,
+    config: Stage05V2EfficiencyDiagnosticConfig,
+    by_method: dict[str, dict[str, Any]],
+    contextual_reference: dict[str, Any],
+    decision: dict[str, Any],
+) -> list[str]:
+    reference_summary = by_method[STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME]
+    candidate_summary = by_method[STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME]
+    return [
+        (
+            f"The optimized 1536-epoch Stage 05 v2 candidate materially improves configured-step mechanism over the current 1536-epoch default."
+            if decision[STAGE05_V2_EFFICIENCY_DECISION_NAME]
+            else "The optimized 1536-epoch Stage 05 v2 candidate does not materially improve configured-step mechanism over the current 1536-epoch default."
+        ),
+        (
+            f"The optimized 1536-epoch Stage 05 v2 candidate materially improves report-only accuracy over the current 1536-epoch default."
+            if decision[STAGE05_V2_EFFICIENCY_ACCURACY_DECISION_NAME]
+            else "The optimized 1536-epoch Stage 05 v2 candidate does not materially improve report-only accuracy over the current 1536-epoch default."
+        ),
+        (
+            f"The optimized 1536-epoch Stage 05 v2 candidate materially narrows the gap to the contextual 3072-epoch reference."
+            if decision[STAGE05_V2_EFFICIENCY_GAP_DECISION_NAME]
+            else "The optimized 1536-epoch Stage 05 v2 candidate does not materially narrow the gap to the contextual 3072-epoch reference."
+        ),
+        (
+            f"Current 1536-epoch default configured-step validation energy delta vs identity mean: {reference_summary['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"Optimized 1536-epoch candidate configured-step validation energy delta vs identity mean: {candidate_summary['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"Contextual 3072-epoch reference configured-step validation energy delta vs identity mean: {contextual_reference['configured_step_energy_delta_vs_identity']['mean']:.12f}."
+        ),
+        (
+            f"Current 1536-epoch default validation/test accuracy means: {reference_summary['val_accuracy']['mean']:.6f} / {reference_summary['test_accuracy']['mean']:.6f}."
+        ),
+        (
+            f"Optimized 1536-epoch candidate validation/test accuracy means: {candidate_summary['val_accuracy']['mean']:.6f} / {candidate_summary['test_accuracy']['mean']:.6f}."
+        ),
+        (
+            f"Contextual 3072-epoch reference validation/test accuracy means: {contextual_reference['val_accuracy']['mean']:.6f} / {contextual_reference['test_accuracy']['mean']:.6f}."
+        ),
+    ]
+
+
+def _stage05_v2_efficiency_does_not_support_lines() -> list[str]:
+    return [
+        "This diagnostic does not reopen Stage 04 package-internal work.",
+        "This diagnostic does not change the Stage 05 v2 transport family, residual branch structure, corrected residual identity contract, or selection rule.",
+        "This diagnostic does not claim that Stage 05 replaces the frozen Stage 04 bridge result on main.",
+    ]
+
+
+def _stage05_v2_efficiency_report_markdown(report: dict[str, Any]) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    contextual = report["contextual_3072_reference"]
+    lines = [
+        "# Stage 05 V2 Efficiency Diagnostic At 1536",
+        "",
+        "## Protocol",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- shared shuffle_batches: `{protocol['shared_shuffle_batches']}`",
+        f"- fixed budget ceiling epochs: `{protocol['budget_ceiling_epochs']}`",
+        f"- tested axes: `{protocol['optimized_1536_candidate']['tested_axes']}`",
+        f"- contextual reference epochs: `{protocol['contextual_3072_reference']['epochs']}`",
+        "",
+        "## Decision",
+        f"- `{STAGE05_V2_EFFICIENCY_DECISION_NAME}`: `{decision[STAGE05_V2_EFFICIENCY_DECISION_NAME]}`",
+        f"- `{STAGE05_V2_EFFICIENCY_ACCURACY_DECISION_NAME}`: `{decision[STAGE05_V2_EFFICIENCY_ACCURACY_DECISION_NAME]}`",
+        f"- `{STAGE05_V2_EFFICIENCY_GAP_DECISION_NAME}`: `{decision[STAGE05_V2_EFFICIENCY_GAP_DECISION_NAME]}`",
+        f"- configured-step gain fraction vs reference: `{decision['configured_step_gain_fraction_vs_reference']}`",
+        f"- report accuracy gain vs reference: `{decision['report_accuracy_gain_vs_reference']}`",
+        f"- configured-step gap closed fraction vs 3072 reference: `{decision['configured_step_gap_closed_fraction_vs_3072_reference']}`",
+        f"- report accuracy gap closed fraction vs 3072 reference: `{decision['report_accuracy_gap_closed_fraction_vs_3072_reference']}`",
+        f"- optimized candidate still hits final training boundary on all seeds: `{decision['optimized_candidate_selection_hits_final_training_boundary_on_all_seeds']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Contextual 3072 Reference",
+        f"- source: `{contextual['source']}`",
+        f"- validation/test accuracy means: `{contextual['val_accuracy']['mean']}` / `{contextual['test_accuracy']['mean']}`",
+        f"- configured-step validation energy delta vs identity mean: `{contextual['configured_step_energy_delta_vs_identity']['mean']}`",
+        f"- configured-step validation fixed-point residual delta vs identity mean: `{contextual['configured_step_fixed_point_residual_delta_vs_identity']['mean']}`",
+        "",
+        "## Supports",
+    ]
+    for item in report["supports"]:
+        lines.append(f"- {item}")
+    lines.extend(["", "## Does Not Support"])
+    for item in report["does_not_support"]:
+        lines.append(f"- {item}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _stage05_v2_efficiency_suite_config_payload(
+    config: Stage05V2EfficiencyDiagnosticConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_protocol": _stage05_v2_efficiency_protocol_payload(config),
+        "artifacts": {
+            "aggregate_runs_csv": "aggregate_runs.csv",
+            "aggregate_summary_json": "aggregate_summary.json",
+            "comparison_report_json": "comparison_report.json",
+            "comparison_report_md": "comparison_report.md",
+        },
+    }
+
+
+def run_stage05_v2_efficiency_diagnostic(
+    config: Stage05V2EfficiencyDiagnosticConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run a narrow Stage 05 v2 same-family efficiency diagnostic at a fixed 1536-epoch ceiling."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(config.output_root, config.experiment_name, config.resolved_run_id(), config.output_layout)
+    )
+    _write_json(run_dir / "config.json", _stage05_v2_efficiency_suite_config_payload(config))
+
+    reference_artifact_root = _resolve_repo_path(config.reference_artifact_root)
+    if not reference_artifact_root.exists():
+        raise FileNotFoundError(
+            f"Missing Stage 05 v2 efficiency reference artifacts at '{reference_artifact_root}'."
+        )
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+
+    for seed in config.seeds:
+        reference_run_dir = reference_artifact_root / f"seed_{seed}"
+        if not reference_run_dir.exists():
+            raise FileNotFoundError(
+                f"Missing Stage 05 v2 efficiency reference seed artifact at '{reference_run_dir}'."
+            )
+        run_index += 1
+        rows.append(
+            _load_existing_stage05_core_row(
+                run_index=run_index,
+                existing_run_dir=reference_run_dir,
+                seed=seed,
+                expected_dataset_name=config.dataset_name,
+                expected_batch_size=config.batch_size,
+                expected_shuffle_batches=config.shuffle_batches,
+                method_name=STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME,
+                stage_name=(
+                    f"FMPC Stage 05 EF Core Probe v2 {int(config.reference_stage05_epochs)}-Epoch Default"
+                ),
+            )
+        )
+
+        run_index += 1
+        optimized_config = _stage05_v2_budget_config(
+            config,
+            seed=seed,
+            output_root=runs_root,
+            experiment_name=STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME,
+            epochs=int(config.reference_stage05_epochs),
+            lambda_id_warmup_epochs=int(config.optimized_lambda_id_warmup_epochs),
+            lambda_id_ramp_epochs=int(config.optimized_lambda_id_ramp_epochs),
+        )
+        optimized_result = run_fmpc_ef_exploratory_probe(optimized_config)
+        rows.append(
+            _stage05_core_row(
+                run_index=run_index,
+                suite_run_dir=run_dir,
+                seed=seed,
+                result=optimized_result,
+                config=optimized_config,
+                method_name=STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME,
+                stage_name=(
+                    f"FMPC Stage 05 EF Core Probe v2 {int(config.reference_stage05_epochs)}-Epoch Efficiency Candidate"
+                ),
+            )
+        )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(bool(row["deterministic_artifact_checks_passed"])),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME)
+        ),
+        STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME)
+        ),
+    }
+    contextual_reference = _load_stage05_v2_contextual_reference(config)
+    pairwise_candidate_vs_default = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V2_EFFICIENCY_CANDIDATE_METHOD_NAME,
+        reference_method=STAGE05_V2_EFFICIENCY_REFERENCE_METHOD_NAME,
+    )
+    decision, decision_rationale = _stage05_v2_efficiency_decision(
+        rows=rows,
+        config=config,
+        by_method=by_method,
+        contextual_reference=contextual_reference,
+    )
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_efficiency_protocol_payload(config),
+        "by_method": by_method,
+        "contextual_3072_reference": contextual_reference,
+        "pairwise_best_optimized_1536_vs_current_1536_default": pairwise_candidate_vs_default,
+        **decision,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_efficiency_protocol_payload(config),
+        "decision": {
+            **decision,
+            "decision_rationale": decision_rationale,
+        },
+        "contextual_3072_reference": contextual_reference,
+        "supports": _stage05_v2_efficiency_supports_lines(
+            config=config,
+            by_method=by_method,
+            contextual_reference=contextual_reference,
+            decision=decision,
+        ),
+        "does_not_support": _stage05_v2_efficiency_does_not_support_lines(),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(run_dir / "comparison_report.md", _stage05_v2_efficiency_report_markdown(report))
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_efficiency_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,
