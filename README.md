@@ -44,7 +44,8 @@ Current working interpretation:
 - the formal Stage 05 v1 vs v2 comparison says the two-branch Stage 05 v2 core improves mechanism magnitude over the v1 baseline
 - the refreshed frozen-bridge vs Stage 05 v2 comparison says Stage 05 v2 remains mechanism-positive and should be treated as the current exploratory reference, but not as a replacement for the frozen bridge result on `main`
 - the dedicated Stage 05 v2 diagnostics say the current narrow diagnosis is `likely_undertrained`, not primarily a selection-rule issue
-- the completed Stage 05 v2 longer-training validation says the next move should continue pushing budget on the same v2 family before opening a true v3 charter
+- the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it remains contextual evidence rather than the active next move
+- the fixed-budget same-family efficiency diagnostic now says the next move should be to open the Stage 05 v3-A charter rather than keep pushing the same family by schedule tweaks alone
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 

@@ -255,3 +255,109 @@ Secondary report-only signals:
 Task accuracy is not the gate for Stage 05 v1.
 
 The same mechanism-first evaluation contract remains in force for Stage 05 v2.
+
+### 18.11 Stage 05 v3-A charter
+
+This section opens the next Stage 05 charter only.
+
+It does not itself modify:
+
+- the current Stage 05 v2 implementation
+- the current Stage 05 experiment entrypoints
+- the current Stage 05 smoke or unit tests
+
+Current evidence motivating this charter:
+
+- Stage 05 v2 already shows positive one-step mechanism signal
+- the main remaining weakness is configured-step mechanism efficiency
+- same-family budget pushes still improve configured-step mechanism and report-only accuracy
+- the fixed-budget same-family efficiency diagnostic no longer gives a material gain
+- the next credible change should therefore target the higher-level mechanism contract rather than another schedule, epoch, or feature-flag tweak
+
+#### 18.11.1 Working hypothesis
+
+Stage 05 v3-A is motivated by the working hypothesis that the current residual target entangles
+transport residual and anchor-drift residual, limiting configured-step efficiency.
+
+This is a chartering hypothesis, not a proved repository conclusion.
+
+The purpose of v3-A is to make that hypothesis explicit enough to test in the next implementation
+pass.
+
+#### 18.11.2 Explicit transport-drift decomposition
+
+Under the current Stage 05 remaining-horizon notation:
+
+- `t` is the current knot time
+- `r` is the remaining horizon
+
+Define the true average velocity and the average local flow over the same interval by:
+
+- `u^*_{t,r} = (1 / r) * integral_t^{t+r} v_tau d tau`
+- `gbar^*_{t,r} = (1 / r) * integral_t^{t+r} g_tau d tau`
+
+When the normalized terminal-time interpretation `t + r = 1` is used, these may be written
+equivalently over `[t, 1]`.
+
+The current residual target can then be decomposed as:
+
+- `b^*_{t,r} = u^*_{t,r} - g_t = (u^*_{t,r} - gbar^*_{t,r}) + (gbar^*_{t,r} - g_t)`
+
+Interpretation:
+
+- `u^*_{t,r} - gbar^*_{t,r}` is the transport residual
+- `gbar^*_{t,r} - g_t` is the anchor drift or anchor mismatch
+
+The v3-A working hypothesis is that the current high-level residual contract asks one learned
+residual object to absorb both terms at once, which can preserve one-step value while releasing
+configured-step efficiency too weakly.
+
+#### 18.11.3 v3-A contract definition
+
+Stage 05 v3-A is defined as an explicit transport-drift contract:
+
+- `u_psi = g_t + q_psi + d_psi`
+
+where:
+
+- `q_psi` is the transport-residual branch
+- `d_psi` is the anchor-drift branch
+
+The bootstrap supervision is correspondingly decomposed into:
+
+- `gbar_boot = average local flow along the same bootstrap rollout interval`
+- `d_boot = gbar_boot - g_t`
+- `q_boot = u_boot - gbar_boot`
+
+This charter only fixes the high-level supervision semantics.
+
+It does not yet fix:
+
+- the exact v3-A loss weighting
+- the final rollout-consistency terms
+- the exact branch parameterization
+
+Those choices belong to the next implementation pass.
+
+#### 18.11.4 Non-goals and required next deliverables
+
+Stage 05 v3-A must not be framed as:
+
+- a reopening of Stage 04 package-internal work
+- another pure same-family budget escalation
+- another pure same-family efficiency tweak
+- a default introduction of `muPC`, `iPC`, `DKP-PC`, or a full `AlphaFlow` family replacement
+- a change to the artifact-independent target-construction boundary
+- a promotion of task accuracy to the primary gate
+
+The next Stage 05 v3-A implementation pass must minimally add:
+
+- a new Stage 05 v3-A candidate codepath
+- a new comparison entry or suite against the current Stage 05 v2 reference
+- a matching smoke test
+- a dedicated artifact directory
+- aggregate summary fields that report:
+  - whether explicit transport-drift decomposition is enabled
+  - pairwise deltas versus the current v2 reference
+  - a gap-closure style decision field
+  - `recommended_next_move`

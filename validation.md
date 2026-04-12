@@ -163,6 +163,7 @@ Current interpretation:
   - the optimized `1536`-epoch candidate still selects the final training epoch on every seed
   - the current decision is therefore:
     - `recommended_next_move = open_stage05_v3_charter`
+- the current Stage 05 v3-A charter is now motivated by the working hypothesis that the current residual target may entangle transport residual and anchor-drift residual too tightly, limiting configured-step efficiency
 - it still does not justify replacing the frozen bridge result on `main`
 
 ## Current Recommended Validation Move
@@ -175,7 +176,32 @@ The next validation move is:
 - treat the fixed-budget efficiency check as the closing same-family efficiency result under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
 - do not continue pure same-family budget escalation from this state
-- use the next Stage 05 pass to draft and validate a true v3 mechanism charter instead
+- do not continue pure same-family efficiency tweaking from this state
+- use the next Stage 05 pass to draft and validate a true v3-A mechanism charter instead:
+  - `explicit transport-drift contract`
+  - working-hypothesis driven, not yet a proved repair
+  - still mechanism-first
+  - still not a replacement claim against the frozen Stage 04 bridge
+
+The next v3-A implementation pass should be accepted only if it:
+
+- preserves artifact-independent target construction
+- preserves deterministic artifact generation
+- keeps one-step mechanism metrics positive under the current Stage 05 rule
+- improves configured-step mechanism relative to the current Stage 05 v2 reference under the shared comparison protocol
+- reports task accuracy only as a secondary signal
+
+The next v3-A implementation pass must minimally produce:
+
+- a new Stage 05 v3-A candidate codepath
+- a new comparison entry or suite against the current v2 reference
+- a matching smoke test
+- a dedicated artifact directory
+- aggregate summary fields that report:
+  - whether explicit transport-drift decomposition is enabled
+  - pairwise deltas versus the current v2 reference
+  - a gap-closure style decision field
+  - `recommended_next_move`
 
 That next step should preserve:
 
@@ -186,6 +212,8 @@ It should not be framed as:
 
 - a Stage 04 package-internal reopening
 - a new adoption sweep inside the saturated corrective bridge package
+- another pure same-family budget escalation
+- another pure same-family efficiency tweak
 
 ## Relevant Active Artifacts
 

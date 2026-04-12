@@ -169,73 +169,65 @@ Completed outcome:
 - the current narrow diagnosis is:
   - `likely_undertrained`
 
-### 7. If Stage 05 Continues, Target Longer Training / Budget On V2 First
+### 7. Open Stage 05 V3-A Charter
 
 Objective:
 
-- keep the current Stage 05 v2 transport family fixed and test whether a longer training / budget pass on the same reference closes more of the configured-step and report-only gap before inventing a new family
+- open a true Stage 05 v3-A mechanism charter on top of the current Stage 05 v2 exploratory reference
 
 Required framing:
 
 - keep Stage 04 frozen on `main`
 - do not reopen Stage 04 package-internal work
-- do not change the Stage 05 v2 transport family before the budget question is answered
+- do not continue pure same-family budget escalation from this state
+- do not continue pure same-family efficiency tweaking from this state
 - do not treat any Stage 05 result as a default-replacement claim against the frozen bridge result
 
-Completed outcome:
+Current evidence supporting this move:
 
-- the dedicated budget-push validation now exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
-- the same Stage 05 v2 family with a stronger `3072`-epoch budget materially improves:
-  - configured-step validation energy delta vs identity
-  - configured-step validation fixed-point residual delta vs identity
-  - report-only validation accuracy
-  - report-only test accuracy
-- the stronger budget still selects the final training epoch on every seed
-- the explicit stop-rule layer now also says:
-  - `budget_line_still_looks_boundary_limited = true`
-  - `budget_line_should_continue = true`
-  - `budget_line_should_stop_and_open_v3 = false`
-  - `budget_line_interpretation = boundary_limited_mechanism_prototype`
-- the current answer is therefore:
-  - keep pushing budget on the same v2 family
-  - do not open a true Stage 05 v3 mechanism charter yet
+- the stronger same-family `3072`-epoch budget materially improves configured-step mechanism and report-only accuracy
+- the fixed-budget same-family efficiency diagnostic still fails to recover a material fraction of that same-family budget upside
+- Stage 05 v2 therefore still looks useful as an exploratory reference, but not as a family that should keep being pushed only by epochs or schedule tweaks
+- the next credible move is now to change the higher-level mechanism contract rather than another same-family local knob
 
 Current execution plan:
 
-- keep the current Stage 05 v2 family fixed
-- the narrow same-family efficiency diagnostic at the current `1536`-epoch budget ceiling now exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
-- that efficiency result says:
-  - the tested same-family schedule change does not materially improve configured-step mechanism over the current `1536`-epoch default
-  - it does not materially improve report-only accuracy
-  - it does not materially narrow the gap to the contextual `3072`-epoch reference
-  - `recommended_next_move = open_stage05_v3_charter`
-- keep the current Stage 05 v2 family fixed as the exploratory reference while the next charter is being defined
-- do not increase epochs beyond the current `3072`-epoch reference from this state
-- treat the current `3072`-epoch result as contextual same-family evidence, not as another new training target
-- use the next Stage 05 pass to draft a true v3 mechanism charter on top of the same:
+- keep the current Stage 05 v2 family fixed as the exploratory reference:
   - `transport_family = two_branch_residual_meanflow_core`
   - `feature_aware_state_branch_tangents = true`
   - residual branch structure
   - corrected residual identity contract
   - selection rule
-- keep the shared protocol fixed:
+- define Stage 05 v3-A as a working-hypothesis-driven charter:
+  - the current residual target may entangle transport residual and anchor-drift residual too tightly
+  - that entanglement may be limiting configured-step efficiency more than one-step mechanism quality
+- formalize the v3-A contract as:
+  - `explicit transport-drift contract`
+  - `u_psi = g_t + q_psi + d_psi`
+- keep the shared protocol fixed for the next implementation pass:
   - `dataset = digits`
   - `seeds = (0, 1, 2)`
   - `batch_size = 128`
   - `layer_dims = (64, 16, 10)`
   - `transport_steps = 2`
   - `eval_steps = 15`
-- compare exactly:
-  - the completed `1536`-epoch default
-  - the completed narrow `1536`-epoch efficiency candidate
-  - the completed `3072`-epoch same-family reference as context only
-- require the next chartering pass to answer:
-  - what real mechanism change should define Stage 05 v3
-  - why that change is justified beyond same-family budget scaling and same-family schedule tuning
-  - how that new mechanism will still preserve the Stage 05 mechanism-first contract
-  - how the new charter will avoid reopening Stage 04 package-internal work
+- require the next implementation pass to add:
+  - a new Stage 05 v3-A candidate codepath
+  - a new comparison entry or suite versus the current v2 reference
+  - a matching smoke test
+  - a dedicated artifact directory
+  - aggregate summary fields for:
+    - whether explicit transport-drift decomposition is enabled
+    - pairwise deltas versus the current v2 reference
+    - a gap-closure style decision field
+    - `recommended_next_move`
+
+The next Stage 05 chartering pass must answer:
+
+- what explicit transport-drift decomposition should be tested first
+- why that change is justified beyond same-family budget scaling and same-family schedule tuning
+- how the new charter preserves the Stage 05 mechanism-first contract
+- how the new charter avoids reopening Stage 04 package-internal work
 
 ## Exploratory Acceptance Criteria
 
