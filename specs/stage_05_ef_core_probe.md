@@ -829,3 +829,54 @@ Current evidence from the first fixed-budget fused-contract comparison is:
 The next implementation question therefore becomes:
 
 - how to refine the fusion direction so the consolidated main trajectory contract can materially beat the active refined v3-C reference under the existing mechanism-first rule
+
+#### 18.13.10 First non-equivalent midpoint-reconstruction pass
+
+The next contract-consolidation implementation inside the current Stage 05 family is:
+
+- `stage05_v3c_midpoint_reconstructed_trajectory_contract`
+
+This pass is opened because the first exact detached-target fusion pass was semantically clean but
+did not materially beat the active refined `stage05_v3c_stronger_semigroup_weight` reference.
+
+The next move therefore changes the target-construction rule itself instead of re-expressing the
+same stacked detached targets.
+
+It keeps:
+
+- the Stage 05 v3-A explicit transport-drift decomposition
+- the Stage 05 v3-B trajectory-curriculum split notation
+- the Stage 05 v3-C single-sided detached semigroup endpoint target
+
+It then reconstructs the internal knot before continuation is re-evaluated.
+
+Using the current notation:
+
+- `u_B = u_boot(z_t, alpha * r, t; c)`
+- `z_B = z_t + alpha * r * u_B`
+- `u_C^B = stopgrad(u_hat(z_B, r_s, s; c))`
+- `z_sg^* = stopgrad(z_hat_split)`
+- `kappa = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2)`
+- `z_sg_mid^* = z_sg^* - (1 - alpha) * r * u_C^B`
+- `z_mid^* = (1 - kappa) * z_B + kappa * z_sg_mid^*`
+- `u_short^* = (z_mid^* - z_t) / (alpha * r)`
+- `u_C^* = stopgrad(u_hat(z_mid^*, r_s, s; c))`
+- `u_main^* = alpha * u_short^* + (1 - alpha) * u_C^*`
+- `m_main^* = u_main^* - g_t`
+
+The unified main trajectory contract is then:
+
+- `lambda_main = lambda_tc + lambda_sg * r^2`
+- `L_main_traj = lambda_main * ||m_hat - m_main^*||^2`
+
+Interpretation:
+
+- semigroup consistency is absorbed into the main trajectory contract through midpoint reconstruction
+- continuation is re-evaluated at the reconstructed midpoint, so this pass is not gradient-equivalent to the previous exact fused detached-target contract
+- the candidate remains inside the current Stage 05 family and does not refactor the family around semigroup consistency alone
+
+This pass still does not justify:
+
+- `refactor_main_contract_around_endpoint_semigroup_consistency`
+- a reopening of Stage 04
+- a new mechanism family

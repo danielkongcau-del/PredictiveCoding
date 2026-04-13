@@ -16,6 +16,7 @@ from pc.stage_05_ef_core_probe.frozen_bridge_vs_corrected_core_comparison import
     Stage05V3BRefinementDiagnosticConfig,
     Stage05V3CRefinementDiagnosticConfig,
     Stage05V2ActiveV3CFusedComparisonConfig,
+    Stage05V2ActiveV3CMidpointReconstructedComparisonConfig,
     Stage05V2PromotedV3BV3CComparisonConfig,
     Stage05V2VsV3AComparisonConfig,
     Stage05V2V3AV3BComparisonConfig,
@@ -28,6 +29,7 @@ from pc.stage_05_ef_core_probe.frozen_bridge_vs_corrected_core_comparison import
     run_stage05_v3b_refinement_diagnostic,
     run_stage05_v3c_refinement_diagnostic,
     run_stage05_v2_active_v3c_fused_contract_comparison,
+    run_stage05_v2_active_v3c_midpoint_reconstructed_contract_comparison,
     run_stage05_v2_promoted_v3b_v3c_comparison,
     run_stage05_v2_vs_v3a_comparison,
     run_stage05_v2_v3a_v3b_comparison,
@@ -143,6 +145,13 @@ def run(
             **overrides,
         )
         return run_stage05_v2_active_v3c_fused_contract_comparison(config)
+    if comparison_variant == "stage05_v2_active_v3c_midpoint_reconstructed_contract_comparison":
+        config = Stage05V2ActiveV3CMidpointReconstructedComparisonConfig(
+            output_root=output_root,
+            run_id=run_id,
+            **overrides,
+        )
+        return run_stage05_v2_active_v3c_midpoint_reconstructed_contract_comparison(config)
     raise ValueError(f"Unsupported comparison_variant '{comparison_variant}'.")
 
 

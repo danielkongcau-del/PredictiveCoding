@@ -30,10 +30,12 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     build_endpoint_semigroup_targets,
     build_explicit_transport_drift_bootstrap_targets,
     build_fused_trajectory_semigroup_targets,
+    build_midpoint_reconstructed_trajectory_targets,
     build_trajectory_curriculum_targets,
     build_stage05_v3b_stronger_traj_curr_weight_config,
     build_stage05_v3c_endpoint_semigroup_config,
     build_stage05_v3c_fused_trajectory_semigroup_contract_config,
+    build_stage05_v3c_midpoint_reconstructed_trajectory_contract_config,
     build_stage05_v3c_stronger_semigroup_weight_config,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
@@ -384,6 +386,18 @@ def test_fused_v3c_builder_exposes_explicit_candidate_identity_and_fusion_flag()
     assert config.lambda_sg == pytest.approx(0.10)
 
 
+def test_midpoint_reconstructed_v3c_builder_exposes_explicit_candidate_identity_and_flag() -> None:
+    config = build_stage05_v3c_midpoint_reconstructed_trajectory_contract_config()
+
+    assert (
+        config.candidate_name_override
+        == "stage05_v3c_midpoint_reconstructed_trajectory_contract"
+    )
+    assert config.use_midpoint_reconstructed_trajectory_contract is True
+    assert config.use_fused_trajectory_semigroup_contract is False
+    assert config.lambda_sg == pytest.approx(0.10)
+
+
 def test_v3c_endpoint_semigroup_targets_have_expected_shapes() -> None:
     config = build_stage05_v3c_endpoint_semigroup_config(
         run_seed=0,
@@ -482,6 +496,54 @@ def test_fused_v3c_targets_have_expected_shapes() -> None:
     assert np.all(fused_targets.fusion_weights > 0.0)
     assert np.all(fused_targets.fusion_rho > 0.0)
     assert np.all(fused_targets.fusion_rho < 1.0)
+
+
+def test_midpoint_reconstructed_v3c_targets_have_expected_shapes() -> None:
+    config = build_stage05_v3c_midpoint_reconstructed_trajectory_contract_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    psi_network = _make_psi_network(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    targets = build_midpoint_reconstructed_trajectory_targets(
+        context,
+        psi_network,
+        config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+        lambda_traj_curr=config.lambda_traj_curr,
+        lambda_sg=config.lambda_sg,
+    )
+
+    assert targets.bootstrap_midpoint_state.shape == context.z0.shape
+    assert targets.bootstrap_continuation_velocity.shape == context.z0.shape
+    assert targets.semigroup_implied_midpoint_state.shape == context.z0.shape
+    assert targets.reconstructed_midpoint_state.shape == context.z0.shape
+    assert targets.reconstructed_short_velocity.shape == context.z0.shape
+    assert targets.reevaluated_continuation_velocity.shape == context.z0.shape
+    assert targets.unified_velocity_target.shape == context.z0.shape
+    assert targets.unified_residual_target.shape == context.z0.shape
+    assert targets.main_loss_weights.shape == (context.z0.shape[0], 1)
+    assert targets.reconstruction_weight.shape == (context.z0.shape[0], 1)
+    assert targets.midpoint_reconstruction_shift_norm.shape == (context.z0.shape[0], 1)
+    assert targets.continuation_reevaluation_shift_norm.shape == (context.z0.shape[0], 1)
+    assert targets.semigroup_endpoint_closure_residual_norm.shape == (context.z0.shape[0], 1)
+    assert np.all(targets.main_loss_weights > 0.0)
 
 
 def test_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
@@ -613,6 +675,91 @@ def test_fused_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     )
 
     assert "train_main_traj_contract_loss" in epoch_rows[0]
+    assert any(float(row["train_main_traj_contract_loss"]) > 0.0 for row in epoch_rows)
+
+
+def test_midpoint_reconstructed_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3c_midpoint_reconstructed_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        **{
+            key: value
+            for key, value in build_stage05_v3c_midpoint_reconstructed_trajectory_contract_config(
+                output_root=tmp_path,
+                run_id="unused",
+                epochs=4,
+                batch_size=128,
+                eval_steps=8,
+                transport_steps=2,
+                layer_dims=(64, 16, 10),
+            ).__dict__.items()
+            if key
+            not in {
+                "output_root",
+                "run_id",
+                "output_layout",
+                "warmup_epochs",
+                "epochs",
+                "batch_size",
+                "eval_steps",
+                "transport_steps",
+                "layer_dims",
+            }
+        },
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert (
+        summary["candidate_name"] == "stage05_v3c_midpoint_reconstructed_trajectory_contract"
+    )
+    assert summary["endpoint_semigroup_consistency_enabled"] is True
+    assert summary["target_reconstruction_enabled"] is True
+    assert summary["midpoint_reconstruction_enabled"] is True
+    assert summary["continuation_reevaluated_at_reconstructed_midpoint"] is True
+    assert summary["contract_fusion_enabled"] is False
+    assert summary["semigroup_consistency_absorbed_into_main_trajectory_contract"] is True
+    assert summary["semigroup_consistency_is_auxiliary_only"] is False
+    assert summary["exact_detached_target_barycentric_fusion_enabled"] is False
+    assert summary["main_trajectory_contract_identity"] == (
+        "midpoint_reconstructed_semigroup_internalized_trajectory_contract"
+    )
+    assert summary["pairwise_deltas_vs_active_refined_v3c_reference"]["status"] == (
+        "pending_real_fixed_budget_v2_vs_active_v3c_vs_midpoint_reconstructed_contract_comparison"
+    )
+    assert summary["recommended_next_move"] == (
+        "run_fixed_budget_v2_vs_active_v3c_vs_midpoint_reconstructed_contract_comparison"
+    )
+
+    assert (
+        config["transport"]["candidate_name"]
+        == "stage05_v3c_midpoint_reconstructed_trajectory_contract"
+    )
+    assert config["transport"]["target_reconstruction_enabled"] is True
+    assert config["transport"]["midpoint_reconstruction_enabled"] is True
+    assert config["transport"]["continuation_reevaluated_at_reconstructed_midpoint"] is True
+    assert (
+        config["transport"]["semigroup_consistency_absorbed_into_main_trajectory_contract"]
+        is True
+    )
+    assert config["transport"]["semigroup_consistency_is_auxiliary_only"] is False
+    assert config["transport"]["exact_detached_target_barycentric_fusion_enabled"] is False
+    assert config["transport"]["main_trajectory_contract_identity"] == (
+        "midpoint_reconstructed_semigroup_internalized_trajectory_contract"
+    )
+
+    assert "train_main_traj_contract_loss" in epoch_rows[0]
+    assert "train_mean_midpoint_reconstruction_shift_norm" in epoch_rows[0]
+    assert "train_mean_continuation_reevaluation_shift_norm" in epoch_rows[0]
+    assert "train_mean_semigroup_endpoint_closure_residual_norm" in epoch_rows[0]
     assert any(float(row["train_main_traj_contract_loss"]) > 0.0 for row in epoch_rows)
 
 
