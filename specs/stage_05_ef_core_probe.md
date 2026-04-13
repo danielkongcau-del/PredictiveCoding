@@ -758,3 +758,33 @@ The first-pass v3-C implementation must not yet add:
 - multiple semigroup variants
 - a broad semigroup schedule search
 - a claim that v3-C should replace the promoted refined v3-B reference before a real fixed-budget comparison
+
+#### 18.13.8 Post-promotion structural interpretation
+
+Current repository evidence now covers the following chain:
+
+- `v2 -> v3-A`
+  - explicit transport-drift decomposition materially improved configured-step mechanism over the fixed-budget v2 control
+- `v3-A -> refined v3-B`
+  - stronger trajectory curriculum materially improved configured-step mechanism again over the fixed-budget v3-A reference
+- `refined v3-B -> refined v3-C`
+  - explicit endpoint / semigroup consistency then materially improved configured-step mechanism again under the formal fixed-budget recompare
+
+The repository therefore now adopts the structural interpretation:
+
+- `absorb_semigroup_into_main_trajectory_contract`
+
+Interpretation:
+
+- endpoint / semigroup consistency no longer looks like a permanently attached auxiliary-only probe
+- it currently looks complementary to the main trajectory contract and should be internalized into that contract in future mainline work
+- current evidence still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`
+- trajectory curriculum therefore remains part of the main Stage 05 contract framing
+
+This remains a repository-level working interpretation, not a proved mathematical theorem.
+
+No new Stage 05 charter is opened by this conclusion.
+
+The next implementation question inside the existing Stage 05 family is:
+
+- how to refactor the current refined v3-C layering into one main trajectory contract that internalizes semigroup consistency without continuing additive loss stacking

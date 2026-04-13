@@ -140,6 +140,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - it materially improves configured-step mechanism over the fixed-budget v2 control
   - it avoids an obvious report-only accuracy regression
   - `stage05_v3c_stronger_semigroup_weight` is now the active fixed-budget Stage 05 improvement reference
+  - the current repository-level structural interpretation is now:
+    - `absorb_semigroup_into_main_trajectory_contract`
+    - do not keep semigroup consistency framed as a permanently attached auxiliary-only term
+    - do not yet refactor the main contract around endpoint / semigroup consistency alone
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -151,10 +155,11 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as a repeat of the already-closed refined v3-C versus promoted refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next step from the active refined v3-C reference while keeping:
+- if Stage 05 continues, draft the next step as a narrow implementation-first contract-consolidation pass above `stage05_v3c_stronger_semigroup_weight`
+- keep:
   - the fixed-budget v2 control
-  - `stage05_v3b_stronger_traj_curr_weight` as the previous comparison reference
-  - the next immediate move as a post-promotion planning/diagnostic pass rather than another recompare or an automatic new charter
+  - `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget improvement reference
+- do not frame the next step as another recompare or as an automatic new charter
 
 ## What Prompt Writers Must Not Reopen
 

@@ -273,6 +273,11 @@ Current probe status:
     - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the promoted refined v3-B reference
     - the current recompare decision is therefore:
       - `recommended_next_move = promote_refined_v3c_as_active_reference`
+  - the current repository-level structural interpretation is now:
+    - `absorb_semigroup_into_main_trajectory_contract`
+    - endpoint / semigroup consistency now looks complementary to the main trajectory contract rather than like a permanently attached auxiliary-only term
+    - current evidence still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`
+    - no new planning-only charter is required from the current state
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -290,8 +295,12 @@ Current probe status:
 - Treat the refined v3-C versus promoted refined v3-B promotion question as closed.
 - Keep `stage05_v3c_endpoint_semigroup_consistency_contract` as the original diagnostic-only v3-C control, not as the active fixed-budget reference.
 - Treat `stage05_v3c_stronger_semigroup_weight` as the promoted refined v3-C result, not as a remaining recompare candidate.
+- Adopt `absorb_semigroup_into_main_trajectory_contract` as the current Stage 05 structural interpretation.
+- Do not keep semigroup consistency framed as a permanently attached auxiliary-only term in future mainline work.
+- Do not yet refactor the main Stage 05 contract around endpoint / semigroup consistency alone.
 - Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
-- If Stage 05 continues, the next pass should be a post-promotion planning/diagnostic pass that identifies the next mechanism question above the active refined v3-C reference rather than reopening the already-closed recompare.
+- No new planning-only Stage 05 charter is required by the current evidence chain.
+- If Stage 05 continues, the next pass should implement a contract-consolidation refactor above `stage05_v3c_stronger_semigroup_weight` so semigroup consistency is absorbed into the main trajectory contract rather than kept as another attached loss stack.
 
 ## Reopen Conditions
 

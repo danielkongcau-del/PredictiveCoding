@@ -128,7 +128,8 @@ Current known state:
 - the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now complete
 - the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
 - that recompare says `stage05_v3c_stronger_semigroup_weight` materially displaces the promoted refined v3-B reference under the current mechanism-first rule
-- the next immediate move is now a post-promotion planning/diagnostic pass, not another recompare
+- the current Stage 05 structural interpretation is `absorb_semigroup_into_main_trajectory_contract`
+- the next immediate move is now a narrow contract-consolidation implementation pass, not another recompare or another charter
 
 ## Current Code Entry Points
 

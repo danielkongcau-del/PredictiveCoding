@@ -236,7 +236,10 @@ The next validation move is:
 - keep `stage05_v3c_stronger_semigroup_weight` as the current fixed-budget Stage 05 improvement reference
 - treat `stage05_v3b_stronger_traj_curr_weight` as the previous comparison reference
 - treat the refined v3-C versus promoted refined v3-B promotion question as closed
-- keep `Stage 05 v3-C` framed as a working-hypothesis-driven endpoint / semigroup question, but note that the first minimal diagnostic-only v3-C probe now already exists
+- adopt `absorb_semigroup_into_main_trajectory_contract` as the current Stage 05 structural interpretation
+- do not keep endpoint / semigroup consistency framed as a permanently attached auxiliary-only term
+- do not yet adopt `refactor_main_contract_around_endpoint_semigroup_consistency`
+- do not open a new planning-only charter by default from the current state
 
 Any next narrower Stage 05 follow-up should preserve:
 
@@ -247,6 +250,7 @@ Any next narrower Stage 05 follow-up should preserve:
 - task accuracy as a secondary signal only
 - the refined v3-C scaffold as the current Stage 05 improvement reference
 - the original v3-C probe as diagnostic-only control rather than the active fixed-budget reference
+- the current structural interpretation that semigroup consistency should be absorbed into the main trajectory contract
 
 Any next narrower Stage 05 follow-up should be accepted only if it:
 
@@ -255,10 +259,11 @@ Any next narrower Stage 05 follow-up should be accepted only if it:
 - keeps artifact-independent target construction
 - keeps deterministic artifact generation
 - keeps one-step mechanism metrics positive under the current Stage 05 rule
+- makes explicit whether semigroup consistency is absorbed into the main trajectory contract rather than appended as another auxiliary-only term
 - reports explicit pairwise deltas versus:
-  - the promoted refined Stage 05 v3-B reference
+  - the active refined Stage 05 v3-C reference
   - the fixed-budget v2 control
-- makes the trajectory or semigroup contract identity explicit
+- makes the consolidated main trajectory-contract identity explicit
 - keeps task accuracy as a secondary signal only
 
 Any next narrower Stage 05 follow-up must minimally produce:
@@ -269,8 +274,9 @@ Any next narrower Stage 05 follow-up must minimally produce:
 - a dedicated artifact directory
 - aggregate summary fields that report:
   - whether endpoint / semigroup consistency is enabled
+  - whether semigroup consistency is absorbed into the main trajectory contract
   - the split-horizon semigroup identity
-  - pairwise deltas versus the promoted refined v3-B reference
+  - pairwise deltas versus the active refined v3-C reference
   - pairwise deltas versus v2
   - a gap-closure style decision field
   - `recommended_next_move`
@@ -304,10 +310,14 @@ Current v3-C status:
   - `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
   - it materially improves configured-step mechanism over fixed-budget `v2`
   - it avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
+- the current repository-level structural interpretation is now:
+  - `absorb_semigroup_into_main_trajectory_contract`
+  - current evidence supports semigroup consistency as part of the main trajectory contract
+  - current evidence does not yet support replacing the trajectory framing with endpoint / semigroup consistency alone
 - the next acceptance step is therefore:
   - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
   - keep fixed-budget `v2` as the immediate control
-  - require any next mechanism idea to beat the active refined v3-C reference under the same mechanism-first rule
+  - require any next contract-consolidation implementation to beat the active refined v3-C reference under the same mechanism-first rule
 
 It should not be framed as:
 

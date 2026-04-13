@@ -325,6 +325,14 @@ Current planning implication:
   - the fixed-budget v2 control
   - the active refined v3-C reference
 
+Current structural decision:
+
+- adopt `absorb_semigroup_into_main_trajectory_contract`
+- do not keep endpoint / semigroup consistency framed as a permanently attached auxiliary-only term
+- do not currently adopt `refactor_main_contract_around_endpoint_semigroup_consistency`
+- no new planning-only charter is required from the current state
+- the next implementation question is how to consolidate the current refined v3-C layering into one main trajectory contract without continuing additive loss stacking
+
 ### 10. Open The Stage 05 V3-C Charter
 
 Objective:
@@ -425,7 +433,45 @@ Current status update:
 - the immediate next move is therefore:
   - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
   - treat the refined v3-C versus promoted refined v3-B promotion question as closed
-  - run a post-promotion planning/diagnostic pass to identify the next mechanism question rather than reopening the already-closed recompare
+  - treat semigroup consistency as part of the main trajectory contract rather than as a permanently attached auxiliary-only term
+  - do not open a new planning-only charter by default
+  - make the next implementation pass a contract-consolidation refactor above `stage05_v3c_stronger_semigroup_weight`
+
+### 11. Consolidate The Main Stage 05 Trajectory Contract
+
+Objective:
+
+- consolidate the current refined v3-C layering into one main Stage 05 trajectory contract
+
+Repository-level interpretation from the current evidence chain:
+
+- `v2 -> v3-A` improved the target contract
+- `v3-A -> refined v3-B` improved the trajectory contract
+- `refined v3-B -> refined v3-C` improved configured-step mechanism again under the formal fixed-budget recompare
+- the most credible interpretation is therefore:
+  - `absorb_semigroup_into_main_trajectory_contract`
+
+What this means:
+
+- semigroup consistency should no longer be treated as a permanently attached diagnostic add-on
+- trajectory curriculum still remains part of the main contract framing
+- current evidence does not yet justify replacing the main trajectory framing with endpoint / semigroup consistency alone
+
+Immediate next implementation focus:
+
+- start from `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget reference
+- test a contract-consolidation implementation that internalizes semigroup consistency inside the main trajectory contract
+- compare that consolidated contract against:
+  - the active refined v3-C reference
+  - the fixed-budget v2 control
+
+Non-goals:
+
+- do not reopen Stage 04 package-internal work
+- do not reopen another pure same-family budget escalation
+- do not reopen another pure same-family efficiency tweak
+- do not broaden v3-C into a parameter-search branch
+- do not open a new charter by default before the consolidation question is tested
 
 ## Exploratory Acceptance Criteria
 
