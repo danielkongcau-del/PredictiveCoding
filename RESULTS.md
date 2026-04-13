@@ -615,6 +615,86 @@ Current interpretation:
   - keep `stage05_v3c_fused_trajectory_semigroup_contract` as the first consolidation candidate rather than promoting it
   - refine the fusion direction rather than reopening promotion, budget escalation, or a new charter
 
+## Endpoint-Line Midpoint Comparison
+
+Artifact:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison/`
+
+Compared candidates:
+
+- active refined v3-C reference:
+  - `stage05_v3c_stronger_semigroup_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0059706216916698045`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2701777366495727e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8839506172839506`
+- endpoint-line midpoint candidate:
+  - `stage05_v3c_endpoint_line_midpoint_trajectory_contract`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.006015732548759099`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.287737578720965e-05`
+  - mean validation accuracy:
+    - `0.8790123456790123`
+  - mean test accuracy:
+    - `0.8814814814814814`
+
+Current interpretation:
+
+- the endpoint-line midpoint candidate preserves the current mechanism-first gate and avoids an obvious report-only accuracy regression
+- it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+- it improves contextual gap closure beyond the active refined v3-C reference
+- it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the current decision is therefore:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - keep `stage05_v3c_endpoint_line_midpoint_trajectory_contract` as the current narrow refinement candidate rather than promoting it
+  - continue the endpoint-line midpoint direction rather than reopening promotion or budget questions
+
+## Stage 05 Endpoint-Line Continuation-Blend Fixed-Budget Comparison
+
+Artifact:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison/`
+
+Compared candidates:
+
+- active refined v3-C reference:
+  - `stage05_v3c_stronger_semigroup_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0059706216916698045`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2701777366495727e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8839506172839506`
+- endpoint-line continuation-blend candidate:
+  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.006077107269951781`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.3154554470203098e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8814814814814814`
+
+Current interpretation:
+
+- the endpoint-line continuation-blend candidate preserves the current mechanism-first gate and avoids an obvious report-only accuracy regression
+- it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+- it improves contextual gap closure beyond the active refined v3-C reference
+- it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the current decision is therefore:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - keep `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current narrow refinement candidate rather than promoting it
+  - continue the continuation-target refinement direction rather than reopening promotion or budget questions
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

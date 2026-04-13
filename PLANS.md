@@ -447,6 +447,30 @@ Current status update:
   - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
   - treat `stage05_v3c_fused_trajectory_semigroup_contract` as the first consolidation candidate, not as the active reference
   - keep the fusion direction alive, but refine implementation rather than promote the current fused candidate
+- the fixed-budget endpoint-line midpoint comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison/`
+- that endpoint-line midpoint comparison says:
+  - `stage05_v3c_endpoint_line_midpoint_trajectory_contract` keeps one-step and configured-step mechanism positive
+  - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the active refined v3-C reference
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the immediate next move is therefore refined again:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat `stage05_v3c_endpoint_line_midpoint_trajectory_contract` as the current narrow refinement candidate, not as the active reference
+  - keep the endpoint-line midpoint direction alive, but refine implementation rather than promote the current candidate
+- the fixed-budget endpoint-line continuation-blend comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison/`
+- that endpoint-line continuation-blend comparison says:
+  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` keeps one-step and configured-step mechanism positive
+  - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the active refined v3-C reference
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the immediate next move is therefore refined again:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current narrow refinement candidate, not as the active reference
+  - keep the continuation-target refinement direction alive, but refine implementation rather than promote the current candidate
 
 ### 11. Consolidate The Main Stage 05 Trajectory Contract
 
@@ -471,8 +495,8 @@ What this means:
 Immediate next implementation focus:
 
 - start from `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget reference
-- keep `stage05_v3c_fused_trajectory_semigroup_contract` as the first exact-fusion consolidation candidate
-- refine the fusion direction so it can materially beat the active refined v3-C reference under the same mechanism-first rule
+- keep `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current refinement candidate
+- refine the continuation-target direction so it can materially beat the active refined v3-C reference under the same mechanism-first rule
 - compare that consolidated contract against:
   - the active refined v3-C reference
   - the fixed-budget v2 control

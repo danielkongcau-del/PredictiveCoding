@@ -880,3 +880,126 @@ This pass still does not justify:
 - `refactor_main_contract_around_endpoint_semigroup_consistency`
 - a reopening of Stage 04
 - a new mechanism family
+
+#### 18.13.11 Endpoint-line midpoint refinement
+
+The next narrow refinement inside the same consolidation direction is:
+
+- `stage05_v3c_endpoint_line_midpoint_trajectory_contract`
+
+This pass is opened because the first midpoint-reconstructed candidate:
+
+- stayed directionally correct
+- but did not materially beat the active refined `stage05_v3c_stronger_semigroup_weight`
+- and its midpoint guidance still backed semigroup endpoint information out through the bootstrap continuation
+
+The concrete refinement is:
+
+- keep the bootstrap short leg
+- keep detached continuation re-evaluation at the reconstructed midpoint
+- replace continuation-backout midpoint guidance with endpoint-line midpoint guidance
+
+Using the current notation:
+
+- `u_B = u_boot(z_t, alpha * r, t; c)`
+- `z_B = z_t + alpha * r * u_B`
+- `u_C^B = stopgrad(u_hat(z_B, r_s, s; c))`
+- `z_sg^* = stopgrad(z_hat_split)`
+- `u_sg^* = (z_sg^* - z_t) / r`
+- `kappa = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2)`
+- `z_line_mid^* = z_t + alpha * (z_sg^* - z_t)`
+- `z_mid^* = (1 - kappa) * z_B + kappa * z_line_mid^*`
+- `u_short^* = (z_mid^* - z_t) / (alpha * r)`
+- `u_C^* = stopgrad(u_hat(z_mid^*, r_s, s; c))`
+- `u_main^* = alpha * u_short^* + (1 - alpha) * u_C^*`
+- `m_main^* = u_main^* - g_t`
+
+The unified main trajectory contract remains:
+
+- `lambda_main = lambda_tc + lambda_sg * r^2`
+- `L_main_traj = lambda_main * ||m_hat - m_main^*||^2`
+
+Interpretation:
+
+- semigroup consistency remains absorbed into the main trajectory contract
+- trajectory remains the main contract frame
+- the refinement is more non-equivalent than exact detached-target fusion because continuation is re-evaluated after the midpoint is changed in state space
+- the refinement still does not justify refactoring the family around endpoint / semigroup consistency alone
+
+Current fixed-budget result:
+
+- the endpoint-line midpoint candidate improves configured-step mechanism and contextual gap closure beyond `stage05_v3c_stronger_semigroup_weight`
+- it avoids an obvious report-only accuracy regression
+- it does not materially beat `stage05_v3c_stronger_semigroup_weight` under the current threshold
+
+Current decision:
+
+- keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+- keep the endpoint-line midpoint direction alive as the current refinement direction
+- do not treat this result as a promotion or as a reason to reopen Stage 04
+
+#### 18.13.12 Endpoint-line continuation-target refinement
+
+The next narrow refinement inside the same consolidation direction is:
+
+- `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
+
+This pass is opened because the endpoint-line midpoint candidate:
+
+- already showed directional configured-step improvement over the active refined `stage05_v3c_stronger_semigroup_weight`
+- already avoided an obvious report-only accuracy regression
+- but still left the continuation leg too close to a pure re-evaluated trajectory continuation
+
+The concrete refinement is therefore:
+
+- keep the endpoint-line midpoint reconstruction
+- keep trajectory as the main contract frame
+- inject semigroup geometry directly into the continuation target
+- do not reintroduce a separate auxiliary semigroup loss
+
+Using the current notation:
+
+- `u_B = u_boot(z_t, alpha * r, t; c)`
+- `z_B = z_t + alpha * r * u_B`
+- `u_C^B = stopgrad(u_hat(z_B, r_s, s; c))`
+- `z_sg^* = stopgrad(z_hat_split)`
+- `u_sg^* = (z_sg^* - z_t) / r`
+- `kappa = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2)`
+- `z_line_mid^* = z_t + alpha * (z_sg^* - z_t)`
+- `z_mid^* = (1 - kappa) * z_B + kappa * z_line_mid^*`
+- `u_short^* = (z_mid^* - z_t) / (alpha * r)`
+- `u_C,traj^* = stopgrad(u_hat(z_mid^*, r_s, s; c))`
+- `u_C,sg^* = (z_sg^* - z_mid^*) / ((1 - alpha) * r)`
+- `u_C^* = (1 - kappa) * u_C,traj^* + kappa * u_C,sg^*`
+- `u_main^* = alpha * u_short^* + (1 - alpha) * u_C^*`
+- `m_main^* = u_main^* - g_t`
+
+The unified main trajectory contract remains:
+
+- `lambda_main = lambda_tc + lambda_sg * r^2`
+- `L_main_traj = lambda_main * ||m_hat - m_main^*||^2`
+
+Interpretation:
+
+- semigroup consistency remains absorbed into the main trajectory contract
+- the continuation target is now explicitly refined, not only the midpoint state
+- trajectory remains the main contract frame
+- the candidate still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`
+
+This pass must not be implemented as:
+
+- another exact detached-target folding pass
+- another weight-only tweak
+- a return to `L_traj_curr + lambda_sg * L_sg` as separate trajectory-level terms
+
+Current fixed-budget result:
+
+- the endpoint-line continuation-blend candidate improves configured-step mechanism and contextual gap closure beyond `stage05_v3c_stronger_semigroup_weight`
+- it avoids an obvious report-only accuracy regression
+- it does not materially beat `stage05_v3c_stronger_semigroup_weight` under the current threshold
+
+Current decision:
+
+- keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+- keep `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current narrow refinement candidate
+- keep the continuation-target refinement direction alive, but refine implementation rather than promote the current candidate

@@ -317,6 +317,14 @@ Current v3-C status:
   - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
   - it improves contextual gap closure relative to the `3072`-epoch same-family reference beyond the active refined v3-C reference
   - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the fixed-budget endpoint-line midpoint comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison/`
+- that endpoint-line midpoint comparison says:
+  - `stage05_v3c_endpoint_line_midpoint_trajectory_contract` keeps one-step and configured-step mechanism positive
+  - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure relative to the `3072`-epoch same-family reference beyond the active refined v3-C reference
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
 - the current repository-level structural interpretation is now:
   - `absorb_semigroup_into_main_trajectory_contract`
   - current evidence supports semigroup consistency as part of the main trajectory contract
@@ -324,8 +332,21 @@ Current v3-C status:
 - the next acceptance step is therefore:
   - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
   - keep fixed-budget `v2` as the immediate control
-  - treat `stage05_v3c_fused_trajectory_semigroup_contract` as the first consolidation candidate rather than the active reference
-  - require any next fusion-direction refinement to beat the active refined v3-C reference under the same mechanism-first rule
+  - treat `stage05_v3c_endpoint_line_midpoint_trajectory_contract` as the current narrow refinement candidate rather than the active reference
+  - require any next endpoint-line midpoint refinement to beat the active refined v3-C reference under the same mechanism-first rule
+- the fixed-budget endpoint-line continuation-blend comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison/`
+- that endpoint-line continuation-blend comparison says:
+  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` keeps one-step and configured-step mechanism positive
+  - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure relative to the `3072`-epoch same-family reference beyond the active refined v3-C reference
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the next acceptance step is therefore refined again:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
+  - keep fixed-budget `v2` as the immediate control
+  - treat `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current narrow refinement candidate rather than the active reference
+  - require any next continuation-target refinement to beat the active refined v3-C reference under the same mechanism-first rule
 
 It should not be framed as:
 
@@ -360,6 +381,10 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
 - Stage 05 refined v3-B recompare:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
+- Stage 05 endpoint-line midpoint fixed-budget comparison:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison/`
+- Stage 05 endpoint-line continuation-blend fixed-budget comparison:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison/`
 - Stage 05 v3-C refinement diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
 - Stage 05 refined v3-C recompare:

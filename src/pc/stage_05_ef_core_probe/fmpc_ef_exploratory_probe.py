@@ -56,6 +56,12 @@ STAGE05_V3C_FUSED_CANDIDATE_NAME = "stage05_v3c_fused_trajectory_semigroup_contr
 STAGE05_V3C_MIDPOINT_RECONSTRUCTED_CANDIDATE_NAME = (
     "stage05_v3c_midpoint_reconstructed_trajectory_contract"
 )
+STAGE05_V3C_ENDPOINT_LINE_MIDPOINT_CANDIDATE_NAME = (
+    "stage05_v3c_endpoint_line_midpoint_trajectory_contract"
+)
+STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_CANDIDATE_NAME = (
+    "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract"
+)
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
@@ -97,6 +103,26 @@ MIDPOINT_RECONSTRUCTED_TRAJECTORY_CONTRACT = (
     "u_main_star = alpha * ((z_mid_star - z_t) / (alpha * r)) + (1 - alpha) * u_C_star; "
     "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
 )
+ENDPOINT_LINE_MIDPOINT_TRAJECTORY_CONTRACT = (
+    "u_B = u_boot(z_t, alpha * r, t; c); "
+    "z_B = z_t + alpha * r * u_B; "
+    "z_line_mid_star = z_t + alpha * (z_sg_star - z_t); "
+    "z_mid_star = (1 - kappa) * z_B + kappa * z_line_mid_star; "
+    "u_C_star = stopgrad(u_hat(z_mid_star, r_s, s; c)); "
+    "u_main_star = alpha * ((z_mid_star - z_t) / (alpha * r)) + (1 - alpha) * u_C_star; "
+    "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
+)
+ENDPOINT_LINE_CONTINUATION_BLEND_TRAJECTORY_CONTRACT = (
+    "u_B = u_boot(z_t, alpha * r, t; c); "
+    "z_B = z_t + alpha * r * u_B; "
+    "z_line_mid_star = z_t + alpha * (z_sg_star - z_t); "
+    "z_mid_star = (1 - kappa) * z_B + kappa * z_line_mid_star; "
+    "u_C_traj_star = stopgrad(u_hat(z_mid_star, r_s, s; c)); "
+    "u_C_sg_star = (z_sg_star - z_mid_star) / ((1 - alpha) * r); "
+    "u_C_star = (1 - kappa) * u_C_traj_star + kappa * u_C_sg_star; "
+    "u_main_star = alpha * ((z_mid_star - z_t) / (alpha * r)) + (1 - alpha) * u_C_star; "
+    "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
+)
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3B = "trajectory_curriculum_detached_continuation"
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_STACKED = (
     "stacked_trajectory_curriculum_plus_auxiliary_semigroup_probe"
@@ -107,6 +133,13 @@ MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_FUSED = (
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_MIDPOINT_RECONSTRUCTED = (
     "midpoint_reconstructed_semigroup_internalized_trajectory_contract"
 )
+MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_MIDPOINT = (
+    "endpoint_line_midpoint_reconstructed_semigroup_internalized_trajectory_contract"
+)
+MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_CONTINUATION_BLEND = (
+    "endpoint_line_midpoint_with_continuation_target_blend_semigroup_internalized_trajectory_contract"
+)
+CONTINUATION_TARGET_BLEND_IDENTITY = "kappa_closed_form_blend"
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -159,6 +192,8 @@ class FMPCEFExploratoryProbeConfig:
     use_trajectory_curriculum_contract: bool = False
     use_fused_trajectory_semigroup_contract: bool = False
     use_midpoint_reconstructed_trajectory_contract: bool = False
+    use_endpoint_line_midpoint_trajectory_contract: bool = False
+    use_endpoint_line_continuation_blend_trajectory_contract: bool = False
     lambda_drift: float = 1.0
     lambda_traj_curr: float = 0.1
     alpha_floor: float = 0.5
@@ -272,6 +307,22 @@ class FMPCEFExploratoryProbeConfig:
         ):
             raise ValueError(
                 "The midpoint-reconstructed and exact-fusion v3-C contracts are mutually exclusive."
+            )
+        if (
+            self.use_endpoint_line_midpoint_trajectory_contract
+            and not self.use_midpoint_reconstructed_trajectory_contract
+        ):
+            raise ValueError(
+                "use_endpoint_line_midpoint_trajectory_contract requires "
+                "use_midpoint_reconstructed_trajectory_contract=True."
+            )
+        if (
+            self.use_endpoint_line_continuation_blend_trajectory_contract
+            and not self.use_endpoint_line_midpoint_trajectory_contract
+        ):
+            raise ValueError(
+                "use_endpoint_line_continuation_blend_trajectory_contract requires "
+                "use_endpoint_line_midpoint_trajectory_contract=True."
             )
 
     def resolved_run_id(self) -> str:
@@ -595,12 +646,15 @@ class MidpointReconstructedTrajectoryTargets:
     reconstructed_midpoint_state: np.ndarray
     reconstructed_short_velocity: np.ndarray
     reevaluated_continuation_velocity: np.ndarray
+    endpoint_implied_continuation_velocity: np.ndarray
+    blended_continuation_velocity: np.ndarray
     unified_velocity_target: np.ndarray
     unified_residual_target: np.ndarray
     main_loss_weights: np.ndarray
     reconstruction_weight: np.ndarray
     midpoint_reconstruction_shift_norm: np.ndarray
     continuation_reevaluation_shift_norm: np.ndarray
+    continuation_target_blend_shift_norm: np.ndarray
     semigroup_endpoint_closure_residual_norm: np.ndarray
 
     def __post_init__(self) -> None:
@@ -611,6 +665,8 @@ class MidpointReconstructedTrajectoryTargets:
             "reconstructed_midpoint_state",
             "reconstructed_short_velocity",
             "reevaluated_continuation_velocity",
+            "endpoint_implied_continuation_velocity",
+            "blended_continuation_velocity",
             "unified_velocity_target",
             "unified_residual_target",
         ):
@@ -620,6 +676,7 @@ class MidpointReconstructedTrajectoryTargets:
             "reconstruction_weight",
             "midpoint_reconstruction_shift_norm",
             "continuation_reevaluation_shift_norm",
+            "continuation_target_blend_shift_norm",
             "semigroup_endpoint_closure_residual_norm",
         ):
             object.__setattr__(self, name, _as_batch_first(name, getattr(self, name)))
@@ -630,6 +687,8 @@ class MidpointReconstructedTrajectoryTargets:
             "reconstructed_midpoint_state",
             "reconstructed_short_velocity",
             "reevaluated_continuation_velocity",
+            "endpoint_implied_continuation_velocity",
+            "blended_continuation_velocity",
             "unified_velocity_target",
             "unified_residual_target",
         ):
@@ -642,6 +701,7 @@ class MidpointReconstructedTrajectoryTargets:
             "reconstruction_weight",
             "midpoint_reconstruction_shift_norm",
             "continuation_reevaluation_shift_norm",
+            "continuation_target_blend_shift_norm",
             "semigroup_endpoint_closure_residual_norm",
         ):
             if getattr(self, name).shape != (reference_shape[0], 1):
@@ -666,6 +726,7 @@ class ResidualSupervisionBatch:
     midpoint_reconstructed_main_loss_weights: np.ndarray | None = None
     midpoint_reconstruction_shift_norms: np.ndarray | None = None
     continuation_reevaluation_shift_norms: np.ndarray | None = None
+    continuation_target_blend_shift_norms: np.ndarray | None = None
     semigroup_endpoint_closure_residual_norms: np.ndarray | None = None
     explicit_transport_drift_decomposition_enabled: bool = False
     trajectory_curriculum_enabled: bool = False
@@ -749,6 +810,15 @@ class ResidualSupervisionBatch:
                     self.continuation_reevaluation_shift_norms,
                 ),
             )
+        if self.continuation_target_blend_shift_norms is not None:
+            object.__setattr__(
+                self,
+                "continuation_target_blend_shift_norms",
+                _as_batch_first(
+                    "continuation_target_blend_shift_norms",
+                    self.continuation_target_blend_shift_norms,
+                ),
+            )
         if self.semigroup_endpoint_closure_residual_norms is not None:
             object.__setattr__(
                 self,
@@ -795,6 +865,7 @@ class ResidualSupervisionBatch:
             "midpoint_reconstructed_main_loss_weights",
             "midpoint_reconstruction_shift_norms",
             "continuation_reevaluation_shift_norms",
+            "continuation_target_blend_shift_norms",
             "semigroup_endpoint_closure_residual_norms",
         ):
             value = getattr(self, name)
@@ -820,6 +891,7 @@ class FMPCEFExploratoryProbeEpochMetrics:
     train_main_traj_contract_loss: float
     train_mean_midpoint_reconstruction_shift_norm: float
     train_mean_continuation_reevaluation_shift_norm: float
+    train_mean_continuation_target_blend_shift_norm: float
     train_mean_semigroup_endpoint_closure_residual_norm: float
     train_transported_final_energy: float
     val_one_step_transported_final_energy: float
@@ -947,6 +1019,35 @@ def build_stage05_v3c_midpoint_reconstructed_trajectory_contract_config(
     return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
 
 
+def build_stage05_v3c_endpoint_line_midpoint_trajectory_contract_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return the endpoint-line midpoint reconstruction refinement on top of active refined v3-C."""
+
+    payload: dict[str, Any] = {
+        "use_midpoint_reconstructed_trajectory_contract": True,
+        "use_endpoint_line_midpoint_trajectory_contract": True,
+        "candidate_name_override": STAGE05_V3C_ENDPOINT_LINE_MIDPOINT_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
+
+
+def build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return the endpoint-line continuation-blend refinement on top of active refined v3-C."""
+
+    payload: dict[str, Any] = {
+        "use_midpoint_reconstructed_trajectory_contract": True,
+        "use_endpoint_line_midpoint_trajectory_contract": True,
+        "use_endpoint_line_continuation_blend_trajectory_contract": True,
+        "candidate_name_override": STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
+
+
 def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.use_two_branch_residual_core:
         return TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY
@@ -956,6 +1057,10 @@ def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
 def _candidate_name(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.candidate_name_override is not None:
         return str(config.candidate_name_override)
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_CANDIDATE_NAME
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return STAGE05_V3C_ENDPOINT_LINE_MIDPOINT_CANDIDATE_NAME
     if config.use_midpoint_reconstructed_trajectory_contract:
         return STAGE05_V3C_MIDPOINT_RECONSTRUCTED_CANDIDATE_NAME
     if config.use_fused_trajectory_semigroup_contract:
@@ -1026,6 +1131,19 @@ def _explicit_transport_drift_target_contract(
 def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
     if not config.use_explicit_transport_drift_decomposition:
         return None
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return {
+            "status": (
+                "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
+                "endpoint_line_continuation_blend_contract_comparison"
+            ),
+            "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+        }
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return {
+            "status": "pending_real_fixed_budget_v2_vs_active_v3c_vs_endpoint_line_midpoint_contract_comparison",
+            "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+        }
     if config.use_midpoint_reconstructed_trajectory_contract:
         return {
             "status": "pending_real_fixed_budget_v2_vs_active_v3c_vs_midpoint_reconstructed_contract_comparison",
@@ -1082,6 +1200,19 @@ def _pairwise_promoted_v3b_placeholder(
 def _pairwise_active_refined_v3c_placeholder(
     config: FMPCEFExploratoryProbeConfig,
 ) -> dict[str, Any] | None:
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return {
+            "status": (
+                "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
+                "endpoint_line_continuation_blend_contract_comparison"
+            ),
+            "reference_candidate_name": STAGE05_V3C_STRONGER_SEMIGROUP_CANDIDATE_NAME,
+        }
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return {
+            "status": "pending_real_fixed_budget_v2_vs_active_v3c_vs_endpoint_line_midpoint_contract_comparison",
+            "reference_candidate_name": STAGE05_V3C_STRONGER_SEMIGROUP_CANDIDATE_NAME,
+        }
     if config.use_midpoint_reconstructed_trajectory_contract:
         return {
             "status": "pending_real_fixed_budget_v2_vs_active_v3c_vs_midpoint_reconstructed_contract_comparison",
@@ -1096,6 +1227,13 @@ def _pairwise_active_refined_v3c_placeholder(
 
 
 def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return (
+            "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
+            "endpoint_line_continuation_blend_contract_comparison"
+        )
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return "pending_real_fixed_budget_v2_vs_active_v3c_vs_endpoint_line_midpoint_contract_comparison"
     if config.use_midpoint_reconstructed_trajectory_contract:
         return "pending_real_fixed_budget_v2_vs_active_v3c_vs_midpoint_reconstructed_contract_comparison"
     if config.use_fused_trajectory_semigroup_contract:
@@ -1110,6 +1248,10 @@ def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> s
 
 
 def _recommended_next_move(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return "run_fixed_budget_v2_vs_active_v3c_vs_endpoint_line_continuation_blend_contract_comparison"
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return "run_fixed_budget_v2_vs_active_v3c_vs_endpoint_line_midpoint_contract_comparison"
     if config.use_midpoint_reconstructed_trajectory_contract:
         return "run_fixed_budget_v2_vs_active_v3c_vs_midpoint_reconstructed_contract_comparison"
     if config.use_fused_trajectory_semigroup_contract:
@@ -1138,6 +1280,10 @@ def _semigroup_target_contract(config: FMPCEFExploratoryProbeConfig) -> str | No
 
 
 def _main_trajectory_contract_identity(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_CONTINUATION_BLEND
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_MIDPOINT
     if config.use_midpoint_reconstructed_trajectory_contract:
         return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_MIDPOINT_RECONSTRUCTED
     if config.use_fused_trajectory_semigroup_contract:
@@ -1152,6 +1298,10 @@ def _main_trajectory_contract_identity(config: FMPCEFExploratoryProbeConfig) -> 
 def _main_trajectory_contract_target_contract(
     config: FMPCEFExploratoryProbeConfig,
 ) -> str | None:
+    if config.use_endpoint_line_continuation_blend_trajectory_contract:
+        return ENDPOINT_LINE_CONTINUATION_BLEND_TRAJECTORY_CONTRACT
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        return ENDPOINT_LINE_MIDPOINT_TRAJECTORY_CONTRACT
     if config.use_midpoint_reconstructed_trajectory_contract:
         return MIDPOINT_RECONSTRUCTED_TRAJECTORY_CONTRACT
     if config.use_fused_trajectory_semigroup_contract:
@@ -1167,6 +1317,7 @@ def _semigroup_consistency_absorbed_into_main_trajectory_contract(
     return bool(
         config.use_fused_trajectory_semigroup_contract
         or config.use_midpoint_reconstructed_trajectory_contract
+        or config.use_endpoint_line_continuation_blend_trajectory_contract
     )
 
 
@@ -1505,12 +1656,7 @@ def build_midpoint_reconstructed_trajectory_targets(
     lambda_traj_curr: float,
     lambda_sg: float,
 ) -> MidpointReconstructedTrajectoryTargets:
-    """Return the first non-equivalent internal-knot reconstruction target.
-
-    The new target stays detached on the target side, but it no longer collapses to an exact
-    barycentric fusion because the continuation is re-evaluated after the midpoint is
-    reconstructed in state space.
-    """
+    """Return the active internal-knot reconstruction target family for the current v3-C line."""
 
     validate_tf1_time_pair(t, r)
     if not config.use_midpoint_reconstructed_trajectory_contract:
@@ -1519,8 +1665,8 @@ def build_midpoint_reconstructed_trajectory_targets(
             "use_midpoint_reconstructed_trajectory_contract=True."
         )
     alpha_value = float(alpha)
-    if not (0.0 < alpha_value < 1.0):
-        raise ValueError("Midpoint-reconstructed targets require 0 < alpha < 1.")
+    if not (0.0 < alpha_value <= 1.0):
+        raise ValueError("Midpoint-reconstructed targets require 0 < alpha <= 1.")
     if lambda_traj_curr < 0.0:
         raise ValueError("lambda_traj_curr must be non-negative.")
     if lambda_sg < 0.0:
@@ -1532,8 +1678,10 @@ def build_midpoint_reconstructed_trajectory_targets(
         raise ValueError("Midpoint reconstruction requires an active short horizon.")
     split_time = float(t) + short_r
     continuation_r = (1.0 - alpha_value) * float(r)
+    continuation_active = continuation_r > 1e-12
     validate_tf1_time_pair(t, short_r)
-    validate_tf1_time_pair(split_time, continuation_r)
+    if continuation_active:
+        validate_tf1_time_pair(split_time, continuation_r)
 
     u_boot_short = bootstrap_average_velocity_target(
         context,
@@ -1544,23 +1692,18 @@ def build_midpoint_reconstructed_trajectory_targets(
         substeps=config.bootstrap_substeps,
     )
     z_boot_mid = z_array + short_r * u_boot_short
-    u_cont_boot = _predict_total_velocity_at_state(
-        context,
-        psi_network,
-        config,
-        z_boot_mid,
-        t=split_time,
-        r=continuation_r,
-    )
+    if continuation_active:
+        u_cont_boot = _predict_total_velocity_at_state(
+            context,
+            psi_network,
+            config,
+            z_boot_mid,
+            t=split_time,
+            r=continuation_r,
+        )
+    else:
+        u_cont_boot = np.zeros_like(z_array)
 
-    direct_velocity = _predict_total_velocity_at_state(
-        context,
-        psi_network,
-        config,
-        z_array,
-        t=t,
-        r=r,
-    )
     short_horizon_velocity = _predict_total_velocity_at_state(
         context,
         psi_network,
@@ -1570,15 +1713,17 @@ def build_midpoint_reconstructed_trajectory_targets(
         r=short_r,
     )
     z_hat_mid = z_array + short_r * short_horizon_velocity
-    split_continuation_velocity = _predict_total_velocity_at_state(
-        context,
-        psi_network,
-        config,
-        z_hat_mid,
-        t=split_time,
-        r=continuation_r,
-    )
-    direct_endpoint = z_array + float(r) * direct_velocity
+    if continuation_active:
+        split_continuation_velocity = _predict_total_velocity_at_state(
+            context,
+            psi_network,
+            config,
+            z_hat_mid,
+            t=split_time,
+            r=continuation_r,
+        )
+    else:
+        split_continuation_velocity = np.zeros_like(z_array)
     z_sg_star = (
         z_array
         + short_r * short_horizon_velocity
@@ -1592,24 +1737,44 @@ def build_midpoint_reconstructed_trajectory_targets(
         raise ValueError("Midpoint reconstruction requires strictly positive main weights.")
     kappa = (float(lambda_sg) * loss_weights) / w_main
 
-    z_sg_mid_star = z_sg_star - continuation_r * u_cont_boot
-    z_mid_star = ((1.0 - kappa) * z_boot_mid) + (kappa * z_sg_mid_star)
+    if config.use_endpoint_line_midpoint_trajectory_contract:
+        z_guidance_mid_star = z_array + (short_r * u_sg_star)
+    else:
+        z_guidance_mid_star = z_sg_star - continuation_r * u_cont_boot
+    z_mid_star = ((1.0 - kappa) * z_boot_mid) + (kappa * z_guidance_mid_star)
     u_short_star = (z_mid_star - z_array) / short_r
-    u_cont_star = _predict_total_velocity_at_state(
-        context,
-        psi_network,
-        config,
-        z_mid_star,
-        t=split_time,
-        r=continuation_r,
-    )
+
+    if continuation_active:
+        u_cont_traj_star = _predict_total_velocity_at_state(
+            context,
+            psi_network,
+            config,
+            z_mid_star,
+            t=split_time,
+            r=continuation_r,
+        )
+    else:
+        u_cont_traj_star = np.zeros_like(z_array)
+
+    if config.use_endpoint_line_continuation_blend_trajectory_contract and continuation_active:
+        u_cont_sg_star = (z_sg_star - z_mid_star) / continuation_r
+        u_cont_star = ((1.0 - kappa) * u_cont_traj_star) + (kappa * u_cont_sg_star)
+    else:
+        u_cont_sg_star = u_cont_traj_star.copy()
+        u_cont_star = u_cont_traj_star.copy()
+
     u_main_star = (alpha_value * u_short_star) + ((1.0 - alpha_value) * u_cont_star)
     g_t = hidden_local_flow(context, z_array)
     m_main_star = u_main_star - g_t
 
     midpoint_shift_norm = np.linalg.norm(z_mid_star - z_boot_mid, axis=1, keepdims=True)
     continuation_shift_norm = np.linalg.norm(
-        u_cont_star - u_cont_boot,
+        u_cont_traj_star - u_cont_boot,
+        axis=1,
+        keepdims=True,
+    )
+    continuation_target_blend_shift_norm = np.linalg.norm(
+        u_cont_star - u_cont_traj_star,
         axis=1,
         keepdims=True,
     )
@@ -1621,16 +1786,19 @@ def build_midpoint_reconstructed_trajectory_targets(
     return MidpointReconstructedTrajectoryTargets(
         bootstrap_midpoint_state=z_boot_mid,
         bootstrap_continuation_velocity=u_cont_boot,
-        semigroup_implied_midpoint_state=z_sg_mid_star,
+        semigroup_implied_midpoint_state=z_guidance_mid_star,
         reconstructed_midpoint_state=z_mid_star,
         reconstructed_short_velocity=u_short_star,
-        reevaluated_continuation_velocity=u_cont_star,
+        reevaluated_continuation_velocity=u_cont_traj_star,
+        endpoint_implied_continuation_velocity=u_cont_sg_star,
+        blended_continuation_velocity=u_cont_star,
         unified_velocity_target=u_main_star,
         unified_residual_target=m_main_star,
         main_loss_weights=w_main,
         reconstruction_weight=kappa,
         midpoint_reconstruction_shift_norm=midpoint_shift_norm,
         continuation_reevaluation_shift_norm=continuation_shift_norm,
+        continuation_target_blend_shift_norm=continuation_target_blend_shift_norm,
         semigroup_endpoint_closure_residual_norm=semigroup_endpoint_closure_residual_norm,
     )
 
@@ -2247,6 +2415,20 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "midpoint_reconstruction_enabled": bool(
                 config.use_midpoint_reconstructed_trajectory_contract
             ),
+            "endpoint_line_midpoint_reconstruction_enabled": bool(
+                config.use_endpoint_line_midpoint_trajectory_contract
+            ),
+            "continuation_target_blending_enabled": bool(
+                config.use_endpoint_line_continuation_blend_trajectory_contract
+            ),
+            "endpoint_implied_continuation_target_enabled": bool(
+                config.use_endpoint_line_continuation_blend_trajectory_contract
+            ),
+            "continuation_target_blend_identity": (
+                CONTINUATION_TARGET_BLEND_IDENTITY
+                if config.use_endpoint_line_continuation_blend_trajectory_contract
+                else None
+            ),
             "continuation_reevaluated_at_reconstructed_midpoint": bool(
                 config.use_midpoint_reconstructed_trajectory_contract
             ),
@@ -2353,6 +2535,7 @@ def _collect_residual_supervision(
     midpoint_reconstructed_main_loss_weights: list[np.ndarray] = []
     midpoint_reconstruction_shift_norms: list[np.ndarray] = []
     continuation_reevaluation_shift_norms: list[np.ndarray] = []
+    continuation_target_blend_shift_norms: list[np.ndarray] = []
     semigroup_endpoint_closure_residual_norms: list[np.ndarray] = []
     trajectory_curriculum_active = bool(
         config.use_trajectory_curriculum_contract
@@ -2457,6 +2640,9 @@ def _collect_residual_supervision(
             continuation_reevaluation_shift_norms.append(
                 midpoint_targets.continuation_reevaluation_shift_norm
             )
+            continuation_target_blend_shift_norms.append(
+                midpoint_targets.continuation_target_blend_shift_norm
+            )
             semigroup_endpoint_closure_residual_norms.append(
                 midpoint_targets.semigroup_endpoint_closure_residual_norm
             )
@@ -2524,6 +2710,13 @@ def _collect_residual_supervision(
                 np.float64, copy=False
             )
             if continuation_reevaluation_shift_norms
+            else None
+        ),
+        continuation_target_blend_shift_norms=(
+            np.concatenate(continuation_target_blend_shift_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if continuation_target_blend_shift_norms
             else None
         ),
         semigroup_endpoint_closure_residual_norms=(
@@ -2729,6 +2922,7 @@ def _train_one_batch(
     main_traj_contract_loss = 0.0
     midpoint_reconstruction_shift_norm = 0.0
     continuation_reevaluation_shift_norm = 0.0
+    continuation_target_blend_shift_norm = 0.0
     semigroup_endpoint_closure_residual_norm = 0.0
     if config.use_explicit_transport_drift_decomposition:
         if supervision.state_inputs is None:
@@ -2776,6 +2970,10 @@ def _train_one_batch(
             if supervision.continuation_reevaluation_shift_norms is not None:
                 continuation_reevaluation_shift_norm = float(
                     np.mean(supervision.continuation_reevaluation_shift_norms)
+                )
+            if supervision.continuation_target_blend_shift_norms is not None:
+                continuation_target_blend_shift_norm = float(
+                    np.mean(supervision.continuation_target_blend_shift_norms)
                 )
             if supervision.semigroup_endpoint_closure_residual_norms is not None:
                 semigroup_endpoint_closure_residual_norm = float(
@@ -2925,6 +3123,7 @@ def _train_one_batch(
         main_traj_contract_loss,
         midpoint_reconstruction_shift_norm,
         continuation_reevaluation_shift_norm,
+        continuation_target_blend_shift_norm,
         semigroup_endpoint_closure_residual_norm,
         transported_energy,
     )
@@ -2975,6 +3174,7 @@ def run_fmpc_ef_exploratory_probe(
         batch_main_traj_contract_losses: list[float] = []
         batch_midpoint_reconstruction_shift_norms: list[float] = []
         batch_continuation_reevaluation_shift_norms: list[float] = []
+        batch_continuation_target_blend_shift_norms: list[float] = []
         batch_semigroup_endpoint_closure_residual_norms: list[float] = []
         batch_transport_energies: list[float] = []
         batch_seed = config.batch_order_seed + epoch_index
@@ -2996,6 +3196,7 @@ def run_fmpc_ef_exploratory_probe(
                 main_traj_contract_loss,
                 midpoint_reconstruction_shift_norm,
                 continuation_reevaluation_shift_norm,
+                continuation_target_blend_shift_norm,
                 semigroup_endpoint_closure_residual_norm,
                 transported_energy,
             ) = _train_one_batch(
@@ -3021,6 +3222,9 @@ def run_fmpc_ef_exploratory_probe(
             batch_midpoint_reconstruction_shift_norms.append(midpoint_reconstruction_shift_norm)
             batch_continuation_reevaluation_shift_norms.append(
                 continuation_reevaluation_shift_norm
+            )
+            batch_continuation_target_blend_shift_norms.append(
+                continuation_target_blend_shift_norm
             )
             batch_semigroup_endpoint_closure_residual_norms.append(
                 semigroup_endpoint_closure_residual_norm
@@ -3066,6 +3270,9 @@ def run_fmpc_ef_exploratory_probe(
                 ),
                 train_mean_continuation_reevaluation_shift_norm=float(
                     np.mean(batch_continuation_reevaluation_shift_norms)
+                ),
+                train_mean_continuation_target_blend_shift_norm=float(
+                    np.mean(batch_continuation_target_blend_shift_norms)
                 ),
                 train_mean_semigroup_endpoint_closure_residual_norm=float(
                     np.mean(batch_semigroup_endpoint_closure_residual_norms)
@@ -3214,6 +3421,20 @@ def run_fmpc_ef_exploratory_probe(
         "midpoint_reconstruction_enabled": bool(
             config.use_midpoint_reconstructed_trajectory_contract
         ),
+        "endpoint_line_midpoint_reconstruction_enabled": bool(
+            config.use_endpoint_line_midpoint_trajectory_contract
+        ),
+        "continuation_target_blending_enabled": bool(
+            config.use_endpoint_line_continuation_blend_trajectory_contract
+        ),
+        "endpoint_implied_continuation_target_enabled": bool(
+            config.use_endpoint_line_continuation_blend_trajectory_contract
+        ),
+        "continuation_target_blend_identity": (
+            CONTINUATION_TARGET_BLEND_IDENTITY
+            if config.use_endpoint_line_continuation_blend_trajectory_contract
+            else None
+        ),
         "continuation_reevaluated_at_reconstructed_midpoint": bool(
             config.use_midpoint_reconstructed_trajectory_contract
         ),
@@ -3277,6 +3498,9 @@ def run_fmpc_ef_exploratory_probe(
         ),
         "selected_epoch_mean_continuation_reevaluation_shift_norm": float(
             best_row["train_mean_continuation_reevaluation_shift_norm"]
+        ),
+        "selected_epoch_mean_continuation_target_blend_shift_norm": float(
+            best_row["train_mean_continuation_target_blend_shift_norm"]
         ),
         "selected_epoch_mean_semigroup_endpoint_closure_residual_norm": float(
             best_row["train_mean_semigroup_endpoint_closure_residual_norm"]

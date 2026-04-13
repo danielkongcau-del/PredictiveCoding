@@ -283,6 +283,28 @@ Current probe status:
     - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
     - the current fused-contract decision is therefore:
       - `recommended_next_move = keep_fusion_direction_and_refine_implementation`
+  - the fixed-budget endpoint-line midpoint comparison now also exists under:
+    - [outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison)
+  - that endpoint-line midpoint comparison says:
+    - the candidate is `stage05_v3c_endpoint_line_midpoint_trajectory_contract`
+    - it keeps one-step and configured-step mechanism positive on all comparison seeds
+    - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+    - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the active refined v3-C reference
+    - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+    - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+    - the current endpoint-line midpoint decision is therefore:
+      - `recommended_next_move = keep_endpoint_line_midpoint_direction_and_refine_implementation`
+  - the fixed-budget endpoint-line continuation-blend comparison now also exists under:
+    - [outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison)
+  - that endpoint-line continuation-blend comparison says:
+    - the candidate is `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
+    - it keeps one-step and configured-step mechanism positive on all comparison seeds
+    - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+    - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the active refined v3-C reference
+    - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+    - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+    - the current endpoint-line continuation-blend decision is therefore:
+      - `recommended_next_move = keep_endpoint_line_continuation_blend_direction_and_refine_implementation`
   - the current repository-level structural interpretation is now:
     - `absorb_semigroup_into_main_trajectory_contract`
     - endpoint / semigroup consistency now looks complementary to the main trajectory contract rather than like a permanently attached auxiliary-only term
@@ -306,12 +328,13 @@ Current probe status:
 - Keep `stage05_v3c_endpoint_semigroup_consistency_contract` as the original diagnostic-only v3-C control, not as the active fixed-budget reference.
 - Treat `stage05_v3c_stronger_semigroup_weight` as the promoted refined v3-C result, not as a remaining recompare candidate.
 - Treat `stage05_v3c_fused_trajectory_semigroup_contract` as the first contract-consolidation candidate, not as the active fixed-budget reference.
+- Treat `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current narrow refinement candidate, not as the active fixed-budget reference.
 - Adopt `absorb_semigroup_into_main_trajectory_contract` as the current Stage 05 structural interpretation.
 - Do not keep semigroup consistency framed as a permanently attached auxiliary-only term in future mainline work.
 - Do not yet refactor the main Stage 05 contract around endpoint / semigroup consistency alone.
 - Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
 - No new planning-only Stage 05 charter is required by the current evidence chain.
-- If Stage 05 continues, the next pass should keep `stage05_v3c_stronger_semigroup_weight` as the active reference and run a narrow fusion-direction refinement above `stage05_v3c_fused_trajectory_semigroup_contract`.
+- If Stage 05 continues, the next pass should keep `stage05_v3c_stronger_semigroup_weight` as the active reference and run a narrow continuation-target / contract refinement above `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`.
 
 ## Reopen Conditions
 
