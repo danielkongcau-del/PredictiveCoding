@@ -125,7 +125,9 @@ Current known state:
 - treat the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the previous comparison reference
 - treat the `v3-A -> refined v3-B` promotion question as closed
 - the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now already open and has a first minimal diagnostic-only probe implementation
-- the next immediate move is now a real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison, not another planning-only v3-C pass
+- the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now complete
+- that comparison says v3-C directionally improves configured-step mechanism and contextual gap closure over the promoted refined v3-B reference, but does not yet materially displace it
+- the next immediate move is now a narrow v3-C refinement pass, not another planning-only v3-C pass
 
 ## Current Code Entry Points
 

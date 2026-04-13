@@ -434,6 +434,55 @@ Current interpretation:
   - keep the fixed-budget v2 result as the immediate control
   - do not treat this as a replacement claim against the frozen Stage 04 bridge on `main`
 
+## FMPC Stage 05 V2 vs Promoted V3-B vs V3-C Fixed-Budget Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison/`
+
+Current comparison result:
+
+- fixed-budget Stage 05 v2 control:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004980554368336933`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8451788412853327e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+- promoted refined v3-B reference:
+  - `stage05_v3b_stronger_traj_curr_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005720360383603999`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.1608872426289415e-05`
+  - mean validation accuracy:
+    - `0.8827160493827161`
+  - mean test accuracy:
+    - `0.882716049382716`
+- diagnostic-only v3-C candidate:
+  - `stage05_v3c_endpoint_semigroup_consistency_contract`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0058467458070066425`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2163570572707745e-05`
+  - mean validation accuracy:
+    - `0.8814814814814814`
+  - mean test accuracy:
+    - `0.882716049382716`
+
+Current interpretation:
+
+- the diagnostic-only v3-C candidate directionally improves configured-step mechanism over the promoted refined v3-B reference
+- it also improves contextual gap closure relative to the `3072`-epoch same-family v2 reference
+- it keeps one-step mechanism positive and avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
+- it does not materially improve configured-step mechanism over the promoted refined v3-B reference under the current threshold
+- the current decision is therefore:
+  - keep `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference
+  - keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only
+  - use a narrow v3-C refinement pass as the next move rather than immediate promotion
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

@@ -280,10 +280,18 @@ Current v3-C status:
 - the first smoke-ready `v2 vs promoted-v3B vs v3-C` comparison entry now also exists under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
 - that smoke artifact should be treated only as a wiring and deterministic-artifact check
-- the next acceptance step is not another planning-only charter pass
-- the next acceptance step is a real fixed-budget comparison against:
-  - the fixed-budget v2 control
-  - `stage05_v3b_stronger_traj_curr_weight`
+- the first real fixed-budget comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison/`
+- that fixed-budget comparison says:
+  - v3-C keeps one-step and configured-step mechanism positive under the current Stage 05 gate
+  - v3-C directionally improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight`
+  - v3-C shows a positive contextual gap-closure signal over the promoted refined v3-B reference
+  - v3-C avoids an obvious report-only accuracy regression
+  - v3-C still does not materially beat the promoted refined v3-B reference under the current threshold
+- the next acceptance step is therefore:
+  - keep the promoted refined v3-B result as the active Stage 05 improvement reference
+  - keep v3-C diagnostic-only
+  - allow only a narrow v3-C refinement pass before any promotion claim
 
 It should not be framed as:
 

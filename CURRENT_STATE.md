@@ -240,7 +240,17 @@ Current probe status:
   - the first minimal diagnostic-only v3-C probe `stage05_v3c_endpoint_semigroup_consistency_contract` now exists on top of the promoted refined v3-B scaffold
   - the smoke comparison artifact now also exists under `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
   - that smoke artifact does not yet establish a fixed-budget mechanism win over the promoted refined v3-B reference; it only verifies wiring, deterministic artifacts, and comparison readiness
-  - from the current state, the next Stage 05 pass should be a real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison rather than another planning-only v3-C charter pass
+  - the first real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison now also exists under:
+    - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison)
+  - that fixed-budget v3-C comparison says:
+    - v3-C keeps one-step mechanism positive on all comparison seeds
+    - v3-C keeps configured-step mechanism positive on all comparison seeds
+    - v3-C directionally improves configured-step mechanism over the promoted refined v3-B reference
+    - v3-C improves contextual gap-closure fractions relative to the `3072`-epoch v2 reference beyond the promoted refined v3-B reference
+    - v3-C avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
+    - v3-C does not materially improve configured-step mechanism over the promoted refined v3-B reference under the current threshold
+    - the current comparison decision is therefore:
+      - `recommended_next_move = keep_v3c_diagnostic_only_and_refine_implementation`
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -258,7 +268,7 @@ Current probe status:
 - Treat the v3-A versus refined v3-B promotion question as closed.
 - Keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only at this point; do not treat it as the new active fixed-budget reference yet.
 - Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
-- If Stage 05 continues, the next pass should run a real fixed-budget `v2 vs stage05_v3b_stronger_traj_curr_weight vs stage05_v3c_endpoint_semigroup_consistency_contract` comparison.
+- If Stage 05 continues, the next pass should refine the current diagnostic-only v3-C implementation against `stage05_v3b_stronger_traj_curr_weight` rather than reopen another planning-only v3-C pass or promote v3-C immediately.
 
 ## Reopen Conditions
 
@@ -309,3 +319,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare)
 - Stage 05 v3-C diagnostic-only smoke comparison artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison)
+- Stage 05 v3-C fixed-budget comparison artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison)

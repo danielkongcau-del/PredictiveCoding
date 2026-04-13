@@ -120,6 +120,12 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - the smoke-ready `v2 vs promoted-v3B vs v3-C` artifact now also exists under:
     - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
   - that smoke artifact only verifies wiring and deterministic comparison readiness
+  - the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now also complete under:
+    - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison/`
+  - that fixed-budget comparison shows:
+    - v3-C directionally improves configured-step mechanism over the promoted refined v3-B reference
+    - v3-C improves contextual gap closure
+    - v3-C does not yet materially displace the promoted refined v3-B reference
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -134,7 +140,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - if Stage 05 continues, draft the next step from the promoted refined v3-B reference and the current diagnostic-only v3-C probe while keeping:
   - the fixed-budget v2 control
   - the fixed-budget v3-A result as the previous comparison reference
-  - the next immediate move as a real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison rather than another planning-only v3-C pass
+  - the next immediate move as a narrow v3-C refinement pass rather than another planning-only charter pass or an immediate v3-C promotion claim
 
 ## What Prompt Writers Must Not Reopen
 

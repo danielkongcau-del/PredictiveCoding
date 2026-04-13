@@ -537,7 +537,7 @@ class Stage05V2PromotedV3BV3CComparisonConfig:
     reuse_stage05_v3b_reference_artifacts: bool = False
     v3b_reference_artifact_root: str | Path = (
         "outputs/stage_05_ef_core_probe/"
-        "stage05_v2_v3a_refined_v3b_fixed_budget_recompare/"
+        "stage05_v3b_refinement_diagnostic/"
         "runs/stage05_v3b_stronger_traj_curr_weight"
     )
     reuse_stage05_v3c_candidate_artifacts: bool = False
@@ -1715,12 +1715,24 @@ def _load_existing_stage05_core_row(
     expected_shuffle_batches: bool,
     method_name: ComparisonMethodName,
     stage_name: str,
+    expected_total_training_epochs: int | None = None,
+    expected_eval_steps: int | None = None,
+    expected_layer_dims: tuple[int, ...] | None = None,
+    expected_transport_steps: int | None = None,
+    expected_transport_family: str | None = None,
+    expected_explicit_transport_drift_decomposition_enabled: bool | None = None,
+    expected_trajectory_curriculum_enabled: bool | None = None,
+    expected_endpoint_semigroup_consistency_enabled: bool | None = None,
+    expected_lambda_traj_curr: float | None = None,
+    expected_alpha_floor: float | None = None,
+    expected_lambda_sg: float | None = None,
 ) -> dict[str, Any]:
     summary = _read_json(existing_run_dir / "summary.json")
     config_payload = _read_json(existing_run_dir / "config.json")
     val_one_step = summary["mechanism_metrics"]["one_step"]
     val_configured = summary["mechanism_metrics"]["configured_steps"]
     run_payload = config_payload["run"]
+    model_payload = config_payload["model"]
     transport_payload = config_payload["transport"]
     artifact_checks = _artifact_checks(
         existing_run_dir,
@@ -1728,6 +1740,66 @@ def _load_existing_stage05_core_row(
         expected_dataset_name=expected_dataset_name,
         expected_batch_size=expected_batch_size,
         expected_shuffle_batches=expected_shuffle_batches,
+    )
+    expected_layer_dims_list = (
+        [int(value) for value in expected_layer_dims] if expected_layer_dims is not None else None
+    )
+    model_protocol_matches = True
+    if expected_total_training_epochs is not None:
+        model_protocol_matches = model_protocol_matches and (
+            int(run_payload.get("epochs", -1)) == int(expected_total_training_epochs)
+        )
+    if expected_eval_steps is not None:
+        model_protocol_matches = model_protocol_matches and (
+            int(model_payload.get("eval_steps", -1)) == int(expected_eval_steps)
+        )
+    if expected_layer_dims_list is not None:
+        model_protocol_matches = model_protocol_matches and (
+            [int(value) for value in model_payload.get("layer_dims", [])] == expected_layer_dims_list
+        )
+    transport_protocol_matches = True
+    if expected_transport_steps is not None:
+        transport_protocol_matches = transport_protocol_matches and (
+            int(transport_payload.get("transport_steps", -1)) == int(expected_transport_steps)
+        )
+    if expected_transport_family is not None:
+        transport_protocol_matches = transport_protocol_matches and (
+            str(summary.get("transport_family")) == str(expected_transport_family)
+        )
+    if expected_explicit_transport_drift_decomposition_enabled is not None:
+        transport_protocol_matches = transport_protocol_matches and (
+            bool(summary.get("explicit_transport_drift_decomposition_enabled", False))
+            == bool(expected_explicit_transport_drift_decomposition_enabled)
+        )
+    if expected_trajectory_curriculum_enabled is not None:
+        transport_protocol_matches = transport_protocol_matches and (
+            bool(summary.get("trajectory_curriculum_enabled", False))
+            == bool(expected_trajectory_curriculum_enabled)
+        )
+    if expected_endpoint_semigroup_consistency_enabled is not None:
+        transport_protocol_matches = transport_protocol_matches and (
+            bool(summary.get("endpoint_semigroup_consistency_enabled", False))
+            == bool(expected_endpoint_semigroup_consistency_enabled)
+        )
+    if expected_lambda_traj_curr is not None:
+        transport_protocol_matches = transport_protocol_matches and np.isclose(
+            float(summary.get("lambda_traj_curr", 0.0)),
+            float(expected_lambda_traj_curr),
+        )
+    if expected_alpha_floor is not None:
+        transport_protocol_matches = transport_protocol_matches and np.isclose(
+            float(summary.get("alpha_floor", 0.0)),
+            float(expected_alpha_floor),
+        )
+    if expected_lambda_sg is not None:
+        transport_protocol_matches = transport_protocol_matches and np.isclose(
+            float(summary.get("lambda_sg", 0.0)),
+            float(expected_lambda_sg),
+        )
+    deterministic_artifact_checks_passed = bool(
+        artifact_checks["deterministic_artifact_checks_passed"]
+        and model_protocol_matches
+        and transport_protocol_matches
     )
     runtime_proxy = float(summary.get("train_wall_time_seconds", 0.0)) + float(
         summary.get("evaluation_wall_time_seconds", 0.0)
@@ -1785,7 +1857,12 @@ def _load_existing_stage05_core_row(
             and float(val_configured["energy_delta_vs_identity"]) < 0.0
             and float(val_configured["fixed_point_residual_delta_vs_identity"]) < 0.0
         ),
-        **artifact_checks,
+        **{
+            **artifact_checks,
+            "model_protocol_matches": bool(model_protocol_matches),
+            "transport_protocol_matches": bool(transport_protocol_matches),
+            "deterministic_artifact_checks_passed": bool(deterministic_artifact_checks_passed),
+        },
     }
 
 
@@ -4547,6 +4624,7 @@ def _stage05_v2_promoted_v3b_v3c_protocol_payload(
             "lambda_sg": float(config.lambda_sg),
             "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
             "semigroup_target_mode": "single_sided_detached_split_endpoint",
+            "semigroup_target_is_single_sided_detached": True,
             "reference_reused_from_existing_artifacts": bool(
                 config.reuse_stage05_v3c_candidate_artifacts
             ),
@@ -4717,6 +4795,16 @@ def _stage05_v2_promoted_v3b_v3c_decision(
                 "configured_step_residual": _gap_fraction(v2_residual, v3c_residual, reference_residual),
             },
         }
+        gap_closure_payload["v3c_minus_promoted_v3b"] = {
+            "configured_step_energy": float(
+                gap_closure_payload["stage05_v3c"]["configured_step_energy"]
+                - gap_closure_payload["promoted_v3b"]["configured_step_energy"]
+            ),
+            "configured_step_residual": float(
+                gap_closure_payload["stage05_v3c"]["configured_step_residual"]
+                - gap_closure_payload["promoted_v3b"]["configured_step_residual"]
+            ),
+        }
         positive_gap_closure = bool(
             gap_closure_payload["stage05_v3c"]["configured_step_energy"]
             > gap_closure_payload["promoted_v3b"]["configured_step_energy"]
@@ -4732,19 +4820,39 @@ def _stage05_v2_promoted_v3b_v3c_decision(
             "deterministic, and comparable against the promoted refined v3-B reference."
         )
     else:
-        if artifact_pass and one_step_positive and configured_step_positive and materially_improves_vs_v3b:
-            recommended_next_move = "evaluate_v3c_against_promoted_v3b_under_current_fixed_budget"
-            gap_closure_decision = (
-                "positive_gap_closure_signal_vs_promoted_v3b"
-                if positive_gap_closure
-                else "directional_gain_without_clear_gap_closure"
-            )
+        if (
+            artifact_pass
+            and one_step_positive
+            and configured_step_positive
+            and materially_improves_vs_v3b
+            and avoids_obvious_accuracy_regression
+            and positive_gap_closure
+        ):
+            recommended_next_move = "promote_v3c_as_active_reference"
+            gap_closure_decision = "positive_gap_closure_signal_vs_promoted_v3b"
             rationale = (
                 "The v3-C diagnostic probe improves configured-step mechanism over the promoted "
-                "refined v3-B reference while preserving the mechanism-first gate."
+                "refined v3-B reference, preserves the mechanism-first gate, and improves contextual "
+                "gap closure versus the 3072-epoch same-family reference."
+            )
+        elif (
+            artifact_pass
+            and one_step_positive
+            and configured_step_positive
+            and avoids_obvious_accuracy_regression
+        ):
+            recommended_next_move = "keep_v3c_diagnostic_only_and_refine_implementation"
+            gap_closure_decision = (
+                "directional_gain_without_clear_gap_closure"
+                if (energy_delta < 0.0 and residual_delta < 0.0)
+                else "no_positive_gap_closure_signal_vs_promoted_v3b"
+            )
+            rationale = (
+                "The v3-C diagnostic probe preserves the mechanism-first gate but does not yet "
+                "materially and cleanly displace the promoted refined v3-B reference."
             )
         else:
-            recommended_next_move = "another_v3c_implementation_pass"
+            recommended_next_move = "retain_promoted_v3b_as_active_reference"
             gap_closure_decision = "no_positive_gap_closure_signal_vs_promoted_v3b"
             rationale = (
                 "The v3-C diagnostic probe does not yet show a strong enough configured-step gain "
@@ -4873,6 +4981,14 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
                     expected_shuffle_batches=bool(config.shuffle_batches),
                     method_name=STAGE05_V2_METHOD_NAME,
                     stage_name="FMPC Stage 05 EF Core Probe v2 Control",
+                    expected_total_training_epochs=int(config.stage05_epochs),
+                    expected_eval_steps=int(config.stage05_eval_steps),
+                    expected_layer_dims=config.stage05_layer_dims,
+                    expected_transport_steps=int(config.stage05_transport_steps),
+                    expected_transport_family="two_branch_residual_meanflow_core",
+                    expected_explicit_transport_drift_decomposition_enabled=False,
+                    expected_trajectory_curriculum_enabled=False,
+                    expected_endpoint_semigroup_consistency_enabled=False,
                 )
             )
         else:
@@ -4915,6 +5031,16 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
                     expected_shuffle_batches=bool(config.shuffle_batches),
                     method_name=STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
                     stage_name="FMPC Stage 05 EF Core Probe Promoted Refined v3-B Reference",
+                    expected_total_training_epochs=int(config.stage05_epochs),
+                    expected_eval_steps=int(config.stage05_eval_steps),
+                    expected_layer_dims=config.stage05_layer_dims,
+                    expected_transport_steps=int(config.stage05_transport_steps),
+                    expected_transport_family="two_branch_residual_meanflow_core",
+                    expected_explicit_transport_drift_decomposition_enabled=True,
+                    expected_trajectory_curriculum_enabled=True,
+                    expected_endpoint_semigroup_consistency_enabled=False,
+                    expected_lambda_traj_curr=float(config.promoted_v3b_lambda_traj_curr),
+                    expected_alpha_floor=float(config.promoted_v3b_alpha_floor),
                 )
             )
         else:
@@ -4948,6 +5074,17 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
                     expected_shuffle_batches=bool(config.shuffle_batches),
                     method_name=STAGE05_V3C_METHOD_NAME,
                     stage_name="FMPC Stage 05 EF Core Probe v3-C Endpoint Semigroup Candidate",
+                    expected_total_training_epochs=int(config.stage05_epochs),
+                    expected_eval_steps=int(config.stage05_eval_steps),
+                    expected_layer_dims=config.stage05_layer_dims,
+                    expected_transport_steps=int(config.stage05_transport_steps),
+                    expected_transport_family="two_branch_residual_meanflow_core",
+                    expected_explicit_transport_drift_decomposition_enabled=True,
+                    expected_trajectory_curriculum_enabled=True,
+                    expected_endpoint_semigroup_consistency_enabled=True,
+                    expected_lambda_traj_curr=float(config.promoted_v3b_lambda_traj_curr),
+                    expected_alpha_floor=float(config.promoted_v3b_alpha_floor),
+                    expected_lambda_sg=float(config.lambda_sg),
                 )
             )
         else:

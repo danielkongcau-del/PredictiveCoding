@@ -402,8 +402,16 @@ Current status update:
 - that smoke artifact is diagnostic only:
   - it verifies wiring and deterministic comparison readiness
   - it does not yet justify promoting v3-C over the promoted refined v3-B reference
+- the first real fixed-budget comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison/`
+- that fixed-budget comparison says:
+  - v3-C directionally improves configured-step mechanism over the promoted refined v3-B reference
+  - v3-C improves contextual gap closure relative to the `3072`-epoch same-family reference
+  - v3-C keeps the mechanism-first gate positive and avoids an obvious report-only accuracy regression
+  - v3-C still does not materially displace the promoted refined v3-B reference under the current threshold
 - the immediate next move is therefore:
-  - run the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison
+  - keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only
+  - run a narrow v3-C refinement pass rather than promote v3-C or open another charter
 
 ## Exploratory Acceptance Criteria
 

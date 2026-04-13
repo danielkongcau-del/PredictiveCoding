@@ -31,7 +31,8 @@ Current working interpretation:
 - the current fixed-budget Stage 05 improvement reference is now `stage05_v3b_stronger_traj_curr_weight`
 - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the previous fixed-budget comparison reference
 - the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now open and has a first minimal diagnostic-only probe implementation
-- the next immediate Stage 05 move is a real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison
+- the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now complete
+- the next immediate Stage 05 move is a narrow diagnostic-only v3-C refinement pass
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
 - the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed
