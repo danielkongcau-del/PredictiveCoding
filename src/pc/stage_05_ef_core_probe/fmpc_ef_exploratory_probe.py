@@ -51,6 +51,7 @@ STAGE05_V3A_CANDIDATE_NAME = "stage05_v3a_explicit_transport_drift_contract"
 STAGE05_V3B_CANDIDATE_NAME = "stage05_v3b_trajectory_curriculum_contract"
 STAGE05_V3B_REFINED_CANDIDATE_NAME = "stage05_v3b_stronger_traj_curr_weight"
 STAGE05_V3C_CANDIDATE_NAME = "stage05_v3c_endpoint_semigroup_consistency_contract"
+STAGE05_V3C_STRONGER_SEMIGROUP_CANDIDATE_NAME = "stage05_v3c_stronger_semigroup_weight"
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
@@ -678,6 +679,19 @@ def build_stage05_v3c_endpoint_semigroup_config(
     }
     payload.update(overrides)
     return build_stage05_v3b_stronger_traj_curr_weight_config(**payload)
+
+
+def build_stage05_v3c_stronger_semigroup_weight_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return a single-axis v3-C refinement that only strengthens the semigroup probe weight."""
+
+    payload: dict[str, Any] = {
+        "lambda_sg": 0.10,
+        "candidate_name_override": STAGE05_V3C_STRONGER_SEMIGROUP_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_stage05_v3c_endpoint_semigroup_config(**payload)
 
 
 def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:

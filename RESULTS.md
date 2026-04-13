@@ -483,6 +483,51 @@ Current interpretation:
   - keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only
   - use a narrow v3-C refinement pass as the next move rather than immediate promotion
 
+## FMPC Stage 05 V3-C Refinement Diagnostic Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
+
+Current compared candidates:
+
+- fixed-budget immediate control:
+  - `stage_05_two_branch_corrected_residual_core_v2`
+- promoted refined v3-B reference:
+  - `stage05_v3b_stronger_traj_curr_weight`
+- current v3-C control:
+  - `stage05_v3c_endpoint_semigroup_consistency_contract`
+- strongest refined v3-C candidate:
+  - `stage05_v3c_stronger_semigroup_weight`
+
+Current configured-step mechanism means:
+
+- promoted refined v3-B energy delta vs identity:
+  - `-0.005720360383603999`
+- current v3-C control energy delta vs identity:
+  - `-0.0058467458070066425`
+- refined v3-C energy delta vs identity:
+  - `-0.0059706216916698045`
+- promoted refined v3-B fixed-point residual delta vs identity:
+  - `-2.1608872426289415e-05`
+- current v3-C control fixed-point residual delta vs identity:
+  - `-2.2163570572707745e-05`
+- refined v3-C fixed-point residual delta vs identity:
+  - `-2.2701777366495727e-05`
+
+Current interpretation:
+
+- the stronger semigroup-weight refinement continues to move configured-step mechanism in the favorable direction
+- it materially improves configured-step mechanism over the promoted refined v3-B reference under the current threshold
+- it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
+- it keeps one-step and configured-step mechanism positive
+- it avoids an obvious report-only accuracy regression
+
+- the current decision is therefore:
+  - keep `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference until recompare completes
+  - promote `stage05_v3c_stronger_semigroup_weight` as the next refined v3-C recompare candidate
+  - run a fresh fixed-budget `v2` vs promoted-v3B vs refined-v3C recompare as the next move
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

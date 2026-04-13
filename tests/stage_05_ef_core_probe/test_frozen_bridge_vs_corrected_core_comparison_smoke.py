@@ -711,6 +711,97 @@ def test_stage05_v2_promoted_v3b_v3c_comparison_writes_expected_artifacts(
     )
 
 
+def test_stage05_v3c_refinement_diagnostic_writes_expected_artifacts(
+    tmp_path: Path,
+) -> None:
+    v3c_fixture = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v3c_refinement_fixture",
+        comparison_variant="stage05_v2_promoted_v3b_v3c",
+        comparison_scope="smoke_only",
+        experiment_name="stage05_v3c_refinement_fixture",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_sg=0.05,
+    )
+
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v3c_refinement_smoke",
+        comparison_variant="stage05_v3c_refinement_diagnostic",
+        comparison_scope="smoke_only",
+        experiment_name="stage05_v3c_refinement_diagnostic_smoke",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        reuse_stage05_v2_reference_artifacts=True,
+        reference_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2"
+        ),
+        reuse_stage05_v3b_reference_artifacts=True,
+        v3b_reference_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage05_v3b_stronger_traj_curr_weight"
+        ),
+        reuse_stage05_v3c_control_artifacts=True,
+        v3c_control_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage05_v3c_endpoint_semigroup_consistency_contract"
+        ),
+        control_lambda_sg=0.05,
+        stronger_semigroup_lambda_sg=0.10,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 4
+    assert {row["method_name"] for row in rows} == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3b_stronger_traj_curr_weight",
+        "stage05_v3c_endpoint_semigroup_consistency_contract",
+        "stage05_v3c_stronger_semigroup_weight",
+    }
+
+    assert summary["stage"] == "stage05_v3c_refinement_diagnostic_smoke"
+    assert summary["comparison_scope"] == "smoke_only"
+    assert summary["best_variant_name"] == "stage05_v3c_stronger_semigroup_weight"
+    assert "v3c_variant_settings" in summary
+    assert "pairwise_deltas_vs_v3c_control" in summary
+    assert "pairwise_deltas_vs_promoted_refined_v3b_reference" in summary
+    assert "pairwise_deltas_vs_stage05_v2_reference" in summary
+    assert "narrow_v3c_refinement_materially_beats_v3c_control" in summary
+    assert "narrow_v3c_refinement_materially_beats_promoted_v3b_reference" in summary
+    assert summary["recommended_next_move"] == "run_real_fixed_budget_v3c_refinement_diagnostic"
+    assert (
+        summary["v3c_variant_settings"]["stage05_v3c_stronger_semigroup_weight"]["lambda_sg"]
+        == 0.10
+    )
+
+    assert "pairwise_deltas_vs_v3c_control" in report
+    assert "pairwise_deltas_vs_promoted_refined_v3b_reference" in report
+    assert report["decision"]["recommended_next_move"] == (
+        "run_real_fixed_budget_v3c_refinement_diagnostic"
+    )
+
+
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(
         output_root=tmp_path,

@@ -126,6 +126,13 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
     - v3-C directionally improves configured-step mechanism over the promoted refined v3-B reference
     - v3-C improves contextual gap closure
     - v3-C does not yet materially displace the promoted refined v3-B reference
+  - the narrow fixed-budget `v3-C` refinement diagnostic is now also complete under:
+    - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
+  - that refinement diagnostic shows:
+    - the strongest tested refinement is `stage05_v3c_stronger_semigroup_weight`
+    - that refined v3-C candidate materially improves configured-step mechanism over the promoted refined v3-B reference under the current threshold
+    - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
+    - it avoids an obvious report-only accuracy regression under the current Stage 05 rule
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -137,10 +144,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as a repeat of the already-closed v3-A versus refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next step from the promoted refined v3-B reference and the current diagnostic-only v3-C probe while keeping:
+- if Stage 05 continues, draft the next step from the promoted refined v3-B reference and the refined v3-C recompare candidate while keeping:
   - the fixed-budget v2 control
   - the fixed-budget v3-A result as the previous comparison reference
-  - the next immediate move as a narrow v3-C refinement pass rather than another planning-only charter pass or an immediate v3-C promotion claim
+  - the next immediate move as a fresh fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare rather than another planning-only charter pass or an immediate v3-C promotion claim
 
 ## What Prompt Writers Must Not Reopen
 

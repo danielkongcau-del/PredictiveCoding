@@ -288,10 +288,18 @@ Current v3-C status:
   - v3-C shows a positive contextual gap-closure signal over the promoted refined v3-B reference
   - v3-C avoids an obvious report-only accuracy regression
   - v3-C still does not materially beat the promoted refined v3-B reference under the current threshold
+- the narrow fixed-budget v3-C refinement diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
+- that refinement diagnostic says:
+  - the best tested refinement variant is `stage05_v3c_stronger_semigroup_weight`
+  - it materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
+  - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
+  - it keeps one-step and configured-step mechanism positive
+  - it avoids an obvious report-only accuracy regression
 - the next acceptance step is therefore:
-  - keep the promoted refined v3-B result as the active Stage 05 improvement reference
-  - keep v3-C diagnostic-only
-  - allow only a narrow v3-C refinement pass before any promotion claim
+  - keep the promoted refined v3-B result as the active Stage 05 improvement reference until a fresh recompare is complete
+  - treat `stage05_v3c_stronger_semigroup_weight` as the refined v3-C recompare candidate
+  - require a fresh fixed-budget `v2` vs promoted-v3B vs refined-v3C comparison before any promotion claim
 
 It should not be framed as:
 
@@ -326,6 +334,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
 - Stage 05 refined v3-B recompare:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
+- Stage 05 v3-C refinement diagnostic:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
 
 ## Document Layering
 

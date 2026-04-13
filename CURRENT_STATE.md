@@ -251,6 +251,17 @@ Current probe status:
     - v3-C does not materially improve configured-step mechanism over the promoted refined v3-B reference under the current threshold
     - the current comparison decision is therefore:
       - `recommended_next_move = keep_v3c_diagnostic_only_and_refine_implementation`
+  - the narrow fixed-budget v3-C refinement diagnostic now also exists under:
+    - [outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic)
+  - that refinement diagnostic says:
+    - the best tested refinement variant is `stage05_v3c_stronger_semigroup_weight`
+    - it keeps one-step mechanism positive on all comparison seeds
+    - it keeps configured-step mechanism positive on all comparison seeds
+    - it materially improves configured-step mechanism over the promoted refined v3-B reference under the current threshold
+    - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
+    - it avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
+    - the current refinement decision is therefore:
+      - `recommended_next_move = promote_refined_v3c_and_recompare`
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -266,9 +277,10 @@ Current probe status:
 - Use `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference.
 - Treat the fixed-budget v3-A result as the previous comparison reference, not as the current active improvement reference.
 - Treat the v3-A versus refined v3-B promotion question as closed.
-- Keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only at this point; do not treat it as the new active fixed-budget reference yet.
+- Keep `stage05_v3c_endpoint_semigroup_consistency_contract` as the original diagnostic-only v3-C control, not as the active fixed-budget reference.
+- Treat `stage05_v3c_stronger_semigroup_weight` as the current refined v3-C recompare candidate, not yet as the active fixed-budget reference.
 - Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
-- If Stage 05 continues, the next pass should refine the current diagnostic-only v3-C implementation against `stage05_v3b_stronger_traj_curr_weight` rather than reopen another planning-only v3-C pass or promote v3-C immediately.
+- If Stage 05 continues, the next pass should run a fresh fixed-budget recompare of `stage05_v3c_stronger_semigroup_weight` against `stage05_v3b_stronger_traj_curr_weight` and the fixed-budget v2 control.
 
 ## Reopen Conditions
 
@@ -321,3 +333,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison)
 - Stage 05 v3-C fixed-budget comparison artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison)
+- Stage 05 v3-C refinement diagnostic artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic)

@@ -1,0 +1,665 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v3c_refinement_diagnostic",
+  "comparison_scope": "fixed_budget_comparison",
+  "num_runs": 12,
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "fixed_budget_v2_control": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "promoted_refined_v3b_reference": {
+      "method_name": "stage05_v3b_stronger_traj_curr_weight",
+      "candidate_name": "stage05_v3b_stronger_traj_curr_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": false,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.0,
+      "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
+      "semigroup_target_mode": "single_sided_detached_split_endpoint",
+      "semigroup_target_is_single_sided_detached": true,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/runs/stage05_v3b_stronger_traj_curr_weight",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "stage05_v3c_control": {
+      "method_name": "stage05_v3c_endpoint_semigroup_consistency_contract",
+      "candidate_name": "stage05_v3c_endpoint_semigroup_consistency_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.05,
+      "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
+      "semigroup_target_mode": "single_sided_detached_split_endpoint",
+      "semigroup_target_is_single_sided_detached": true,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison/runs/stage05_v3c_endpoint_semigroup_consistency_contract",
+      "epochs": 1536,
+      "configured_transport_steps": 2
+    },
+    "refinement_variants": [
+      {
+        "method_name": "stage05_v3c_stronger_semigroup_weight",
+        "candidate_name": "stage05_v3c_stronger_semigroup_weight",
+        "transport_family": "two_branch_residual_meanflow_core",
+        "residual_branch_structure": "two_branch",
+        "explicit_transport_drift_decomposition_enabled": true,
+        "trajectory_curriculum_enabled": true,
+        "endpoint_semigroup_consistency_enabled": true,
+        "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+        "alpha_floor": 0.5,
+        "lambda_traj_curr": 0.2,
+        "lambda_sg": 0.1,
+        "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
+        "semigroup_target_mode": "single_sided_detached_split_endpoint",
+        "semigroup_target_is_single_sided_detached": true,
+        "epochs": 1536,
+        "configured_transport_steps": 2
+      }
+    ],
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v3c_refinement_attribution_diagnostic",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_v3b_reference_artifacts": true,
+      "reuse_stage05_v3c_control_artifacts": true
+    }
+  },
+  "tested_variant_names": [
+    "stage05_v3c_endpoint_semigroup_consistency_contract",
+    "stage05_v3c_stronger_semigroup_weight"
+  ],
+  "v3c_variant_settings": {
+    "stage05_v3c_endpoint_semigroup_consistency_contract": {
+      "method_name": "stage05_v3c_endpoint_semigroup_consistency_contract",
+      "candidate_name": "stage05_v3c_endpoint_semigroup_consistency_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.05,
+      "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
+      "semigroup_target_mode": "single_sided_detached_split_endpoint",
+      "semigroup_target_is_single_sided_detached": true
+    },
+    "stage05_v3c_stronger_semigroup_weight": {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "candidate_name": "stage05_v3c_stronger_semigroup_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "residual_branch_structure": "two_branch",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
+      "semigroup_target_mode": "single_sided_detached_split_endpoint",
+      "semigroup_target_is_single_sided_detached": true
+    }
+  },
+  "by_method": {
+    "stage_05_two_branch_corrected_residual_core_v2": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.004993063453529826,
+        "std": 0.0004497886244058906
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.004980554368336933,
+        "std": 0.0004619010522770305
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.8451788412853327e-05,
+        "std": 1.7042211944327626e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0007782552556208818,
+        "std": 0.0001066222708630268
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0007828017566811433,
+        "std": 0.00011445825630689142
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.370544746595761e-06,
+        "std": 5.800356555165735e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8876543209876543,
+        "std": 0.020135193123827277
+      },
+      "test_accuracy": {
+        "mean": 0.8876543209876543,
+        "std": 0.007610387657986378
+      },
+      "val_output_mse": {
+        "mean": 0.043408228822216455,
+        "std": 0.00014474751820407094
+      },
+      "test_output_mse": {
+        "mean": 0.042297337021277574,
+        "std": 0.0005151723569268052
+      },
+      "runtime_proxy_seconds": {
+        "mean": 240.9623000333328,
+        "std": 1.4256820311816305
+      }
+    },
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.005743561878287164,
+        "std": 0.000794564617167504
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.005720360383603999,
+        "std": 0.0007976253689137121
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.1608872426289415e-05,
+        "std": 2.9617810709106014e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009005483716518677,
+        "std": 0.00018366002200858196
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0008988321541851529,
+        "std": 0.00019027416334954395
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.7396313433062044e-06,
+        "std": 8.013535774916949e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8827160493827161,
+        "std": 0.025719341550616875
+      },
+      "test_accuracy": {
+        "mean": 0.882716049382716,
+        "std": 0.009720997375323195
+      },
+      "val_output_mse": {
+        "mean": 0.044485324947808824,
+        "std": 0.0007270918509267025
+      },
+      "test_output_mse": {
+        "mean": 0.04336723809036716,
+        "std": 0.0010664706444538084
+      },
+      "runtime_proxy_seconds": {
+        "mean": 312.64816683333265,
+        "std": 3.668278940722804
+      }
+    },
+    "stage05_v3c_endpoint_semigroup_consistency_contract": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.005871768050649688,
+        "std": 0.000839442547159968
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0058467458070066425,
+        "std": 0.0008413742362252489
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.2163570572707745e-05,
+        "std": 3.07656503602232e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009116893301614563,
+        "std": 0.00020538859535954064
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009089990061484551,
+        "std": 0.00021119851338053996
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.7805627694039645e-06,
+        "std": 8.550042635056207e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8814814814814814,
+        "std": 0.028847707272957854
+      },
+      "test_accuracy": {
+        "mean": 0.882716049382716,
+        "std": 0.009720997375323195
+      },
+      "val_output_mse": {
+        "mean": 0.044675651327108955,
+        "std": 0.0008920361180704483
+      },
+      "test_output_mse": {
+        "mean": 0.04353132903250365,
+        "std": 0.0012525671460175507
+      },
+      "runtime_proxy_seconds": {
+        "mean": 508.80385620000015,
+        "std": 19.46493489957643
+      }
+    },
+    "stage05_v3c_stronger_semigroup_weight": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.00599729493855843,
+        "std": 0.0008808258994122166
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0059706216916698045,
+        "std": 0.0008818467149723331
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.2701777366495727e-05,
+        "std": 3.170690497970636e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009229542925971909,
+        "std": 0.00022651579340825996
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009194446104016004,
+        "std": 0.00023164159661929099
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.8205356974837174e-06,
+        "std": 9.084181089313963e-07
+      },
+      "val_accuracy": {
+        "mean": 0.880246913580247,
+        "std": 0.03044155063194556
+      },
+      "test_accuracy": {
+        "mean": 0.8839506172839506,
+        "std": 0.006295085819250353
+      },
+      "val_output_mse": {
+        "mean": 0.04488751148396228,
+        "std": 0.0010595797747872267
+      },
+      "test_output_mse": {
+        "mean": 0.043719789409510136,
+        "std": 0.001438914724898345
+      },
+      "runtime_proxy_seconds": {
+        "mean": 776.1473479666723,
+        "std": 29.08378279410941
+      }
+    }
+  },
+  "configured_step_mechanism_ranking": [
+    {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "configured_step_energy_delta_vs_identity_mean": -0.0059706216916698045,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.2701777366495727e-05
+    },
+    {
+      "method_name": "stage05_v3c_endpoint_semigroup_consistency_contract",
+      "configured_step_energy_delta_vs_identity_mean": -0.0058467458070066425,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.2163570572707745e-05
+    },
+    {
+      "method_name": "stage05_v3b_stronger_traj_curr_weight",
+      "configured_step_energy_delta_vs_identity_mean": -0.005720360383603999,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.1608872426289415e-05
+    },
+    {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "configured_step_energy_delta_vs_identity_mean": -0.004980554368336933,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -1.8451788412853327e-05
+    }
+  ],
+  "pairwise_deltas_vs_v3c_control": {
+    "stage05_v3c_stronger_semigroup_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0001255268879087427,
+        "std": 4.148418778704131e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00012387588466316232,
+        "std": 4.055092217897119e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -5.382067937879815e-07,
+        "std": 9.660163621770209e-08
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -1.0445604253145335e-05,
+        "std": 2.2210744992121767e-05
+      },
+      "val_accuracy_delta": {
+        "mean": -0.0012345679012345512,
+        "std": 0.00174594266959639
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0012345679012345883,
+        "std": 0.003491885339192806
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 267.3434917666721,
+        "std": 48.49099678846574
+      }
+    }
+  },
+  "pairwise_deltas_vs_promoted_refined_v3b_reference": {
+    "stage05_v3c_endpoint_semigroup_consistency_contract": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0001282061723625235,
+        "std": 4.5124216129177764e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.00012638542340264366,
+        "std": 4.395627876284899e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -5.546981464183299e-07,
+        "std": 1.1826064436855667e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -1.01668519633021e-05,
+        "std": 2.3103682198831936e-05
+      },
+      "val_accuracy_delta": {
+        "mean": -0.0012345679012345883,
+        "std": 0.004619330107128309
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 196.1556893666675,
+        "std": 18.734439626949307
+      }
+    },
+    "stage05_v3c_stronger_semigroup_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0002537330602712662,
+        "std": 8.659851828725381e-05
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.000250261308065806,
+        "std": 8.449711588411325e-05
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -1.0929049402063115e-06,
+        "std": 2.1486058010269175e-07
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -2.0612456216447434e-05,
+        "std": 4.531409117424643e-05
+      },
+      "val_accuracy_delta": {
+        "mean": -0.0024691358024691392,
+        "std": 0.006295085819250317
+      },
+      "test_accuracy_delta": {
+        "mean": 0.0012345679012345883,
+        "std": 0.003491885339192806
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 463.4991811333396,
+        "std": 30.677452011408064
+      }
+    }
+  },
+  "pairwise_deltas_vs_stage05_v2_reference": {
+    "stage05_v3c_endpoint_semigroup_consistency_contract": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0008787045971198615,
+        "std": 0.0003973111726722482
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0008661914386697093,
+        "std": 0.0003871098756520272
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -3.7117821598544186e-06,
+        "std": 1.404011401124602e-06
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -0.00012619724946731173,
+        "std": 0.00015361691096067135
+      },
+      "val_accuracy_delta": {
+        "mean": -0.006172839506172867,
+        "std": 0.011448911722834203
+      },
+      "test_accuracy_delta": {
+        "mean": -0.004938271604938242,
+        "std": 0.01259017163850067
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 267.8415561666673,
+        "std": 18.45799225366326
+      }
+    },
+    "stage05_v3c_stronger_semigroup_weight": {
+      "shared_seeds": [
+        0,
+        1,
+        2
+      ],
+      "one_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0010042314850286043,
+        "std": 0.0004386986158013528
+      },
+      "configured_step_energy_delta_vs_identity_delta": {
+        "mean": -0.0009900673233328716,
+        "std": 0.0004275344040420975
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+        "mean": -4.2499889536424e-06,
+        "std": 1.500372906508022e-06
+      },
+      "configured_step_energy_delta_vs_local_field_only_delta": {
+        "mean": -0.00013664285372045706,
+        "std": 0.00017565208321452863
+      },
+      "val_accuracy_delta": {
+        "mean": -0.007407407407407418,
+        "std": 0.013181578088927523
+      },
+      "test_accuracy_delta": {
+        "mean": -0.0037037037037036535,
+        "std": 0.010475656017578498
+      },
+      "runtime_proxy_seconds_delta": {
+        "mean": 535.1850479333394,
+        "std": 30.222054359629727
+      }
+    }
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "best_variant_name": "stage05_v3c_stronger_semigroup_weight",
+  "narrow_v3c_refinement_keeps_one_step_mechanism_positive": true,
+  "narrow_v3c_refinement_keeps_configured_step_mechanism_positive": true,
+  "narrow_v3c_refinement_avoids_obvious_report_accuracy_regression": true,
+  "narrow_v3c_refinement_materially_beats_v3c_control": false,
+  "narrow_v3c_refinement_materially_beats_promoted_v3b_reference": true,
+  "narrow_v3c_refinement_shows_positive_gap_closure_signal_vs_v3c_control": true,
+  "narrow_v3c_refinement_shows_positive_gap_closure_signal_vs_promoted_v3b": true,
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "stage05_v3b_stronger_traj_curr_weight": {
+      "configured_step_energy": 0.6071343635851628,
+      "configured_step_residual": 0.3009346986677075,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3c_endpoint_semigroup_consistency_contract": {
+      "configured_step_energy": 0.7108547065135791,
+      "configured_step_residual": 0.3538087808376831,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3c_stronger_semigroup_weight": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "refined_minus_v3c_control": {
+      "configured_step_energy": 0.10166084736600545,
+      "configured_step_residual": 0.05130211886037872
+    },
+    "refined_minus_promoted_v3b": {
+      "configured_step_energy": 0.2053811902944217,
+      "configured_step_residual": 0.1041762010303543
+    }
+  },
+  "recommended_next_move": "promote_refined_v3c_and_recompare",
+  "decision_rationale": "The stronger semigroup-weight refinement materially improves configured-step mechanism over the promoted refined v3-B reference while preserving the current mechanism-first gate.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}

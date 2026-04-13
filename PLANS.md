@@ -409,9 +409,17 @@ Current status update:
   - v3-C improves contextual gap closure relative to the `3072`-epoch same-family reference
   - v3-C keeps the mechanism-first gate positive and avoids an obvious report-only accuracy regression
   - v3-C still does not materially displace the promoted refined v3-B reference under the current threshold
+- the narrow v3-C refinement diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
+- that refinement diagnostic says:
+  - the best tested refinement variant is `stage05_v3c_stronger_semigroup_weight`
+  - it materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
+  - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
+  - it avoids an obvious report-only accuracy regression under the current Stage 05 rule
 - the immediate next move is therefore:
-  - keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only
-  - run a narrow v3-C refinement pass rather than promote v3-C or open another charter
+  - keep `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference until recompare completes
+  - treat `stage05_v3c_stronger_semigroup_weight` as the promoted refined v3-C candidate
+  - run a fresh fixed-budget recompare of `v2` vs promoted refined `v3-B` vs refined `v3-C`
 
 ## Exploratory Acceptance Criteria
 

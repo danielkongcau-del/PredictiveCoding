@@ -32,6 +32,7 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     build_trajectory_curriculum_targets,
     build_stage05_v3b_stronger_traj_curr_weight_config,
     build_stage05_v3c_endpoint_semigroup_config,
+    build_stage05_v3c_stronger_semigroup_weight_config,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
     lambda_id_for_epoch,
@@ -364,6 +365,13 @@ def test_promoted_v3b_builder_exposes_explicit_candidate_identity() -> None:
     config = build_stage05_v3b_stronger_traj_curr_weight_config()
 
     assert config.candidate_name_override == "stage05_v3b_stronger_traj_curr_weight"
+
+
+def test_refined_v3c_builder_exposes_explicit_candidate_identity_and_weight() -> None:
+    config = build_stage05_v3c_stronger_semigroup_weight_config()
+
+    assert config.candidate_name_override == "stage05_v3c_stronger_semigroup_weight"
+    assert config.lambda_sg == pytest.approx(0.10)
 
 
 def test_v3c_endpoint_semigroup_targets_have_expected_shapes() -> None:
