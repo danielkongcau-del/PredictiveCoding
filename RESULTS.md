@@ -524,9 +524,57 @@ Current interpretation:
 - it avoids an obvious report-only accuracy regression
 
 - the current decision is therefore:
-  - keep `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference until recompare completes
-  - promote `stage05_v3c_stronger_semigroup_weight` as the next refined v3-C recompare candidate
-  - run a fresh fixed-budget `v2` vs promoted-v3B vs refined-v3C recompare as the next move
+  - keep `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference only until the fresh recompare completes
+  - promote `stage05_v3c_stronger_semigroup_weight` as the refined v3-C formal comparison candidate
+
+## FMPC Stage 05 Refined V3-C Recompare Snapshot
+
+Current formal comparison:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
+
+Current comparison result:
+
+- fixed-budget Stage 05 v2 control:
+  - mean configured-step validation energy delta vs identity:
+    - `-0.004980554368336933`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-1.8451788412853327e-05`
+  - mean validation accuracy:
+    - `0.8876543209876543`
+  - mean test accuracy:
+    - `0.8876543209876543`
+- promoted refined v3-B reference:
+  - `stage05_v3b_stronger_traj_curr_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005720360383603999`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.1608872426289415e-05`
+  - mean validation accuracy:
+    - `0.8827160493827161`
+  - mean test accuracy:
+    - `0.882716049382716`
+- refined v3-C formal comparison candidate:
+  - `stage05_v3c_stronger_semigroup_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0059706216916698045`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2701777366495727e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8839506172839506`
+
+Current interpretation:
+
+- the refined v3-C candidate materially improves configured-step mechanism over the promoted refined v3-B reference under the current threshold
+- it also materially improves configured-step mechanism over the fixed-budget v2 control
+- it keeps one-step mechanism positive and avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
+- it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the promoted refined v3-B reference
+- the current decision is therefore:
+  - promote `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat `stage05_v3b_stronger_traj_curr_weight` as the previous fixed-budget comparison reference
+  - do not treat this as any claim that Stage 05 replaces the frozen Stage 04 bridge result on `main`
 
 ## Where Detailed History Went
 

@@ -692,9 +692,16 @@ def test_stage05_v2_promoted_v3b_v3c_comparison_writes_expected_artifacts(
     assert summary["stage"] == "stage05_v2_promoted_v3b_v3c_comparison"
     assert summary["comparison_scope"] == "smoke_only"
     assert "comparison_protocol" in summary
+    assert summary["comparison_protocol"]["stage_05_v3c_candidate"]["method_name"] == (
+        "stage05_v3c_endpoint_semigroup_consistency_contract"
+    )
     assert "pairwise_deltas_vs_stage05_v2_reference" in summary
     assert "pairwise_deltas_vs_promoted_refined_v3b_reference" in summary
     assert "stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b" in summary
+    assert "refined_v3c_formal_comparison_candidate_name" in summary
+    assert "promoted_refined_v3c_materially_beats_promoted_v3b" in summary
+    assert "promoted_refined_v3c_avoids_obvious_report_accuracy_regression" in summary
+    assert "promoted_refined_v3c_replaces_promoted_v3b_as_active_reference" in summary
     assert summary["recommended_next_move"] == "run_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
     assert (
         summary["comparison_protocol"]["stage_05_v3c_candidate"]["semigroup_target_mode"]
@@ -800,6 +807,139 @@ def test_stage05_v3c_refinement_diagnostic_writes_expected_artifacts(
     assert report["decision"]["recommended_next_move"] == (
         "run_real_fixed_budget_v3c_refinement_diagnostic"
     )
+
+
+def test_stage05_v2_promoted_v3b_refined_v3c_recompare_reuses_existing_artifacts(
+    tmp_path: Path,
+) -> None:
+    contextual_path = tmp_path / "contextual_3072_summary.json"
+    _write_stage05_contextual_summary(contextual_path)
+
+    v3c_fixture = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_refined_v3c_recompare_fixture",
+        comparison_variant="stage05_v2_promoted_v3b_v3c",
+        comparison_scope="smoke_only",
+        experiment_name="stage05_refined_v3c_recompare_fixture",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_sg=0.05,
+    )
+
+    v3c_refinement = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_refined_v3c_recompare_refinement",
+        comparison_variant="stage05_v3c_refinement_diagnostic",
+        comparison_scope="smoke_only",
+        experiment_name="stage05_refined_v3c_recompare_refinement",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        reuse_stage05_v2_reference_artifacts=True,
+        reference_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2"
+        ),
+        reuse_stage05_v3b_reference_artifacts=True,
+        v3b_reference_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage05_v3b_stronger_traj_curr_weight"
+        ),
+        reuse_stage05_v3c_control_artifacts=True,
+        v3c_control_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage05_v3c_endpoint_semigroup_consistency_contract"
+        ),
+        control_lambda_sg=0.05,
+        stronger_semigroup_lambda_sg=0.10,
+    )
+
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_refined_v3c_recompare_smoke",
+        comparison_variant="stage05_v2_promoted_v3b_refined_v3c_recompare",
+        comparison_scope="fixed_budget_comparison",
+        experiment_name="stage05_v2_promoted_v3b_refined_v3c_recompare_smoke",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        reuse_stage05_v2_reference_artifacts=True,
+        reference_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage_05_two_branch_corrected_residual_core_v2"
+        ),
+        reuse_stage05_v3b_reference_artifacts=True,
+        v3b_reference_artifact_root=(
+            v3c_fixture.run_dir
+            / "runs"
+            / "stage05_v3b_stronger_traj_curr_weight"
+        ),
+        reuse_stage05_v3c_candidate_artifacts=True,
+        v3c_candidate_method_name="stage05_v3c_stronger_semigroup_weight",
+        v3c_candidate_artifact_root=(
+            v3c_refinement.run_dir
+            / "runs"
+            / "stage05_v3c_stronger_semigroup_weight"
+        ),
+        lambda_sg=0.10,
+        contextual_reference_summary_path=contextual_path,
+        contextual_reference_stage05_epochs=6,
+    )
+
+    run_dir = result.run_dir
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert summary["stage"] == "stage05_v2_promoted_v3b_refined_v3c_recompare_smoke"
+    assert summary["comparison_roles"]["active_reference_at_comparison_start"] == (
+        "stage05_v3b_stronger_traj_curr_weight"
+    )
+    assert summary["comparison_roles"]["refined_v3c_formal_comparison_candidate"] == (
+        "stage05_v3c_stronger_semigroup_weight"
+    )
+    assert summary["comparison_protocol"]["stage_05_v3c_candidate"]["method_name"] == (
+        "stage05_v3c_stronger_semigroup_weight"
+    )
+    assert summary["comparison_protocol"]["stage_05_v3c_candidate"][
+        "reference_reused_from_existing_artifacts"
+    ] is True
+    assert summary["refined_v3c_formal_comparison_candidate_name"] == (
+        "stage05_v3c_stronger_semigroup_weight"
+    )
+    assert "promoted_refined_v3c_materially_beats_promoted_v3b" in summary
+    assert "promoted_refined_v3c_avoids_obvious_report_accuracy_regression" in summary
+    assert "promoted_refined_v3c_replaces_promoted_v3b_as_active_reference" in summary
+    assert "refined_v3c" in summary["contextual_gap_closure_fractions_vs_3072_reference"]
+    assert (
+        "refined_v3c_minus_promoted_v3b"
+        in summary["contextual_gap_closure_fractions_vs_3072_reference"]
+    )
+    assert summary["recommended_next_move"] in {
+        "promote_refined_v3c_as_active_reference",
+        "retain_promoted_v3b_as_active_reference",
+    }
+
+    assert report["comparison_protocol"]["stage_05_v3c_candidate"]["method_name"] == (
+        "stage05_v3c_stronger_semigroup_weight"
+    )
+    assert report["decision"]["refined_v3c_formal_comparison_candidate_name"] == (
+        "stage05_v3c_stronger_semigroup_weight"
+    )
+    assert report["decision"]["recommended_next_move"] in {
+        "promote_refined_v3c_as_active_reference",
+        "retain_promoted_v3b_as_active_reference",
+    }
 
 
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:

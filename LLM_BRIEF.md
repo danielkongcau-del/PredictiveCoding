@@ -113,21 +113,22 @@ Current known state:
 - the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
 - the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the completed refined fixed-budget recompare now says `stage05_v3b_stronger_traj_curr_weight` materially improves configured-step mechanism over both the fixed-budget v2 control and the fixed-budget v3-A reference
+- the completed refined fixed-budget recompare now says `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over both the promoted refined v3-B reference and the fixed-budget v2 control
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
-- use the fixed-budget v2 result as the immediate control and `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget improvement reference
+- use the fixed-budget v2 result as the immediate control and `stage05_v3c_stronger_semigroup_weight` as the current fixed-budget improvement reference
 - do not continue pure same-family budget escalation from the current state
 - treat the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the previous comparison reference
 - treat the `v3-A -> refined v3-B` promotion question as closed
 - the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now already open and has a first minimal diagnostic-only probe implementation
 - the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now complete
-- that comparison says v3-C directionally improves configured-step mechanism and contextual gap closure over the promoted refined v3-B reference, but does not yet materially displace it
-- the next immediate move is now a narrow v3-C refinement pass, not another planning-only v3-C pass
+- the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
+- that recompare says `stage05_v3c_stronger_semigroup_weight` materially displaces the promoted refined v3-B reference under the current mechanism-first rule
+- the next immediate move is now a post-promotion planning/diagnostic pass, not another recompare
 
 ## Current Code Entry Points
 

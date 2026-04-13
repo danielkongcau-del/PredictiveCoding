@@ -28,11 +28,11 @@ Current working interpretation:
 - Stage 04 package-internal digging is treated as closed from the current state
 - the current open work is no longer another Stage 04 repair
 - the current narrow Stage 05 exploratory reference is still the two-branch corrected residual MeanFlow v2 core
-- the current fixed-budget Stage 05 improvement reference is now `stage05_v3b_stronger_traj_curr_weight`
-- the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result is now the previous fixed-budget comparison reference
+- the current fixed-budget Stage 05 improvement reference is now `stage05_v3c_stronger_semigroup_weight`
+- the fixed-budget `stage05_v3b_stronger_traj_curr_weight` result is now the previous fixed-budget comparison reference
 - the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now open and has a first minimal diagnostic-only probe implementation
-- the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now complete
-- the next immediate Stage 05 move is a narrow diagnostic-only v3-C refinement pass
+- the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
+- the next immediate Stage 05 move is a post-promotion planning/diagnostic pass above the active refined v3-C reference
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
 - the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed
@@ -52,7 +52,7 @@ Current working interpretation:
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it remains contextual evidence rather than the active next move
 - the fixed-budget same-family efficiency diagnostic closed the pure same-family schedule-tweak line and now serves as part of the evidence base behind the current Stage 05 `v3-B` line
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the completed fixed-budget Stage 05 refined recompare says `stage05_v3b_stronger_traj_curr_weight` materially improves configured-step mechanism over both the fixed-budget v2 control and the fixed-budget v3-A reference
+- the completed fixed-budget refined v3-C recompare says `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over both the promoted refined v3-B reference and the fixed-budget v2 control
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 

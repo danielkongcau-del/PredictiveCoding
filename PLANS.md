@@ -313,17 +313,17 @@ Current planning implication:
 - keep Stage 04 frozen on `main`
 - keep Stage 05 mechanism-first and keep task accuracy report-only
 - keep the fixed-budget v2 result as the immediate control
-- promote `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
-- treat the fixed-budget v3-A result as the previous fixed-budget comparison reference
+- promote `stage05_v3c_stronger_semigroup_weight` as the current fixed-budget Stage 05 improvement reference
+- treat `stage05_v3b_stronger_traj_curr_weight` as the previous fixed-budget comparison reference
 - do not reopen the same fixed-budget recompare question as the immediate next move
 - the post-promotion planning conclusion is now:
   - `v3-A` already addressed the target-entanglement question strongly enough that it is no longer the lead unresolved mechanism issue
   - refined `v3-B` then improved configured-step mechanism again, so trajectory-level supervision matters, but the remaining gap is not best described as another immediate v3-B promotion question
-  - the current v3-B line still lacks an explicit endpoint / semigroup consistency contract across split horizons
+  - refined `v3-C` then improved configured-step mechanism again under the formal shared-protocol recompare, so explicit endpoint / semigroup consistency also matters
 - the planning-only `Stage 05 v3-C` charter is now open and has a first minimal diagnostic-only probe implementation
-- any next Stage 05 planning or implementation pass should start from the promoted refined v3-B reference and compare against:
+- any next Stage 05 planning or implementation pass should start from the active refined v3-C reference and compare against:
   - the fixed-budget v2 control
-  - the promoted refined v3-B reference
+  - the active refined v3-C reference
 
 ### 10. Open The Stage 05 V3-C Charter
 
@@ -416,10 +416,16 @@ Current status update:
   - it materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
   - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
   - it avoids an obvious report-only accuracy regression under the current Stage 05 rule
+- the fresh fixed-budget refined v3-C recompare now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
+- that refined recompare says:
+  - `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
+  - it materially improves configured-step mechanism over the fixed-budget v2 control
+  - it avoids an obvious report-only accuracy regression
 - the immediate next move is therefore:
-  - keep `stage05_v3b_stronger_traj_curr_weight` as the active fixed-budget Stage 05 improvement reference until recompare completes
-  - treat `stage05_v3c_stronger_semigroup_weight` as the promoted refined v3-C candidate
-  - run a fresh fixed-budget recompare of `v2` vs promoted refined `v3-B` vs refined `v3-C`
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat the refined v3-C versus promoted refined v3-B promotion question as closed
+  - run a post-promotion planning/diagnostic pass to identify the next mechanism question rather than reopening the already-closed recompare
 
 ## Exploratory Acceptance Criteria
 

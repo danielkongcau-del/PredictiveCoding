@@ -546,6 +546,7 @@ class Stage05V2PromotedV3BV3CComparisonConfig:
         "runs/stage05_v3b_stronger_traj_curr_weight"
     )
     reuse_stage05_v3c_candidate_artifacts: bool = False
+    v3c_candidate_method_name: ComparisonMethodName = STAGE05_V3C_METHOD_NAME
     v3c_candidate_artifact_root: str | Path = (
         "outputs/stage_05_ef_core_probe/"
         "stage05_v2_promoted_v3b_v3c_comparison/"
@@ -583,6 +584,15 @@ class Stage05V2PromotedV3BV3CComparisonConfig:
             raise ValueError("promoted_v3b alpha warmup/ramp epochs must be non-negative.")
         if self.lambda_sg < 0.0:
             raise ValueError("lambda_sg must be non-negative.")
+        if self.v3c_candidate_method_name not in {
+            STAGE05_V3C_METHOD_NAME,
+            STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+        }:
+            raise ValueError(
+                "v3c_candidate_method_name must be one of "
+                "{'stage05_v3c_endpoint_semigroup_consistency_contract', "
+                "'stage05_v3c_stronger_semigroup_weight'}."
+            )
         if self.contextual_reference_stage05_epochs <= 0:
             raise ValueError("contextual_reference_stage05_epochs must be positive.")
         if self.configured_step_improvement_fraction_threshold < 0.0:
@@ -1452,15 +1462,23 @@ def _stage05_promoted_v3b_reference_config(
     )
 
 
-def _stage05_v3c_config(
+def _stage05_v3c_candidate_config(
     config: Stage05V2PromotedV3BV3CComparisonConfig,
     *,
     seed: int,
     output_root: Path,
 ) -> FMPCEFExploratoryProbeConfig:
-    return build_stage05_v3c_endpoint_semigroup_config(
+    if config.v3c_candidate_method_name == STAGE05_V3C_METHOD_NAME:
+        builder = build_stage05_v3c_endpoint_semigroup_config
+    elif config.v3c_candidate_method_name == STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME:
+        builder = build_stage05_v3c_stronger_semigroup_weight_config
+    else:
+        raise ValueError(
+            f"Unsupported Stage 05 v3-C candidate '{config.v3c_candidate_method_name}'."
+        )
+    return builder(
         output_root=output_root,
-        experiment_name=STAGE05_V3C_METHOD_NAME,
+        experiment_name=str(config.v3c_candidate_method_name),
         output_layout="run_id_subdir",
         run_id=f"seed_{seed}",
         run_seed=seed,
@@ -4752,8 +4770,8 @@ def _stage05_v2_promoted_v3b_v3c_protocol_payload(
             "layer_dims": [int(value) for value in config.stage05_layer_dims],
         },
         "stage_05_v3c_candidate": {
-            "method_name": STAGE05_V3C_METHOD_NAME,
-            "candidate_name": STAGE05_V3C_METHOD_NAME,
+            "method_name": str(config.v3c_candidate_method_name),
+            "candidate_name": str(config.v3c_candidate_method_name),
             "transport_family": "two_branch_residual_meanflow_core",
             "explicit_transport_drift_decomposition_enabled": True,
             "trajectory_curriculum_enabled": True,
@@ -4815,9 +4833,10 @@ def _stage05_v2_promoted_v3b_v3c_decision(
     pairwise_v3c_vs_v3b: dict[str, Any],
     contextual_reference: dict[str, Any] | None,
 ) -> tuple[dict[str, Any], str]:
+    v3c_candidate_method_name = str(config.v3c_candidate_method_name)
     v2_rows = _method_rows(rows, STAGE05_V2_METHOD_NAME)
     v3b_rows = _method_rows(rows, STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME)
-    v3c_rows = _method_rows(rows, STAGE05_V3C_METHOD_NAME)
+    v3c_rows = _method_rows(rows, v3c_candidate_method_name)
     v2_by_seed = {int(row["seed"]): row for row in v2_rows}
     v3b_by_seed = {int(row["seed"]): row for row in v3b_rows}
     v3c_by_seed = {int(row["seed"]): row for row in v3c_rows}
@@ -4905,10 +4924,10 @@ def _stage05_v2_promoted_v3b_v3c_decision(
             ]["mean"]
         )
         v3c_energy = float(
-            by_method[STAGE05_V3C_METHOD_NAME]["configured_step_energy_delta_vs_identity"]["mean"]
+            by_method[v3c_candidate_method_name]["configured_step_energy_delta_vs_identity"]["mean"]
         )
         v3c_residual = float(
-            by_method[STAGE05_V3C_METHOD_NAME][
+            by_method[v3c_candidate_method_name][
                 "configured_step_fixed_point_residual_delta_vs_identity"
             ]["mean"]
         )
@@ -4935,6 +4954,7 @@ def _stage05_v2_promoted_v3b_v3c_decision(
                 "configured_step_residual": _gap_fraction(v2_residual, v3c_residual, reference_residual),
             },
         }
+        gap_closure_payload["refined_v3c"] = dict(gap_closure_payload["stage05_v3c"])
         gap_closure_payload["v3c_minus_promoted_v3b"] = {
             "configured_step_energy": float(
                 gap_closure_payload["stage05_v3c"]["configured_step_energy"]
@@ -4945,6 +4965,9 @@ def _stage05_v2_promoted_v3b_v3c_decision(
                 - gap_closure_payload["promoted_v3b"]["configured_step_residual"]
             ),
         }
+        gap_closure_payload["refined_v3c_minus_promoted_v3b"] = dict(
+            gap_closure_payload["v3c_minus_promoted_v3b"]
+        )
         positive_gap_closure = bool(
             gap_closure_payload["stage05_v3c"]["configured_step_energy"]
             > gap_closure_payload["promoted_v3b"]["configured_step_energy"]
@@ -4968,12 +4991,13 @@ def _stage05_v2_promoted_v3b_v3c_decision(
             and avoids_obvious_accuracy_regression
             and positive_gap_closure
         ):
-            recommended_next_move = "promote_v3c_as_active_reference"
+            recommended_next_move = "promote_refined_v3c_as_active_reference"
             gap_closure_decision = "positive_gap_closure_signal_vs_promoted_v3b"
             rationale = (
-                "The v3-C diagnostic probe improves configured-step mechanism over the promoted "
-                "refined v3-B reference, preserves the mechanism-first gate, and improves contextual "
-                "gap closure versus the 3072-epoch same-family reference."
+                f"The refined v3-C formal comparison candidate `{v3c_candidate_method_name}` "
+                "improves configured-step mechanism over the promoted refined v3-B reference, "
+                "preserves the mechanism-first gate, and improves contextual gap closure versus "
+                "the 3072-epoch same-family reference."
             )
         elif (
             artifact_pass
@@ -4981,27 +5005,30 @@ def _stage05_v2_promoted_v3b_v3c_decision(
             and configured_step_positive
             and avoids_obvious_accuracy_regression
         ):
-            recommended_next_move = "keep_v3c_diagnostic_only_and_refine_implementation"
+            recommended_next_move = "retain_promoted_v3b_as_active_reference"
             gap_closure_decision = (
                 "directional_gain_without_clear_gap_closure"
                 if (energy_delta < 0.0 and residual_delta < 0.0)
                 else "no_positive_gap_closure_signal_vs_promoted_v3b"
             )
             rationale = (
-                "The v3-C diagnostic probe preserves the mechanism-first gate but does not yet "
-                "materially and cleanly displace the promoted refined v3-B reference."
+                f"The refined v3-C formal comparison candidate `{v3c_candidate_method_name}` "
+                "preserves the mechanism-first gate but does not yet materially and cleanly "
+                "displace the promoted refined v3-B reference."
             )
         else:
             recommended_next_move = "retain_promoted_v3b_as_active_reference"
             gap_closure_decision = "no_positive_gap_closure_signal_vs_promoted_v3b"
             rationale = (
-                "The v3-C diagnostic probe does not yet show a strong enough configured-step gain "
-                "over the promoted refined v3-B reference."
+                f"The refined v3-C formal comparison candidate `{v3c_candidate_method_name}` "
+                "does not yet show a strong enough configured-step gain over the promoted refined "
+                "v3-B reference."
             )
 
     return (
         {
             "deterministic_artifact_checks_all_pass": bool(artifact_pass),
+            "refined_v3c_formal_comparison_candidate_name": str(v3c_candidate_method_name),
             "stage05_v3c_keeps_one_step_mechanism_positive": bool(one_step_positive),
             "stage05_v3c_keeps_configured_step_mechanism_positive": bool(configured_step_positive),
             "stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b": bool(
@@ -5012,6 +5039,15 @@ def _stage05_v2_promoted_v3b_v3c_decision(
             ),
             "stage05_v3c_shows_positive_gap_closure_signal_vs_promoted_v3b": bool(
                 positive_gap_closure
+            ),
+            "promoted_refined_v3c_materially_beats_promoted_v3b": bool(
+                materially_improves_vs_v3b
+            ),
+            "promoted_refined_v3c_avoids_obvious_report_accuracy_regression": bool(
+                avoids_obvious_accuracy_regression
+            ),
+            "promoted_refined_v3c_replaces_promoted_v3b_as_active_reference": bool(
+                recommended_next_move == "promote_refined_v3c_as_active_reference"
             ),
             "contextual_gap_closure_fractions_vs_3072_reference": gap_closure_payload,
             "gap_closure_decision": str(gap_closure_decision),
@@ -5034,9 +5070,9 @@ def _stage05_v2_promoted_v3b_v3c_supports_lines(summary: dict[str, Any]) -> list
         return lines
     lines.append(
         (
-            f"The diagnostic-only v3-C candidate `{candidate_name}` materially improves configured-step mechanism over the promoted refined v3-B reference."
-            if bool(summary["stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b"])
-            else f"The diagnostic-only v3-C candidate `{candidate_name}` does not materially improve configured-step mechanism over the promoted refined v3-B reference."
+            f"The v3-C formal comparison candidate `{candidate_name}` materially improves configured-step mechanism over the promoted refined v3-B reference."
+            if bool(summary["promoted_refined_v3c_materially_beats_promoted_v3b"])
+            else f"The v3-C formal comparison candidate `{candidate_name}` does not materially improve configured-step mechanism over the promoted refined v3-B reference."
         )
     )
     return lines
@@ -5053,6 +5089,7 @@ def _stage05_v2_promoted_v3b_v3c_does_not_support_lines() -> list[str]:
 def _stage05_v2_promoted_v3b_v3c_report_markdown(report: dict[str, Any]) -> str:
     protocol = report["comparison_protocol"]
     decision = report["decision"]
+    candidate_name = str(protocol["stage_05_v3c_candidate"]["candidate_name"])
     lines = [
         "# Stage 05 v2 vs Promoted v3-B vs v3-C Comparison",
         "",
@@ -5064,6 +5101,7 @@ def _stage05_v2_promoted_v3b_v3c_report_markdown(report: dict[str, Any]) -> str:
         f"- Stage 05 epochs: `{protocol['stage_05_v3c_candidate']['epochs']}`",
         "",
         "## Decision",
+        f"- refined v3-C formal comparison candidate: `{candidate_name}`",
         f"- `stage05_v3c_keeps_one_step_mechanism_positive`: `{decision['stage05_v3c_keeps_one_step_mechanism_positive']}`",
         f"- `stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b`: `{decision['stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b']}`",
         f"- `stage05_v3c_shows_positive_gap_closure_signal_vs_promoted_v3b`: `{decision['stage05_v3c_shows_positive_gap_closure_signal_vs_promoted_v3b']}`",
@@ -5212,8 +5250,8 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
                     expected_dataset_name=config.dataset_name,
                     expected_batch_size=int(config.batch_size),
                     expected_shuffle_batches=bool(config.shuffle_batches),
-                    method_name=STAGE05_V3C_METHOD_NAME,
-                    stage_name="FMPC Stage 05 EF Core Probe v3-C Endpoint Semigroup Candidate",
+                    method_name=str(config.v3c_candidate_method_name),
+                    stage_name="FMPC Stage 05 EF Core Probe v3-C Formal Comparison Candidate",
                     expected_total_training_epochs=int(config.stage05_epochs),
                     expected_eval_steps=int(config.stage05_eval_steps),
                     expected_layer_dims=config.stage05_layer_dims,
@@ -5228,7 +5266,7 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
                 )
             )
         else:
-            v3c_config = _stage05_v3c_config(config, seed=seed, output_root=runs_root)
+            v3c_config = _stage05_v3c_candidate_config(config, seed=seed, output_root=runs_root)
             v3c_result = run_fmpc_ef_exploratory_probe(v3c_config)
             rows.append(
                 _stage05_core_row(
@@ -5237,8 +5275,8 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
                     seed=seed,
                     result=v3c_result,
                     config=v3c_config,
-                    method_name=STAGE05_V3C_METHOD_NAME,
-                    stage_name="FMPC Stage 05 EF Core Probe v3-C Endpoint Semigroup Candidate",
+                    method_name=str(config.v3c_candidate_method_name),
+                    stage_name="FMPC Stage 05 EF Core Probe v3-C Formal Comparison Candidate",
                 )
             )
 
@@ -5266,7 +5304,9 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
         STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME: _method_summary(
             _method_rows(rows, STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME)
         ),
-        STAGE05_V3C_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V3C_METHOD_NAME)),
+        str(config.v3c_candidate_method_name): _method_summary(
+            _method_rows(rows, str(config.v3c_candidate_method_name))
+        ),
     }
     pairwise_v3b_vs_v2 = _pairwise_summary(
         rows,
@@ -5275,12 +5315,12 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
     )
     pairwise_v3c_vs_v2 = _pairwise_summary(
         rows,
-        candidate_method=STAGE05_V3C_METHOD_NAME,
+        candidate_method=str(config.v3c_candidate_method_name),
         reference_method=STAGE05_V2_METHOD_NAME,
     )
     pairwise_v3c_vs_v3b = _pairwise_summary(
         rows,
-        candidate_method=STAGE05_V3C_METHOD_NAME,
+        candidate_method=str(config.v3c_candidate_method_name),
         reference_method=STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
     )
     contextual_reference = (
@@ -5310,7 +5350,7 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
             (
                 STAGE05_V2_METHOD_NAME,
                 STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
-                STAGE05_V3C_METHOD_NAME,
+                str(config.v3c_candidate_method_name),
             ),
             key=lambda method_name: (
                 float(by_method[method_name]["configured_step_energy_delta_vs_identity"]["mean"]),
@@ -5329,10 +5369,15 @@ def run_stage05_v2_promoted_v3b_v3c_comparison(
         "comparison_scope": str(config.comparison_scope),
         "num_runs": int(len(rows)),
         "comparison_protocol": _stage05_v2_promoted_v3b_v3c_protocol_payload(config),
+        "comparison_roles": {
+            "immediate_control": STAGE05_V2_METHOD_NAME,
+            "active_reference_at_comparison_start": STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
+            "refined_v3c_formal_comparison_candidate": str(config.v3c_candidate_method_name),
+        },
         "candidate_identities": [
             STAGE05_V2_METHOD_NAME,
             STAGE05_V3B_STRONGER_TRAJ_METHOD_NAME,
-            STAGE05_V3C_METHOD_NAME,
+            str(config.v3c_candidate_method_name),
         ],
         "by_method": by_method,
         "configured_step_mechanism_ranking": configured_step_mechanism_ranking,

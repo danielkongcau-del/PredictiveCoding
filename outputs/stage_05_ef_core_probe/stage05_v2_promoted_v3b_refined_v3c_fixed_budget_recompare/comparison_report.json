@@ -1,0 +1,326 @@
+{
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_control": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": false,
+      "trajectory_curriculum_enabled": false,
+      "endpoint_semigroup_consistency_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_promoted_v3b_reference": {
+      "method_name": "stage05_v3b_stronger_traj_curr_weight",
+      "candidate_name": "stage05_v3b_stronger_traj_curr_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": false,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/runs/stage05_v3b_stronger_traj_curr_weight",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_v3c_candidate": {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "candidate_name": "stage05_v3c_stronger_semigroup_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "semigroup_split_identity": "s = t + alpha * r; r_s = (1 - alpha) * r",
+      "semigroup_target_mode": "single_sided_detached_split_endpoint",
+      "semigroup_target_is_single_sided_detached": true,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/runs/stage05_v3c_stronger_semigroup_weight",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "contextual_3072_reference": {
+      "source_summary_path": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+      "epochs": 3072
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_v3b_reference_artifacts": true,
+      "reuse_stage05_v3c_candidate_artifacts": true
+    }
+  },
+  "decision": {
+    "deterministic_artifact_checks_all_pass": true,
+    "refined_v3c_formal_comparison_candidate_name": "stage05_v3c_stronger_semigroup_weight",
+    "stage05_v3c_keeps_one_step_mechanism_positive": true,
+    "stage05_v3c_keeps_configured_step_mechanism_positive": true,
+    "stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b": true,
+    "stage05_v3c_avoids_obvious_report_accuracy_regression": true,
+    "stage05_v3c_shows_positive_gap_closure_signal_vs_promoted_v3b": true,
+    "promoted_refined_v3c_materially_beats_promoted_v3b": true,
+    "promoted_refined_v3c_avoids_obvious_report_accuracy_regression": true,
+    "promoted_refined_v3c_replaces_promoted_v3b_as_active_reference": true,
+    "contextual_gap_closure_fractions_vs_3072_reference": {
+      "promoted_v3b": {
+        "configured_step_energy": 0.6071343635851628,
+        "configured_step_residual": 0.3009346986677075
+      },
+      "stage05_v3c": {
+        "configured_step_energy": 0.8125155538795845,
+        "configured_step_residual": 0.4051108996980618
+      },
+      "refined_v3c": {
+        "configured_step_energy": 0.8125155538795845,
+        "configured_step_residual": 0.4051108996980618
+      },
+      "v3c_minus_promoted_v3b": {
+        "configured_step_energy": 0.2053811902944217,
+        "configured_step_residual": 0.1041762010303543
+      },
+      "refined_v3c_minus_promoted_v3b": {
+        "configured_step_energy": 0.2053811902944217,
+        "configured_step_residual": 0.1041762010303543
+      }
+    },
+    "gap_closure_decision": "positive_gap_closure_signal_vs_promoted_v3b",
+    "recommended_next_move": "promote_refined_v3c_as_active_reference",
+    "decision_rationale": "The refined v3-C formal comparison candidate `stage05_v3c_stronger_semigroup_weight` improves configured-step mechanism over the promoted refined v3-B reference, preserves the mechanism-first gate, and improves contextual gap closure versus the 3072-epoch same-family reference."
+  },
+  "pairwise_deltas_vs_stage05_v2_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0010042314850286043,
+      "std": 0.0004386986158013528
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0009900673233328716,
+      "std": 0.0004275344040420975
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -4.2499889536424e-06,
+      "std": 1.500372906508022e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00013664285372045706,
+      "std": 0.00017565208321452863
+    },
+    "val_accuracy_delta": {
+      "mean": -0.007407407407407418,
+      "std": 0.013181578088927523
+    },
+    "test_accuracy_delta": {
+      "mean": -0.0037037037037036535,
+      "std": 0.010475656017578498
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 535.1850479333394,
+      "std": 30.222054359629727
+    }
+  },
+  "pairwise_deltas_vs_promoted_refined_v3b_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0002537330602712662,
+      "std": 8.659851828725381e-05
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.000250261308065806,
+      "std": 8.449711588411325e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -1.0929049402063115e-06,
+      "std": 2.1486058010269175e-07
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -2.0612456216447434e-05,
+      "std": 4.531409117424643e-05
+    },
+    "val_accuracy_delta": {
+      "mean": -0.0024691358024691392,
+      "std": 0.006295085819250317
+    },
+    "test_accuracy_delta": {
+      "mean": 0.0012345679012345883,
+      "std": 0.003491885339192806
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 463.4991811333396,
+      "std": 30.677452011408064
+    }
+  },
+  "pairwise_promoted_refined_v3b_vs_v2": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.000750498424757338,
+      "std": 0.00035223086400259715
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0007398060152670657,
+      "std": 0.0003432208249884622
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -3.1570840134360887e-06,
+      "std": 1.2861731080437265e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00011603039750400963,
+      "std": 0.00013078776703916322
+    },
+    "val_accuracy_delta": {
+      "mean": -0.0049382716049382784,
+      "std": 0.006983770678385665
+    },
+    "test_accuracy_delta": {
+      "mean": -0.004938271604938242,
+      "std": 0.01259017163850067
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 71.68586679999983,
+      "std": 2.5287478826144985
+    }
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "promoted_v3b": {
+      "configured_step_energy": 0.6071343635851628,
+      "configured_step_residual": 0.3009346986677075
+    },
+    "stage05_v3c": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618
+    },
+    "refined_v3c": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618
+    },
+    "v3c_minus_promoted_v3b": {
+      "configured_step_energy": 0.2053811902944217,
+      "configured_step_residual": 0.1041762010303543
+    },
+    "refined_v3c_minus_promoted_v3b": {
+      "configured_step_energy": 0.2053811902944217,
+      "configured_step_residual": 0.1041762010303543
+    }
+  },
+  "supports": [
+    "The comparison preserves the Stage 05 mechanism-first contract.",
+    "The comparison exposes explicit pairwise deltas versus both the fixed-budget v2 control and the promoted refined v3-B reference.",
+    "The diagnostic-only v3-C candidate `stage05_v3c_stronger_semigroup_weight` makes endpoint / semigroup consistency identity explicit in artifacts.",
+    "The v3-C formal comparison candidate `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over the promoted refined v3-B reference."
+  ],
+  "does_not_support": [
+    "This comparison does not justify replacing the frozen Stage 04 bridge on main.",
+    "This comparison does not promote task accuracy to the Stage 05 gate.",
+    "This comparison does not reopen Stage 04 package-internal work."
+  ]
+}

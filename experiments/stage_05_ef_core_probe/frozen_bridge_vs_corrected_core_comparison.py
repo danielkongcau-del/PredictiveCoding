@@ -127,6 +127,13 @@ def run(
             **overrides,
         )
         return run_stage05_v2_promoted_v3b_v3c_comparison(config)
+    if comparison_variant == "stage05_v2_promoted_v3b_refined_v3c_recompare":
+        config = Stage05V2PromotedV3BV3CComparisonConfig(
+            output_root=output_root,
+            run_id=run_id,
+            **overrides,
+        )
+        return run_stage05_v2_promoted_v3b_v3c_comparison(config)
     raise ValueError(f"Unsupported comparison_variant '{comparison_variant}'.")
 
 

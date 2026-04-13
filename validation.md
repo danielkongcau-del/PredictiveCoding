@@ -226,14 +226,16 @@ The next validation move is:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_v3b_fixed_budget_comparison/`
 - treat the fixed-budget v3-B refinement diagnostic as the current immediate v3-B follow-up evidence under:
   - `outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic/`
-- treat the fixed-budget refined v3-B recompare as the current active Stage 05 improvement-reference decision under:
+- treat the fixed-budget refined v3-B recompare as the completed v3-B promotion decision under:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
+- treat the fixed-budget refined v3-C recompare as the current active Stage 05 improvement-reference decision under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
 - do not continue pure same-family budget escalation from this state
 - do not continue pure same-family efficiency tweaking from this state
 - keep the fixed-budget Stage 05 v2 result as the immediate control
-- keep `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
-- treat the fixed-budget Stage 05 v3-A result as the previous comparison reference
-- treat the `v3-A -> refined v3-B` promotion question as closed
+- keep `stage05_v3c_stronger_semigroup_weight` as the current fixed-budget Stage 05 improvement reference
+- treat `stage05_v3b_stronger_traj_curr_weight` as the previous comparison reference
+- treat the refined v3-C versus promoted refined v3-B promotion question as closed
 - keep `Stage 05 v3-C` framed as a working-hypothesis-driven endpoint / semigroup question, but note that the first minimal diagnostic-only v3-C probe now already exists
 
 Any next narrower Stage 05 follow-up should preserve:
@@ -243,13 +245,13 @@ Any next narrower Stage 05 follow-up should preserve:
 - the fixed-budget v2 result as the immediate control
 - the mechanism-first validation contract for Stage 05
 - task accuracy as a secondary signal only
-- the promoted refined v3-B scaffold as the current Stage 05 improvement reference
-- the current v3-C probe as diagnostic-only unless a real fixed-budget comparison says otherwise
+- the refined v3-C scaffold as the current Stage 05 improvement reference
+- the original v3-C probe as diagnostic-only control rather than the active fixed-budget reference
 
 Any next narrower Stage 05 follow-up should be accepted only if it:
 
 - preserves explicit transport-drift decomposition from v3-A
-- preserves the promoted refined v3-B trajectory-curriculum scaffold as the active comparison reference
+- preserves the refined v3-C scaffold as the active comparison reference
 - keeps artifact-independent target construction
 - keeps deterministic artifact generation
 - keeps one-step mechanism metrics positive under the current Stage 05 rule
@@ -263,7 +265,7 @@ Any next narrower Stage 05 follow-up must minimally produce:
 
 - a comparison run or suite against:
   - the fixed-budget Stage 05 v2 control
-  - `stage05_v3b_stronger_traj_curr_weight`
+  - `stage05_v3c_stronger_semigroup_weight`
 - a dedicated artifact directory
 - aggregate summary fields that report:
   - whether endpoint / semigroup consistency is enabled
@@ -296,10 +298,16 @@ Current v3-C status:
   - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
   - it keeps one-step and configured-step mechanism positive
   - it avoids an obvious report-only accuracy regression
+- the fresh fixed-budget refined v3-C recompare now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
+- that refined recompare says:
+  - `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
+  - it materially improves configured-step mechanism over fixed-budget `v2`
+  - it avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
 - the next acceptance step is therefore:
-  - keep the promoted refined v3-B result as the active Stage 05 improvement reference until a fresh recompare is complete
-  - treat `stage05_v3c_stronger_semigroup_weight` as the refined v3-C recompare candidate
-  - require a fresh fixed-budget `v2` vs promoted-v3B vs refined-v3C comparison before any promotion claim
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
+  - keep fixed-budget `v2` as the immediate control
+  - require any next mechanism idea to beat the active refined v3-C reference under the same mechanism-first rule
 
 It should not be framed as:
 
@@ -336,6 +344,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare/`
 - Stage 05 v3-C refinement diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
+- Stage 05 refined v3-C recompare:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
 
 ## Document Layering
 
