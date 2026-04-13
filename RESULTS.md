@@ -576,6 +576,45 @@ Current interpretation:
   - treat `stage05_v3b_stronger_traj_curr_weight` as the previous fixed-budget comparison reference
   - do not treat this as any claim that Stage 05 replaces the frozen Stage 04 bridge result on `main`
 
+## First Exact-Fusion Consolidation Comparison
+
+Artifact:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison/`
+
+Compared candidates:
+
+- active refined v3-C reference:
+  - `stage05_v3c_stronger_semigroup_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0059706216916698045`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2701777366495727e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8839506172839506`
+- exact-fusion consolidation candidate:
+  - `stage05_v3c_fused_trajectory_semigroup_contract`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.005970657762441119`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2701930872562526e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8839506172839506`
+
+Current interpretation:
+
+- the fused candidate preserves the current mechanism-first gate and avoids an obvious report-only accuracy regression
+- it shows a positive but very small contextual gap-closure movement beyond the active refined v3-C reference
+- it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the current decision is therefore:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - keep `stage05_v3c_fused_trajectory_semigroup_contract` as the first consolidation candidate rather than promoting it
+  - refine the fusion direction rather than reopening promotion, budget escalation, or a new charter
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

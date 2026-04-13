@@ -144,6 +144,13 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
     - `absorb_semigroup_into_main_trajectory_contract`
     - do not keep semigroup consistency framed as a permanently attached auxiliary-only term
     - do not yet refactor the main contract around endpoint / semigroup consistency alone
+- the first fixed-budget fused-contract comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison/`
+- that fused-contract comparison shows:
+  - `stage05_v3c_fused_trajectory_semigroup_contract` keeps one-step and configured-step mechanism positive
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure slightly beyond the active refined v3-C reference
+  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -155,7 +162,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as a repeat of the already-closed refined v3-C versus promoted refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next step as a narrow implementation-first contract-consolidation pass above `stage05_v3c_stronger_semigroup_weight`
+- if Stage 05 continues, draft the next step as a narrow implementation-first fusion-direction refinement above `stage05_v3c_fused_trajectory_semigroup_contract`, while keeping `stage05_v3c_stronger_semigroup_weight` as the active reference
 - keep:
   - the fixed-budget v2 control
   - `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget improvement reference

@@ -310,6 +310,13 @@ Current v3-C status:
   - `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over `stage05_v3b_stronger_traj_curr_weight` under the current threshold
   - it materially improves configured-step mechanism over fixed-budget `v2`
   - it avoids an obvious report-only accuracy regression relative to the promoted refined v3-B reference
+- the first fixed-budget fused-contract comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison/`
+- that fused-contract comparison says:
+  - `stage05_v3c_fused_trajectory_semigroup_contract` keeps one-step and configured-step mechanism positive
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure relative to the `3072`-epoch same-family reference beyond the active refined v3-C reference
+  - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
 - the current repository-level structural interpretation is now:
   - `absorb_semigroup_into_main_trajectory_contract`
   - current evidence supports semigroup consistency as part of the main trajectory contract
@@ -317,7 +324,8 @@ Current v3-C status:
 - the next acceptance step is therefore:
   - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
   - keep fixed-budget `v2` as the immediate control
-  - require any next contract-consolidation implementation to beat the active refined v3-C reference under the same mechanism-first rule
+  - treat `stage05_v3c_fused_trajectory_semigroup_contract` as the first consolidation candidate rather than the active reference
+  - require any next fusion-direction refinement to beat the active refined v3-C reference under the same mechanism-first rule
 
 It should not be framed as:
 

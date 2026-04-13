@@ -29,9 +29,11 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     build_corrected_residual_identity_target,
     build_endpoint_semigroup_targets,
     build_explicit_transport_drift_bootstrap_targets,
+    build_fused_trajectory_semigroup_targets,
     build_trajectory_curriculum_targets,
     build_stage05_v3b_stronger_traj_curr_weight_config,
     build_stage05_v3c_endpoint_semigroup_config,
+    build_stage05_v3c_fused_trajectory_semigroup_contract_config,
     build_stage05_v3c_stronger_semigroup_weight_config,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
@@ -374,6 +376,14 @@ def test_refined_v3c_builder_exposes_explicit_candidate_identity_and_weight() ->
     assert config.lambda_sg == pytest.approx(0.10)
 
 
+def test_fused_v3c_builder_exposes_explicit_candidate_identity_and_fusion_flag() -> None:
+    config = build_stage05_v3c_fused_trajectory_semigroup_contract_config()
+
+    assert config.candidate_name_override == "stage05_v3c_fused_trajectory_semigroup_contract"
+    assert config.use_fused_trajectory_semigroup_contract is True
+    assert config.lambda_sg == pytest.approx(0.10)
+
+
 def test_v3c_endpoint_semigroup_targets_have_expected_shapes() -> None:
     config = build_stage05_v3c_endpoint_semigroup_config(
         run_seed=0,
@@ -416,6 +426,62 @@ def test_v3c_endpoint_semigroup_targets_have_expected_shapes() -> None:
     assert targets.residual_target.shape == context.z0.shape
     assert targets.loss_weights.shape == (context.z0.shape[0], 1)
     np.testing.assert_allclose(targets.split_endpoint_target, targets.split_endpoint, atol=1e-12, rtol=1e-12)
+
+
+def test_fused_v3c_targets_have_expected_shapes() -> None:
+    config = build_stage05_v3c_fused_trajectory_semigroup_contract_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    psi_network = _make_psi_network(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    trajectory_targets = build_trajectory_curriculum_targets(
+        context,
+        psi_network,
+        config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+    )
+    semigroup_targets = build_endpoint_semigroup_targets(
+        context,
+        psi_network,
+        config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+    )
+    fused_targets = build_fused_trajectory_semigroup_targets(
+        trajectory_targets.residual_target,
+        semigroup_targets.residual_target,
+        semigroup_targets.loss_weights,
+        lambda_traj_curr=config.lambda_traj_curr,
+        lambda_sg=config.lambda_sg,
+    )
+
+    assert fused_targets.trajectory_residual_target.shape == context.z0.shape
+    assert fused_targets.semigroup_residual_target.shape == context.z0.shape
+    assert fused_targets.fused_residual_target.shape == context.z0.shape
+    assert fused_targets.fusion_weights.shape == (context.z0.shape[0], 1)
+    assert fused_targets.fusion_rho.shape == (context.z0.shape[0], 1)
+    assert np.all(fused_targets.fusion_weights > 0.0)
+    assert np.all(fused_targets.fusion_rho > 0.0)
+    assert np.all(fused_targets.fusion_rho < 1.0)
 
 
 def test_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
@@ -481,6 +547,73 @@ def test_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     assert "lambda_sg" in epoch_rows[0]
     assert "train_semigroup_loss" in epoch_rows[0]
     assert any(float(row["train_semigroup_loss"]) > 0.0 for row in epoch_rows)
+
+
+def test_fused_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3c_fused_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        **{
+            key: value
+            for key, value in build_stage05_v3c_fused_trajectory_semigroup_contract_config(
+                output_root=tmp_path,
+                run_id="unused",
+                epochs=4,
+                batch_size=128,
+                eval_steps=8,
+                transport_steps=2,
+                layer_dims=(64, 16, 10),
+            ).__dict__.items()
+            if key
+            not in {
+                "output_root",
+                "run_id",
+                "output_layout",
+                "warmup_epochs",
+                "epochs",
+                "batch_size",
+                "eval_steps",
+                "transport_steps",
+                "layer_dims",
+            }
+        },
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert summary["candidate_name"] == "stage05_v3c_fused_trajectory_semigroup_contract"
+    assert summary["endpoint_semigroup_consistency_enabled"] is True
+    assert summary["contract_fusion_enabled"] is True
+    assert summary["semigroup_consistency_absorbed_into_main_trajectory_contract"] is True
+    assert summary["semigroup_consistency_is_auxiliary_only"] is False
+    assert summary["exact_detached_target_barycentric_fusion_enabled"] is True
+    assert summary["main_trajectory_contract_identity"] == "exact_detached_target_barycentric_fusion"
+    assert summary["pairwise_deltas_vs_active_refined_v3c_reference"]["status"] == (
+        "pending_real_fixed_budget_v2_vs_active_v3c_vs_fused_contract_comparison"
+    )
+    assert summary["recommended_next_move"] == (
+        "run_fixed_budget_v2_vs_active_v3c_vs_fused_contract_comparison"
+    )
+
+    assert config["transport"]["candidate_name"] == "stage05_v3c_fused_trajectory_semigroup_contract"
+    assert config["transport"]["contract_fusion_enabled"] is True
+    assert config["transport"]["semigroup_consistency_absorbed_into_main_trajectory_contract"] is True
+    assert config["transport"]["semigroup_consistency_is_auxiliary_only"] is False
+    assert config["transport"]["exact_detached_target_barycentric_fusion_enabled"] is True
+    assert config["transport"]["main_trajectory_contract_identity"] == (
+        "exact_detached_target_barycentric_fusion"
+    )
+
+    assert "train_main_traj_contract_loss" in epoch_rows[0]
+    assert any(float(row["train_main_traj_contract_loss"]) > 0.0 for row in epoch_rows)
 
 
 def test_corrected_residual_identity_target_includes_anchor_derivative_term() -> None:

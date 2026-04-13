@@ -273,6 +273,16 @@ Current probe status:
     - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the promoted refined v3-B reference
     - the current recompare decision is therefore:
       - `recommended_next_move = promote_refined_v3c_as_active_reference`
+  - the first fixed-budget fused-contract comparison now also exists under:
+    - [outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison)
+  - that fused-contract comparison says:
+    - the fused candidate is `stage05_v3c_fused_trajectory_semigroup_contract`
+    - it keeps one-step and configured-step mechanism positive on all comparison seeds
+    - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+    - it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the active refined v3-C reference
+    - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+    - the current fused-contract decision is therefore:
+      - `recommended_next_move = keep_fusion_direction_and_refine_implementation`
   - the current repository-level structural interpretation is now:
     - `absorb_semigroup_into_main_trajectory_contract`
     - endpoint / semigroup consistency now looks complementary to the main trajectory contract rather than like a permanently attached auxiliary-only term
@@ -295,12 +305,13 @@ Current probe status:
 - Treat the refined v3-C versus promoted refined v3-B promotion question as closed.
 - Keep `stage05_v3c_endpoint_semigroup_consistency_contract` as the original diagnostic-only v3-C control, not as the active fixed-budget reference.
 - Treat `stage05_v3c_stronger_semigroup_weight` as the promoted refined v3-C result, not as a remaining recompare candidate.
+- Treat `stage05_v3c_fused_trajectory_semigroup_contract` as the first contract-consolidation candidate, not as the active fixed-budget reference.
 - Adopt `absorb_semigroup_into_main_trajectory_contract` as the current Stage 05 structural interpretation.
 - Do not keep semigroup consistency framed as a permanently attached auxiliary-only term in future mainline work.
 - Do not yet refactor the main Stage 05 contract around endpoint / semigroup consistency alone.
 - Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
 - No new planning-only Stage 05 charter is required by the current evidence chain.
-- If Stage 05 continues, the next pass should implement a contract-consolidation refactor above `stage05_v3c_stronger_semigroup_weight` so semigroup consistency is absorbed into the main trajectory contract rather than kept as another attached loss stack.
+- If Stage 05 continues, the next pass should keep `stage05_v3c_stronger_semigroup_weight` as the active reference and run a narrow fusion-direction refinement above `stage05_v3c_fused_trajectory_semigroup_contract`.
 
 ## Reopen Conditions
 
@@ -357,3 +368,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic)
 - Stage 05 refined v3-C recompare artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare)
+- Stage 05 fused-contract comparison artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison)

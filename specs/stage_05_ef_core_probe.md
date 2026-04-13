@@ -788,3 +788,44 @@ No new Stage 05 charter is opened by this conclusion.
 The next implementation question inside the existing Stage 05 family is:
 
 - how to refactor the current refined v3-C layering into one main trajectory contract that internalizes semigroup consistency without continuing additive loss stacking
+
+#### 18.13.9 First exact-fusion consolidation pass
+
+The first contract-consolidation implementation inside the current Stage 05 family is:
+
+- `stage05_v3c_fused_trajectory_semigroup_contract`
+
+It keeps:
+
+- the Stage 05 v3-A explicit transport-drift decomposition
+- the Stage 05 v3-B trajectory-curriculum scaffold
+- the Stage 05 v3-C single-sided detached semigroup target construction
+
+It then replaces the stacked trajectory-level update:
+
+- `lambda_tc * ||m_hat - m_traj_star||^2`
+- `+ lambda_sg * r^2 * ||m_hat - m_sg_star||^2`
+
+with one unified detached-target main trajectory contract:
+
+- `W = lambda_tc + lambda_sg * r^2`
+- `m_fuse_star = (lambda_tc * m_traj_star + lambda_sg * r^2 * m_sg_star) / W`
+- `L_main_traj = W * ||m_hat - m_fuse_star||^2`
+
+Interpretation:
+
+- this is an exact detached-target fusion move inside the current Stage 05 implementation style
+- it is a contract-consolidation step, not a new mechanism family
+- it absorbs semigroup consistency into the main trajectory contract rather than leaving it as an attached auxiliary-only update
+- it still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`
+
+Current evidence from the first fixed-budget fused-contract comparison is:
+
+- the fused candidate keeps one-step and configured-step mechanism positive
+- it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+- it shows a positive but very small contextual gap-closure movement beyond the active refined v3-C reference
+- it does not yet materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+
+The next implementation question therefore becomes:
+
+- how to refine the fusion direction so the consolidated main trajectory contract can materially beat the active refined v3-C reference under the existing mechanism-first rule
