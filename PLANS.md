@@ -320,7 +320,7 @@ Current planning implication:
   - `v3-A` already addressed the target-entanglement question strongly enough that it is no longer the lead unresolved mechanism issue
   - refined `v3-B` then improved configured-step mechanism again, so trajectory-level supervision matters, but the remaining gap is not best described as another immediate v3-B promotion question
   - the current v3-B line still lacks an explicit endpoint / semigroup consistency contract across split horizons
-- open a planning-only `Stage 05 v3-C` charter as the next Stage 05 mechanism question
+- the planning-only `Stage 05 v3-C` charter is now open and has a first minimal diagnostic-only probe implementation
 - any next Stage 05 planning or implementation pass should start from the promoted refined v3-B reference and compare against:
   - the fixed-budget v2 control
   - the promoted refined v3-B reference
@@ -389,6 +389,21 @@ Required next implementation deliverables:
   - pairwise deltas versus the fixed-budget v2 control
   - a gap-closure style decision field
   - `recommended_next_move`
+
+Current status update:
+
+- the first minimal diagnostic-only v3-C candidate now exists:
+  - `stage05_v3c_endpoint_semigroup_consistency_contract`
+- it is implemented on top of `stage05_v3b_stronger_traj_curr_weight`
+- it keeps the semigroup target single-sided detached in the first pass
+- a smoke-ready `v2 vs promoted-v3B vs v3-C` comparison entry now also exists
+- the smoke artifact now exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
+- that smoke artifact is diagnostic only:
+  - it verifies wiring and deterministic comparison readiness
+  - it does not yet justify promoting v3-C over the promoted refined v3-B reference
+- the immediate next move is therefore:
+  - run the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison
 
 ## Exploratory Acceptance Criteria
 

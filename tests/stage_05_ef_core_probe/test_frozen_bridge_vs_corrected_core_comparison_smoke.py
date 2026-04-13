@@ -655,6 +655,62 @@ def test_stage05_v2_v3a_refined_v3b_recompare_uses_promoted_candidate_artifacts(
     }
 
 
+def test_stage05_v2_promoted_v3b_v3c_comparison_writes_expected_artifacts(
+    tmp_path: Path,
+) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="stage05_v2_promoted_v3b_v3c_smoke",
+        comparison_variant="stage05_v2_promoted_v3b_v3c",
+        comparison_scope="smoke_only",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        lambda_sg=0.05,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 3
+    assert {row["method_name"] for row in rows} == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3b_stronger_traj_curr_weight",
+        "stage05_v3c_endpoint_semigroup_consistency_contract",
+    }
+
+    assert summary["stage"] == "stage05_v2_promoted_v3b_v3c_comparison"
+    assert summary["comparison_scope"] == "smoke_only"
+    assert "comparison_protocol" in summary
+    assert "pairwise_deltas_vs_stage05_v2_reference" in summary
+    assert "pairwise_deltas_vs_promoted_refined_v3b_reference" in summary
+    assert "stage05_v3c_materially_improves_configured_step_mechanism_vs_promoted_v3b" in summary
+    assert summary["recommended_next_move"] == "run_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
+    assert (
+        summary["comparison_protocol"]["stage_05_v3c_candidate"]["semigroup_target_mode"]
+        == "single_sided_detached_split_endpoint"
+    )
+    assert (
+        summary["comparison_protocol"]["stage_05_v3c_candidate"]["endpoint_semigroup_consistency_enabled"]
+        is True
+    )
+
+    assert "pairwise_deltas_vs_promoted_refined_v3b_reference" in report
+    assert report["decision"]["recommended_next_move"] == (
+        "run_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
+    )
+
+
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(
         output_root=tmp_path,

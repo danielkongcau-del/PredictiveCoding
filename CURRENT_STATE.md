@@ -216,7 +216,7 @@ Current probe status:
     - endpoint / semigroup consistency contract
     - still-insufficient trajectory curriculum contract
     - corrected residual identity contract
-  - the repository now opens a planning-only `Stage 05 v3-C` charter
+  - the repository has now moved from a planning-only `Stage 05 v3-C` charter to a first minimal diagnostic-only `Stage 05 v3-C` probe
   - `Stage 05 v3-C` is defined by the working hypothesis that the current Stage 05 family still lacks an explicit endpoint / semigroup consistency contract across split horizons
   - this is a working hypothesis, not a proved repository conclusion
 - Stage 05 evaluation remains mechanism-first:
@@ -237,7 +237,10 @@ Current probe status:
   - v3-A already improved configured-step mechanism over the fixed-budget v2 control, so target-entanglement is no longer the lead unresolved mechanism question
   - refined v3-B then improved configured-step mechanism again over v3-A, so trajectory-level structure matters, but the remaining gap still points above pure weight or schedule tweaking
   - the current v3-B implementation still does not impose an explicit endpoint / semigroup consistency contract
-  - from the current state, any next Stage 05 planning or implementation pass should start from the promoted refined v3-B reference and the planning-only `Stage 05 v3-C` charter rather than reopening the recompare question
+  - the first minimal diagnostic-only v3-C probe `stage05_v3c_endpoint_semigroup_consistency_contract` now exists on top of the promoted refined v3-B scaffold
+  - the smoke comparison artifact now also exists under `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
+  - that smoke artifact does not yet establish a fixed-budget mechanism win over the promoted refined v3-B reference; it only verifies wiring, deterministic artifacts, and comparison readiness
+  - from the current state, the next Stage 05 pass should be a real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison rather than another planning-only v3-C charter pass
   - it still does not justify replacing the frozen Stage 04 bridge result on `main`
 
 ## Current Recommendation
@@ -253,9 +256,9 @@ Current probe status:
 - Use `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference.
 - Treat the fixed-budget v3-A result as the previous comparison reference, not as the current active improvement reference.
 - Treat the v3-A versus refined v3-B promotion question as closed.
-- Open the next Stage 05 planning move as a working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency.
+- Keep `stage05_v3c_endpoint_semigroup_consistency_contract` diagnostic-only at this point; do not treat it as the new active fixed-budget reference yet.
 - Do not infer from this result alone that Stage 05 should replace the frozen Stage 04 bridge on `main`.
-- If Stage 05 continues, the next pass should start from `stage05_v3b_stronger_traj_curr_weight` as the promoted fixed-budget reference and test whether an explicit endpoint / semigroup consistency contract closes more of the remaining configured-step gap.
+- If Stage 05 continues, the next pass should run a real fixed-budget `v2 vs stage05_v3b_stronger_traj_curr_weight vs stage05_v3c_endpoint_semigroup_consistency_contract` comparison.
 
 ## Reopen Conditions
 
@@ -304,3 +307,5 @@ Stage 04 package-internal work should be reopened only if one of these becomes t
   - [outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3b_refinement_diagnostic)
 - Stage 05 refined v3-B recompare artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_v3a_refined_v3b_fixed_budget_recompare)
+- Stage 05 v3-C diagnostic-only smoke comparison artifact:
+  - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison)

@@ -708,3 +708,53 @@ The next Stage 05 v3-C implementation pass must minimally add:
   - pairwise deltas versus the fixed-budget v2 control
   - a gap-closure style decision field
   - `recommended_next_move`
+
+#### 18.13.7 First diagnostic-only v3-C probe contract
+
+The first implemented Stage 05 v3-C pass must remain diagnostic-only.
+
+It does not yet claim that endpoint / semigroup consistency is the final main Stage 05 contract.
+It only tests whether an explicit semigroup probe adds useful mechanism signal on top of the
+promoted refined v3-B scaffold.
+
+The first implemented v3-C candidate must therefore:
+
+- preserve the promoted refined v3-B trajectory curriculum scaffold
+- preserve the explicit v3-A transport-drift decomposition
+- preserve artifact-independent target construction
+- keep the semigroup probe aggregate-only in the first pass
+
+For the first pass, define:
+
+- prediction side:
+  - `z_hat_direct = z_t + r * u_hat(z_t, r, t; c)`
+- target side:
+  - `z_hat_split_target = stopgrad(z_hat_split)`
+  - where `z_hat_split` is the split-horizon endpoint prediction defined above
+
+The first-pass semigroup probe loss is then:
+
+- `L_sg = || z_hat_direct - z_hat_split_target ||^2`
+
+The first-pass total objective is allowed to stay minimal:
+
+- `L_total_v3c = L_promoted_v3b + lambda_sg * L_sg`
+
+where:
+
+- `L_promoted_v3b` is the already-implemented promoted refined v3-B objective
+- `lambda_sg` is explicit, small, and reviewable
+
+The first implementation pass may realize this endpoint loss through an exactly equivalent
+residual-target proxy, provided that:
+
+- the split endpoint remains single-sided detached on the target side
+- the proxy remains mathematically consistent with the endpoint objective
+- the implementation keeps the semigroup target mode explicit in artifacts
+
+The first-pass v3-C implementation must not yet add:
+
+- branchwise semigroup targets
+- multiple semigroup variants
+- a broad semigroup schedule search
+- a claim that v3-C should replace the promoted refined v3-B reference before a real fixed-budget comparison

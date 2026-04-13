@@ -27,11 +27,15 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     _make_psi_network,
     alpha_for_epoch,
     build_corrected_residual_identity_target,
+    build_endpoint_semigroup_targets,
     build_explicit_transport_drift_bootstrap_targets,
     build_trajectory_curriculum_targets,
+    build_stage05_v3b_stronger_traj_curr_weight_config,
+    build_stage05_v3c_endpoint_semigroup_config,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
     lambda_id_for_epoch,
+    lambda_sg_for_epoch,
     lambda_traj_curr_for_epoch,
 )
 
@@ -356,6 +360,121 @@ def test_v3b_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     assert "train_traj_curr_loss" in epoch_rows[0]
 
 
+def test_promoted_v3b_builder_exposes_explicit_candidate_identity() -> None:
+    config = build_stage05_v3b_stronger_traj_curr_weight_config()
+
+    assert config.candidate_name_override == "stage05_v3b_stronger_traj_curr_weight"
+
+
+def test_v3c_endpoint_semigroup_targets_have_expected_shapes() -> None:
+    config = build_stage05_v3c_endpoint_semigroup_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    split = load_digits_split(
+        split_seed=config.data_seed,
+        train_fraction=config.train_fraction,
+        val_fraction=config.val_fraction,
+        test_fraction=config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(config)
+    psi_network = _make_psi_network(config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    targets = build_endpoint_semigroup_targets(
+        context,
+        psi_network,
+        config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+    )
+
+    assert targets.direct_velocity.shape == context.z0.shape
+    assert targets.short_horizon_velocity.shape == context.z0.shape
+    assert targets.continuation_velocity.shape == context.z0.shape
+    assert targets.direct_endpoint.shape == context.z0.shape
+    assert targets.midpoint_state.shape == context.z0.shape
+    assert targets.split_endpoint.shape == context.z0.shape
+    assert targets.split_endpoint_target.shape == context.z0.shape
+    assert targets.semigroup_residual.shape == context.z0.shape
+    assert targets.velocity_target.shape == context.z0.shape
+    assert targets.residual_target.shape == context.z0.shape
+    assert targets.loss_weights.shape == (context.z0.shape[0], 1)
+    np.testing.assert_allclose(targets.split_endpoint_target, targets.split_endpoint, atol=1e-12, rtol=1e-12)
+
+
+def test_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3c_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        **{
+            key: value
+            for key, value in build_stage05_v3c_endpoint_semigroup_config(
+                output_root=tmp_path,
+                run_id="unused",
+                epochs=4,
+                batch_size=128,
+                eval_steps=8,
+                transport_steps=2,
+                layer_dims=(64, 16, 10),
+            ).__dict__.items()
+            if key
+                not in {
+                    "output_root",
+                    "run_id",
+                    "output_layout",
+                    "warmup_epochs",
+                    "epochs",
+                    "batch_size",
+                    "eval_steps",
+                    "transport_steps",
+                    "layer_dims",
+            }
+        },
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert summary["candidate_name"] == "stage05_v3c_endpoint_semigroup_consistency_contract"
+    assert summary["endpoint_semigroup_consistency_enabled"] is True
+    assert summary["semigroup_split_identity"] == "s = t + alpha * r; r_s = (1 - alpha) * r"
+    assert summary["semigroup_target_mode"] == "single_sided_detached_split_endpoint"
+    assert summary["semigroup_target_is_single_sided_detached"] is True
+    assert summary["semigroup_target_contract"] == (
+        "z_hat_split_target = stopgrad(z_hat_split); "
+        "L_sg = || z_hat_direct - z_hat_split_target ||^2"
+    )
+    assert summary["pairwise_deltas_vs_promoted_refined_v3b_reference"]["status"] == (
+        "pending_real_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
+    )
+    assert summary["recommended_next_move"] == "run_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
+
+    assert config["transport"]["candidate_name"] == "stage05_v3c_endpoint_semigroup_consistency_contract"
+    assert config["transport"]["endpoint_semigroup_consistency_enabled"] is True
+    assert config["transport"]["semigroup_target_mode"] == "single_sided_detached_split_endpoint"
+    assert config["transport"]["semigroup_target_is_single_sided_detached"] is True
+    assert config["transport"]["lambda_sg"] == pytest.approx(0.05)
+
+    assert "lambda_sg" in epoch_rows[0]
+    assert "train_semigroup_loss" in epoch_rows[0]
+    assert any(float(row["train_semigroup_loss"]) > 0.0 for row in epoch_rows)
+
+
 def test_corrected_residual_identity_target_includes_anchor_derivative_term() -> None:
     config = build_fmpc_ef_exploratory_probe_config(
         run_seed=0,
@@ -537,6 +656,19 @@ def test_v3b_alpha_and_lambda_traj_schedule_are_explicit() -> None:
     assert lambda_0 == pytest.approx(0.0)
     assert 0.0 < lambda_1 < lambda_2 <= 0.2
     assert lambda_3 == pytest.approx(0.2)
+
+
+def test_v3c_lambda_sg_schedule_stays_zero_until_split_is_active() -> None:
+    config = build_stage05_v3c_endpoint_semigroup_config(
+        alpha_floor=0.5,
+        alpha_warmup_epochs=1,
+        alpha_ramp_epochs=2,
+        lambda_sg=0.05,
+    )
+
+    assert lambda_sg_for_epoch(config, 0) == pytest.approx(0.0)
+    assert lambda_sg_for_epoch(config, 1) == pytest.approx(0.05)
+    assert lambda_sg_for_epoch(config, 2) == pytest.approx(0.05)
 
 
 def test_exploratory_probe_is_deterministic_under_fixed_seeds(tmp_path: Path) -> None:

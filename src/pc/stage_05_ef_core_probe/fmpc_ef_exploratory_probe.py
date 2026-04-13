@@ -40,6 +40,7 @@ from ..utils import ensure_finite_array, set_seed
 ProbeStage = Literal["warmup", "transition", "hybrid"]
 OutputLayout = Literal["single_dir", "run_id_subdir"]
 ResidualIdentityMode = Literal["residual_corrected_meanflow"]
+EndpointSemigroupTargetMode = Literal["single_sided_detached_split_endpoint"]
 
 RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "residual_meanflow_core"
 TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY = "two_branch_residual_meanflow_core"
@@ -48,6 +49,8 @@ STAGE05_V1_CANDIDATE_NAME = "stage05_v1_corrected_residual_meanflow_core"
 STAGE05_V2_CANDIDATE_NAME = "stage05_v2_two_branch_corrected_residual_meanflow_core"
 STAGE05_V3A_CANDIDATE_NAME = "stage05_v3a_explicit_transport_drift_contract"
 STAGE05_V3B_CANDIDATE_NAME = "stage05_v3b_trajectory_curriculum_contract"
+STAGE05_V3B_REFINED_CANDIDATE_NAME = "stage05_v3b_stronger_traj_curr_weight"
+STAGE05_V3C_CANDIDATE_NAME = "stage05_v3c_endpoint_semigroup_consistency_contract"
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
@@ -65,6 +68,15 @@ TRAJECTORY_CURRICULUM_TARGET_CONTRACT = (
     "(1 - alpha) * u_hat(z_s_boot, r_s, s; c) [detached target side]"
 )
 TRAJECTORY_CURRICULUM_SCHEDULE_IDENTITY = "warmup_sigmoid_to_alpha_floor"
+SEMIGROUP_SPLIT_IDENTITY = "s = t + alpha * r; r_s = (1 - alpha) * r"
+SEMIGROUP_TARGET_MODE = "single_sided_detached_split_endpoint"
+SEMIGROUP_TARGET_CONTRACT = (
+    "z_hat_split_target = stopgrad(z_hat_split); "
+    "L_sg = || z_hat_direct - z_hat_split_target ||^2"
+)
+SEMIGROUP_UPDATE_PROXY_CONTRACT = (
+    "m_sg_target = ((z_hat_split_target - z_t) / r) - g_t with per-sample r^2 weighting"
+)
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -127,6 +139,10 @@ class FMPCEFExploratoryProbeConfig:
     psi_eta_b: float | None = 0.01
     bootstrap_integrator: Literal["euler", "rk2"] = "rk2"
     bootstrap_substeps: int = 4
+    candidate_name_override: str | None = None
+    use_endpoint_semigroup_consistency_probe: bool = False
+    lambda_sg: float = 0.05
+    semigroup_target_mode: EndpointSemigroupTargetMode = SEMIGROUP_TARGET_MODE
     selection_metric: Literal["val_configured_transported_final_energy"] = (
         "val_configured_transported_final_energy"
     )
@@ -156,6 +172,8 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError("lambda_drift must be non-negative.")
         if self.lambda_traj_curr < 0.0:
             raise ValueError("lambda_traj_curr must be non-negative.")
+        if self.lambda_sg < 0.0:
+            raise ValueError("lambda_sg must be non-negative.")
         if self.tangent_epsilon <= 0.0:
             raise ValueError("tangent_epsilon must be positive.")
         if self.alpha_warmup_epochs < 0:
@@ -166,6 +184,11 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError(
                 "Stage 05 currently supports trajectory_curriculum_schedule="
                 f"'{TRAJECTORY_CURRICULUM_SCHEDULE_IDENTITY}' only."
+            )
+        if self.semigroup_target_mode != SEMIGROUP_TARGET_MODE:
+            raise ValueError(
+                "Stage 05 currently supports semigroup_target_mode="
+                f"'{SEMIGROUP_TARGET_MODE}' only."
             )
         if self.identity_mode != RESIDUAL_IDENTITY_MODE:
             raise ValueError(
@@ -185,6 +208,14 @@ class FMPCEFExploratoryProbeConfig:
         if self.use_trajectory_curriculum_contract and not (0.0 < self.alpha_floor < 1.0):
             raise ValueError(
                 "alpha_floor must satisfy 0 < alpha_floor < 1 when "
+                "use_trajectory_curriculum_contract=True."
+            )
+        if (
+            self.use_endpoint_semigroup_consistency_probe
+            and not self.use_trajectory_curriculum_contract
+        ):
+            raise ValueError(
+                "use_endpoint_semigroup_consistency_probe requires "
                 "use_trajectory_curriculum_contract=True."
             )
 
@@ -395,6 +426,71 @@ class TrajectoryCurriculumTargets:
 
 
 @dataclass(frozen=True)
+class EndpointSemigroupTargets:
+    """Detached endpoint-semigroup targets for the first diagnostic-only v3-C probe."""
+
+    alpha: float
+    split_time: float
+    continuation_remaining_horizon: float
+    direct_velocity: np.ndarray
+    short_horizon_velocity: np.ndarray
+    continuation_velocity: np.ndarray
+    direct_endpoint: np.ndarray
+    midpoint_state: np.ndarray
+    split_endpoint: np.ndarray
+    split_endpoint_target: np.ndarray
+    semigroup_residual: np.ndarray
+    velocity_target: np.ndarray
+    residual_target: np.ndarray
+    loss_weights: np.ndarray
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "direct_velocity", _as_batch_first("direct_velocity", self.direct_velocity))
+        object.__setattr__(
+            self,
+            "short_horizon_velocity",
+            _as_batch_first("short_horizon_velocity", self.short_horizon_velocity),
+        )
+        object.__setattr__(
+            self,
+            "continuation_velocity",
+            _as_batch_first("continuation_velocity", self.continuation_velocity),
+        )
+        object.__setattr__(self, "direct_endpoint", _as_batch_first("direct_endpoint", self.direct_endpoint))
+        object.__setattr__(self, "midpoint_state", _as_batch_first("midpoint_state", self.midpoint_state))
+        object.__setattr__(self, "split_endpoint", _as_batch_first("split_endpoint", self.split_endpoint))
+        object.__setattr__(
+            self,
+            "split_endpoint_target",
+            _as_batch_first("split_endpoint_target", self.split_endpoint_target),
+        )
+        object.__setattr__(
+            self,
+            "semigroup_residual",
+            _as_batch_first("semigroup_residual", self.semigroup_residual),
+        )
+        object.__setattr__(self, "velocity_target", _as_batch_first("velocity_target", self.velocity_target))
+        object.__setattr__(self, "residual_target", _as_batch_first("residual_target", self.residual_target))
+        object.__setattr__(self, "loss_weights", _as_batch_first("loss_weights", self.loss_weights))
+        reference_shape = self.direct_velocity.shape
+        for name in (
+            "short_horizon_velocity",
+            "continuation_velocity",
+            "direct_endpoint",
+            "midpoint_state",
+            "split_endpoint",
+            "split_endpoint_target",
+            "semigroup_residual",
+            "velocity_target",
+            "residual_target",
+        ):
+            if getattr(self, name).shape != reference_shape:
+                raise ValueError(f"{name} must share the same shape as direct_velocity.")
+        if self.loss_weights.shape != (reference_shape[0], 1):
+            raise ValueError("loss_weights must be shaped (batch, 1).")
+
+
+@dataclass(frozen=True)
 class ResidualSupervisionBatch:
     """Stage 05 supervision tensors, with optional v2 state-branch inputs."""
 
@@ -406,8 +502,11 @@ class ResidualSupervisionBatch:
     transport_targets: np.ndarray | None = None
     drift_targets: np.ndarray | None = None
     trajectory_curriculum_targets: np.ndarray | None = None
+    semigroup_targets: np.ndarray | None = None
+    semigroup_loss_weights: np.ndarray | None = None
     explicit_transport_drift_decomposition_enabled: bool = False
     trajectory_curriculum_enabled: bool = False
+    endpoint_semigroup_consistency_enabled: bool = False
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -439,6 +538,18 @@ class ResidualSupervisionBatch:
                 "trajectory_curriculum_targets",
                 _as_batch_first("trajectory_curriculum_targets", self.trajectory_curriculum_targets),
             )
+        if self.semigroup_targets is not None:
+            object.__setattr__(
+                self,
+                "semigroup_targets",
+                _as_batch_first("semigroup_targets", self.semigroup_targets),
+            )
+        if self.semigroup_loss_weights is not None:
+            object.__setattr__(
+                self,
+                "semigroup_loss_weights",
+                _as_batch_first("semigroup_loss_weights", self.semigroup_loss_weights),
+            )
         if self.trajectory_inputs.shape[0] != self.boot_targets.shape[0]:
             raise ValueError("trajectory_inputs and boot_targets must share the same batch size.")
         if self.trajectory_inputs.shape[0] != self.identity_targets.shape[0]:
@@ -458,6 +569,13 @@ class ResidualSupervisionBatch:
             raise ValueError(
                 "trajectory_curriculum_targets must share the same shape as boot_targets."
             )
+        if self.semigroup_targets is not None and self.semigroup_targets.shape != self.boot_targets.shape:
+            raise ValueError("semigroup_targets must share the same shape as boot_targets.")
+        if self.semigroup_loss_weights is not None and self.semigroup_loss_weights.shape != (
+            self.boot_targets.shape[0],
+            1,
+        ):
+            raise ValueError("semigroup_loss_weights must be shaped (batch, 1).")
 
 
 @dataclass(frozen=True)
@@ -467,12 +585,14 @@ class FMPCEFExploratoryProbeEpochMetrics:
     lambda_id: float
     alpha: float
     lambda_traj_curr: float
+    lambda_sg: float
     train_total_loss: float
     train_boot_loss: float
     train_transport_loss: float
     train_drift_loss: float
     train_identity_loss: float
     train_traj_curr_loss: float
+    train_semigroup_loss: float
     train_transported_final_energy: float
     val_one_step_transported_final_energy: float
     val_one_step_energy_delta_vs_identity: float
@@ -525,6 +645,41 @@ def build_fmpc_ef_exploratory_probe_config(
     return FMPCEFExploratoryProbeConfig(**payload)
 
 
+def build_stage05_v3b_stronger_traj_curr_weight_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return the promoted refined v3-B reference as an explicit probe-side preset."""
+
+    payload: dict[str, Any] = {
+        "use_two_branch_residual_core": True,
+        "feature_aware_state_branch_tangents": True,
+        "use_explicit_transport_drift_decomposition": True,
+        "use_trajectory_curriculum_contract": True,
+        "lambda_drift": 1.0,
+        "lambda_traj_curr": 0.2,
+        "alpha_floor": 0.5,
+        "alpha_warmup_epochs": 3,
+        "alpha_ramp_epochs": 3,
+        "candidate_name_override": STAGE05_V3B_REFINED_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_fmpc_ef_exploratory_probe_config(**payload)
+
+
+def build_stage05_v3c_endpoint_semigroup_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return the first diagnostic-only v3-C candidate on top of refined v3-B."""
+
+    payload: dict[str, Any] = {
+        "use_endpoint_semigroup_consistency_probe": True,
+        "lambda_sg": 0.05,
+        "candidate_name_override": STAGE05_V3C_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_stage05_v3b_stronger_traj_curr_weight_config(**payload)
+
+
 def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.use_two_branch_residual_core:
         return TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY
@@ -532,6 +687,10 @@ def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
 
 
 def _candidate_name(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.candidate_name_override is not None:
+        return str(config.candidate_name_override)
+    if config.use_endpoint_semigroup_consistency_probe:
+        return STAGE05_V3C_CANDIDATE_NAME
     if config.use_trajectory_curriculum_contract:
         return STAGE05_V3B_CANDIDATE_NAME
     if config.use_explicit_transport_drift_decomposition:
@@ -596,6 +755,11 @@ def _explicit_transport_drift_target_contract(
 def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
     if not config.use_explicit_transport_drift_decomposition:
         return None
+    if config.use_endpoint_semigroup_consistency_probe:
+        return {
+            "status": "pending_real_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison",
+            "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+        }
     if config.use_trajectory_curriculum_contract:
         return {
             "status": "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison",
@@ -608,6 +772,8 @@ def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, 
 
 
 def _pairwise_v3a_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
+    if config.use_endpoint_semigroup_consistency_probe:
+        return None
     if not config.use_trajectory_curriculum_contract:
         return None
     return {
@@ -616,7 +782,20 @@ def _pairwise_v3a_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str,
     }
 
 
+def _pairwise_promoted_v3b_placeholder(
+    config: FMPCEFExploratoryProbeConfig,
+) -> dict[str, Any] | None:
+    if not config.use_endpoint_semigroup_consistency_probe:
+        return None
+    return {
+        "status": "pending_real_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison",
+        "reference_candidate_name": STAGE05_V3B_REFINED_CANDIDATE_NAME,
+    }
+
+
 def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_endpoint_semigroup_consistency_probe:
+        return "pending_real_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
     if config.use_trajectory_curriculum_contract:
         return "pending_real_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
     if not config.use_explicit_transport_drift_decomposition:
@@ -625,6 +804,8 @@ def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> s
 
 
 def _recommended_next_move(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_endpoint_semigroup_consistency_probe:
+        return "run_fixed_budget_v2_vs_promoted_v3b_vs_v3c_comparison"
     if config.use_trajectory_curriculum_contract:
         return "run_fixed_budget_v2_vs_v3a_vs_v3b_comparison"
     if config.use_explicit_transport_drift_decomposition:
@@ -638,6 +819,12 @@ def _trajectory_curriculum_target_contract(
     if not config.use_trajectory_curriculum_contract:
         return None
     return TRAJECTORY_CURRICULUM_TARGET_CONTRACT
+
+
+def _semigroup_target_contract(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if not config.use_endpoint_semigroup_consistency_probe:
+        return None
+    return SEMIGROUP_TARGET_CONTRACT
 
 
 def build_exploratory_probe_input(
@@ -815,6 +1002,94 @@ def build_trajectory_curriculum_targets(
         continuation_velocity=continuation_velocity,
         current_velocity_target=current_velocity_target,
         residual_target=residual_target,
+    )
+
+
+def build_endpoint_semigroup_targets(
+    context: FMPCTF1Context,
+    psi_network: Stage05ResidualCoreNetworks,
+    config: FMPCEFExploratoryProbeConfig,
+    z_t: np.ndarray,
+    *,
+    t: float,
+    r: float,
+    alpha: float,
+) -> EndpointSemigroupTargets:
+    """Return the first diagnostic-only v3-C endpoint-semigroup probe targets.
+
+    The split endpoint is computed on the target side only and treated as detached.
+    The update is then applied through an exactly equivalent residual-target proxy
+    with per-sample `r^2` weighting.
+    """
+
+    validate_tf1_time_pair(t, r)
+    if not config.use_endpoint_semigroup_consistency_probe:
+        raise ValueError(
+            "Endpoint semigroup targets require use_endpoint_semigroup_consistency_probe=True."
+        )
+    alpha_value = float(alpha)
+    if not (0.0 < alpha_value < 1.0):
+        raise ValueError("Endpoint semigroup targets require 0 < alpha < 1.")
+
+    z_array = _as_batch_first("z_t", z_t)
+    short_r = alpha_value * float(r)
+    split_time = float(t) + short_r
+    continuation_r = (1.0 - alpha_value) * float(r)
+    validate_tf1_time_pair(t, short_r)
+    validate_tf1_time_pair(split_time, continuation_r)
+
+    direct_velocity = _predict_total_velocity_at_state(
+        context,
+        psi_network,
+        config,
+        z_array,
+        t=t,
+        r=r,
+    )
+    short_horizon_velocity = _predict_total_velocity_at_state(
+        context,
+        psi_network,
+        config,
+        z_array,
+        t=t,
+        r=short_r,
+    )
+    midpoint_state = z_array + short_r * short_horizon_velocity
+    continuation_velocity = _predict_total_velocity_at_state(
+        context,
+        psi_network,
+        config,
+        midpoint_state,
+        t=split_time,
+        r=continuation_r,
+    )
+    direct_endpoint = z_array + float(r) * direct_velocity
+    split_endpoint = (
+        z_array
+        + short_r * short_horizon_velocity
+        + continuation_r * continuation_velocity
+    )
+    split_endpoint_target = split_endpoint.copy()
+    semigroup_residual = direct_endpoint - split_endpoint_target
+    velocity_target = (split_endpoint_target - z_array) / float(r)
+    g_t = hidden_local_flow(context, z_array)
+    residual_target = velocity_target - g_t
+    loss_weights = np.full((z_array.shape[0], 1), float(r) ** 2, dtype=np.float64)
+    return EndpointSemigroupTargets(
+        alpha=alpha_value,
+        split_time=split_time,
+        continuation_remaining_horizon=continuation_r,
+        direct_velocity=direct_velocity,
+        short_horizon_velocity=short_horizon_velocity,
+        continuation_velocity=continuation_velocity,
+        direct_endpoint=direct_endpoint,
+        midpoint_state=midpoint_state,
+        split_endpoint=split_endpoint,
+        split_endpoint_target=split_endpoint_target,
+        semigroup_residual=semigroup_residual,
+        velocity_target=velocity_target,
+        residual_target=residual_target,
+        loss_weights=loss_weights,
     )
 
 
@@ -1018,6 +1293,17 @@ def lambda_traj_curr_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index
     return float(config.lambda_traj_curr) * _sigmoid_unit_interval(progress)
 
 
+def lambda_sg_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> float:
+    if not config.use_endpoint_semigroup_consistency_probe:
+        return 0.0
+    if config.lambda_sg <= 0.0:
+        return 0.0
+    alpha = alpha_for_epoch(config, epoch_index)
+    if alpha >= 1.0 - 1e-12:
+        return 0.0
+    return float(config.lambda_sg)
+
+
 def _stage_for_epoch(config: FMPCEFExploratoryProbeConfig, epoch_index: int) -> ProbeStage:
     if epoch_index < config.lambda_id_warmup_epochs:
         return "warmup"
@@ -1052,6 +1338,7 @@ def _weighted_mse_step(
     target: np.ndarray,
     *,
     loss_scale: float,
+    sample_weights: np.ndarray | None = None,
 ) -> None:
     activations, pre_activations = _forward_mlp(network, inputs)
     predictions = activations[-1]
@@ -1062,7 +1349,13 @@ def _weighted_mse_step(
         raise ValueError("loss_scale must be positive.")
 
     output_size = float(predictions.size)
-    delta = (2.0 * float(loss_scale) / output_size) * (predictions - targets)
+    delta = predictions - targets
+    if sample_weights is not None:
+        weights = _as_batch_first("sample_weights", sample_weights)
+        if weights.shape != (predictions.shape[0], 1):
+            raise ValueError("sample_weights must be shaped (batch, 1).")
+        delta = weights * delta
+    delta = (2.0 * float(loss_scale) / output_size) * delta
     for layer_index in range(len(network.layers) - 1, -1, -1):
         layer = network.layers[layer_index]
         pre_activation = pre_activations[layer_index + 1]
@@ -1116,6 +1409,7 @@ def _weighted_two_branch_mse_step(
     target: np.ndarray,
     *,
     loss_scale: float,
+    sample_weights: np.ndarray | None = None,
 ) -> None:
     if residual_core.state_network is None:
         raise ValueError("Two-branch update requires state_network.")
@@ -1129,12 +1423,14 @@ def _weighted_two_branch_mse_step(
         trajectory_inputs,
         target - predictions.state_residual,
         loss_scale=loss_scale,
+        sample_weights=sample_weights,
     )
     _weighted_mse_step(
         residual_core.state_network,
         state_inputs,
         target - predictions.trajectory_residual,
         loss_scale=loss_scale,
+        sample_weights=sample_weights,
     )
 
 
@@ -1375,10 +1671,12 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
                 config
             ),
             "trajectory_curriculum_target_contract": _trajectory_curriculum_target_contract(config),
+            "semigroup_target_contract": _semigroup_target_contract(config),
             "residual_identity_target_contract": _residual_identity_target_contract(config),
             "identity_loss_weight": float(config.identity_loss_weight),
             "lambda_drift": float(config.lambda_drift),
             "lambda_traj_curr": float(config.lambda_traj_curr),
+            "lambda_sg": float(config.lambda_sg),
             "tangent_epsilon": float(config.tangent_epsilon),
             "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
             "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
@@ -1393,6 +1691,25 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
                 if config.use_trajectory_curriculum_contract
                 else None
             ),
+            "endpoint_semigroup_consistency_enabled": bool(
+                config.use_endpoint_semigroup_consistency_probe
+            ),
+            "semigroup_split_identity": (
+                SEMIGROUP_SPLIT_IDENTITY
+                if config.use_endpoint_semigroup_consistency_probe
+                else None
+            ),
+            "semigroup_target_mode": (
+                config.semigroup_target_mode if config.use_endpoint_semigroup_consistency_probe else None
+            ),
+            "semigroup_target_is_single_sided_detached": bool(
+                config.use_endpoint_semigroup_consistency_probe
+            ),
+            "semigroup_update_proxy_contract": (
+                SEMIGROUP_UPDATE_PROXY_CONTRACT
+                if config.use_endpoint_semigroup_consistency_probe
+                else None
+            ),
             "no_teacher_dependency_in_target_construction": True,
             "use_teacher_free_features": bool(config.use_two_branch_residual_core),
             "uses_current_state_features": bool(config.use_two_branch_residual_core),
@@ -1401,6 +1718,9 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
                 config.use_explicit_transport_drift_decomposition
             ),
             "pairwise_deltas_vs_stage05_v3a_reference": _pairwise_v3a_placeholder(config),
+            "pairwise_deltas_vs_promoted_refined_v3b_reference": _pairwise_promoted_v3b_placeholder(
+                config
+            ),
             "feature_aware_state_branch_tangents": bool(
                 config.feature_aware_state_branch_tangents
             ),
@@ -1452,10 +1772,15 @@ def _collect_residual_supervision(
     transport_targets: list[np.ndarray] = []
     drift_targets: list[np.ndarray] = []
     trajectory_curriculum_targets: list[np.ndarray] = []
+    semigroup_targets: list[np.ndarray] = []
+    semigroup_loss_weights: list[np.ndarray] = []
     trajectory_curriculum_active = bool(
         config.use_trajectory_curriculum_contract
         and trajectory_alpha is not None
         and float(trajectory_alpha) < 1.0 - 1e-12
+    )
+    semigroup_active = bool(
+        config.use_endpoint_semigroup_consistency_probe and trajectory_curriculum_active
     )
     for knot_index, t_k in enumerate(knot_times[:-1]):
         z_t = z_knots[knot_index]
@@ -1520,6 +1845,18 @@ def _collect_residual_supervision(
                 alpha=float(trajectory_alpha),
             )
             trajectory_curriculum_targets.append(trajectory_targets.residual_target)
+        if semigroup_active:
+            semigroup_probe = build_endpoint_semigroup_targets(
+                context,
+                psi_network,
+                config,
+                z_t,
+                t=t_float,
+                r=r_k,
+                alpha=float(trajectory_alpha),
+            )
+            semigroup_targets.append(semigroup_probe.residual_target)
+            semigroup_loss_weights.append(semigroup_probe.loss_weights)
     return ResidualSupervisionBatch(
         trajectory_inputs=np.concatenate(trajectory_input_blocks, axis=0).astype(
             np.float64,
@@ -1552,10 +1889,21 @@ def _collect_residual_supervision(
             if trajectory_curriculum_targets
             else None
         ),
+        semigroup_targets=(
+            np.concatenate(semigroup_targets, axis=0).astype(np.float64, copy=False)
+            if semigroup_targets
+            else None
+        ),
+        semigroup_loss_weights=(
+            np.concatenate(semigroup_loss_weights, axis=0).astype(np.float64, copy=False)
+            if semigroup_loss_weights
+            else None
+        ),
         explicit_transport_drift_decomposition_enabled=bool(
             config.use_explicit_transport_drift_decomposition
         ),
         trajectory_curriculum_enabled=trajectory_curriculum_active,
+        endpoint_semigroup_consistency_enabled=semigroup_active,
     )
 
 
@@ -1711,9 +2059,10 @@ def _train_one_batch(
     *,
     lambda_id: float,
     lambda_traj_curr: float,
+    lambda_sg: float,
     trajectory_alpha: float,
     stage: ProbeStage,
-) -> tuple[float, float, float, float, float, float, float]:
+) -> tuple[float, float, float, float, float, float, float, float]:
     context = build_tf1_context(model, x_batch, y_batch)
     source_rollout = rollout_hidden_transport(
         context,
@@ -1740,6 +2089,7 @@ def _train_one_batch(
     boot_loss = transport_loss
     identity_loss = float(np.mean((psi_predictions - supervision.identity_targets) ** 2))
     traj_curr_loss = 0.0
+    semigroup_loss = 0.0
     if config.use_explicit_transport_drift_decomposition:
         if supervision.state_inputs is None:
             raise ValueError("Stage 05 v3-A requires state_inputs for the drift branch.")
@@ -1781,6 +2131,25 @@ def _train_one_batch(
                 supervision.state_inputs,
                 supervision.trajectory_curriculum_targets,
                 loss_scale=float(lambda_traj_curr),
+            )
+        if (
+            config.use_endpoint_semigroup_consistency_probe
+            and lambda_sg > 0.0
+            and supervision.semigroup_targets is not None
+            and supervision.semigroup_loss_weights is not None
+            and supervision.state_inputs is not None
+        ):
+            semigroup_loss = float(
+                np.mean((psi_predictions - supervision.semigroup_targets) ** 2)
+            )
+            total_loss += float(lambda_sg) * semigroup_loss
+            _weighted_two_branch_mse_step(
+                psi_network,
+                supervision.trajectory_inputs,
+                supervision.state_inputs,
+                supervision.semigroup_targets,
+                loss_scale=float(lambda_sg),
+                sample_weights=supervision.semigroup_loss_weights,
             )
     else:
         if lambda_id > 0.0:
@@ -1831,6 +2200,7 @@ def _train_one_batch(
         drift_loss,
         identity_loss,
         traj_curr_loss,
+        semigroup_loss,
         transported_energy,
     )
 
@@ -1869,12 +2239,14 @@ def run_fmpc_ef_exploratory_probe(
         lambda_id = lambda_id_for_epoch(config, epoch_index)
         alpha = alpha_for_epoch(config, epoch_index)
         lambda_traj_curr = lambda_traj_curr_for_epoch(config, epoch_index)
+        lambda_sg = lambda_sg_for_epoch(config, epoch_index)
         batch_total_losses: list[float] = []
         batch_boot_losses: list[float] = []
         batch_transport_losses: list[float] = []
         batch_drift_losses: list[float] = []
         batch_identity_losses: list[float] = []
         batch_traj_curr_losses: list[float] = []
+        batch_semigroup_losses: list[float] = []
         batch_transport_energies: list[float] = []
         batch_seed = config.batch_order_seed + epoch_index
         for x_batch, y_batch in iter_minibatches(
@@ -1891,6 +2263,7 @@ def run_fmpc_ef_exploratory_probe(
                 drift_loss,
                 identity_loss,
                 traj_curr_loss,
+                semigroup_loss,
                 transported_energy,
             ) = _train_one_batch(
                 model,
@@ -1900,6 +2273,7 @@ def run_fmpc_ef_exploratory_probe(
                 y_batch,
                 lambda_id=lambda_id,
                 lambda_traj_curr=lambda_traj_curr,
+                lambda_sg=lambda_sg,
                 trajectory_alpha=alpha,
                 stage=stage,
             )
@@ -1909,6 +2283,7 @@ def run_fmpc_ef_exploratory_probe(
             batch_drift_losses.append(drift_loss)
             batch_identity_losses.append(identity_loss)
             batch_traj_curr_losses.append(traj_curr_loss)
+            batch_semigroup_losses.append(semigroup_loss)
             batch_transport_energies.append(transported_energy)
 
         val_one_step = _evaluate_mechanism_metrics(
@@ -1936,12 +2311,14 @@ def run_fmpc_ef_exploratory_probe(
                 lambda_id=float(lambda_id),
                 alpha=float(alpha),
                 lambda_traj_curr=float(lambda_traj_curr),
+                lambda_sg=float(lambda_sg),
                 train_total_loss=float(np.mean(batch_total_losses)),
                 train_boot_loss=float(np.mean(batch_boot_losses)),
                 train_transport_loss=float(np.mean(batch_transport_losses)),
                 train_drift_loss=float(np.mean(batch_drift_losses)),
                 train_identity_loss=float(np.mean(batch_identity_losses)),
                 train_traj_curr_loss=float(np.mean(batch_traj_curr_losses)),
+                train_semigroup_loss=float(np.mean(batch_semigroup_losses)),
                 train_transported_final_energy=float(np.mean(batch_transport_energies)),
                 val_one_step_transported_final_energy=val_one_step.transported_final_energy,
                 val_one_step_energy_delta_vs_identity=val_one_step.energy_delta_vs_identity,
@@ -2052,10 +2429,12 @@ def run_fmpc_ef_exploratory_probe(
             config
         ),
         "trajectory_curriculum_target_contract": _trajectory_curriculum_target_contract(config),
+        "semigroup_target_contract": _semigroup_target_contract(config),
         "residual_identity_target_contract": _residual_identity_target_contract(config),
         "identity_loss_weight": float(config.identity_loss_weight),
         "lambda_drift": float(config.lambda_drift),
         "lambda_traj_curr": float(config.lambda_traj_curr),
+        "lambda_sg": float(config.lambda_sg),
         "tangent_epsilon": float(config.tangent_epsilon),
         "lambda_id_warmup_epochs": int(config.lambda_id_warmup_epochs),
         "lambda_id_ramp_epochs": int(config.lambda_id_ramp_epochs),
@@ -2070,11 +2449,31 @@ def run_fmpc_ef_exploratory_probe(
             if config.use_trajectory_curriculum_contract
             else None
         ),
+        "endpoint_semigroup_consistency_enabled": bool(
+            config.use_endpoint_semigroup_consistency_probe
+        ),
+        "semigroup_split_identity": (
+            SEMIGROUP_SPLIT_IDENTITY if config.use_endpoint_semigroup_consistency_probe else None
+        ),
+        "semigroup_target_mode": (
+            config.semigroup_target_mode if config.use_endpoint_semigroup_consistency_probe else None
+        ),
+        "semigroup_target_is_single_sided_detached": bool(
+            config.use_endpoint_semigroup_consistency_probe
+        ),
+        "semigroup_update_proxy_contract": (
+            SEMIGROUP_UPDATE_PROXY_CONTRACT
+            if config.use_endpoint_semigroup_consistency_probe
+            else None
+        ),
         "use_two_branch_residual_core": bool(config.use_two_branch_residual_core),
         "explicit_transport_drift_decomposition_enabled": bool(
             config.use_explicit_transport_drift_decomposition
         ),
         "pairwise_deltas_vs_stage05_v3a_reference": _pairwise_v3a_placeholder(config),
+        "pairwise_deltas_vs_promoted_refined_v3b_reference": _pairwise_promoted_v3b_placeholder(
+            config
+        ),
         "uses_current_state_features": bool(config.use_two_branch_residual_core),
         "feature_aware_state_branch_tangents": bool(
             config.feature_aware_state_branch_tangents
@@ -2090,6 +2489,7 @@ def run_fmpc_ef_exploratory_probe(
         "selected_epoch_lambda_id": float(best_row["lambda_id"]),
         "selected_epoch_alpha": float(best_row["alpha"]),
         "selected_epoch_lambda_traj_curr": float(best_row["lambda_traj_curr"]),
+        "selected_epoch_lambda_sg": float(best_row["lambda_sg"]),
         "train_wall_time_seconds": train_wall_time_seconds,
         "evaluation_wall_time_seconds": evaluation_wall_time_seconds,
         "val_accuracy": float(val_accuracy),
@@ -2139,6 +2539,9 @@ def run_fmpc_ef_exploratory_probe(
         "no_teacher_dependency_in_target_construction": True,
         "pairwise_deltas_vs_stage05_v2_reference": _pairwise_v2_placeholder(config),
         "pairwise_deltas_vs_stage05_v3a_reference": _pairwise_v3a_placeholder(config),
+        "pairwise_deltas_vs_promoted_refined_v3b_reference": _pairwise_promoted_v3b_placeholder(
+            config
+        ),
         "gap_closure_decision": _gap_closure_decision_placeholder(config),
         "recommended_next_move": _recommended_next_move(config),
         "run_artifacts": {

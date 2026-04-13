@@ -234,7 +234,7 @@ The next validation move is:
 - keep `stage05_v3b_stronger_traj_curr_weight` as the current fixed-budget Stage 05 improvement reference
 - treat the fixed-budget Stage 05 v3-A result as the previous comparison reference
 - treat the `v3-A -> refined v3-B` promotion question as closed
-- open the next Stage 05 planning move as a working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency
+- keep `Stage 05 v3-C` framed as a working-hypothesis-driven endpoint / semigroup question, but note that the first minimal diagnostic-only v3-C probe now already exists
 
 Any next narrower Stage 05 follow-up should preserve:
 
@@ -244,6 +244,7 @@ Any next narrower Stage 05 follow-up should preserve:
 - the mechanism-first validation contract for Stage 05
 - task accuracy as a secondary signal only
 - the promoted refined v3-B scaffold as the current Stage 05 improvement reference
+- the current v3-C probe as diagnostic-only unless a real fixed-budget comparison says otherwise
 
 Any next narrower Stage 05 follow-up should be accepted only if it:
 
@@ -271,6 +272,18 @@ Any next narrower Stage 05 follow-up must minimally produce:
   - pairwise deltas versus v2
   - a gap-closure style decision field
   - `recommended_next_move`
+
+Current v3-C status:
+
+- the first minimal diagnostic-only v3-C probe now exists:
+  - `stage05_v3c_endpoint_semigroup_consistency_contract`
+- the first smoke-ready `v2 vs promoted-v3B vs v3-C` comparison entry now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
+- that smoke artifact should be treated only as a wiring and deterministic-artifact check
+- the next acceptance step is not another planning-only charter pass
+- the next acceptance step is a real fixed-budget comparison against:
+  - the fixed-budget v2 control
+  - `stage05_v3b_stronger_traj_curr_weight`
 
 It should not be framed as:
 

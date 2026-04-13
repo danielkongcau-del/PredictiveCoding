@@ -112,9 +112,14 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the fresh refined fixed-budget recompare is now complete:
   - `stage05_v3b_stronger_traj_curr_weight` is now the active fixed-budget Stage 05 improvement reference
   - the `v3-A -> refined v3-B` promotion question is closed
-  - the repo now opens a planning-only `Stage 05 v3-C` charter
+  - the repo no longer treats `Stage 05 v3-C` as planning-only
   - `v3-C = endpoint / semigroup consistency contract`
   - this charter is motivated by the working hypothesis that the current refined v3-B scaffold still lacks an explicit endpoint / semigroup consistency contract across split horizons
+  - the first minimal diagnostic-only v3-C probe now also exists:
+    - `stage05_v3c_endpoint_semigroup_consistency_contract`
+  - the smoke-ready `v2 vs promoted-v3B vs v3-C` artifact now also exists under:
+    - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
+  - that smoke artifact only verifies wiring and deterministic comparison readiness
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -126,10 +131,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as a repeat of the already-closed v3-A versus refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next step from the promoted refined v3-B reference while keeping:
+- if Stage 05 continues, draft the next step from the promoted refined v3-B reference and the current diagnostic-only v3-C probe while keeping:
   - the fixed-budget v2 control
   - the fixed-budget v3-A result as the previous comparison reference
-  - the next mechanism question centered on endpoint / semigroup consistency rather than another pure v3-B sweep
+  - the next immediate move as a real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison rather than another planning-only v3-C pass
 
 ## What Prompt Writers Must Not Reopen
 
