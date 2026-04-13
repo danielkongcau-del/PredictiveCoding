@@ -165,6 +165,13 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - it improves contextual gap closure beyond the active refined v3-C reference
   - it avoids an obvious report-only accuracy regression
   - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the fixed-budget coupled defect-projection comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_coupled_defect_projection_contract_comparison/`
+- that coupled defect-projection comparison shows:
+  - `stage05_v3c_coupled_defect_projection_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure beyond the active refined v3-C reference
+  - it avoids an obvious report-only accuracy regression
+  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -176,7 +183,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as a repeat of the already-closed refined v3-C versus promoted refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next step as a narrow implementation-first continuation-target refinement above `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`, while keeping `stage05_v3c_stronger_semigroup_weight` as the active reference
+- if Stage 05 continues, draft the next step as a narrow implementation-first coupled midpoint-continuation refinement above `stage05_v3c_coupled_defect_projection_trajectory_contract`, while keeping `stage05_v3c_stronger_semigroup_weight` as the active reference
 - keep:
   - the fixed-budget v2 control
   - `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget improvement reference

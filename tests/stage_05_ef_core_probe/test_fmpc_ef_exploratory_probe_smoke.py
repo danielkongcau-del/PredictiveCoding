@@ -34,6 +34,7 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     build_trajectory_curriculum_targets,
     build_stage05_v3b_stronger_traj_curr_weight_config,
     build_stage05_v3c_endpoint_semigroup_config,
+    build_stage05_v3c_coupled_defect_projection_trajectory_contract_config,
     build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_config,
     build_stage05_v3c_endpoint_line_midpoint_trajectory_contract_config,
     build_stage05_v3c_fused_trajectory_semigroup_contract_config,
@@ -427,6 +428,21 @@ def test_endpoint_line_continuation_blend_v3c_builder_exposes_explicit_candidate
     assert config.lambda_sg == pytest.approx(0.10)
 
 
+def test_coupled_defect_projection_v3c_builder_exposes_explicit_candidate_identity_and_flag() -> None:
+    config = build_stage05_v3c_coupled_defect_projection_trajectory_contract_config()
+
+    assert (
+        config.candidate_name_override
+        == "stage05_v3c_coupled_defect_projection_trajectory_contract"
+    )
+    assert config.use_midpoint_reconstructed_trajectory_contract is True
+    assert config.use_endpoint_line_midpoint_trajectory_contract is True
+    assert config.use_coupled_defect_projection_trajectory_contract is True
+    assert config.use_endpoint_line_continuation_blend_trajectory_contract is False
+    assert config.use_fused_trajectory_semigroup_contract is False
+    assert config.lambda_sg == pytest.approx(0.10)
+
+
 def test_v3c_endpoint_semigroup_targets_have_expected_shapes() -> None:
     config = build_stage05_v3c_endpoint_semigroup_config(
         run_seed=0,
@@ -743,6 +759,82 @@ def test_endpoint_line_continuation_blend_v3c_targets_handle_alpha_near_one_stab
     assert np.all(np.isfinite(targets.unified_residual_target))
     assert np.allclose(targets.continuation_target_blend_shift_norm, 0.0)
     assert np.allclose(targets.endpoint_implied_continuation_velocity, 0.0)
+
+
+def test_coupled_defect_projection_v3c_targets_expose_defect_correction_fields() -> None:
+    base_config = build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    coupled_config = build_stage05_v3c_coupled_defect_projection_trajectory_contract_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    split = load_digits_split(
+        split_seed=base_config.data_seed,
+        train_fraction=base_config.train_fraction,
+        val_fraction=base_config.val_fraction,
+        test_fraction=base_config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(base_config)
+    psi_network = _make_psi_network(base_config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    base_targets = build_midpoint_reconstructed_trajectory_targets(
+        context,
+        psi_network,
+        base_config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+        lambda_traj_curr=base_config.lambda_traj_curr,
+        lambda_sg=base_config.lambda_sg,
+    )
+    coupled_targets = build_midpoint_reconstructed_trajectory_targets(
+        context,
+        psi_network,
+        coupled_config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+        lambda_traj_curr=coupled_config.lambda_traj_curr,
+        lambda_sg=coupled_config.lambda_sg,
+    )
+
+    assert coupled_targets.predictor_semigroup_defect_norm.shape == (context.z0.shape[0], 1)
+    assert coupled_targets.corrected_semigroup_defect_norm.shape == (context.z0.shape[0], 1)
+    assert coupled_targets.first_projection_short_leg_correction_norm.shape == (
+        context.z0.shape[0],
+        1,
+    )
+    assert coupled_targets.first_projection_continuation_correction_norm.shape == (
+        context.z0.shape[0],
+        1,
+    )
+    assert coupled_targets.second_projection_short_leg_correction_norm.shape == (
+        context.z0.shape[0],
+        1,
+    )
+    assert coupled_targets.second_projection_continuation_correction_norm.shape == (
+        context.z0.shape[0],
+        1,
+    )
+    assert np.all(coupled_targets.predictor_semigroup_defect_norm >= 0.0)
+    assert np.all(coupled_targets.corrected_semigroup_defect_norm >= 0.0)
+    assert not np.allclose(
+        coupled_targets.unified_residual_target,
+        base_targets.unified_residual_target,
+    )
 
 
 def test_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
@@ -1120,6 +1212,96 @@ def test_endpoint_line_continuation_blend_v3c_probe_writes_expected_artifacts(tm
 
     assert "train_main_traj_contract_loss" in epoch_rows[0]
     assert "train_mean_continuation_target_blend_shift_norm" in epoch_rows[0]
+    assert any(float(row["train_main_traj_contract_loss"]) > 0.0 for row in epoch_rows)
+
+
+def test_coupled_defect_projection_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3c_coupled_defect_projection_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        **{
+            key: value
+            for key, value in build_stage05_v3c_coupled_defect_projection_trajectory_contract_config(
+                output_root=tmp_path,
+                run_id="unused",
+                epochs=4,
+                batch_size=128,
+                eval_steps=8,
+                transport_steps=2,
+                layer_dims=(64, 16, 10),
+            ).__dict__.items()
+            if key
+            not in {
+                "output_root",
+                "run_id",
+                "output_layout",
+                "warmup_epochs",
+                "epochs",
+                "batch_size",
+                "eval_steps",
+                "transport_steps",
+                "layer_dims",
+            }
+        },
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert (
+        summary["candidate_name"]
+        == "stage05_v3c_coupled_defect_projection_trajectory_contract"
+    )
+    assert summary["target_reconstruction_enabled"] is True
+    assert summary["midpoint_reconstruction_enabled"] is True
+    assert summary["endpoint_line_midpoint_reconstruction_enabled"] is True
+    assert summary["continuation_target_refinement_enabled"] is True
+    assert summary["coupled_defect_projection_enabled"] is True
+    assert summary["shared_semigroup_defect_coupling_enabled"] is True
+    assert summary["predictor_corrector_refinement_enabled"] is True
+    assert summary["second_pass_continuation_reevaluation_enabled"] is True
+    assert summary["defect_projection_coefficient_identity"] == (
+        "two_segment_quadratic_closed_form_rho"
+    )
+    assert summary["continuation_reevaluated_at_reconstructed_midpoint"] is True
+    assert summary["semigroup_consistency_absorbed_into_main_trajectory_contract"] is True
+    assert summary["semigroup_consistency_is_auxiliary_only"] is False
+    assert summary["main_trajectory_contract_identity"] == (
+        "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract"
+    )
+    assert summary["pairwise_deltas_vs_active_refined_v3c_reference"]["status"] == (
+        "pending_real_fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison"
+    )
+    assert summary["recommended_next_move"] == (
+        "run_fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison"
+    )
+
+    assert (
+        config["transport"]["candidate_name"]
+        == "stage05_v3c_coupled_defect_projection_trajectory_contract"
+    )
+    assert config["transport"]["coupled_defect_projection_enabled"] is True
+    assert config["transport"]["shared_semigroup_defect_coupling_enabled"] is True
+    assert config["transport"]["predictor_corrector_refinement_enabled"] is True
+    assert config["transport"]["second_pass_continuation_reevaluation_enabled"] is True
+    assert config["transport"]["defect_projection_coefficient_identity"] == (
+        "two_segment_quadratic_closed_form_rho"
+    )
+
+    assert "train_main_traj_contract_loss" in epoch_rows[0]
+    assert "train_mean_predictor_semigroup_defect_norm" in epoch_rows[0]
+    assert "train_mean_corrected_semigroup_defect_norm" in epoch_rows[0]
+    assert "train_mean_first_projection_short_leg_correction_norm" in epoch_rows[0]
+    assert "train_mean_first_projection_continuation_correction_norm" in epoch_rows[0]
+    assert "train_mean_second_projection_short_leg_correction_norm" in epoch_rows[0]
+    assert "train_mean_second_projection_continuation_correction_norm" in epoch_rows[0]
     assert any(float(row["train_main_traj_contract_loss"]) > 0.0 for row in epoch_rows)
 
 

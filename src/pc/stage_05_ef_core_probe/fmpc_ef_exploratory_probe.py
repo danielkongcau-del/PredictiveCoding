@@ -62,6 +62,9 @@ STAGE05_V3C_ENDPOINT_LINE_MIDPOINT_CANDIDATE_NAME = (
 STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_CANDIDATE_NAME = (
     "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract"
 )
+STAGE05_V3C_COUPLED_DEFECT_PROJECTION_CANDIDATE_NAME = (
+    "stage05_v3c_coupled_defect_projection_trajectory_contract"
+)
 U_PSI_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_TRAJ_INPUT_CONTRACT = "concat([z_t, target_onehot, t, r])"
 M_STATE_INPUT_CONTRACT = "concat([g_t, e_out_t, F_t])"
@@ -123,6 +126,23 @@ ENDPOINT_LINE_CONTINUATION_BLEND_TRAJECTORY_CONTRACT = (
     "u_main_star = alpha * ((z_mid_star - z_t) / (alpha * r)) + (1 - alpha) * u_C_star; "
     "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
 )
+COUPLED_DEFECT_PROJECTION_TRAJECTORY_CONTRACT = (
+    "u_B = u_boot(z_t, alpha * r, t; c); "
+    "z_B = z_t + alpha * r * u_B; "
+    "z_line_mid_star = z_t + alpha * (z_sg_star - z_t); "
+    "z_mid_star_0 = (1 - kappa) * z_B + kappa * z_line_mid_star; "
+    "u_C_traj_star_0 = stopgrad(u_hat(z_mid_star_0, r_s, s; c)); "
+    "d_sg_0 = u_sg_star - (alpha * u_short_star_0 + (1 - alpha) * u_C_traj_star_0); "
+    "rho = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2 * (alpha^2 + (1 - alpha)^2)); "
+    "u_short_star_half = u_short_star_0 + rho * alpha * d_sg_0; "
+    "z_mid_star_half = z_t + alpha * r * u_short_star_half; "
+    "u_C_traj_star_1 = stopgrad(u_hat(z_mid_star_half, r_s, s; c)); "
+    "d_sg_1 = u_sg_star - (alpha * u_short_star_half + (1 - alpha) * u_C_traj_star_1); "
+    "u_short_star = u_short_star_half + rho * alpha * d_sg_1; "
+    "u_C_star = u_C_traj_star_1 + rho * (1 - alpha) * d_sg_1; "
+    "u_main_star = alpha * u_short_star + (1 - alpha) * u_C_star; "
+    "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
+)
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3B = "trajectory_curriculum_detached_continuation"
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_STACKED = (
     "stacked_trajectory_curriculum_plus_auxiliary_semigroup_probe"
@@ -139,7 +159,11 @@ MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_MIDPOINT = (
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_CONTINUATION_BLEND = (
     "endpoint_line_midpoint_with_continuation_target_blend_semigroup_internalized_trajectory_contract"
 )
+MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_COUPLED_DEFECT_PROJECTION = (
+    "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract"
+)
 CONTINUATION_TARGET_BLEND_IDENTITY = "kappa_closed_form_blend"
+DEFECT_PROJECTION_COEFFICIENT_IDENTITY = "two_segment_quadratic_closed_form_rho"
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -194,6 +218,7 @@ class FMPCEFExploratoryProbeConfig:
     use_midpoint_reconstructed_trajectory_contract: bool = False
     use_endpoint_line_midpoint_trajectory_contract: bool = False
     use_endpoint_line_continuation_blend_trajectory_contract: bool = False
+    use_coupled_defect_projection_trajectory_contract: bool = False
     lambda_drift: float = 1.0
     lambda_traj_curr: float = 0.1
     alpha_floor: float = 0.5
@@ -323,6 +348,22 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError(
                 "use_endpoint_line_continuation_blend_trajectory_contract requires "
                 "use_endpoint_line_midpoint_trajectory_contract=True."
+            )
+        if (
+            self.use_coupled_defect_projection_trajectory_contract
+            and not self.use_endpoint_line_midpoint_trajectory_contract
+        ):
+            raise ValueError(
+                "use_coupled_defect_projection_trajectory_contract requires "
+                "use_endpoint_line_midpoint_trajectory_contract=True."
+            )
+        if (
+            self.use_coupled_defect_projection_trajectory_contract
+            and self.use_endpoint_line_continuation_blend_trajectory_contract
+        ):
+            raise ValueError(
+                "The coupled-defect-projection and endpoint-line-continuation-blend "
+                "contracts are mutually exclusive."
             )
 
     def resolved_run_id(self) -> str:
@@ -638,7 +679,7 @@ class FusedTrajectorySemigroupTargets:
 
 @dataclass(frozen=True)
 class MidpointReconstructedTrajectoryTargets:
-    """Non-equivalent internal-knot reconstruction targets for the next v3-C pass."""
+    """Non-equivalent internal-knot trajectory targets for Stage 05 v3-C refinements."""
 
     bootstrap_midpoint_state: np.ndarray
     bootstrap_continuation_velocity: np.ndarray
@@ -656,6 +697,12 @@ class MidpointReconstructedTrajectoryTargets:
     continuation_reevaluation_shift_norm: np.ndarray
     continuation_target_blend_shift_norm: np.ndarray
     semigroup_endpoint_closure_residual_norm: np.ndarray
+    predictor_semigroup_defect_norm: np.ndarray
+    corrected_semigroup_defect_norm: np.ndarray
+    first_projection_short_leg_correction_norm: np.ndarray
+    first_projection_continuation_correction_norm: np.ndarray
+    second_projection_short_leg_correction_norm: np.ndarray
+    second_projection_continuation_correction_norm: np.ndarray
 
     def __post_init__(self) -> None:
         for name in (
@@ -678,6 +725,12 @@ class MidpointReconstructedTrajectoryTargets:
             "continuation_reevaluation_shift_norm",
             "continuation_target_blend_shift_norm",
             "semigroup_endpoint_closure_residual_norm",
+            "predictor_semigroup_defect_norm",
+            "corrected_semigroup_defect_norm",
+            "first_projection_short_leg_correction_norm",
+            "first_projection_continuation_correction_norm",
+            "second_projection_short_leg_correction_norm",
+            "second_projection_continuation_correction_norm",
         ):
             object.__setattr__(self, name, _as_batch_first(name, getattr(self, name)))
         reference_shape = self.bootstrap_midpoint_state.shape
@@ -703,6 +756,12 @@ class MidpointReconstructedTrajectoryTargets:
             "continuation_reevaluation_shift_norm",
             "continuation_target_blend_shift_norm",
             "semigroup_endpoint_closure_residual_norm",
+            "predictor_semigroup_defect_norm",
+            "corrected_semigroup_defect_norm",
+            "first_projection_short_leg_correction_norm",
+            "first_projection_continuation_correction_norm",
+            "second_projection_short_leg_correction_norm",
+            "second_projection_continuation_correction_norm",
         ):
             if getattr(self, name).shape != (reference_shape[0], 1):
                 raise ValueError(f"{name} must be shaped (batch, 1).")
@@ -728,6 +787,12 @@ class ResidualSupervisionBatch:
     continuation_reevaluation_shift_norms: np.ndarray | None = None
     continuation_target_blend_shift_norms: np.ndarray | None = None
     semigroup_endpoint_closure_residual_norms: np.ndarray | None = None
+    predictor_semigroup_defect_norms: np.ndarray | None = None
+    corrected_semigroup_defect_norms: np.ndarray | None = None
+    first_projection_short_leg_correction_norms: np.ndarray | None = None
+    first_projection_continuation_correction_norms: np.ndarray | None = None
+    second_projection_short_leg_correction_norms: np.ndarray | None = None
+    second_projection_continuation_correction_norms: np.ndarray | None = None
     explicit_transport_drift_decomposition_enabled: bool = False
     trajectory_curriculum_enabled: bool = False
     endpoint_semigroup_consistency_enabled: bool = False
@@ -828,6 +893,17 @@ class ResidualSupervisionBatch:
                     self.semigroup_endpoint_closure_residual_norms,
                 ),
             )
+        for name in (
+            "predictor_semigroup_defect_norms",
+            "corrected_semigroup_defect_norms",
+            "first_projection_short_leg_correction_norms",
+            "first_projection_continuation_correction_norms",
+            "second_projection_short_leg_correction_norms",
+            "second_projection_continuation_correction_norms",
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                object.__setattr__(self, name, _as_batch_first(name, value))
         if self.trajectory_inputs.shape[0] != self.boot_targets.shape[0]:
             raise ValueError("trajectory_inputs and boot_targets must share the same batch size.")
         if self.trajectory_inputs.shape[0] != self.identity_targets.shape[0]:
@@ -867,6 +943,12 @@ class ResidualSupervisionBatch:
             "continuation_reevaluation_shift_norms",
             "continuation_target_blend_shift_norms",
             "semigroup_endpoint_closure_residual_norms",
+            "predictor_semigroup_defect_norms",
+            "corrected_semigroup_defect_norms",
+            "first_projection_short_leg_correction_norms",
+            "first_projection_continuation_correction_norms",
+            "second_projection_short_leg_correction_norms",
+            "second_projection_continuation_correction_norms",
         ):
             value = getattr(self, name)
             if value is not None and value.shape != (self.boot_targets.shape[0], 1):
@@ -893,6 +975,12 @@ class FMPCEFExploratoryProbeEpochMetrics:
     train_mean_continuation_reevaluation_shift_norm: float
     train_mean_continuation_target_blend_shift_norm: float
     train_mean_semigroup_endpoint_closure_residual_norm: float
+    train_mean_predictor_semigroup_defect_norm: float
+    train_mean_corrected_semigroup_defect_norm: float
+    train_mean_first_projection_short_leg_correction_norm: float
+    train_mean_first_projection_continuation_correction_norm: float
+    train_mean_second_projection_short_leg_correction_norm: float
+    train_mean_second_projection_continuation_correction_norm: float
     train_transported_final_energy: float
     val_one_step_transported_final_energy: float
     val_one_step_energy_delta_vs_identity: float
@@ -1048,6 +1136,21 @@ def build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_confi
     return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
 
 
+def build_stage05_v3c_coupled_defect_projection_trajectory_contract_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return the coupled local defect-projection refinement on top of active refined v3-C."""
+
+    payload: dict[str, Any] = {
+        "use_midpoint_reconstructed_trajectory_contract": True,
+        "use_endpoint_line_midpoint_trajectory_contract": True,
+        "use_coupled_defect_projection_trajectory_contract": True,
+        "candidate_name_override": STAGE05_V3C_COUPLED_DEFECT_PROJECTION_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
+
+
 def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.use_two_branch_residual_core:
         return TWO_BRANCH_RESIDUAL_MEANFLOW_TRANSPORT_FAMILY
@@ -1057,6 +1160,8 @@ def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
 def _candidate_name(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.candidate_name_override is not None:
         return str(config.candidate_name_override)
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return STAGE05_V3C_COUPLED_DEFECT_PROJECTION_CANDIDATE_NAME
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_CANDIDATE_NAME
     if config.use_endpoint_line_midpoint_trajectory_contract:
@@ -1131,6 +1236,14 @@ def _explicit_transport_drift_target_contract(
 def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
     if not config.use_explicit_transport_drift_decomposition:
         return None
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return {
+            "status": (
+                "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
+                "coupled_defect_projection_contract_comparison"
+            ),
+            "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+        }
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return {
             "status": (
@@ -1200,6 +1313,14 @@ def _pairwise_promoted_v3b_placeholder(
 def _pairwise_active_refined_v3c_placeholder(
     config: FMPCEFExploratoryProbeConfig,
 ) -> dict[str, Any] | None:
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return {
+            "status": (
+                "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
+                "coupled_defect_projection_contract_comparison"
+            ),
+            "reference_candidate_name": STAGE05_V3C_STRONGER_SEMIGROUP_CANDIDATE_NAME,
+        }
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return {
             "status": (
@@ -1227,6 +1348,11 @@ def _pairwise_active_refined_v3c_placeholder(
 
 
 def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return (
+            "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
+            "coupled_defect_projection_contract_comparison"
+        )
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return (
             "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
@@ -1248,6 +1374,8 @@ def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> s
 
 
 def _recommended_next_move(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return "run_fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison"
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return "run_fixed_budget_v2_vs_active_v3c_vs_endpoint_line_continuation_blend_contract_comparison"
     if config.use_endpoint_line_midpoint_trajectory_contract:
@@ -1280,6 +1408,8 @@ def _semigroup_target_contract(config: FMPCEFExploratoryProbeConfig) -> str | No
 
 
 def _main_trajectory_contract_identity(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_COUPLED_DEFECT_PROJECTION
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_CONTINUATION_BLEND
     if config.use_endpoint_line_midpoint_trajectory_contract:
@@ -1298,6 +1428,8 @@ def _main_trajectory_contract_identity(config: FMPCEFExploratoryProbeConfig) -> 
 def _main_trajectory_contract_target_contract(
     config: FMPCEFExploratoryProbeConfig,
 ) -> str | None:
+    if config.use_coupled_defect_projection_trajectory_contract:
+        return COUPLED_DEFECT_PROJECTION_TRAJECTORY_CONTRACT
     if config.use_endpoint_line_continuation_blend_trajectory_contract:
         return ENDPOINT_LINE_CONTINUATION_BLEND_TRAJECTORY_CONTRACT
     if config.use_endpoint_line_midpoint_trajectory_contract:
@@ -1317,6 +1449,7 @@ def _semigroup_consistency_absorbed_into_main_trajectory_contract(
     return bool(
         config.use_fused_trajectory_semigroup_contract
         or config.use_midpoint_reconstructed_trajectory_contract
+        or config.use_coupled_defect_projection_trajectory_contract
         or config.use_endpoint_line_continuation_blend_trajectory_contract
     )
 
@@ -1329,6 +1462,7 @@ def _semigroup_consistency_is_auxiliary_only(
     return not bool(
         config.use_fused_trajectory_semigroup_contract
         or config.use_midpoint_reconstructed_trajectory_contract
+        or config.use_coupled_defect_projection_trajectory_contract
     )
 
 
@@ -1736,32 +1870,100 @@ def build_midpoint_reconstructed_trajectory_targets(
     if np.any(w_main <= 0.0):
         raise ValueError("Midpoint reconstruction requires strictly positive main weights.")
     kappa = (float(lambda_sg) * loss_weights) / w_main
+    zero_scalar = np.zeros((z_array.shape[0], 1), dtype=np.float64)
 
     if config.use_endpoint_line_midpoint_trajectory_contract:
         z_guidance_mid_star = z_array + (short_r * u_sg_star)
     else:
         z_guidance_mid_star = z_sg_star - continuation_r * u_cont_boot
-    z_mid_star = ((1.0 - kappa) * z_boot_mid) + (kappa * z_guidance_mid_star)
-    u_short_star = (z_mid_star - z_array) / short_r
+    z_mid_star_0 = ((1.0 - kappa) * z_boot_mid) + (kappa * z_guidance_mid_star)
+    u_short_star_0 = (z_mid_star_0 - z_array) / short_r
 
     if continuation_active:
-        u_cont_traj_star = _predict_total_velocity_at_state(
+        u_cont_traj_star_0 = _predict_total_velocity_at_state(
             context,
             psi_network,
             config,
-            z_mid_star,
+            z_mid_star_0,
             t=split_time,
             r=continuation_r,
         )
     else:
-        u_cont_traj_star = np.zeros_like(z_array)
+        u_cont_traj_star_0 = np.zeros_like(z_array)
 
-    if config.use_endpoint_line_continuation_blend_trajectory_contract and continuation_active:
-        u_cont_sg_star = (z_sg_star - z_mid_star) / continuation_r
-        u_cont_star = ((1.0 - kappa) * u_cont_traj_star) + (kappa * u_cont_sg_star)
+    predictor_semigroup_defect_norm = zero_scalar.copy()
+    corrected_semigroup_defect_norm = zero_scalar.copy()
+    first_projection_short_leg_correction_norm = zero_scalar.copy()
+    first_projection_continuation_correction_norm = zero_scalar.copy()
+    second_projection_short_leg_correction_norm = zero_scalar.copy()
+    second_projection_continuation_correction_norm = zero_scalar.copy()
+
+    if config.use_coupled_defect_projection_trajectory_contract:
+        rho_denom = float(lambda_traj_curr) + (
+            float(lambda_sg)
+            * loss_weights
+            * ((alpha_value ** 2) + ((1.0 - alpha_value) ** 2))
+        )
+        if np.any(rho_denom <= 0.0):
+            raise ValueError("Coupled defect projection requires strictly positive rho denominator.")
+        rho = (float(lambda_sg) * loss_weights) / rho_denom
+        d_sg_0 = u_sg_star - (
+            (alpha_value * u_short_star_0) + ((1.0 - alpha_value) * u_cont_traj_star_0)
+        )
+        u_short_star_half = u_short_star_0 + (rho * alpha_value * d_sg_0)
+        u_cont_star_half = u_cont_traj_star_0 + (rho * (1.0 - alpha_value) * d_sg_0)
+        z_mid_star_half = z_array + (short_r * u_short_star_half)
+        if continuation_active:
+            u_cont_traj_star_1 = _predict_total_velocity_at_state(
+                context,
+                psi_network,
+                config,
+                z_mid_star_half,
+                t=split_time,
+                r=continuation_r,
+            )
+        else:
+            u_cont_traj_star_1 = np.zeros_like(z_array)
+        d_sg_1 = u_sg_star - (
+            (alpha_value * u_short_star_half) + ((1.0 - alpha_value) * u_cont_traj_star_1)
+        )
+        u_short_star = u_short_star_half + (rho * alpha_value * d_sg_1)
+        u_cont_star = u_cont_traj_star_1 + (rho * (1.0 - alpha_value) * d_sg_1)
+        z_mid_star = z_array + (short_r * u_short_star)
+        u_cont_sg_star = u_cont_star.copy()
+        u_cont_traj_star = u_cont_traj_star_1
+        predictor_semigroup_defect_norm = np.linalg.norm(d_sg_0, axis=1, keepdims=True)
+        corrected_semigroup_defect_norm = np.linalg.norm(d_sg_1, axis=1, keepdims=True)
+        first_projection_short_leg_correction_norm = np.linalg.norm(
+            u_short_star_half - u_short_star_0,
+            axis=1,
+            keepdims=True,
+        )
+        first_projection_continuation_correction_norm = np.linalg.norm(
+            u_cont_star_half - u_cont_traj_star_0,
+            axis=1,
+            keepdims=True,
+        )
+        second_projection_short_leg_correction_norm = np.linalg.norm(
+            u_short_star - u_short_star_half,
+            axis=1,
+            keepdims=True,
+        )
+        second_projection_continuation_correction_norm = np.linalg.norm(
+            u_cont_star - u_cont_traj_star_1,
+            axis=1,
+            keepdims=True,
+        )
     else:
-        u_cont_sg_star = u_cont_traj_star.copy()
-        u_cont_star = u_cont_traj_star.copy()
+        z_mid_star = z_mid_star_0
+        u_short_star = u_short_star_0
+        u_cont_traj_star = u_cont_traj_star_0
+        if config.use_endpoint_line_continuation_blend_trajectory_contract and continuation_active:
+            u_cont_sg_star = (z_sg_star - z_mid_star) / continuation_r
+            u_cont_star = ((1.0 - kappa) * u_cont_traj_star) + (kappa * u_cont_sg_star)
+        else:
+            u_cont_sg_star = u_cont_traj_star.copy()
+            u_cont_star = u_cont_traj_star.copy()
 
     u_main_star = (alpha_value * u_short_star) + ((1.0 - alpha_value) * u_cont_star)
     g_t = hidden_local_flow(context, z_array)
@@ -1800,6 +2002,12 @@ def build_midpoint_reconstructed_trajectory_targets(
         continuation_reevaluation_shift_norm=continuation_shift_norm,
         continuation_target_blend_shift_norm=continuation_target_blend_shift_norm,
         semigroup_endpoint_closure_residual_norm=semigroup_endpoint_closure_residual_norm,
+        predictor_semigroup_defect_norm=predictor_semigroup_defect_norm,
+        corrected_semigroup_defect_norm=corrected_semigroup_defect_norm,
+        first_projection_short_leg_correction_norm=first_projection_short_leg_correction_norm,
+        first_projection_continuation_correction_norm=first_projection_continuation_correction_norm,
+        second_projection_short_leg_correction_norm=second_projection_short_leg_correction_norm,
+        second_projection_continuation_correction_norm=second_projection_continuation_correction_norm,
     )
 
 
@@ -2418,6 +2626,10 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "endpoint_line_midpoint_reconstruction_enabled": bool(
                 config.use_endpoint_line_midpoint_trajectory_contract
             ),
+            "continuation_target_refinement_enabled": bool(
+                config.use_endpoint_line_continuation_blend_trajectory_contract
+                or config.use_coupled_defect_projection_trajectory_contract
+            ),
             "continuation_target_blending_enabled": bool(
                 config.use_endpoint_line_continuation_blend_trajectory_contract
             ),
@@ -2427,6 +2639,23 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             "continuation_target_blend_identity": (
                 CONTINUATION_TARGET_BLEND_IDENTITY
                 if config.use_endpoint_line_continuation_blend_trajectory_contract
+                else None
+            ),
+            "coupled_defect_projection_enabled": bool(
+                config.use_coupled_defect_projection_trajectory_contract
+            ),
+            "shared_semigroup_defect_coupling_enabled": bool(
+                config.use_coupled_defect_projection_trajectory_contract
+            ),
+            "predictor_corrector_refinement_enabled": bool(
+                config.use_coupled_defect_projection_trajectory_contract
+            ),
+            "second_pass_continuation_reevaluation_enabled": bool(
+                config.use_coupled_defect_projection_trajectory_contract
+            ),
+            "defect_projection_coefficient_identity": (
+                DEFECT_PROJECTION_COEFFICIENT_IDENTITY
+                if config.use_coupled_defect_projection_trajectory_contract
                 else None
             ),
             "continuation_reevaluated_at_reconstructed_midpoint": bool(
@@ -2537,6 +2766,12 @@ def _collect_residual_supervision(
     continuation_reevaluation_shift_norms: list[np.ndarray] = []
     continuation_target_blend_shift_norms: list[np.ndarray] = []
     semigroup_endpoint_closure_residual_norms: list[np.ndarray] = []
+    predictor_semigroup_defect_norms: list[np.ndarray] = []
+    corrected_semigroup_defect_norms: list[np.ndarray] = []
+    first_projection_short_leg_correction_norms: list[np.ndarray] = []
+    first_projection_continuation_correction_norms: list[np.ndarray] = []
+    second_projection_short_leg_correction_norms: list[np.ndarray] = []
+    second_projection_continuation_correction_norms: list[np.ndarray] = []
     trajectory_curriculum_active = bool(
         config.use_trajectory_curriculum_contract
         and trajectory_alpha is not None
@@ -2646,6 +2881,24 @@ def _collect_residual_supervision(
             semigroup_endpoint_closure_residual_norms.append(
                 midpoint_targets.semigroup_endpoint_closure_residual_norm
             )
+            predictor_semigroup_defect_norms.append(
+                midpoint_targets.predictor_semigroup_defect_norm
+            )
+            corrected_semigroup_defect_norms.append(
+                midpoint_targets.corrected_semigroup_defect_norm
+            )
+            first_projection_short_leg_correction_norms.append(
+                midpoint_targets.first_projection_short_leg_correction_norm
+            )
+            first_projection_continuation_correction_norms.append(
+                midpoint_targets.first_projection_continuation_correction_norm
+            )
+            second_projection_short_leg_correction_norms.append(
+                midpoint_targets.second_projection_short_leg_correction_norm
+            )
+            second_projection_continuation_correction_norms.append(
+                midpoint_targets.second_projection_continuation_correction_norm
+            )
     return ResidualSupervisionBatch(
         trajectory_inputs=np.concatenate(trajectory_input_blocks, axis=0).astype(
             np.float64,
@@ -2724,6 +2977,48 @@ def _collect_residual_supervision(
                 np.float64, copy=False
             )
             if semigroup_endpoint_closure_residual_norms
+            else None
+        ),
+        predictor_semigroup_defect_norms=(
+            np.concatenate(predictor_semigroup_defect_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if predictor_semigroup_defect_norms
+            else None
+        ),
+        corrected_semigroup_defect_norms=(
+            np.concatenate(corrected_semigroup_defect_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if corrected_semigroup_defect_norms
+            else None
+        ),
+        first_projection_short_leg_correction_norms=(
+            np.concatenate(first_projection_short_leg_correction_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if first_projection_short_leg_correction_norms
+            else None
+        ),
+        first_projection_continuation_correction_norms=(
+            np.concatenate(first_projection_continuation_correction_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if first_projection_continuation_correction_norms
+            else None
+        ),
+        second_projection_short_leg_correction_norms=(
+            np.concatenate(second_projection_short_leg_correction_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if second_projection_short_leg_correction_norms
+            else None
+        ),
+        second_projection_continuation_correction_norms=(
+            np.concatenate(second_projection_continuation_correction_norms, axis=0).astype(
+                np.float64, copy=False
+            )
+            if second_projection_continuation_correction_norms
             else None
         ),
         explicit_transport_drift_decomposition_enabled=bool(
@@ -2889,7 +3184,26 @@ def _train_one_batch(
     lambda_sg: float,
     trajectory_alpha: float,
     stage: ProbeStage,
-) -> tuple[float, float, float, float, float, float, float, float, float, float, float, float]:
+) -> tuple[
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+    float,
+]:
     context = build_tf1_context(model, x_batch, y_batch)
     source_rollout = rollout_hidden_transport(
         context,
@@ -2924,6 +3238,12 @@ def _train_one_batch(
     continuation_reevaluation_shift_norm = 0.0
     continuation_target_blend_shift_norm = 0.0
     semigroup_endpoint_closure_residual_norm = 0.0
+    predictor_semigroup_defect_norm = 0.0
+    corrected_semigroup_defect_norm = 0.0
+    first_projection_short_leg_correction_norm = 0.0
+    first_projection_continuation_correction_norm = 0.0
+    second_projection_short_leg_correction_norm = 0.0
+    second_projection_continuation_correction_norm = 0.0
     if config.use_explicit_transport_drift_decomposition:
         if supervision.state_inputs is None:
             raise ValueError("Stage 05 v3-A requires state_inputs for the drift branch.")
@@ -2978,6 +3298,30 @@ def _train_one_batch(
             if supervision.semigroup_endpoint_closure_residual_norms is not None:
                 semigroup_endpoint_closure_residual_norm = float(
                     np.mean(supervision.semigroup_endpoint_closure_residual_norms)
+                )
+            if supervision.predictor_semigroup_defect_norms is not None:
+                predictor_semigroup_defect_norm = float(
+                    np.mean(supervision.predictor_semigroup_defect_norms)
+                )
+            if supervision.corrected_semigroup_defect_norms is not None:
+                corrected_semigroup_defect_norm = float(
+                    np.mean(supervision.corrected_semigroup_defect_norms)
+                )
+            if supervision.first_projection_short_leg_correction_norms is not None:
+                first_projection_short_leg_correction_norm = float(
+                    np.mean(supervision.first_projection_short_leg_correction_norms)
+                )
+            if supervision.first_projection_continuation_correction_norms is not None:
+                first_projection_continuation_correction_norm = float(
+                    np.mean(supervision.first_projection_continuation_correction_norms)
+                )
+            if supervision.second_projection_short_leg_correction_norms is not None:
+                second_projection_short_leg_correction_norm = float(
+                    np.mean(supervision.second_projection_short_leg_correction_norms)
+                )
+            if supervision.second_projection_continuation_correction_norms is not None:
+                second_projection_continuation_correction_norm = float(
+                    np.mean(supervision.second_projection_continuation_correction_norms)
                 )
             main_traj_contract_loss = float(
                 np.mean(
@@ -3125,6 +3469,12 @@ def _train_one_batch(
         continuation_reevaluation_shift_norm,
         continuation_target_blend_shift_norm,
         semigroup_endpoint_closure_residual_norm,
+        predictor_semigroup_defect_norm,
+        corrected_semigroup_defect_norm,
+        first_projection_short_leg_correction_norm,
+        first_projection_continuation_correction_norm,
+        second_projection_short_leg_correction_norm,
+        second_projection_continuation_correction_norm,
         transported_energy,
     )
 
@@ -3176,6 +3526,12 @@ def run_fmpc_ef_exploratory_probe(
         batch_continuation_reevaluation_shift_norms: list[float] = []
         batch_continuation_target_blend_shift_norms: list[float] = []
         batch_semigroup_endpoint_closure_residual_norms: list[float] = []
+        batch_predictor_semigroup_defect_norms: list[float] = []
+        batch_corrected_semigroup_defect_norms: list[float] = []
+        batch_first_projection_short_leg_correction_norms: list[float] = []
+        batch_first_projection_continuation_correction_norms: list[float] = []
+        batch_second_projection_short_leg_correction_norms: list[float] = []
+        batch_second_projection_continuation_correction_norms: list[float] = []
         batch_transport_energies: list[float] = []
         batch_seed = config.batch_order_seed + epoch_index
         for x_batch, y_batch in iter_minibatches(
@@ -3198,6 +3554,12 @@ def run_fmpc_ef_exploratory_probe(
                 continuation_reevaluation_shift_norm,
                 continuation_target_blend_shift_norm,
                 semigroup_endpoint_closure_residual_norm,
+                predictor_semigroup_defect_norm,
+                corrected_semigroup_defect_norm,
+                first_projection_short_leg_correction_norm,
+                first_projection_continuation_correction_norm,
+                second_projection_short_leg_correction_norm,
+                second_projection_continuation_correction_norm,
                 transported_energy,
             ) = _train_one_batch(
                 model,
@@ -3228,6 +3590,20 @@ def run_fmpc_ef_exploratory_probe(
             )
             batch_semigroup_endpoint_closure_residual_norms.append(
                 semigroup_endpoint_closure_residual_norm
+            )
+            batch_predictor_semigroup_defect_norms.append(predictor_semigroup_defect_norm)
+            batch_corrected_semigroup_defect_norms.append(corrected_semigroup_defect_norm)
+            batch_first_projection_short_leg_correction_norms.append(
+                first_projection_short_leg_correction_norm
+            )
+            batch_first_projection_continuation_correction_norms.append(
+                first_projection_continuation_correction_norm
+            )
+            batch_second_projection_short_leg_correction_norms.append(
+                second_projection_short_leg_correction_norm
+            )
+            batch_second_projection_continuation_correction_norms.append(
+                second_projection_continuation_correction_norm
             )
             batch_transport_energies.append(transported_energy)
 
@@ -3276,6 +3652,24 @@ def run_fmpc_ef_exploratory_probe(
                 ),
                 train_mean_semigroup_endpoint_closure_residual_norm=float(
                     np.mean(batch_semigroup_endpoint_closure_residual_norms)
+                ),
+                train_mean_predictor_semigroup_defect_norm=float(
+                    np.mean(batch_predictor_semigroup_defect_norms)
+                ),
+                train_mean_corrected_semigroup_defect_norm=float(
+                    np.mean(batch_corrected_semigroup_defect_norms)
+                ),
+                train_mean_first_projection_short_leg_correction_norm=float(
+                    np.mean(batch_first_projection_short_leg_correction_norms)
+                ),
+                train_mean_first_projection_continuation_correction_norm=float(
+                    np.mean(batch_first_projection_continuation_correction_norms)
+                ),
+                train_mean_second_projection_short_leg_correction_norm=float(
+                    np.mean(batch_second_projection_short_leg_correction_norms)
+                ),
+                train_mean_second_projection_continuation_correction_norm=float(
+                    np.mean(batch_second_projection_continuation_correction_norms)
                 ),
                 train_transported_final_energy=float(np.mean(batch_transport_energies)),
                 val_one_step_transported_final_energy=val_one_step.transported_final_energy,
@@ -3424,6 +3818,10 @@ def run_fmpc_ef_exploratory_probe(
         "endpoint_line_midpoint_reconstruction_enabled": bool(
             config.use_endpoint_line_midpoint_trajectory_contract
         ),
+        "continuation_target_refinement_enabled": bool(
+            config.use_endpoint_line_continuation_blend_trajectory_contract
+            or config.use_coupled_defect_projection_trajectory_contract
+        ),
         "continuation_target_blending_enabled": bool(
             config.use_endpoint_line_continuation_blend_trajectory_contract
         ),
@@ -3433,6 +3831,23 @@ def run_fmpc_ef_exploratory_probe(
         "continuation_target_blend_identity": (
             CONTINUATION_TARGET_BLEND_IDENTITY
             if config.use_endpoint_line_continuation_blend_trajectory_contract
+            else None
+        ),
+        "coupled_defect_projection_enabled": bool(
+            config.use_coupled_defect_projection_trajectory_contract
+        ),
+        "shared_semigroup_defect_coupling_enabled": bool(
+            config.use_coupled_defect_projection_trajectory_contract
+        ),
+        "predictor_corrector_refinement_enabled": bool(
+            config.use_coupled_defect_projection_trajectory_contract
+        ),
+        "second_pass_continuation_reevaluation_enabled": bool(
+            config.use_coupled_defect_projection_trajectory_contract
+        ),
+        "defect_projection_coefficient_identity": (
+            DEFECT_PROJECTION_COEFFICIENT_IDENTITY
+            if config.use_coupled_defect_projection_trajectory_contract
             else None
         ),
         "continuation_reevaluated_at_reconstructed_midpoint": bool(
@@ -3504,6 +3919,24 @@ def run_fmpc_ef_exploratory_probe(
         ),
         "selected_epoch_mean_semigroup_endpoint_closure_residual_norm": float(
             best_row["train_mean_semigroup_endpoint_closure_residual_norm"]
+        ),
+        "selected_epoch_mean_predictor_semigroup_defect_norm": float(
+            best_row["train_mean_predictor_semigroup_defect_norm"]
+        ),
+        "selected_epoch_mean_corrected_semigroup_defect_norm": float(
+            best_row["train_mean_corrected_semigroup_defect_norm"]
+        ),
+        "selected_epoch_mean_first_projection_short_leg_correction_norm": float(
+            best_row["train_mean_first_projection_short_leg_correction_norm"]
+        ),
+        "selected_epoch_mean_first_projection_continuation_correction_norm": float(
+            best_row["train_mean_first_projection_continuation_correction_norm"]
+        ),
+        "selected_epoch_mean_second_projection_short_leg_correction_norm": float(
+            best_row["train_mean_second_projection_short_leg_correction_norm"]
+        ),
+        "selected_epoch_mean_second_projection_continuation_correction_norm": float(
+            best_row["train_mean_second_projection_continuation_correction_norm"]
         ),
         "train_wall_time_seconds": train_wall_time_seconds,
         "evaluation_wall_time_seconds": evaluation_wall_time_seconds,

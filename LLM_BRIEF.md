@@ -114,6 +114,7 @@ Current known state:
 - the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
 - the completed refined fixed-budget recompare now says `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over both the promoted refined v3-B reference and the fixed-budget v2 control
+- the completed fixed-budget coupled defect-projection comparison now says `stage05_v3c_coupled_defect_projection_trajectory_contract` directionally improves configured-step mechanism over the active refined v3-C reference, but does not materially displace it
 - task accuracy is still low and remains report-only
 
 ## Current Recommended Next Move
@@ -129,7 +130,8 @@ Current known state:
 - the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
 - that recompare says `stage05_v3c_stronger_semigroup_weight` materially displaces the promoted refined v3-B reference under the current mechanism-first rule
 - the current Stage 05 structural interpretation is `absorb_semigroup_into_main_trajectory_contract`
-- the next immediate move is now a narrow contract-consolidation implementation pass, not another recompare or another charter
+- the latest coupled defect-projection refinement still does not materially displace `stage05_v3c_stronger_semigroup_weight`
+- the next immediate move is now a narrow coupled midpoint-continuation refinement pass, not another recompare or another charter
 
 ## Current Code Entry Points
 

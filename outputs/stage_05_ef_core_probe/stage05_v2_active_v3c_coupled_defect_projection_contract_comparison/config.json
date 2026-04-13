@@ -1,0 +1,111 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_active_v3c_coupled_defect_projection_contract_comparison",
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_control": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": false,
+      "trajectory_curriculum_enabled": false,
+      "endpoint_semigroup_consistency_enabled": false,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_active_v3c_reference": {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "candidate_name": "stage05_v3c_stronger_semigroup_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": false,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "main_trajectory_contract_identity": "stacked_trajectory_curriculum_plus_auxiliary_semigroup_probe",
+      "semigroup_consistency_is_auxiliary_only": true,
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/runs/stage05_v3c_stronger_semigroup_weight",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_coupled_defect_projection_candidate": {
+      "method_name": "stage05_v3c_coupled_defect_projection_trajectory_contract",
+      "candidate_name": "stage05_v3c_coupled_defect_projection_trajectory_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": true,
+      "midpoint_reconstruction_enabled": true,
+      "endpoint_line_midpoint_reconstruction_enabled": true,
+      "continuation_target_refinement_enabled": true,
+      "coupled_defect_projection_enabled": true,
+      "shared_semigroup_defect_coupling_enabled": true,
+      "predictor_corrector_refinement_enabled": true,
+      "second_pass_continuation_reevaluation_enabled": true,
+      "continuation_reevaluated_at_reconstructed_midpoint": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "main_trajectory_contract_identity": "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract",
+      "defect_projection_coefficient_identity": "two_segment_quadratic_closed_form_rho",
+      "semigroup_consistency_is_auxiliary_only": false,
+      "exact_detached_target_barycentric_fusion_enabled": false,
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "reference_reused_from_existing_artifacts": false,
+      "source_artifact_root": null,
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_active_v3c_reference_artifacts": true,
+      "reuse_stage05_coupled_defect_projection_candidate_artifacts": false
+    }
+  }
+}

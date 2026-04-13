@@ -1,0 +1,556 @@
+{
+  "phase": "FMPC Stage 05 EF Core Probe",
+  "stage": "stage05_v2_active_v3c_coupled_defect_projection_contract_comparison",
+  "comparison_scope": "fixed_budget_comparison",
+  "num_runs": 9,
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_control": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": false,
+      "trajectory_curriculum_enabled": false,
+      "endpoint_semigroup_consistency_enabled": false,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_active_v3c_reference": {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "candidate_name": "stage05_v3c_stronger_semigroup_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": false,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "main_trajectory_contract_identity": "stacked_trajectory_curriculum_plus_auxiliary_semigroup_probe",
+      "semigroup_consistency_is_auxiliary_only": true,
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/runs/stage05_v3c_stronger_semigroup_weight",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_coupled_defect_projection_candidate": {
+      "method_name": "stage05_v3c_coupled_defect_projection_trajectory_contract",
+      "candidate_name": "stage05_v3c_coupled_defect_projection_trajectory_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": true,
+      "midpoint_reconstruction_enabled": true,
+      "endpoint_line_midpoint_reconstruction_enabled": true,
+      "continuation_target_refinement_enabled": true,
+      "coupled_defect_projection_enabled": true,
+      "shared_semigroup_defect_coupling_enabled": true,
+      "predictor_corrector_refinement_enabled": true,
+      "second_pass_continuation_reevaluation_enabled": true,
+      "continuation_reevaluated_at_reconstructed_midpoint": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "main_trajectory_contract_identity": "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract",
+      "defect_projection_coefficient_identity": "two_segment_quadratic_closed_form_rho",
+      "semigroup_consistency_is_auxiliary_only": false,
+      "exact_detached_target_barycentric_fusion_enabled": false,
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "reference_reused_from_existing_artifacts": false,
+      "source_artifact_root": null,
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_active_v3c_reference_artifacts": true,
+      "reuse_stage05_coupled_defect_projection_candidate_artifacts": false
+    }
+  },
+  "comparison_roles": {
+    "immediate_control": "stage_05_two_branch_corrected_residual_core_v2",
+    "active_reference_at_comparison_start": "stage05_v3c_stronger_semigroup_weight",
+    "coupled_defect_projection_candidate": "stage05_v3c_coupled_defect_projection_trajectory_contract"
+  },
+  "candidate_identities": [
+    "stage_05_two_branch_corrected_residual_core_v2",
+    "stage05_v3c_stronger_semigroup_weight",
+    "stage05_v3c_coupled_defect_projection_trajectory_contract"
+  ],
+  "by_method": {
+    "stage_05_two_branch_corrected_residual_core_v2": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.004993063453529826,
+        "std": 0.0004497886244058906
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.004980554368336933,
+        "std": 0.0004619010522770305
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -1.8451788412853327e-05,
+        "std": 1.7042211944327626e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0007782552556208818,
+        "std": 0.0001066222708630268
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0007828017566811433,
+        "std": 0.00011445825630689142
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.370544746595761e-06,
+        "std": 5.800356555165735e-07
+      },
+      "val_accuracy": {
+        "mean": 0.8876543209876543,
+        "std": 0.020135193123827277
+      },
+      "test_accuracy": {
+        "mean": 0.8876543209876543,
+        "std": 0.007610387657986378
+      },
+      "val_output_mse": {
+        "mean": 0.043408228822216455,
+        "std": 0.00014474751820407094
+      },
+      "test_output_mse": {
+        "mean": 0.042297337021277574,
+        "std": 0.0005151723569268052
+      },
+      "runtime_proxy_seconds": {
+        "mean": 240.9623000333328,
+        "std": 1.4256820311816305
+      },
+      "mean_midpoint_reconstruction_shift_norm": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "mean_continuation_reevaluation_shift_norm": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "mean_semigroup_endpoint_closure_residual_norm": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "stage05_v3c_stronger_semigroup_weight": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.00599729493855843,
+        "std": 0.0008808258994122166
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.0059706216916698045,
+        "std": 0.0008818467149723331
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.2701777366495727e-05,
+        "std": 3.170690497970636e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009229542925971909,
+        "std": 0.00022651579340825996
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009194446104016004,
+        "std": 0.00023164159661929099
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.8205356974837174e-06,
+        "std": 9.084181089313963e-07
+      },
+      "val_accuracy": {
+        "mean": 0.880246913580247,
+        "std": 0.03044155063194556
+      },
+      "test_accuracy": {
+        "mean": 0.8839506172839506,
+        "std": 0.006295085819250353
+      },
+      "val_output_mse": {
+        "mean": 0.04488751148396228,
+        "std": 0.0010595797747872267
+      },
+      "test_output_mse": {
+        "mean": 0.043719789409510136,
+        "std": 0.001438914724898345
+      },
+      "runtime_proxy_seconds": {
+        "mean": 776.1473479666723,
+        "std": 29.08378279410941
+      },
+      "mean_midpoint_reconstruction_shift_norm": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "mean_continuation_reevaluation_shift_norm": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "mean_semigroup_endpoint_closure_residual_norm": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "stage05_v3c_coupled_defect_projection_trajectory_contract": {
+      "num_runs": 3,
+      "configured_transport_steps": 2,
+      "total_training_epochs": 1536,
+      "selected_epoch": {
+        "mean": 1536.0,
+        "std": 0.0
+      },
+      "selection_hits_final_training_boundary_rate": 1.0,
+      "deterministic_artifact_check_rate": 1.0,
+      "mechanism_signal_positive_rate": 1.0,
+      "one_step_energy_delta_vs_identity": {
+        "mean": -0.006092406187638798,
+        "std": 0.000906443178211941
+      },
+      "configured_step_energy_delta_vs_identity": {
+        "mean": -0.006064637700758028,
+        "std": 0.0009070633087403902
+      },
+      "configured_step_fixed_point_residual_delta_vs_identity": {
+        "mean": -2.309891909200473e-05,
+        "std": 3.219252424377929e-06
+      },
+      "one_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009338541238523382,
+        "std": 0.00024089161732065065
+      },
+      "configured_step_energy_delta_vs_local_field_only": {
+        "mean": -0.0009298639784803183,
+        "std": 0.0002457198819739074
+      },
+      "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+        "mean": -2.852937041656744e-06,
+        "std": 9.466747155445573e-07
+      },
+      "val_accuracy": {
+        "mean": 0.880246913580247,
+        "std": 0.02743964292702823
+      },
+      "test_accuracy": {
+        "mean": 0.882716049382716,
+        "std": 0.006983770678385665
+      },
+      "val_output_mse": {
+        "mean": 0.04506929921118947,
+        "std": 0.001177365739664176
+      },
+      "test_output_mse": {
+        "mean": 0.043890526288258715,
+        "std": 0.0015608719113832613
+      },
+      "runtime_proxy_seconds": {
+        "mean": 545.601584866672,
+        "std": 32.713413472213674
+      },
+      "mean_midpoint_reconstruction_shift_norm": {
+        "mean": 0.0007752285599409436,
+        "std": 1.3058012567957467e-05
+      },
+      "mean_continuation_reevaluation_shift_norm": {
+        "mean": 1.7764030541758675e-05,
+        "std": 4.784666063615815e-07
+      },
+      "mean_semigroup_endpoint_closure_residual_norm": {
+        "mean": 0.0013196843140328568,
+        "std": 2.989304151834467e-05
+      }
+    }
+  },
+  "configured_step_mechanism_ranking": [
+    {
+      "method_name": "stage05_v3c_coupled_defect_projection_trajectory_contract",
+      "configured_step_energy_delta_vs_identity_mean": -0.006064637700758028,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.309891909200473e-05
+    },
+    {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "configured_step_energy_delta_vs_identity_mean": -0.0059706216916698045,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -2.2701777366495727e-05
+    },
+    {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "configured_step_energy_delta_vs_identity_mean": -0.004980554368336933,
+      "configured_step_fixed_point_residual_delta_vs_identity_mean": -1.8451788412853327e-05
+    }
+  ],
+  "pairwise_deltas_vs_stage05_v2_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0010993427341089712,
+      "std": 0.0004636565753961127
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0010840833324210948,
+      "std": 0.0004520799760076057
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -4.647130679151404e-06,
+      "std": 1.5481245068308417e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00014706222179917497,
+      "std": 0.00019029990525024204
+    },
+    "val_accuracy_delta": {
+      "mean": -0.007407407407407455,
+      "std": 0.01090340847694795
+    },
+    "test_accuracy_delta": {
+      "mean": -0.004938271604938242,
+      "std": 0.009720997375323228
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 304.6392848333392,
+      "std": 31.663603877454793
+    }
+  },
+  "pairwise_deltas_vs_active_refined_v3c_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -9.511124908036701e-05,
+      "std": 2.5862358564185583e-05
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -9.401600908822323e-05,
+      "std": 2.54625440188862e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -3.9714172550900373e-07,
+      "std": 4.85890413508226e-08
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -1.0419368078717905e-05,
+      "std": 1.4840909551146263e-05
+    },
+    "val_accuracy_delta": {
+      "mean": -3.700743415417188e-17,
+      "std": 0.003024061410843434
+    },
+    "test_accuracy_delta": {
+      "mean": -0.0012345679012345883,
+      "std": 0.0017459426695964422
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -230.54576310000024,
+      "std": 61.76213409394979
+    }
+  },
+  "pairwise_active_refined_v3c_vs_v2": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0010042314850286043,
+      "std": 0.0004386986158013528
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0009900673233328716,
+      "std": 0.0004275344040420975
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -4.2499889536424e-06,
+      "std": 1.500372906508022e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00013664285372045706,
+      "std": 0.00017565208321452863
+    },
+    "val_accuracy_delta": {
+      "mean": -0.007407407407407418,
+      "std": 0.013181578088927523
+    },
+    "test_accuracy_delta": {
+      "mean": -0.0037037037037036535,
+      "std": 0.010475656017578498
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 535.1850479333394,
+      "std": 30.222054359629727
+    }
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "deterministic_artifact_checks_all_pass": true,
+  "active_v3c_reference_candidate_name": "stage05_v3c_stronger_semigroup_weight",
+  "coupled_defect_projection_contract_candidate_name": "stage05_v3c_coupled_defect_projection_trajectory_contract",
+  "coupled_defect_projection_contract_keeps_one_step_mechanism_positive": true,
+  "coupled_defect_projection_contract_keeps_configured_step_mechanism_positive": true,
+  "coupled_defect_projection_contract_materially_beats_active_v3c_reference": false,
+  "coupled_defect_projection_contract_avoids_obvious_report_accuracy_regression": true,
+  "coupled_defect_projection_contract_shows_positive_gap_closure_signal_vs_active_v3c": true,
+  "coupled_defect_projection_contract_replaces_active_v3c_reference": false,
+  "energy_gain_fraction_vs_active_v3c_reference": 0.015746435454015568,
+  "residual_gain_fraction_vs_active_v3c_reference": 0.01749386046288705,
+  "max_report_accuracy_regression_vs_active_v3c_reference": 0.0012345679012345883,
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "stage05_v3c_stronger_semigroup_weight": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3c_coupled_defect_projection_trajectory_contract": {
+      "configured_step_energy": 0.8896713875260437,
+      "configured_step_residual": 0.4429666314384249,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "active_refined_v3c": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "coupled_defect_projection_v3c": {
+      "configured_step_energy": 0.8896713875260437,
+      "configured_step_residual": 0.4429666314384249,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "coupled_defect_projection_minus_active_v3c": {
+      "configured_step_energy": 0.07715583364645917,
+      "configured_step_residual": 0.03785573174036311,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    }
+  },
+  "gap_closure_decision": "directional_but_not_material_gap_closure_vs_active_v3c",
+  "recommended_next_move": "keep_coupled_defect_projection_direction_and_refine_implementation",
+  "decision_rationale": "The coupled defect-projection v3-C candidate moves configured-step mechanism in the right direction, but it does not yet materially and cleanly displace the current active refined v3-C reference.",
+  "aggregate_runs_csv_path": "aggregate_runs.csv",
+  "comparison_report_json_path": "comparison_report.json",
+  "comparison_report_md_path": "comparison_report.md"
+}

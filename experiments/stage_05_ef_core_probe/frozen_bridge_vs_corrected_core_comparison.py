@@ -16,6 +16,7 @@ from pc.stage_05_ef_core_probe.frozen_bridge_vs_corrected_core_comparison import
     Stage05V3BRefinementDiagnosticConfig,
     Stage05V3CRefinementDiagnosticConfig,
     Stage05V2ActiveV3CFusedComparisonConfig,
+    Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig,
     Stage05V2ActiveV3CEndpointLineContinuationBlendComparisonConfig,
     Stage05V2ActiveV3CEndpointLineMidpointComparisonConfig,
     Stage05V2ActiveV3CMidpointReconstructedComparisonConfig,
@@ -31,6 +32,7 @@ from pc.stage_05_ef_core_probe.frozen_bridge_vs_corrected_core_comparison import
     run_stage05_v3b_refinement_diagnostic,
     run_stage05_v3c_refinement_diagnostic,
     run_stage05_v2_active_v3c_fused_contract_comparison,
+    run_stage05_v2_active_v3c_coupled_defect_projection_contract_comparison,
     run_stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison,
     run_stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison,
     run_stage05_v2_active_v3c_midpoint_reconstructed_contract_comparison,
@@ -170,6 +172,15 @@ def run(
             **overrides,
         )
         return run_stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison(
+            config
+        )
+    if comparison_variant == "stage05_v2_active_v3c_coupled_defect_projection_contract_comparison":
+        config = Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig(
+            output_root=output_root,
+            run_id=run_id,
+            **overrides,
+        )
+        return run_stage05_v2_active_v3c_coupled_defect_projection_contract_comparison(
             config
         )
     raise ValueError(f"Unsupported comparison_variant '{comparison_variant}'.")

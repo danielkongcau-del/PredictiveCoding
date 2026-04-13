@@ -29,6 +29,7 @@ from .fmpc_ef_exploratory_probe import (
     ProbeMechanismMetrics,
     build_stage05_v3b_stronger_traj_curr_weight_config,
     build_stage05_v3c_endpoint_semigroup_config,
+    build_stage05_v3c_coupled_defect_projection_trajectory_contract_config,
     build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_config,
     build_stage05_v3c_endpoint_line_midpoint_trajectory_contract_config,
     build_stage05_v3c_fused_trajectory_semigroup_contract_config,
@@ -54,6 +55,7 @@ ComparisonMethodName = Literal[
     "stage05_v3c_midpoint_reconstructed_trajectory_contract",
     "stage05_v3c_endpoint_line_midpoint_trajectory_contract",
     "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract",
+    "stage05_v3c_coupled_defect_projection_trajectory_contract",
     "stage_05_two_branch_corrected_residual_core_v2_current_budget",
     "stage_05_two_branch_corrected_residual_core_v2_longer_training",
     "stage_05_two_branch_corrected_residual_core_v2_budget_reference",
@@ -93,6 +95,9 @@ STAGE05_V3C_ENDPOINT_LINE_MIDPOINT_METHOD_NAME: ComparisonMethodName = (
 )
 STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_METHOD_NAME: ComparisonMethodName = (
     "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract"
+)
+STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME: ComparisonMethodName = (
+    "stage05_v3c_coupled_defect_projection_trajectory_contract"
 )
 STAGE05_V2_CURRENT_BUDGET_METHOD_NAME: ComparisonMethodName = (
     "stage_05_two_branch_corrected_residual_core_v2_current_budget"
@@ -997,6 +1002,21 @@ class Stage05V2ActiveV3CEndpointLineContinuationBlendComparisonConfig:
             return self.run_id
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{timestamp}_seed_{self.seeds[0]}"
+
+
+@dataclass
+class Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig(
+    Stage05V2ActiveV3CEndpointLineContinuationBlendComparisonConfig
+):
+    """Compare fixed-budget v2, the active refined v3-C reference, and the coupled defect-projection candidate."""
+
+    experiment_name: str = "stage05_v2_active_v3c_coupled_defect_projection_contract_comparison"
+    reuse_stage05_coupled_defect_projection_candidate_artifacts: bool = False
+    coupled_defect_projection_candidate_artifact_root: str | Path = (
+        "outputs/stage_05_ef_core_probe/"
+        "stage05_v3c_coupled_defect_projection_candidate_runs/"
+        "runs/stage05_v3c_coupled_defect_projection_trajectory_contract"
+    )
 
 
 @dataclass
@@ -2089,6 +2109,40 @@ def _stage05_v3c_endpoint_line_continuation_blend_candidate_config(
     return build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_config(
         output_root=output_root,
         experiment_name=STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_METHOD_NAME,
+        output_layout="run_id_subdir",
+        run_id=f"seed_{seed}",
+        run_seed=seed,
+        data_seed=seed,
+        model_init_seed=seed,
+        psi_init_seed=seed,
+        batch_order_seed=seed,
+        train_fraction=float(config.train_fraction),
+        val_fraction=float(config.val_fraction),
+        test_fraction=float(config.test_fraction),
+        batch_size=int(config.batch_size),
+        shuffle_batches=bool(config.shuffle_batches),
+        epochs=int(config.stage05_epochs),
+        eval_steps=int(config.stage05_eval_steps),
+        layer_dims=config.stage05_layer_dims,
+        transport_steps=int(config.stage05_transport_steps),
+        lambda_drift=float(config.lambda_drift),
+        lambda_traj_curr=float(config.active_v3c_lambda_traj_curr),
+        alpha_floor=float(config.active_v3c_alpha_floor),
+        alpha_warmup_epochs=int(config.active_v3c_alpha_warmup_epochs),
+        alpha_ramp_epochs=int(config.active_v3c_alpha_ramp_epochs),
+        lambda_sg=float(config.active_v3c_lambda_sg),
+    )
+
+
+def _stage05_v3c_coupled_defect_projection_candidate_config(
+    config: Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig,
+    *,
+    seed: int,
+    output_root: Path,
+) -> FMPCEFExploratoryProbeConfig:
+    return build_stage05_v3c_coupled_defect_projection_trajectory_contract_config(
+        output_root=output_root,
+        experiment_name=STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
         output_layout="run_id_subdir",
         run_id=f"seed_{seed}",
         run_seed=seed,
@@ -9276,6 +9330,796 @@ def run_stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparis
                 config
             )
         ),
+        aggregate_rows=rows,
+        summary=summary,
+        comparison_report=report,
+    )
+
+
+def _stage05_v2_active_v3c_coupled_defect_projection_protocol_payload(
+    config: Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig,
+) -> dict[str, Any]:
+    if config.comparison_scope == "smoke_only":
+        decision_rule = {
+            "purpose": "smoke_ready_v3c_coupled_defect_projection_contract_check",
+            "task_accuracy_is_report_only": True,
+            "artifact_checks_required": True,
+            "one_step_mechanism_should_remain_positive": True,
+            "configured_step_mechanism_should_remain_positive": True,
+            "smoke_only": True,
+        }
+    else:
+        decision_rule = {
+            "purpose": "fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison",
+            "primary_split": "validation",
+            "task_accuracy_is_report_only": True,
+            "configured_step_improvement_fraction_threshold": float(
+                config.configured_step_improvement_fraction_threshold
+            ),
+            "allowed_accuracy_regression_threshold": float(
+                config.allowed_accuracy_regression_threshold
+            ),
+            "gap_narrowing_fraction_threshold": float(config.gap_narrowing_fraction_threshold),
+            "reuse_stage05_v2_reference_artifacts": bool(
+                config.reuse_stage05_v2_reference_artifacts
+            ),
+            "reuse_stage05_active_v3c_reference_artifacts": bool(
+                config.reuse_stage05_active_v3c_reference_artifacts
+            ),
+            "reuse_stage05_coupled_defect_projection_candidate_artifacts": bool(
+                config.reuse_stage05_coupled_defect_projection_candidate_artifacts
+            ),
+        }
+    return {
+        "comparison_scope": str(config.comparison_scope),
+        "dataset_name": config.dataset_name,
+        "seeds": [int(seed) for seed in config.seeds],
+        "train_fraction": float(config.train_fraction),
+        "val_fraction": float(config.val_fraction),
+        "test_fraction": float(config.test_fraction),
+        "shared_batch_size": int(config.batch_size),
+        "shared_shuffle_batches": bool(config.shuffle_batches),
+        "stage_05_v2_control": {
+            "method_name": STAGE05_V2_METHOD_NAME,
+            "candidate_name": STAGE05_V2_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "explicit_transport_drift_decomposition_enabled": False,
+            "trajectory_curriculum_enabled": False,
+            "endpoint_semigroup_consistency_enabled": False,
+            "contract_fusion_enabled": False,
+            "target_reconstruction_enabled": False,
+            "reference_reused_from_existing_artifacts": bool(
+                config.reuse_stage05_v2_reference_artifacts
+            ),
+            "source_artifact_root": (
+                _repo_relative_posix(_resolve_repo_path(config.reference_artifact_root))
+                if config.reuse_stage05_v2_reference_artifacts
+                else None
+            ),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "stage_05_active_v3c_reference": {
+            "method_name": STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+            "candidate_name": STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "explicit_transport_drift_decomposition_enabled": True,
+            "trajectory_curriculum_enabled": True,
+            "endpoint_semigroup_consistency_enabled": True,
+            "contract_fusion_enabled": False,
+            "target_reconstruction_enabled": False,
+            "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+            "main_trajectory_contract_identity": (
+                "stacked_trajectory_curriculum_plus_auxiliary_semigroup_probe"
+            ),
+            "semigroup_consistency_is_auxiliary_only": True,
+            "alpha_floor": float(config.active_v3c_alpha_floor),
+            "lambda_traj_curr": float(config.active_v3c_lambda_traj_curr),
+            "lambda_sg": float(config.active_v3c_lambda_sg),
+            "reference_reused_from_existing_artifacts": bool(
+                config.reuse_stage05_active_v3c_reference_artifacts
+            ),
+            "source_artifact_root": (
+                _repo_relative_posix(
+                    _resolve_repo_path(config.active_v3c_reference_artifact_root)
+                )
+                if config.reuse_stage05_active_v3c_reference_artifacts
+                else None
+            ),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "stage_05_coupled_defect_projection_candidate": {
+            "method_name": STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+            "candidate_name": STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+            "transport_family": "two_branch_residual_meanflow_core",
+            "explicit_transport_drift_decomposition_enabled": True,
+            "trajectory_curriculum_enabled": True,
+            "endpoint_semigroup_consistency_enabled": True,
+            "contract_fusion_enabled": False,
+            "target_reconstruction_enabled": True,
+            "midpoint_reconstruction_enabled": True,
+            "endpoint_line_midpoint_reconstruction_enabled": True,
+            "continuation_target_refinement_enabled": True,
+            "coupled_defect_projection_enabled": True,
+            "shared_semigroup_defect_coupling_enabled": True,
+            "predictor_corrector_refinement_enabled": True,
+            "second_pass_continuation_reevaluation_enabled": True,
+            "continuation_reevaluated_at_reconstructed_midpoint": True,
+            "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+            "main_trajectory_contract_identity": (
+                "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract"
+            ),
+            "defect_projection_coefficient_identity": (
+                "two_segment_quadratic_closed_form_rho"
+            ),
+            "semigroup_consistency_is_auxiliary_only": False,
+            "exact_detached_target_barycentric_fusion_enabled": False,
+            "alpha_floor": float(config.active_v3c_alpha_floor),
+            "lambda_traj_curr": float(config.active_v3c_lambda_traj_curr),
+            "lambda_sg": float(config.active_v3c_lambda_sg),
+            "reference_reused_from_existing_artifacts": bool(
+                config.reuse_stage05_coupled_defect_projection_candidate_artifacts
+            ),
+            "source_artifact_root": (
+                _repo_relative_posix(
+                    _resolve_repo_path(
+                        config.coupled_defect_projection_candidate_artifact_root
+                    )
+                )
+                if config.reuse_stage05_coupled_defect_projection_candidate_artifacts
+                else None
+            ),
+            "configured_transport_steps": int(config.stage05_transport_steps),
+            "epochs": int(config.stage05_epochs),
+            "eval_steps": int(config.stage05_eval_steps),
+            "layer_dims": [int(value) for value in config.stage05_layer_dims],
+        },
+        "decision_rule": decision_rule,
+    }
+
+
+def _stage05_v2_active_v3c_coupled_defect_projection_decision(
+    *,
+    rows: list[dict[str, Any]],
+    config: Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig,
+    by_method: dict[str, dict[str, Any]],
+    pairwise_active_v3c_vs_v2: dict[str, Any],
+    pairwise_coupled_vs_v2: dict[str, Any],
+    pairwise_coupled_vs_active_v3c: dict[str, Any],
+    contextual_reference: dict[str, Any] | None,
+) -> tuple[dict[str, Any], str]:
+    coupled_rows = _method_rows(rows, STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME)
+    artifact_pass = all(bool(row["deterministic_artifact_checks_passed"]) for row in coupled_rows)
+    one_step_positive = all(
+        float(row["one_step_energy_delta_vs_identity"]) < 0.0 for row in coupled_rows
+    )
+    configured_step_positive = all(bool(row["mechanism_signal_positive"]) for row in coupled_rows)
+
+    active_summary = by_method[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME]
+    coupled_summary = by_method[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME]
+    energy_gain_fraction_vs_active = float(
+        _negative_magnitude_relative_gain(
+            current_value=float(
+                active_summary["configured_step_energy_delta_vs_identity"]["mean"]
+            ),
+            candidate_value=float(
+                coupled_summary["configured_step_energy_delta_vs_identity"]["mean"]
+            ),
+        )
+    )
+    residual_gain_fraction_vs_active = float(
+        _negative_magnitude_relative_gain(
+            current_value=float(
+                active_summary["configured_step_fixed_point_residual_delta_vs_identity"]["mean"]
+            ),
+            candidate_value=float(
+                coupled_summary["configured_step_fixed_point_residual_delta_vs_identity"][
+                    "mean"
+                ]
+            ),
+        )
+    )
+    materially_beats_active = bool(
+        energy_gain_fraction_vs_active
+        >= float(config.configured_step_improvement_fraction_threshold)
+        and residual_gain_fraction_vs_active
+        >= float(config.configured_step_improvement_fraction_threshold)
+    )
+
+    val_accuracy_delta = float(pairwise_coupled_vs_active_v3c["val_accuracy_delta"]["mean"])
+    test_accuracy_delta = float(pairwise_coupled_vs_active_v3c["test_accuracy_delta"]["mean"])
+    max_accuracy_regression = float(max(-val_accuracy_delta, -test_accuracy_delta, 0.0))
+    avoids_obvious_accuracy_regression = bool(
+        max_accuracy_regression <= float(config.allowed_accuracy_regression_threshold)
+    )
+
+    gap_closure_payload: dict[str, Any] | None = None
+    positive_gap_closure = False
+    if contextual_reference is not None:
+        gap_closure_payload = _stage05_v3b_refinement_contextual_gap_payload(
+            by_method=by_method,
+            contextual_reference=contextual_reference,
+        )
+        gap_closure_payload["active_refined_v3c"] = dict(
+            gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME]
+        )
+        gap_closure_payload["coupled_defect_projection_v3c"] = dict(
+            gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME]
+        )
+        gap_closure_payload["coupled_defect_projection_minus_active_v3c"] = {
+            "configured_step_energy": float(
+                gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME][
+                    "configured_step_energy"
+                ]
+                - gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME][
+                    "configured_step_energy"
+                ]
+            ),
+            "configured_step_residual": float(
+                gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME][
+                    "configured_step_residual"
+                ]
+                - gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME][
+                    "configured_step_residual"
+                ]
+            ),
+            "val_accuracy": float(
+                gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME][
+                    "val_accuracy"
+                ]
+                - gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME][
+                    "val_accuracy"
+                ]
+            ),
+            "test_accuracy": float(
+                gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME][
+                    "test_accuracy"
+                ]
+                - gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME][
+                    "test_accuracy"
+                ]
+            ),
+        }
+        positive_gap_closure = bool(
+            gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME][
+                "configured_step_energy"
+            ]
+            > gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME][
+                "configured_step_energy"
+            ]
+            and gap_closure_payload[STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME][
+                "configured_step_residual"
+            ]
+            >= gap_closure_payload[STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME][
+                "configured_step_residual"
+            ]
+        )
+
+    if config.comparison_scope == "smoke_only":
+        recommended_next_move = (
+            "run_real_fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison"
+        )
+        gap_closure_decision = (
+            "pending_real_fixed_budget_v2_vs_active_v3c_vs_coupled_defect_projection_contract_comparison"
+        )
+        rationale = (
+            "The smoke run only verifies that the coupled defect-projection v3-C candidate "
+            "is wired, deterministic, and comparable against the current active refined v3-C "
+            "reference."
+        )
+    elif (
+        artifact_pass
+        and one_step_positive
+        and configured_step_positive
+        and materially_beats_active
+        and avoids_obvious_accuracy_regression
+        and positive_gap_closure
+    ):
+        recommended_next_move = "promote_coupled_defect_projection_v3c_as_active_reference"
+        gap_closure_decision = "positive_gap_closure_signal_vs_active_v3c"
+        rationale = (
+            "The coupled defect-projection v3-C candidate materially improves configured-step "
+            "mechanism over the current active refined v3-C reference, preserves the "
+            "mechanism-first gate, and improves contextual gap closure."
+        )
+    elif (
+        artifact_pass
+        and one_step_positive
+        and configured_step_positive
+        and avoids_obvious_accuracy_regression
+        and (
+            energy_gain_fraction_vs_active > 0.0
+            or residual_gain_fraction_vs_active > 0.0
+            or positive_gap_closure
+        )
+    ):
+        recommended_next_move = "keep_coupled_defect_projection_direction_and_refine_implementation"
+        gap_closure_decision = (
+            "directional_but_not_material_gap_closure_vs_active_v3c"
+            if positive_gap_closure
+            else "directional_but_not_material_mechanism_gain_vs_active_v3c"
+        )
+        rationale = (
+            "The coupled defect-projection v3-C candidate moves configured-step mechanism "
+            "in the right direction, but it does not yet materially and cleanly displace "
+            "the current active refined v3-C reference."
+        )
+    else:
+        recommended_next_move = "retain_stage05_v3c_stronger_semigroup_weight_as_active_reference"
+        gap_closure_decision = "no_positive_gap_closure_signal_vs_active_v3c"
+        rationale = (
+            "The coupled defect-projection v3-C candidate does not yet show a strong "
+            "enough configured-step gain over the current active refined v3-C reference."
+        )
+
+    return (
+        {
+            "deterministic_artifact_checks_all_pass": bool(artifact_pass),
+            "active_v3c_reference_candidate_name": STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+            "coupled_defect_projection_contract_candidate_name": (
+                STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME
+            ),
+            "coupled_defect_projection_contract_keeps_one_step_mechanism_positive": bool(
+                one_step_positive
+            ),
+            "coupled_defect_projection_contract_keeps_configured_step_mechanism_positive": bool(
+                configured_step_positive
+            ),
+            "coupled_defect_projection_contract_materially_beats_active_v3c_reference": bool(
+                materially_beats_active
+            ),
+            "coupled_defect_projection_contract_avoids_obvious_report_accuracy_regression": bool(
+                avoids_obvious_accuracy_regression
+            ),
+            "coupled_defect_projection_contract_shows_positive_gap_closure_signal_vs_active_v3c": bool(
+                positive_gap_closure
+            ),
+            "coupled_defect_projection_contract_replaces_active_v3c_reference": bool(
+                recommended_next_move == "promote_coupled_defect_projection_v3c_as_active_reference"
+            ),
+            "energy_gain_fraction_vs_active_v3c_reference": float(energy_gain_fraction_vs_active),
+            "residual_gain_fraction_vs_active_v3c_reference": float(
+                residual_gain_fraction_vs_active
+            ),
+            "max_report_accuracy_regression_vs_active_v3c_reference": float(
+                max_accuracy_regression
+            ),
+            "contextual_gap_closure_fractions_vs_3072_reference": gap_closure_payload,
+            "gap_closure_decision": str(gap_closure_decision),
+            "recommended_next_move": str(recommended_next_move),
+        },
+        rationale,
+    )
+
+
+def _stage05_v2_active_v3c_coupled_defect_projection_supports_lines(
+    summary: dict[str, Any],
+) -> list[str]:
+    lines = [
+        "The comparison preserves the Stage 05 mechanism-first contract.",
+        "The comparison exposes explicit pairwise deltas versus both the fixed-budget v2 control and the current active refined v3-C reference.",
+        "The coupled defect-projection candidate internalizes semigroup consistency through an endpoint-line midpoint predictor plus a shared local semigroup defect projection rather than an auxiliary-only semigroup loss.",
+    ]
+    if summary["comparison_scope"] == "smoke_only":
+        if bool(summary["deterministic_artifact_checks_all_pass"]):
+            lines.append(
+                "The smoke artifact confirms that the coupled defect-projection candidate path is wired and deterministic."
+            )
+    else:
+        lines.append(
+            (
+                "The coupled defect-projection candidate materially improves configured-step mechanism over the current active refined v3-C reference."
+                if bool(
+                    summary[
+                        "coupled_defect_projection_contract_materially_beats_active_v3c_reference"
+                    ]
+                )
+                else "The coupled defect-projection candidate does not yet materially improve configured-step mechanism over the current active refined v3-C reference."
+            )
+        )
+    return lines
+
+
+def _stage05_v2_active_v3c_coupled_defect_projection_does_not_support_lines() -> list[str]:
+    return [
+        "This comparison does not justify replacing the frozen Stage 04 bridge on main.",
+        "This comparison does not promote task accuracy to the Stage 05 gate.",
+        "This comparison does not reopen Stage 04 package-internal work.",
+    ]
+
+
+def _stage05_v2_active_v3c_coupled_defect_projection_report_markdown(
+    report: dict[str, Any]
+) -> str:
+    protocol = report["comparison_protocol"]
+    decision = report["decision"]
+    lines = [
+        "# Stage 05 v2 vs Active v3-C vs Coupled Defect-Projection Contract Comparison",
+        "",
+        "## Protocol",
+        f"- comparison scope: `{protocol['comparison_scope']}`",
+        f"- dataset: `{protocol['dataset_name']}`",
+        f"- seeds: `{protocol['seeds']}`",
+        f"- shared batch size: `{protocol['shared_batch_size']}`",
+        f"- Stage 05 epochs: `{protocol['stage_05_coupled_defect_projection_candidate']['epochs']}`",
+        "",
+        "## Decision",
+        f"- active refined v3-C reference: `{decision['active_v3c_reference_candidate_name']}`",
+        f"- coupled defect-projection candidate: `{decision['coupled_defect_projection_contract_candidate_name']}`",
+        f"- `coupled_defect_projection_contract_materially_beats_active_v3c_reference`: `{decision['coupled_defect_projection_contract_materially_beats_active_v3c_reference']}`",
+        f"- `coupled_defect_projection_contract_avoids_obvious_report_accuracy_regression`: `{decision['coupled_defect_projection_contract_avoids_obvious_report_accuracy_regression']}`",
+        f"- `coupled_defect_projection_contract_shows_positive_gap_closure_signal_vs_active_v3c`: `{decision['coupled_defect_projection_contract_shows_positive_gap_closure_signal_vs_active_v3c']}`",
+        f"- gap_closure_decision: `{decision['gap_closure_decision']}`",
+        f"- recommended next move: `{decision['recommended_next_move']}`",
+        f"- rationale: `{decision['decision_rationale']}`",
+        "",
+        "## Pairwise Deltas Vs Active v3-C",
+        f"- configured-step validation energy delta vs identity delta: `{report['pairwise_deltas_vs_active_refined_v3c_reference']['configured_step_energy_delta_vs_identity_delta']['mean']}`",
+        f"- configured-step validation fixed-point residual delta vs identity delta: `{report['pairwise_deltas_vs_active_refined_v3c_reference']['configured_step_fixed_point_residual_delta_vs_identity_delta']['mean']}`",
+        "",
+        "## Pairwise Deltas Vs V2",
+        f"- configured-step validation energy delta vs identity delta: `{report['pairwise_deltas_vs_stage05_v2_reference']['configured_step_energy_delta_vs_identity_delta']['mean']}`",
+        f"- configured-step validation fixed-point residual delta vs identity delta: `{report['pairwise_deltas_vs_stage05_v2_reference']['configured_step_fixed_point_residual_delta_vs_identity_delta']['mean']}`",
+    ]
+    return "\n".join(lines)
+
+
+def _stage05_v2_active_v3c_coupled_defect_projection_suite_config_payload(
+    config: Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig,
+) -> dict[str, Any]:
+    return {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_protocol": _stage05_v2_active_v3c_coupled_defect_projection_protocol_payload(
+            config
+        ),
+    }
+
+
+def run_stage05_v2_active_v3c_coupled_defect_projection_contract_comparison(
+    config: Stage05V2ActiveV3CCoupledDefectProjectionComparisonConfig,
+) -> FrozenBridgeVsCorrectedCoreComparisonRunResult:
+    """Run the fixed-budget v2 vs active-v3-C vs coupled defect-projection comparison."""
+
+    run_dir = _prepare_run_dir(
+        _resolve_run_dir(
+            config.output_root,
+            config.experiment_name,
+            config.resolved_run_id(),
+            config.output_layout,
+        )
+    )
+    _write_json(
+        run_dir / "config.json",
+        _stage05_v2_active_v3c_coupled_defect_projection_suite_config_payload(config),
+    )
+
+    rows: list[dict[str, Any]] = []
+    runs_root = run_dir / "runs"
+    run_index = 0
+    reuse_v2_root = _resolve_repo_path(config.reference_artifact_root)
+    reuse_active_v3c_root = _resolve_repo_path(config.active_v3c_reference_artifact_root)
+    reuse_coupled_root = _resolve_repo_path(config.coupled_defect_projection_candidate_artifact_root)
+
+    if config.reuse_stage05_v2_reference_artifacts and not reuse_v2_root.exists():
+        raise FileNotFoundError(f"Missing Stage 05 v2 reference artifacts at '{reuse_v2_root}'.")
+    if config.reuse_stage05_active_v3c_reference_artifacts and not reuse_active_v3c_root.exists():
+        raise FileNotFoundError(
+            f"Missing active refined Stage 05 v3-C reference artifacts at '{reuse_active_v3c_root}'."
+        )
+    if (
+        config.reuse_stage05_coupled_defect_projection_candidate_artifacts
+        and not reuse_coupled_root.exists()
+    ):
+        raise FileNotFoundError(
+            "Missing coupled defect-projection Stage 05 v3-C candidate artifacts at "
+            f"'{reuse_coupled_root}'."
+        )
+
+    for seed in config.seeds:
+        run_index += 1
+        if config.reuse_stage05_v2_reference_artifacts:
+            rows.append(
+                _load_existing_stage05_core_row(
+                    run_index=run_index,
+                    existing_run_dir=reuse_v2_root / f"seed_{seed}",
+                    seed=seed,
+                    expected_dataset_name=config.dataset_name,
+                    expected_batch_size=int(config.batch_size),
+                    expected_shuffle_batches=bool(config.shuffle_batches),
+                    method_name=STAGE05_V2_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v2 Control",
+                    expected_total_training_epochs=int(config.stage05_epochs),
+                    expected_eval_steps=int(config.stage05_eval_steps),
+                    expected_layer_dims=config.stage05_layer_dims,
+                    expected_transport_steps=int(config.stage05_transport_steps),
+                    expected_transport_family="two_branch_residual_meanflow_core",
+                    expected_explicit_transport_drift_decomposition_enabled=False,
+                    expected_trajectory_curriculum_enabled=False,
+                    expected_endpoint_semigroup_consistency_enabled=False,
+                    expected_contract_fusion_enabled=False,
+                    expected_target_reconstruction_enabled=False,
+                )
+            )
+        else:
+            v2_config = _build_stage05_v2_config(
+                output_root=runs_root,
+                experiment_name=STAGE05_V2_METHOD_NAME,
+                seed=seed,
+                train_fraction=float(config.train_fraction),
+                val_fraction=float(config.val_fraction),
+                test_fraction=float(config.test_fraction),
+                batch_size=int(config.batch_size),
+                shuffle_batches=bool(config.shuffle_batches),
+                epochs=int(config.stage05_epochs),
+                eval_steps=int(config.stage05_eval_steps),
+                layer_dims=config.stage05_layer_dims,
+                transport_steps=int(config.stage05_transport_steps),
+            )
+            v2_result = run_fmpc_ef_exploratory_probe(v2_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=v2_result,
+                    config=v2_config,
+                    method_name=STAGE05_V2_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe v2 Control",
+                )
+            )
+
+        run_index += 1
+        if config.reuse_stage05_active_v3c_reference_artifacts:
+            rows.append(
+                _load_existing_stage05_core_row(
+                    run_index=run_index,
+                    existing_run_dir=reuse_active_v3c_root / f"seed_{seed}",
+                    seed=seed,
+                    expected_dataset_name=config.dataset_name,
+                    expected_batch_size=int(config.batch_size),
+                    expected_shuffle_batches=bool(config.shuffle_batches),
+                    method_name=STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe Active Refined v3-C Reference",
+                    expected_total_training_epochs=int(config.stage05_epochs),
+                    expected_eval_steps=int(config.stage05_eval_steps),
+                    expected_layer_dims=config.stage05_layer_dims,
+                    expected_transport_steps=int(config.stage05_transport_steps),
+                    expected_transport_family="two_branch_residual_meanflow_core",
+                    expected_explicit_transport_drift_decomposition_enabled=True,
+                    expected_trajectory_curriculum_enabled=True,
+                    expected_endpoint_semigroup_consistency_enabled=True,
+                    expected_lambda_traj_curr=float(config.active_v3c_lambda_traj_curr),
+                    expected_alpha_floor=float(config.active_v3c_alpha_floor),
+                    expected_lambda_sg=float(config.active_v3c_lambda_sg),
+                    expected_contract_fusion_enabled=False,
+                    expected_target_reconstruction_enabled=False,
+                )
+            )
+        else:
+            active_v3c_config = _stage05_active_v3c_reference_config(
+                config,
+                seed=seed,
+                output_root=runs_root,
+            )
+            active_v3c_result = run_fmpc_ef_exploratory_probe(active_v3c_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=active_v3c_result,
+                    config=active_v3c_config,
+                    method_name=STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe Active Refined v3-C Reference",
+                )
+            )
+
+        run_index += 1
+        if config.reuse_stage05_coupled_defect_projection_candidate_artifacts:
+            rows.append(
+                _load_existing_stage05_core_row(
+                    run_index=run_index,
+                    existing_run_dir=reuse_coupled_root / f"seed_{seed}",
+                    seed=seed,
+                    expected_dataset_name=config.dataset_name,
+                    expected_batch_size=int(config.batch_size),
+                    expected_shuffle_batches=bool(config.shuffle_batches),
+                    method_name=STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe Coupled Defect-Projection v3-C Candidate",
+                    expected_total_training_epochs=int(config.stage05_epochs),
+                    expected_eval_steps=int(config.stage05_eval_steps),
+                    expected_layer_dims=config.stage05_layer_dims,
+                    expected_transport_steps=int(config.stage05_transport_steps),
+                    expected_transport_family="two_branch_residual_meanflow_core",
+                    expected_explicit_transport_drift_decomposition_enabled=True,
+                    expected_trajectory_curriculum_enabled=True,
+                    expected_endpoint_semigroup_consistency_enabled=True,
+                    expected_lambda_traj_curr=float(config.active_v3c_lambda_traj_curr),
+                    expected_alpha_floor=float(config.active_v3c_alpha_floor),
+                    expected_lambda_sg=float(config.active_v3c_lambda_sg),
+                    expected_contract_fusion_enabled=False,
+                    expected_target_reconstruction_enabled=True,
+                    expected_main_trajectory_contract_identity=(
+                        "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract"
+                    ),
+                )
+            )
+        else:
+            coupled_config = _stage05_v3c_coupled_defect_projection_candidate_config(
+                config,
+                seed=seed,
+                output_root=runs_root,
+            )
+            coupled_result = run_fmpc_ef_exploratory_probe(coupled_config)
+            rows.append(
+                _stage05_core_row(
+                    run_index=run_index,
+                    suite_run_dir=run_dir,
+                    seed=seed,
+                    result=coupled_result,
+                    config=coupled_config,
+                    method_name=STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+                    stage_name="FMPC Stage 05 EF Core Probe Coupled Defect-Projection v3-C Candidate",
+                )
+            )
+
+    csv_rows = [
+        {
+            **row,
+            "deterministic_artifact_checks_passed": str(
+                bool(row["deterministic_artifact_checks_passed"])
+            ),
+            "mechanism_signal_positive": str(bool(row["mechanism_signal_positive"])),
+            "config_json_exists": str(bool(row["config_json_exists"])),
+            "summary_json_exists": str(bool(row["summary_json_exists"])),
+            "epoch_metrics_csv_exists": str(bool(row["epoch_metrics_csv_exists"])),
+            "seed_matches": str(bool(row["seed_matches"])),
+            "dataset_matches": str(bool(row["dataset_matches"])),
+            "batch_protocol_matches": str(bool(row["batch_protocol_matches"])),
+            "selection_hits_final_training_boundary": str(
+                bool(row["selection_hits_final_training_boundary"])
+            ),
+        }
+        for row in rows
+    ]
+    _write_csv(run_dir / "aggregate_runs.csv", csv_rows)
+
+    by_method = {
+        STAGE05_V2_METHOD_NAME: _method_summary(_method_rows(rows, STAGE05_V2_METHOD_NAME)),
+        STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME)
+        ),
+        STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME: _method_summary(
+            _method_rows(rows, STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME)
+        ),
+    }
+    pairwise_active_v3c_vs_v2 = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+        reference_method=STAGE05_V2_METHOD_NAME,
+    )
+    pairwise_coupled_vs_v2 = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+        reference_method=STAGE05_V2_METHOD_NAME,
+    )
+    pairwise_coupled_vs_active_v3c = _pairwise_summary(
+        rows,
+        candidate_method=STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+        reference_method=STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+    )
+    contextual_reference = (
+        None
+        if config.comparison_scope == "smoke_only"
+        else _load_stage05_v2_contextual_reference(config)
+    )
+    decision, decision_rationale = _stage05_v2_active_v3c_coupled_defect_projection_decision(
+        rows=rows,
+        config=config,
+        by_method=by_method,
+        pairwise_active_v3c_vs_v2=pairwise_active_v3c_vs_v2,
+        pairwise_coupled_vs_v2=pairwise_coupled_vs_v2,
+        pairwise_coupled_vs_active_v3c=pairwise_coupled_vs_active_v3c,
+        contextual_reference=contextual_reference,
+    )
+
+    configured_step_mechanism_ranking = [
+        {
+            "method_name": method_name,
+            "configured_step_energy_delta_vs_identity_mean": float(
+                by_method[method_name]["configured_step_energy_delta_vs_identity"]["mean"]
+            ),
+            "configured_step_fixed_point_residual_delta_vs_identity_mean": float(
+                by_method[method_name]["configured_step_fixed_point_residual_delta_vs_identity"][
+                    "mean"
+                ]
+            ),
+        }
+        for method_name in sorted(
+            (
+                STAGE05_V2_METHOD_NAME,
+                STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+                STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+            ),
+            key=lambda method_name: (
+                float(by_method[method_name]["configured_step_energy_delta_vs_identity"]["mean"]),
+                float(
+                    by_method[method_name][
+                        "configured_step_fixed_point_residual_delta_vs_identity"
+                    ]["mean"]
+                ),
+            ),
+        )
+    ]
+
+    summary = {
+        "phase": "FMPC Stage 05 EF Core Probe",
+        "stage": str(config.experiment_name),
+        "comparison_scope": str(config.comparison_scope),
+        "num_runs": int(len(rows)),
+        "comparison_protocol": _stage05_v2_active_v3c_coupled_defect_projection_protocol_payload(
+            config
+        ),
+        "comparison_roles": {
+            "immediate_control": STAGE05_V2_METHOD_NAME,
+            "active_reference_at_comparison_start": STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+            "coupled_defect_projection_candidate": (
+                STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME
+            ),
+        },
+        "candidate_identities": [
+            STAGE05_V2_METHOD_NAME,
+            STAGE05_V3C_STRONGER_SEMIGROUP_METHOD_NAME,
+            STAGE05_V3C_COUPLED_DEFECT_PROJECTION_METHOD_NAME,
+        ],
+        "by_method": by_method,
+        "configured_step_mechanism_ranking": configured_step_mechanism_ranking,
+        "pairwise_deltas_vs_stage05_v2_reference": pairwise_coupled_vs_v2,
+        "pairwise_deltas_vs_active_refined_v3c_reference": pairwise_coupled_vs_active_v3c,
+        "pairwise_active_refined_v3c_vs_v2": pairwise_active_v3c_vs_v2,
+        "contextual_3072_reference": contextual_reference,
+        **decision,
+        "decision_rationale": decision_rationale,
+        "aggregate_runs_csv_path": "aggregate_runs.csv",
+        "comparison_report_json_path": "comparison_report.json",
+        "comparison_report_md_path": "comparison_report.md",
+    }
+    _write_json(run_dir / "aggregate_summary.json", summary)
+
+    report = {
+        "comparison_protocol": _stage05_v2_active_v3c_coupled_defect_projection_protocol_payload(
+            config
+        ),
+        "decision": {**decision, "decision_rationale": decision_rationale},
+        "pairwise_deltas_vs_stage05_v2_reference": pairwise_coupled_vs_v2,
+        "pairwise_deltas_vs_active_refined_v3c_reference": pairwise_coupled_vs_active_v3c,
+        "pairwise_active_refined_v3c_vs_v2": pairwise_active_v3c_vs_v2,
+        "contextual_3072_reference": contextual_reference,
+        "contextual_gap_closure_fractions_vs_3072_reference": decision.get(
+            "contextual_gap_closure_fractions_vs_3072_reference"
+        ),
+        "supports": _stage05_v2_active_v3c_coupled_defect_projection_supports_lines(
+            summary
+        ),
+        "does_not_support": (
+            _stage05_v2_active_v3c_coupled_defect_projection_does_not_support_lines()
+        ),
+    }
+    _write_json(run_dir / "comparison_report.json", report)
+    _write_text(
+        run_dir / "comparison_report.md",
+        _stage05_v2_active_v3c_coupled_defect_projection_report_markdown(report),
+    )
+
+    return FrozenBridgeVsCorrectedCoreComparisonRunResult(
+        run_dir=run_dir,
+        config=_stage05_v2_active_v3c_coupled_defect_projection_suite_config_payload(config),
         aggregate_rows=rows,
         summary=summary,
         comparison_report=report,

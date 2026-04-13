@@ -1003,3 +1003,71 @@ Current decision:
 - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
 - keep `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the current narrow refinement candidate
 - keep the continuation-target refinement direction alive, but refine implementation rather than promote the current candidate
+
+#### 18.13.13 Coupled local defect-projection refinement
+
+The next narrow refinement inside the same consolidation direction is:
+
+- `stage05_v3c_coupled_defect_projection_trajectory_contract`
+
+This pass is opened because the endpoint-line continuation-blend candidate:
+
+- improved configured-step mechanism beyond `stage05_v3c_stronger_semigroup_weight`
+- avoided an obvious report-only accuracy regression
+- but still behaved like a sequential one-pass midpoint update followed by a continuation update
+
+The concrete refinement is therefore:
+
+- keep the endpoint-line midpoint predictor
+- keep semigroup consistency absorbed into the main trajectory contract
+- replace the sequential midpoint / continuation refinement with one shared local semigroup-defect projection
+- allow one detached continuation corrector re-evaluation only
+- do not introduce a new free coupling hyperparameter
+- do not reintroduce a separate auxiliary semigroup loss
+
+Using the current notation:
+
+- `u_B = u_boot(z_t, alpha * r, t; c)`
+- `z_B = z_t + alpha * r * u_B`
+- `z_sg^* = stopgrad(z_hat_split)`
+- `u_sg^* = (z_sg^* - z_t) / r`
+- `kappa = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2)`
+- `z_line_mid^* = z_t + alpha * (z_sg^* - z_t)`
+- `z_mid^(0) = (1 - kappa) * z_B + kappa * z_line_mid^*`
+- `u_short^(0) = (z_mid^(0) - z_t) / (alpha * r)`
+- `u_C,traj^(0) = stopgrad(u_hat(z_mid^(0), r_s, s; c))`
+- `d_sg^(0) = u_sg^* - (alpha * u_short^(0) + (1 - alpha) * u_C,traj^(0))`
+- `rho = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2 * (alpha^2 + (1 - alpha)^2))`
+- `u_short^(1/2) = u_short^(0) + rho * alpha * d_sg^(0)`
+- `u_C^(1/2) = u_C,traj^(0) + rho * (1 - alpha) * d_sg^(0)`
+- `z_mid^(1/2) = z_t + alpha * r * u_short^(1/2)`
+- `u_C,traj^(1) = stopgrad(u_hat(z_mid^(1/2), r_s, s; c))`
+- `d_sg^(1) = u_sg^* - (alpha * u_short^(1/2) + (1 - alpha) * u_C,traj^(1))`
+- `u_short^* = u_short^(1/2) + rho * alpha * d_sg^(1)`
+- `u_C^* = u_C,traj^(1) + rho * (1 - alpha) * d_sg^(1)`
+- `u_main^* = alpha * u_short^* + (1 - alpha) * u_C^*`
+- `m_main^* = u_main^* - g_t`
+
+The unified main trajectory contract remains:
+
+- `lambda_main = lambda_tc + lambda_sg * r^2`
+- `L_main_traj = lambda_main * ||m_hat - m_main^*||^2`
+
+Normative implementation constraints:
+
+- keep `z_sg^*` single-sided detached for the whole local defect-projection pass
+- do not divide by `(1 - alpha)` anywhere in this candidate
+- do not add a second extra corrector beyond the single detached continuation re-evaluation above
+- expose explicit artifact fields for:
+  - coupled defect projection enabled
+  - shared semigroup defect coupling enabled
+  - predictor-corrector refinement enabled
+  - second-pass continuation re-evaluation enabled
+  - defect-projection coefficient identity
+
+Interpretation:
+
+- semigroup consistency remains absorbed into the main trajectory contract
+- trajectory remains the main contract frame
+- midpoint and continuation are now corrected as one local two-segment defect problem instead of a sequential tweak
+- this still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`
