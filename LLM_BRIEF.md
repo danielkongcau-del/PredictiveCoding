@@ -161,16 +161,11 @@ Current known state:
 
 - Stage 04 authority artifacts:
   - `outputs/stage_04_incremental_bridge/`
-- Stage 05 exploratory probe:
-  - `outputs/stage_05_ef_core_probe/fmpc_ef_exploratory_probe/`
-- Stage 05 comparison:
-  - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_corrected_core_comparison/`
-- Stage 05 refreshed bridge vs v2 comparison:
-  - `outputs/stage_05_ef_core_probe/frozen_bridge_vs_two_branch_corrected_core_comparison/`
-- Stage 05 v2 diagnostics:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_diagnostics/`
-- Stage 05 v2 longer-training validation:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_longer_training_validation/`
+- Stage 05 key evidence artifacts:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/`
+  - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
+  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
 
 ## History
 
