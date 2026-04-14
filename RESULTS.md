@@ -11,6 +11,14 @@ This file keeps the current frozen results summary only.
 - Phase 3 standalone real-data baseline snapshot
 - FMPC Stage 04 frozen bridge snapshot
 - FMPC Stage 05 exploratory probe snapshot
+- Stage 06 opening snapshot
+
+## Current Operational Framing
+
+- `FMPC Stage 04 Incremental Bridge` remains the frozen implemented bridge result on `main`
+- `FMPC Stage 05 EF Core Probe` is now frozen as the high-budget mechanism-reference stage
+- `FMPC Stage 06 Low-Budget Efficiency` is now the active forward charter
+- there are no Stage 06 result artifacts yet because Stage 06 is opened here as a planning-only charter
 
 ## Frozen Toy-Benchmark Summary
 
@@ -218,6 +226,8 @@ Current interpretation:
   - stop pure same-family budget escalation from the current state
   - open a true Stage 05 v3 mechanism charter
   - do not treat this as any claim that Stage 05 replaces the frozen Stage 04 bridge result on `main`
+- this artifact also remains part of the evidence for the later Stage 06 opening:
+  - a same-family schedule tweak inside the fixed `1536` ceiling was not an efficiency path
 
 ## FMPC Stage 05 Frozen-Bridge Comparison Snapshot
 
@@ -833,6 +843,24 @@ Decision:
   - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
   - treat `stage05_v3c_scaled_continuation_blend_trajectory_contract` as the strongest tested narrow same-family micro-family candidate rather than promoting it
   - freeze the narrow v3-C contract-consolidation micro-family as locally saturated and move the next new Stage 05 mechanism pass above this micro-family rather than staying inside it
+
+## Stage 06 Opening Snapshot
+
+Current evidence that opens Stage 06:
+
+- the Stage 05 v2 budget-push validation showed that the same family had real long-budget upside and still selected the final epoch on every seed
+- the fixed-`1536` Stage 05 efficiency diagnostic showed that the closest same-family efficiency tweak was effectively a no-op
+- the refined v3-C recompare made `stage05_v3c_stronger_semigroup_weight` the strongest high-budget Stage 05 mechanism result
+- the same refined v3-C line is expensive:
+  - Stage 05 v2 `1536` runtime proxy mean is about `240.9623` seconds
+  - promoted refined v3-B runtime proxy mean is about `312.6482` seconds
+  - active refined v3-C runtime proxy mean is about `776.1473` seconds
+- the final continuation-strength diagnostic showed that the entire narrow v3-C contract-consolidation micro-family is locally saturated under the current fixed-budget threshold
+
+Current interpretation:
+
+- the repository no longer needs another narrow Stage 05 geometry micro-variant as the default next move
+- the project now needs a new efficiency-first charter that asks whether the validated scaffold can survive under low-budget and low-compute matched-budget constraints
 
 ## Where Detailed History Went
 

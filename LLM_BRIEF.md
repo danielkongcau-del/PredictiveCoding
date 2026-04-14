@@ -72,14 +72,16 @@ If you want a specific kind of information, read this file:
 
 - active branch:
   - `main`
-- active algorithmic line:
+- adopted implemented line on `main`:
   - `FMPC Stage 04 Incremental Bridge`
 - current adopted bridge default:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current canonical bridge identity default:
   - `feature_aware_tangents = false`
-- current exploratory line:
+- current frozen mechanism-reference stage:
   - `FMPC Stage 05 EF Core Probe`
+- current active forward charter:
+  - `FMPC Stage 06 Low-Budget Efficiency`
 
 ## What Is Closed
 
@@ -99,46 +101,41 @@ Working interpretation:
 
 ## What Is Open
 
-The current open work is:
+The current open forward work is no longer another Stage 05 geometry pass.
 
-- `FMPC Stage 05 EF Core Probe`
+The current active forward charter is:
+
+- `FMPC Stage 06 Low-Budget Efficiency`
 
 Current known state:
 
 - implementation exists
-- the current Stage 05 baseline contract is the corrected residual MeanFlow v1 probe
-- the fixed-budget Stage 05 control is the two-branch corrected residual MeanFlow v2 core
-- target construction is artifact-independent
-- the first probe shows positive mechanism signal on energy and fixed-point residual
-- the formal frozen-bridge vs corrected-core comparison now exists
-- the formal Stage 05 v1 vs v2 comparison now exists
-- that comparison says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first evidence
-- the refreshed frozen-bridge vs Stage 05 v2 comparison now exists
-- that refreshed comparison supports using Stage 05 v2 as the new exploratory reference
-- the dedicated Stage 05 v2 diagnostics now say the current narrow diagnosis is `likely_undertrained`
-- the completed Stage 05 v2 longer-training validation now says the stronger same-family budget materially improves configured-step mechanism and report-only accuracy, but still hits the final training boundary on every seed
-- the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now says the tested same-family schedule change does not materially improve configured-step mechanism or report-only accuracy and does not materially narrow the gap to the contextual `3072`-epoch reference
-- the completed fixed-budget Stage 05 `v2 vs v3-A` comparison now says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
-- the completed refined fixed-budget recompare now says `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over both the promoted refined v3-B reference and the fixed-budget v2 control
-- the completed fixed-budget continuation-strength diagnostic now says `stage05_v3c_scaled_continuation_blend_trajectory_contract` becomes the strongest tested narrow same-family micro-family candidate, but still does not materially displace the active refined v3-C reference
-- task accuracy is still low and remains report-only
+- Stage 05 remains the mechanism evidence base
+- the `1536 -> 3072` Stage 05 v2 budget push still improved configured-step mechanism and still hit the final epoch on every seed
+- the fixed-`1536` same-family efficiency tweak was nearly a no-op
+- `stage05_v3c_stronger_semigroup_weight` is the strongest high-budget Stage 05 mechanism reference
+- the active refined v3-C line is expensive enough that it should not be treated as an efficiency win by default
+- the narrow v3-C continuation / midpoint / coupled / precision / scaled micro-family is locally saturated
+- Stage 06 is now opened because the remaining question is:
+  - low-budget
+  - low-compute
+  - matched-budget
+  - viability
+- task accuracy remains secondary, but cost is no longer secondary
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not treat any current Stage 05 comparison as a replacement claim against the frozen bridge result
-- use the fixed-budget v2 result as the immediate control and `stage05_v3c_stronger_semigroup_weight` as the current fixed-budget improvement reference
+- keep Stage 05 as the high-budget mechanism reference stage, not the efficiency mainline
+- use the fixed-budget v2 result and `stage05_v3c_stronger_semigroup_weight` as the Stage 05 control/reference pair when needed
 - do not continue pure same-family budget escalation from the current state
-- treat the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result as the previous comparison reference
-- treat the `v3-A -> refined v3-B` promotion question as closed
-- the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now already open and has a first minimal diagnostic-only probe implementation
-- the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now complete
-- the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
-- that recompare says `stage05_v3c_stronger_semigroup_weight` materially displaces the promoted refined v3-B reference under the current mechanism-first rule
-- the current Stage 05 structural interpretation is `absorb_semigroup_into_main_trajectory_contract`
-- the narrow v3-C contract-consolidation micro-family is now treated as locally saturated under the current fixed-budget mechanism-first threshold
-- the strongest tested narrow same-family micro-family candidate is now `stage05_v3c_scaled_continuation_blend_trajectory_contract`
-- the next immediate move is now to formulate a new Stage 05 mechanism pass above this micro-family, not another recompare or another narrow continuation/midpoint variant
+- do not continue another continuation / midpoint / coupled / precision / scaled Stage 05 micro-variant
+- move the next forward pass into Stage 06:
+  - low-budget-first
+  - matched-budget
+  - efficiency-first
+  - above the saturated Stage 05 micro-family
 
 ## Current Code Entry Points
 
@@ -157,6 +154,8 @@ Current known state:
   - `specs/stage_04_incremental_bridge.md`
 - Stage 05 corrected residual MeanFlow addendum:
   - `specs/stage_05_ef_core_probe.md`
+- Stage 06 low-budget efficiency addendum:
+  - `specs/stage_06_low_budget_efficiency.md`
 
 ## Current Artifact Roots
 

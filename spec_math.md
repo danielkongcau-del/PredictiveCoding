@@ -424,6 +424,8 @@ Current addenda:
   - [specs/stage_04_incremental_bridge.md](/e:/CodeSpace/PredictiveCoding/specs/stage_04_incremental_bridge.md)
 - Stage 05 corrected residual MeanFlow core contract:
   - [specs/stage_05_ef_core_probe.md](/e:/CodeSpace/PredictiveCoding/specs/stage_05_ef_core_probe.md)
+- Stage 06 low-budget efficiency charter:
+  - [specs/stage_06_low_budget_efficiency.md](/e:/CodeSpace/PredictiveCoding/specs/stage_06_low_budget_efficiency.md)
 
 Reading rule:
 
@@ -433,6 +435,8 @@ Reading rule:
   - read this baseline file, then the Stage 03 addendum, then the Stage 04 addendum
 - for Stage 05 exploratory work:
   - read this baseline file, then the Stage 03 addendum, then the Stage 05 addendum
+- for Stage 06 low-budget efficiency work:
+  - read this baseline file, then the Stage 03 addendum, then the Stage 05 addendum, then the Stage 06 addendum
 
 Addenda extend the baseline only inside their declared scope. They do not silently
 replace the rest of the baseline math.

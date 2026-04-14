@@ -13,33 +13,36 @@ This repository is developed as an explicit research codebase rather than a loos
 
 - active branch:
   - `main`
-- current active algorithmic line:
+- current adopted implemented line on `main`:
   - `FMPC Stage 04 Incremental Bridge`
 - current adopted bridge default on `main`:
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current canonical bridge identity default:
   - `feature_aware_tangents = false`
-- current exploratory line:
+- current frozen mechanism-reference stage:
   - `FMPC Stage 05 EF Core Probe`
+- current active forward charter:
+  - `FMPC Stage 06 Low-Budget Efficiency`
 
 Current working interpretation:
 
 - Stage 04 is frozen as the current bridge result on `main`
 - Stage 04 package-internal digging is treated as closed from the current state
 - the current open work is no longer another Stage 04 repair
-- the current narrow Stage 05 exploratory reference is still the two-branch corrected residual MeanFlow v2 core
-- the current fixed-budget Stage 05 improvement reference is now `stage05_v3c_stronger_semigroup_weight`
-- the fixed-budget `stage05_v3b_stronger_traj_curr_weight` result is now the previous fixed-budget comparison reference
-- the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now open and has a first minimal diagnostic-only probe implementation
-- the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
-- the current Stage 05 structural interpretation is `absorb_semigroup_into_main_trajectory_contract`
-- the latest tested narrow continuation-strength diagnostic candidate is now `stage05_v3c_scaled_continuation_blend_trajectory_contract`
-- the narrow v3-C contract-consolidation micro-family is now treated as locally saturated under the current fixed-budget mechanism-first threshold
-- the next immediate Stage 05 move should therefore go above this micro-family rather than default to another midpoint / continuation / coupled / precision / scaled variant
-- the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
-- the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
-- the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed
-- the refreshed comparison does not support replacing the frozen bridge result on `main`
+- Stage 05 is now frozen as the high-budget mechanism-reference stage
+- the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare established `stage05_v3c_stronger_semigroup_weight` as the strongest Stage 05 mechanism reference
+- the current Stage 05 structural interpretation remains `absorb_semigroup_into_main_trajectory_contract`
+- the `1536 -> 3072` Stage 05 v2 budget push showed real same-family upside and still hit the final epoch on every seed
+- the fixed-`1536` Stage 05 same-family efficiency tweak was almost a no-op and cannot serve as the efficiency path
+- the narrow v3-C continuation / midpoint / coupled / precision / scaled micro-family is now treated as locally saturated
+- `stage05_v3c_scaled_continuation_blend_trajectory_contract` became the strongest tested narrow same-family micro-family candidate, but still did not materially displace `stage05_v3c_stronger_semigroup_weight`
+- Stage 06 is now the active forward charter:
+  - low-budget
+  - low-compute
+  - matched-budget
+  - efficiency-first
+- long-budget Stage 05 wins should therefore be treated as mechanism evidence, not as automatic efficiency wins
+- the frozen bridge result on `main` is still not replaced by any current Stage 05 result
 
 ## Current Result Snapshot
 
@@ -59,6 +62,8 @@ Current working interpretation:
 - the completed fixed-budget continuation-strength diagnostic says `stage05_v3c_scaled_continuation_blend_trajectory_contract` becomes the strongest tested narrow same-family micro-family candidate, but still does not materially displace `stage05_v3c_stronger_semigroup_weight`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
+- Stage 06 now takes over as the active forward charter:
+  - the next success standard is low-budget and low-compute viability rather than another high-budget Stage 05 micro-variant
 
 Use these short current documents for details:
 
@@ -195,6 +200,7 @@ For general low-context repository orientation, use [LLM_BRIEF.md](/e:/CodeSpace
 - `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
 - `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
 - `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
+- `specs/stage_06_low_budget_efficiency.md` -> `FMPC Stage 06 Low-Budget Efficiency` (spec-only charter at this step)
 
 Interpretation:
 
@@ -202,7 +208,8 @@ Interpretation:
 - Stage 02 is interval/velocity exploration
 - Stage 03 is the first sealed artifact-independent transport stage
 - Stage 04 is the current frozen bridge result on `main`
-- Stage 05 is the current exploratory line
+- Stage 05 is the frozen high-budget mechanism-reference line
+- Stage 06 is the active low-budget efficiency-first charter
 
 ## Repository Layout
 
@@ -239,6 +246,7 @@ Important lookup rules:
   - `specs/stage_03_transport_core_v1.md`
   - `specs/stage_04_incremental_bridge.md`
   - `specs/stage_05_ef_core_probe.md`
+  - `specs/stage_06_low_budget_efficiency.md`
 - matching stage experiment entry points live under:
   - `experiments/stage_04_incremental_bridge/`
   - `experiments/stage_05_ef_core_probe/`
@@ -266,7 +274,7 @@ If you are working on the frozen bridge result:
 - tests:
   - `tests/stage_04_incremental_bridge/`
 
-If you are working on the current exploratory line:
+If you are working on the current frozen mechanism-reference line:
 
 - implementation:
   - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
@@ -308,4 +316,4 @@ Use these archives when you need older material:
 
 ## One-Sentence Project Summary
 
-The repository currently treats `FMPC Stage 04 Incremental Bridge` as the frozen bridge result on `main`, while `FMPC Stage 05 EF Core Probe` is the active exploratory line being evaluated on mechanism-first evidence.
+The repository currently treats `FMPC Stage 04 Incremental Bridge` as the frozen bridge result on `main`, `FMPC Stage 05 EF Core Probe` as the frozen high-budget mechanism reference stage, and `FMPC Stage 06 Low-Budget Efficiency` as the active forward charter.

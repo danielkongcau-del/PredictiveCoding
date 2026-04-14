@@ -71,7 +71,7 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 
 - active branch:
   - `main`
-- active algorithmic line on `main`:
+- adopted implemented line on `main`:
   - `FMPC Stage 04 Incremental Bridge`
 - frozen bridge result on `main`:
   - `FMPC Stage 04 Incremental Bridge`
@@ -79,141 +79,46 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - `tf2_corrective_transport_terminal_angleclip_default`
 - current canonical bridge identity default:
   - `feature_aware_tangents = false`
-- current open exploratory line:
+- current frozen mechanism-reference stage:
   - `FMPC Stage 05 EF Core Probe`
+- current active forward charter:
+  - `FMPC Stage 06 Low-Budget Efficiency`
 
 ## Current Working Interpretation
 
 - Stage 04 package-internal digging is closed from the current state
-- Stage 04 is treated as the frozen bridge result on `main`
-- the current Stage 05 baseline contract is the corrected residual MeanFlow v1 probe
-- the fixed-budget Stage 05 control is the two-branch corrected residual MeanFlow v2 core
-- the frozen-bridge vs corrected-core comparison is now complete
-- the Stage 05 v1 vs v2 comparison is now complete
-- the current comparison result says Stage 05 v2 improves mechanism magnitude over v1 on mechanism-first grounds
-- the refreshed frozen-bridge vs Stage 05 v2 comparison is now complete
-- the refreshed comparison supports using Stage 05 v2 as the current exploratory reference
-- the dedicated Stage 05 v2 diagnostics now conclude:
-  - `likely_undertrained`
-  - the current low report-only accuracy is not primarily a selection-rule artifact
-- the completed Stage 05 v2 longer-training validation now concludes:
-  - the stronger same-family budget materially improves configured-step mechanism and report-only accuracy
-  - the stronger budget still hits the final training boundary on every seed
-- the completed Stage 05 v2 efficiency diagnostic at the fixed `1536`-epoch ceiling now concludes:
-  - the tested same-family schedule change does not materially improve configured-step mechanism
-  - it does not materially improve report-only accuracy
-  - it does not materially narrow the gap to the contextual `3072`-epoch reference
-- the first minimal working-hypothesis-driven `Stage 05 v3-A` candidate now exists:
-  - `explicit transport-drift contract`
-  - motivated by the hypothesis that the current residual target may entangle transport residual and anchor-drift residual too tightly
-- the fixed-budget `v2 vs v3-A` comparison is now complete:
-  - the v3-A candidate materially improves configured-step mechanism over the fixed-budget v2 reference
-  - the fixed-budget `stage05_v3a_explicit_transport_drift_contract` result became the first active Stage 05 implementation branch
-- the fixed-budget `v2 vs v3-A vs v3-B` comparison is now also complete:
-  - the original v3-B candidate improves configured-step mechanism over the fixed-budget v2 control and directionally over v3-A
-  - that original v3-B candidate did not materially improve enough over v3-A for promotion
-  - `v3-B = trajectory curriculum contract`
-- the narrow fixed-budget `v3-B` refinement diagnostic is now also complete:
-  - the strongest tested refinement is `stage05_v3b_stronger_traj_curr_weight`
-  - that refined v3-B candidate materially improves configured-step mechanism over the fixed-budget v3-A reference under the current threshold
-- the fresh refined fixed-budget recompare is now complete:
-  - `stage05_v3b_stronger_traj_curr_weight` is now the active fixed-budget Stage 05 improvement reference
-  - the `v3-A -> refined v3-B` promotion question is closed
-  - the repo no longer treats `Stage 05 v3-C` as planning-only
-  - `v3-C = endpoint / semigroup consistency contract`
-  - this charter is motivated by the working hypothesis that the current refined v3-B scaffold still lacks an explicit endpoint / semigroup consistency contract across split horizons
-  - the first minimal diagnostic-only v3-C probe now also exists:
-    - `stage05_v3c_endpoint_semigroup_consistency_contract`
-  - the smoke-ready `v2 vs promoted-v3B vs v3-C` artifact now also exists under:
-    - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_comparison/`
-  - that smoke artifact only verifies wiring and deterministic comparison readiness
-  - the real fixed-budget `v2 vs promoted-v3B vs v3-C` comparison is now also complete under:
-    - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_v3c_fixed_budget_comparison/`
-  - that fixed-budget comparison shows:
-    - v3-C directionally improves configured-step mechanism over the promoted refined v3-B reference
-    - v3-C improves contextual gap closure
-    - v3-C does not yet materially displace the promoted refined v3-B reference
-- the narrow fixed-budget `v3-C` refinement diagnostic is now also complete under:
-  - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
-- that refinement diagnostic shows:
-  - the strongest tested refinement is `stage05_v3c_stronger_semigroup_weight`
-  - that refined v3-C candidate materially improves configured-step mechanism over the promoted refined v3-B reference under the current threshold
-  - it does not materially improve configured-step mechanism over the current v3-C control under the same threshold
-  - it avoids an obvious report-only accuracy regression under the current Stage 05 rule
-- the fresh fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now also complete under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
-- that refined v3-C recompare shows:
-  - `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over the promoted refined v3-B reference under the current threshold
-  - it materially improves configured-step mechanism over the fixed-budget v2 control
-  - it avoids an obvious report-only accuracy regression
-  - `stage05_v3c_stronger_semigroup_weight` is now the active fixed-budget Stage 05 improvement reference
-  - the current repository-level structural interpretation is now:
-    - `absorb_semigroup_into_main_trajectory_contract`
-    - do not keep semigroup consistency framed as a permanently attached auxiliary-only term
-    - do not yet refactor the main contract around endpoint / semigroup consistency alone
-- the first fixed-budget fused-contract comparison now also exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_fused_contract_comparison/`
-- that fused-contract comparison shows:
-  - `stage05_v3c_fused_trajectory_semigroup_contract` keeps one-step and configured-step mechanism positive
-  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
-  - it improves contextual gap closure slightly beyond the active refined v3-C reference
-  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
-- the fixed-budget endpoint-line midpoint comparison now also exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_midpoint_contract_comparison/`
-- that endpoint-line midpoint comparison shows:
-  - `stage05_v3c_endpoint_line_midpoint_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
-  - it improves contextual gap closure beyond the active refined v3-C reference
-  - it avoids an obvious report-only accuracy regression
-  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
-- the fixed-budget endpoint-line continuation-blend comparison now also exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison/`
-- that endpoint-line continuation-blend comparison shows:
-  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
-  - it improves contextual gap closure beyond the active refined v3-C reference
-  - it avoids an obvious report-only accuracy regression
-  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
-- the fixed-budget coupled defect-projection comparison now also exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_coupled_defect_projection_contract_comparison/`
-- that coupled defect-projection comparison shows:
-  - `stage05_v3c_coupled_defect_projection_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
-  - it improves contextual gap closure beyond the active refined v3-C reference
-  - it avoids an obvious report-only accuracy regression
-  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
-- the fixed-budget precision-weighted continuation-corrector comparison now also exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison/`
-- that precision-weighted continuation-corrector comparison shows:
-  - `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
-  - it improves contextual gap closure beyond the active refined v3-C reference
-  - it avoids an obvious report-only accuracy regression
-  - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
-  - its configured-step gain is weaker than the earlier `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` result
-- the fixed-budget continuation-strength diagnostic now also exists under:
-  - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
-- that continuation-strength diagnostic shows:
-  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` is the local best existing same-family directional predecessor before the pass
-  - `stage05_v3c_scaled_continuation_blend_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
-  - it directionally improves configured-step mechanism over `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
-  - it avoids an obvious report-only accuracy regression
-  - it becomes the strongest tested narrow same-family micro-family candidate by configured-step mechanism ranking
-  - it still does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
-  - the narrow v3-C contract-consolidation micro-family is now judged locally saturated
-- do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
+- Stage 04 remains the frozen bridge result on `main`
+- Stage 05 remains important, but now as the frozen high-budget mechanism-reference stage
+- the `1536 -> 3072` Stage 05 v2 budget push still improved configured-step mechanism and still selected the final epoch on every seed
+- the fixed-`1536` same-family efficiency tweak was nearly a no-op and therefore did not become the efficiency path
+- the fixed-budget refined v3-C recompare made `stage05_v3c_stronger_semigroup_weight` the current strongest Stage 05 mechanism reference
+- the runtime proxy evidence also says that active refined v3-C is expensive relative to earlier Stage 05 references
+- the continuation / midpoint / coupled / precision / scaled v3-C micro-family is now locally saturated
+- Stage 06 is therefore the new active forward charter:
+  - low-budget
+  - matched-budget
+  - efficiency-first
+- do not write prompts that keep Stage 05 as the default efficiency mainline
+- do not write prompts that reopen another narrow Stage 05 geometry micro-variant by default
 
 ## Current Recommended Next Move
 
 - keep the Stage 04 bridge result frozen on `main`
 - do not write prompts that treat any current Stage 05 comparison as a default-replacement claim
-- use the fixed-budget v2 result as the immediate control and `stage05_v3c_stronger_semigroup_weight` as the current fixed-budget improvement reference
-- do not draft the next Stage 05 step as another pure same-family budget push
-- do not draft the next Stage 05 step as another pure same-family efficiency tweak
-- do not draft the next Stage 05 step as a repeat of the already-closed refined v3-C versus promoted refined v3-B promotion question
-- do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next new mechanism step above the now-saturated narrow v3-C contract-consolidation micro-family rather than as another midpoint / continuation / coupled / precision / scaled variant inside it
+- use Stage 05 as the mechanism evidence base, not as the default efficiency line
 - keep:
-  - the fixed-budget v2 control
-  - `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget improvement reference
-- treat `stage05_v3c_scaled_continuation_blend_trajectory_contract` as the strongest tested narrow same-family micro-family candidate, not as the active reference
-- do not frame the next step as another recompare or as an automatic new charter
+  - the fixed-budget v2 result as the immediate same-family control when needed
+  - `stage05_v3c_stronger_semigroup_weight` as the current high-budget Stage 05 mechanism reference
+- draft the next forward pass as Stage 06:
+  - low-budget-first
+  - matched-budget
+  - efficiency-first
+  - above the saturated Stage 05 v3-C geometry micro-family
+- do not draft the next pass as:
+  - another pure same-family budget push
+  - another pure same-family efficiency tweak
+  - another midpoint / continuation / coupled / precision / scaled refinement inside the saturated micro-family
+  - a long-budget existence proof
 
 ## What Prompt Writers Must Not Reopen
 
@@ -245,6 +150,8 @@ Also do not casually open:
   - `specs/stage_04_incremental_bridge.md`
 - Stage 05 corrected residual MeanFlow addendum:
   - `specs/stage_05_ef_core_probe.md`
+- Stage 06 low-budget efficiency addendum:
+  - `specs/stage_06_low_budget_efficiency.md`
 
 ## Current Prompt-Writing Style
 
@@ -256,16 +163,21 @@ Good prompts for this repository should:
 - say which files should be updated first if planning is required
 - keep experiments minimal and evidence-backed
 - preserve the current frozen bridge result unless the task explicitly says otherwise
-- distinguish clearly between frozen Stage 04 reality and Stage 05 exploration
+- distinguish clearly between:
+  - frozen Stage 04 bridge reality
+  - frozen Stage 05 mechanism-reference status
+  - active Stage 06 efficiency-first planning or implementation scope
 
 ## Common Prompt Mistakes To Avoid
 
 - writing as if Stage 04 is still open for package-internal repair
 - writing as if Stage 05 already replaced the active line on `main`
+- writing as if Stage 05 is still the default efficiency mainline
 - using `teacher-free` as the stage name instead of the current stage naming scheme
 - asking GPT to read the entire archive by default
 - opening a broad experimental zoo when the repo state only justifies one narrow pass
-- treating report-only accuracy as the Stage 05 acceptance gate
+- treating report-only accuracy as the main gate
+- treating `1536+` epochs as the first proof that a new candidate exists
 
 ## Copy-Paste Prompt Skeleton
 

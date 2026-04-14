@@ -80,15 +80,19 @@ This sync rule does not change authority precedence:
 - Teacher-based FMPC remains frozen as baseline / diagnostic reference.
 - The post-reference FMPC line begins at:
   - `stage_03_transport_core_v1/`
-- Human-readable FMPC stage names are:
+- Human-readable FMPC stage names and active charter anchors are:
   - `stage_01_reference_prep/` -> `FMPC Stage 01 Reference Prep`
   - `stage_02_interval_velocity/` -> `FMPC Stage 02 Interval Velocity Exploration`
   - `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
   - `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
   - `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
+  - `specs/stage_06_low_budget_efficiency.md` -> `FMPC Stage 06 Low-Budget Efficiency` (spec-only charter until implementation exists)
 - FMPC Stage 03 is sealed as the first artifact-independent transport stage.
-- The current active FMPC stage is:
+- The current adopted implemented FMPC stage on `main` is:
   - `FMPC Stage 04 Incremental Bridge`
+- FMPC Stage 05 is now frozen as the high-budget mechanism-reference stage.
+- The current active forward charter is:
+  - `FMPC Stage 06 Low-Budget Efficiency`
 - Unless something is explicitly labeled baseline or diagnostic, new FMPC work must not depend on:
   - teacher trajectories
   - teacher fixed points
