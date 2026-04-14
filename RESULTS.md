@@ -735,6 +735,59 @@ Current interpretation:
   - keep `stage05_v3c_coupled_defect_projection_trajectory_contract` as the current narrow refinement candidate rather than promoting it
   - continue the coupled local defect-projection direction rather than reopening promotion or budget questions
 
+## Stage 05 Precision-Weighted Continuation-Corrector Fixed-Budget Comparison
+
+Artifact:
+
+- `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison/`
+
+Compared candidates:
+
+- active refined v3-C reference:
+  - `stage05_v3c_stronger_semigroup_weight`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.0059706216916698045`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2701777366495727e-05`
+  - mean validation accuracy:
+    - `0.880246913580247`
+  - mean test accuracy:
+    - `0.8839506172839506`
+- precision-weighted continuation-corrector candidate:
+  - `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract`
+  - mean configured-step validation energy delta vs identity:
+    - `-0.006033525050064575`
+  - mean configured-step validation fixed-point residual delta vs identity:
+    - `-2.2958570229293478e-05`
+  - mean validation accuracy:
+    - `0.8790123456790123`
+  - mean test accuracy:
+    - `0.8814814814814814`
+
+Pairwise deltas versus active refined v3-C:
+
+- configured-step validation energy delta vs identity:
+  - `-6.290335839477061e-05`
+- configured-step validation fixed-point residual delta vs identity:
+  - `-2.5679286279775153e-07`
+- validation accuracy delta:
+  - `-0.0012345679012345883`
+- test accuracy delta:
+  - `-0.0024691358024691392`
+
+Decision:
+
+- it keeps one-step and configured-step mechanism positive on all comparison seeds
+- it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+- it improves contextual gap closure relative to the `3072`-epoch same-family v2 reference beyond the active refined v3-C reference
+- it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+- it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- its configured-step gain is weaker than the earlier `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` result
+- the current decision is therefore:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as a tested asymmetric continuation-corrector variant rather than promoting it
+  - continue the continuation-target refinement direction, but do not treat this exact `eta_cont` weighting as the new same-family leader
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

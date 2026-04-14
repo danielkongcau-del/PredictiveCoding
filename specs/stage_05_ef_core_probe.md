@@ -1071,3 +1071,60 @@ Interpretation:
 - trajectory remains the main contract frame
 - midpoint and continuation are now corrected as one local two-segment defect problem instead of a sequential tweak
 - this still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`
+
+#### 18.13.14 Precision-weighted continuation-corrector refinement
+
+The next narrow asymmetric refinement tested inside the same consolidation direction is:
+
+- `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract`
+
+This pass keeps the endpoint-line midpoint predictor fixed and refines only the continuation-side coefficient.
+
+Using the current notation:
+
+- `u_B = u_boot(z_t, alpha * r, t; c)`
+- `z_B = z_t + alpha * r * u_B`
+- `z_sg^* = stopgrad(z_hat_split)`
+- `u_sg^* = (z_sg^* - z_t) / r`
+- `kappa = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2)`
+- `z_line_mid^* = z_t + alpha * (z_sg^* - z_t)`
+- `z_mid^* = (1 - kappa) * z_B + kappa * z_line_mid^*`
+- `u_short^* = (z_mid^* - z_t) / (alpha * r)`
+- `u_C,traj^* = stopgrad(u_hat(z_mid^*, r_s, s; c))`
+- `eta_cont = (lambda_sg * r^2 * (1 - alpha)^2) / (lambda_tc + lambda_sg * r^2 * (1 - alpha)^2)`
+- `u_C,sg^* = (z_sg^* - z_mid^*) / ((1 - alpha) * r)` for active continuation segments only
+- `u_C^* = (1 - eta_cont) * u_C,traj^* + eta_cont * u_C,sg^*`
+- equivalently at full-horizon level:
+  - `u_main^* = (1 - eta_cont) * (alpha * u_short^* + (1 - alpha) * u_C,traj^*) + eta_cont * u_sg^*`
+- `m_main^* = u_main^* - g_t`
+
+The unified main trajectory contract remains:
+
+- `lambda_main = lambda_tc + lambda_sg * r^2`
+- `L_main_traj = lambda_main * ||m_hat - m_main^*||^2`
+
+Normative implementation constraints:
+
+- keep the endpoint-line midpoint predictor unchanged from `stage05_v3c_endpoint_line_midpoint_trajectory_contract`
+- keep only one detached continuation re-evaluation at the reconstructed midpoint
+- do not add a second midpoint feedback step
+- do not add a second continuation re-evaluation
+- do not reintroduce a separate auxiliary semigroup loss
+- expose explicit artifact fields for:
+  - precision-weighted continuation corrector enabled
+  - continuation-MAP closed-form coefficient enabled
+  - continuation coefficient identity
+
+Current fixed-budget result:
+
+- the precision-weighted continuation-corrector candidate directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+- it improves contextual gap closure beyond the active refined v3-C reference
+- it avoids an obvious report-only accuracy regression
+- it does not materially beat `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- its configured-step gain is weaker than the earlier `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` result
+
+Current decision:
+
+- keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+- treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as a tested asymmetric continuation-corrector variant rather than the active reference
+- keep the continuation-target refinement direction alive, but do not treat this exact `eta_cont` weighting as the new same-family leader

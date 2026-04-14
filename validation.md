@@ -360,6 +360,21 @@ Current v3-C status:
   - keep fixed-budget `v2` as the immediate control
   - treat `stage05_v3c_coupled_defect_projection_trajectory_contract` as the current narrow refinement candidate rather than the active reference
   - require any next coupled midpoint-continuation refinement to beat the active refined v3-C reference under the same mechanism-first rule
+- the fixed-budget precision-weighted continuation-corrector comparison now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison/`
+- that precision-weighted continuation-corrector comparison says:
+  - `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` keeps one-step and configured-step mechanism positive
+  - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it improves contextual gap closure relative to the `3072`-epoch same-family reference beyond the active refined v3-C reference
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+  - its configured-step gain is weaker than the earlier `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` result
+- the next acceptance step is therefore refined again:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
+  - keep fixed-budget `v2` as the immediate control
+  - treat `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the strongest tested same-family directional predecessor rather than the active reference
+  - treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as the latest tested asymmetric continuation-corrector variant rather than the active reference
+  - require any next continuation-target refinement to beat the active refined v3-C reference under the same mechanism-first rule
 
 It should not be framed as:
 
@@ -400,6 +415,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_endpoint_line_continuation_blend_contract_comparison/`
 - Stage 05 coupled defect-projection fixed-budget comparison:
   - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_coupled_defect_projection_contract_comparison/`
+- Stage 05 precision-weighted continuation-corrector fixed-budget comparison:
+  - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison/`
 - Stage 05 v3-C refinement diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
 - Stage 05 refined v3-C recompare:

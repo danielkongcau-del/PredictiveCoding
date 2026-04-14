@@ -1,0 +1,358 @@
+{
+  "comparison_protocol": {
+    "comparison_scope": "fixed_budget_comparison",
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "train_fraction": 0.7,
+    "val_fraction": 0.15,
+    "test_fraction": 0.15,
+    "shared_batch_size": 128,
+    "shared_shuffle_batches": true,
+    "stage_05_v2_control": {
+      "method_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "candidate_name": "stage_05_two_branch_corrected_residual_core_v2",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": false,
+      "trajectory_curriculum_enabled": false,
+      "endpoint_semigroup_consistency_enabled": false,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": false,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/runs/stage_05_two_branch_corrected_residual_core_v2_budget_reference",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_active_v3c_reference": {
+      "method_name": "stage05_v3c_stronger_semigroup_weight",
+      "candidate_name": "stage05_v3c_stronger_semigroup_weight",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": false,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "main_trajectory_contract_identity": "stacked_trajectory_curriculum_plus_auxiliary_semigroup_probe",
+      "semigroup_consistency_is_auxiliary_only": true,
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "reference_reused_from_existing_artifacts": true,
+      "source_artifact_root": "outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/runs/stage05_v3c_stronger_semigroup_weight",
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "stage_05_precision_weighted_continuation_corrector_candidate": {
+      "method_name": "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract",
+      "candidate_name": "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract",
+      "transport_family": "two_branch_residual_meanflow_core",
+      "explicit_transport_drift_decomposition_enabled": true,
+      "trajectory_curriculum_enabled": true,
+      "endpoint_semigroup_consistency_enabled": true,
+      "contract_fusion_enabled": false,
+      "target_reconstruction_enabled": true,
+      "midpoint_reconstruction_enabled": true,
+      "endpoint_line_midpoint_reconstruction_enabled": true,
+      "continuation_target_refinement_enabled": true,
+      "continuation_target_blending_enabled": true,
+      "endpoint_implied_continuation_target_enabled": true,
+      "precision_weighted_continuation_corrector_enabled": true,
+      "continuation_map_closed_form_coefficient_enabled": true,
+      "continuation_coefficient_identity": "local_continuation_map_closed_form_eta_cont",
+      "continuation_reevaluated_at_reconstructed_midpoint": true,
+      "trajectory_curriculum_schedule_identity": "warmup_sigmoid_to_alpha_floor",
+      "main_trajectory_contract_identity": "endpoint_line_midpoint_with_precision_weighted_continuation_corrector_contract",
+      "semigroup_consistency_is_auxiliary_only": false,
+      "exact_detached_target_barycentric_fusion_enabled": false,
+      "alpha_floor": 0.5,
+      "lambda_traj_curr": 0.2,
+      "lambda_sg": 0.1,
+      "reference_reused_from_existing_artifacts": false,
+      "source_artifact_root": null,
+      "configured_transport_steps": 2,
+      "epochs": 1536,
+      "eval_steps": 15,
+      "layer_dims": [
+        64,
+        16,
+        10
+      ]
+    },
+    "decision_rule": {
+      "purpose": "fixed_budget_v2_vs_active_v3c_vs_precision_weighted_continuation_corrector_contract_comparison",
+      "primary_split": "validation",
+      "task_accuracy_is_report_only": true,
+      "configured_step_improvement_fraction_threshold": 0.05,
+      "allowed_accuracy_regression_threshold": 0.01,
+      "gap_narrowing_fraction_threshold": 0.1,
+      "reuse_stage05_v2_reference_artifacts": true,
+      "reuse_stage05_active_v3c_reference_artifacts": true,
+      "reuse_stage05_precision_weighted_continuation_corrector_candidate_artifacts": false
+    }
+  },
+  "decision": {
+    "deterministic_artifact_checks_all_pass": true,
+    "active_v3c_reference_candidate_name": "stage05_v3c_stronger_semigroup_weight",
+    "precision_weighted_continuation_corrector_contract_candidate_name": "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract",
+    "precision_weighted_continuation_corrector_contract_keeps_one_step_mechanism_positive": true,
+    "precision_weighted_continuation_corrector_contract_keeps_configured_step_mechanism_positive": true,
+    "precision_weighted_continuation_corrector_contract_materially_beats_active_v3c_reference": false,
+    "precision_weighted_continuation_corrector_contract_avoids_obvious_report_accuracy_regression": true,
+    "precision_weighted_continuation_corrector_contract_shows_positive_gap_closure_signal_vs_active_v3c": true,
+    "precision_weighted_continuation_corrector_contract_replaces_active_v3c_reference": false,
+    "energy_gain_fraction_vs_active_v3c_reference": 0.010535478823341545,
+    "residual_gain_fraction_vs_active_v3c_reference": 0.011311575241537542,
+    "max_report_accuracy_regression_vs_active_v3c_reference": 0.0024691358024691392,
+    "contextual_gap_closure_fractions_vs_3072_reference": {
+      "stage05_v3c_stronger_semigroup_weight": {
+        "configured_step_energy": 0.8125155538795845,
+        "configured_step_residual": 0.4051108996980618,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract": {
+        "configured_step_energy": 0.8641382626414104,
+        "configured_step_residual": 0.4295885133621821,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "active_refined_v3c": {
+        "configured_step_energy": 0.8125155538795845,
+        "configured_step_residual": 0.4051108996980618,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "precision_weighted_continuation_corrector_v3c": {
+        "configured_step_energy": 0.8641382626414104,
+        "configured_step_residual": 0.4295885133621821,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      },
+      "precision_weighted_continuation_corrector_minus_active_v3c": {
+        "configured_step_energy": 0.05162270876182584,
+        "configured_step_residual": 0.024477613664120323,
+        "val_accuracy": 0.0,
+        "test_accuracy": 0.0
+      }
+    },
+    "gap_closure_decision": "directional_but_not_material_gap_closure_vs_active_v3c",
+    "recommended_next_move": "keep_precision_weighted_continuation_corrector_direction_and_refine_implementation",
+    "decision_rationale": "The precision-weighted continuation-corrector v3-C candidate moves configured-step mechanism in the right direction, but it does not yet materially and cleanly displace the current active refined v3-C reference."
+  },
+  "pairwise_deltas_vs_stage05_v2_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.001067713049537881,
+      "std": 0.0004560180526236724
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0010529706817276423,
+      "std": 0.00044467590049699805
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -4.506781816440151e-06,
+      "std": 1.5332865099521596e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00014211491887787994,
+      "std": 0.0001853838922615187
+    },
+    "val_accuracy_delta": {
+      "mean": -0.008641975308642006,
+      "std": 0.012590171638500673
+    },
+    "test_accuracy_delta": {
+      "mean": -0.006172839506172793,
+      "std": 0.009238660214256659
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 297.6138195999908,
+      "std": 1.0700767096643602
+    }
+  },
+  "pairwise_deltas_vs_active_refined_v3c_reference": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -6.348156450927678e-05,
+      "std": 2.0783603457436013e-05
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -6.290335839477061e-05,
+      "std": 2.051112010689139e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -2.5679286279775153e-07,
+      "std": 3.962842390190077e-08
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -5.47206515742286e-06,
+      "std": 1.0155346091086308e-05
+    },
+    "val_accuracy_delta": {
+      "mean": -0.0012345679012345883,
+      "std": 0.0017459426695964422
+    },
+    "test_accuracy_delta": {
+      "mean": -0.0024691358024691392,
+      "std": 0.0034918853391928324
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": -237.5712283333487,
+      "std": 30.158672189822603
+    }
+  },
+  "pairwise_active_refined_v3c_vs_v2": {
+    "shared_seeds": [
+      0,
+      1,
+      2
+    ],
+    "one_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0010042314850286043,
+      "std": 0.0004386986158013528
+    },
+    "configured_step_energy_delta_vs_identity_delta": {
+      "mean": -0.0009900673233328716,
+      "std": 0.0004275344040420975
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+      "mean": -4.2499889536424e-06,
+      "std": 1.500372906508022e-06
+    },
+    "configured_step_energy_delta_vs_local_field_only_delta": {
+      "mean": -0.00013664285372045706,
+      "std": 0.00017565208321452863
+    },
+    "val_accuracy_delta": {
+      "mean": -0.007407407407407418,
+      "std": 0.013181578088927523
+    },
+    "test_accuracy_delta": {
+      "mean": -0.0037037037037036535,
+      "std": 0.010475656017578498
+    },
+    "runtime_proxy_seconds_delta": {
+      "mean": 535.1850479333394,
+      "std": 30.222054359629727
+    }
+  },
+  "contextual_3072_reference": {
+    "source": "outputs/stage_05_ef_core_probe/stage05_v2_budget_push_validation_1536_to_3072/aggregate_summary.json",
+    "method_name": "stage_05_two_branch_corrected_residual_core_v2_budget_push",
+    "epochs": 3072,
+    "configured_transport_steps": 2,
+    "one_step_energy_delta_vs_identity": {
+      "mean": -0.006229042543161774,
+      "std": 0.00024389025139187796
+    },
+    "configured_step_energy_delta_vs_identity": {
+      "mean": -0.006199075439848138,
+      "std": 0.0002493023804109083
+    },
+    "configured_step_fixed_point_residual_delta_vs_identity": {
+      "mean": -2.8942715605407296e-05,
+      "std": 7.715876554880759e-07
+    },
+    "one_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009287511268646168,
+      "std": 8.402272069993922e-05
+    },
+    "configured_step_energy_delta_vs_local_field_only": {
+      "mean": -0.0009293256050320239,
+      "std": 7.834701480743604e-05
+    },
+    "configured_step_fixed_point_residual_delta_vs_local_field_only": {
+      "mean": -3.1028890058244483e-06,
+      "std": 7.464087997467274e-07
+    },
+    "val_accuracy": {
+      "mean": 0.908641975308642,
+      "std": 0.018477320428513317
+    },
+    "test_accuracy": {
+      "mean": 0.9160493827160495,
+      "std": 0.00174594266959639
+    },
+    "val_output_mse": {
+      "mean": 0.03833792269117723,
+      "std": 0.0009045021141638812
+    },
+    "test_output_mse": {
+      "mean": 0.03660517412053846,
+      "std": 0.0001080841229556257
+    },
+    "selected_epoch": {
+      "mean": 3072.0,
+      "std": 0.0
+    },
+    "selection_hits_final_training_boundary_rate": 1.0,
+    "runtime_proxy_seconds": {
+      "mean": 502.91043736666325,
+      "std": 1.4967867785597702
+    }
+  },
+  "contextual_gap_closure_fractions_vs_3072_reference": {
+    "stage05_v3c_stronger_semigroup_weight": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract": {
+      "configured_step_energy": 0.8641382626414104,
+      "configured_step_residual": 0.4295885133621821,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "active_refined_v3c": {
+      "configured_step_energy": 0.8125155538795845,
+      "configured_step_residual": 0.4051108996980618,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "precision_weighted_continuation_corrector_v3c": {
+      "configured_step_energy": 0.8641382626414104,
+      "configured_step_residual": 0.4295885133621821,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    },
+    "precision_weighted_continuation_corrector_minus_active_v3c": {
+      "configured_step_energy": 0.05162270876182584,
+      "configured_step_residual": 0.024477613664120323,
+      "val_accuracy": 0.0,
+      "test_accuracy": 0.0
+    }
+  },
+  "supports": [
+    "The precision-weighted continuation corrector remains directional but not material.",
+    "The candidate avoids an obvious report-only accuracy regression."
+  ],
+  "does_not_support": [
+    "This pass does not justify reopening Stage 04.",
+    "This pass does not justify reframing Stage 05 around semigroup-only structure."
+  ]
+}

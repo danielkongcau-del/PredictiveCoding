@@ -1336,6 +1336,102 @@ def test_stage05_v2_active_v3c_coupled_defect_projection_contract_comparison_wri
     shutil.rmtree(short_output_root, ignore_errors=True)
 
 
+def test_stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison_writes_expected_artifacts(
+    tmp_path: Path,
+) -> None:
+    short_output_root = Path(tmp_path.anchor) / "pc_pwcc_smoke"
+    shutil.rmtree(short_output_root, ignore_errors=True)
+    result = load_run()(
+        output_root=short_output_root,
+        run_id="stage05_active_v3c_precision_weighted_continuation_corrector_smoke",
+        comparison_variant="stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison",
+        comparison_scope="smoke_only",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        active_v3c_lambda_sg=0.10,
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 3
+    assert {row["method_name"] for row in rows} == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3c_stronger_semigroup_weight",
+        "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract",
+    }
+
+    assert (
+        summary["stage"]
+        == "stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison"
+    )
+    assert summary["comparison_scope"] == "smoke_only"
+    assert summary["comparison_roles"]["active_reference_at_comparison_start"] == (
+        "stage05_v3c_stronger_semigroup_weight"
+    )
+    assert summary["comparison_roles"]["precision_weighted_continuation_corrector_candidate"] == (
+        "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract"
+    )
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["target_reconstruction_enabled"] is True
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["midpoint_reconstruction_enabled"] is True
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["endpoint_line_midpoint_reconstruction_enabled"] is True
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["continuation_target_refinement_enabled"] is True
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["precision_weighted_continuation_corrector_enabled"] is True
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["continuation_map_closed_form_coefficient_enabled"] is True
+    assert summary["comparison_protocol"][
+        "stage_05_precision_weighted_continuation_corrector_candidate"
+    ]["continuation_coefficient_identity"] == "local_continuation_map_closed_form_eta_cont"
+    assert "pairwise_deltas_vs_stage05_v2_reference" in summary
+    assert "pairwise_deltas_vs_active_refined_v3c_reference" in summary
+    assert (
+        "precision_weighted_continuation_corrector_contract_materially_beats_active_v3c_reference"
+        in summary
+    )
+    assert (
+        "precision_weighted_continuation_corrector_contract_avoids_obvious_report_accuracy_regression"
+        in summary
+    )
+    assert (
+        "precision_weighted_continuation_corrector_contract_replaces_active_v3c_reference"
+        in summary
+    )
+    assert summary["recommended_next_move"] == (
+        "run_real_fixed_budget_v2_vs_active_v3c_vs_precision_weighted_continuation_corrector_contract_comparison"
+    )
+
+    assert "pairwise_deltas_vs_active_refined_v3c_reference" in report
+    assert report["decision"][
+        "precision_weighted_continuation_corrector_contract_candidate_name"
+    ] == "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract"
+    assert report["decision"]["recommended_next_move"] == (
+        "run_real_fixed_budget_v2_vs_active_v3c_vs_precision_weighted_continuation_corrector_contract_comparison"
+    )
+    shutil.rmtree(short_output_root, ignore_errors=True)
+
+
 def test_frozen_bridge_vs_stage05_v2_comparison_writes_expected_artifacts(tmp_path: Path) -> None:
     result = load_run()(
         output_root=tmp_path,
