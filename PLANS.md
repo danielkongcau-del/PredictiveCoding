@@ -94,18 +94,25 @@ This charter is necessary because the repository now knows two things at once:
 
 ### Stage 06 First Probe Framing
 
-The first Stage 06 probe should be framed as:
+The first real Stage 06 probe is now:
 
+- `stage06_v1_objective_curriculum_energydrop_default`
 - objective-curriculum / optimization-contract hypothesis space
 - low-budget-first
 - matched-budget
 - scaffold-preserving by default
 
-The first question is:
+What it tested:
 
 - whether the remaining gap is now more about optimization conflict between trajectory-side supervision and semigroup consistency than about another narrow target-geometry refinement
 
-That means:
+What the first result says:
+
+- the line is viable at Tier 1 (`128` epochs)
+- it does not materially beat the matched-budget Stage 05 control at Tier 2 (`256` epochs)
+- it does not justify a `512` rescue from the current evidence
+
+That means current Stage 06 follow-up planning must:
 
 - keep the validated Stage 05 scaffold available:
   - v3-A explicit transport-drift decomposition
@@ -113,6 +120,7 @@ That means:
   - v3-C semigroup-consistency structure
 - do not default to another continuation / midpoint / coupled / precision / scaled geometry pass
 - do not default to another long-budget proof-of-existence pass
+- do not treat Stage 06 v1 as promoted until a later low-budget candidate materially clears the matched-budget control
 
 ### Stage 06 Non-Goals
 
@@ -134,17 +142,24 @@ That means:
 - keep the Stage 05 v2 line and the Stage 05 v3-C micro-family artifacts as evidence, not as the default next search space
 - do not open another continuation / midpoint / coupled / precision / scaled pass by default
 
-### 3. Stage 06 First Probe Should Target Objective Curriculum Or Optimization Contract
+### 3. Keep Stage 06 v1 As The Baseline, Not A Promotion
+
+Required interpretation:
+
+- `stage06_v1_objective_curriculum_energydrop_default` is now the first implemented Stage 06 baseline
+- it passed Tier 1 viability but failed the Tier 2 main gate
+- it is useful as the first real Stage 06 comparison anchor, not as the promoted new mainline
+
+### 4. Any Next Stage 06 Probe Must Move Above The Current v1 Contract
 
 Required framing:
 
-- planning-only charter first
-- no code yet in this pass
 - preserve the validated Stage 05 scaffold
-- separate any new objective-mix coefficient from the existing Stage 05 split-horizon geometry parameter `alpha`
-- require the later implementation pass to be matched-budget and low-budget-first by construction
+- remain matched-budget and low-budget-first by construction
+- do not reopen the saturated Stage 05 geometry micro-family
+- do not merely retune the current Stage 06 v1 default coefficients without a clearer new mechanism hypothesis
 
-### 4. Stage 06 Validation Contract Must Govern The First Real Probe
+### 5. Stage 06 Validation Contract Must Continue To Govern Any Follow-Up
 
 - Tier 1:
   - `128 epochs`

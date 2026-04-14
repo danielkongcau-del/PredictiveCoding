@@ -18,8 +18,8 @@ Scope and precedence:
 - this addendum overrides the Stage 05 addendum only inside the explicit Stage 06 low-budget efficiency scope
 - outside that scope, the baseline, Stage 03, and Stage 05 addenda remain authoritative
 - this addendum does not reopen Stage 04 package-internal work
-- this addendum does not by itself create a new implementation family or claim a new result artifact
-- this addendum is a planning-first charter layer that defines the next efficiency-first probe space
+- this addendum now defines the first implemented Stage 06 objective-contract line
+- this addendum remains narrow and does not by itself reopen a broad Stage 06 search space
 
 ## 19. Stage 06 Low-Budget Efficiency addendum
 
@@ -116,13 +116,53 @@ The minimal Stage 06 abstraction is therefore:
 - keep the Stage 05 transport family and target geometry scaffold fixed unless a later Stage 06 charter explicitly changes them
 - let the next Stage 06 probe vary only a higher-level objective or update contract through `beta_obj(k)` and matched-budget scheduling
 
-This addendum intentionally does not yet fix one concrete Stage 06 loss formula.
+The first implemented Stage 06 line is now fixed as:
 
-That is deliberate:
+- `stage06_v1_objective_curriculum_energydrop_default`
 
-- Stage 06 is opened here as a planning charter
-- the first implementation pass must still choose one narrow probe inside this hypothesis space
-- that implementation choice must remain low-budget-first and matched-budget by construction
+It preserves the validated Stage 05 scaffold and changes only the training contract.
+
+Normative implementation contract:
+
+- keep the Stage 05 transport output notation:
+  - `u_psi(z_t, r, t; c)`
+- keep the Stage 05 local energy flow:
+  - `g_t = -∇_z E_theta(z_t; c)`
+- keep the Stage 05 trajectory-side target semantics as:
+  - `L_traj`
+- keep the Stage 05 semigroup / endpoint-consistency target semantics as:
+  - `L_semi`
+- add the one-step energy-drop penalty:
+  - `z_roll = z_t - (t - r) * u_psi(z_t, r, t; c)`
+  - `L_drop = mean(relu(E_theta(z_roll; c) - E_theta(z_t; c) + delta_margin))`
+- add the fixed-point contraction penalty:
+  - `g_roll = -∇_z E_theta(z_roll; c)`
+  - `L_fp = mean(||g_roll||_2^2)`
+
+The Stage 06 v1 total loss is:
+
+- `L_6A(k) = (1 - beta_obj(k)) * L_traj + beta_obj(k) * L_semi + lambda_energy_drop * L_drop + lambda_fixed_point * L_fp`
+
+Default coefficients:
+
+- `beta_obj_warmup_fraction = 0.25`
+- `beta_obj_ramp_fraction = 0.50`
+- final plateau fraction = `0.25`
+- `lambda_energy_drop = 0.25`
+- `lambda_fixed_point = 0.10`
+- `delta_margin = 0.0`
+
+The default Stage 06 `beta_obj(k)` schedule is:
+
+- `beta_obj(k) = 0` for `k < 0.25K`
+- linearly ramp from `0` to `1` over `[0.25K, 0.75K)`
+- `beta_obj(k) = 1` for `k >= 0.75K`
+
+Interpretation:
+
+- `beta_obj(k)` remains distinct from the Stage 05 geometry parameter `alpha`
+- Stage 06 v1 preserves the Stage 05 scaffold
+- Stage 06 v1 does not continue the narrow Stage 05 v3-C midpoint / continuation micro-family
 
 ### 19.6 Minimal Stage 06 acceptance framing
 
@@ -155,9 +195,9 @@ Interpretation:
 - they are still useful as mechanism lessons
 - they are no longer the default next search space
 
-### 19.8 Required first Stage 06 implementation direction
+### 19.8 Required Stage 06 implementation interpretation
 
-The first Stage 06 implementation pass should be framed as:
+The first implemented Stage 06 pass is framed as:
 
 - a matched-budget, low-budget-first probe
 - above the saturated Stage 05 v3-C geometry micro-family
@@ -169,3 +209,12 @@ It should not be framed as:
 - another continuation-strength variant
 - another midpoint / continuation / coupled local corrector variant
 - another long-budget proof-of-existence pass
+
+The current Stage 06 code-backed path is:
+
+- implementation:
+  - [src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
+- experiment entry:
+  - [experiments/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/experiments/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
+- low-budget comparison entry:
+  - [experiments/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison.py](/e:/CodeSpace/PredictiveCoding/experiments/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison.py)

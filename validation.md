@@ -182,12 +182,17 @@ The current validation move is:
 - keep Stage 05 frozen as the high-budget mechanism reference stage
 - keep `stage05_v3c_stronger_semigroup_weight` as the current high-budget Stage 05 mechanism reference
 - treat the narrow v3-C contract-consolidation micro-family as locally saturated
-- move the next forward probe into Stage 06 under the low-budget gate above
-- require the first new forward probe to be:
+- keep Stage 06 under the low-budget gate above
+- treat `stage06_v1_objective_curriculum_energydrop_default` as the first real Stage 06 baseline artifact:
+  - it passed Tier 1 viability
+  - it failed the Tier 2 main gate against the matched-budget Stage 05 control
+  - it did not justify a `512` rescue
+- require any later Stage 06 follow-up to remain:
   - matched-budget
   - low-budget-first
   - cost-aware
   - outside the continuation / midpoint / coupled / precision / scaled micro-family
+  - materially different from the current Stage 06 v1 contract if reopened
 
 Relevant active reference artifacts remain:
 
@@ -208,6 +213,8 @@ Relevant active reference artifacts remain:
   - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
 - Stage 05 continuation-strength diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
+- Stage 06 first low-budget comparison:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
 
 ## Document Layering
 

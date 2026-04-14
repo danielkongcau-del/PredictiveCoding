@@ -98,6 +98,11 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - low-budget
   - matched-budget
   - efficiency-first
+- the first implemented Stage 06 line is:
+  - `stage06_v1_objective_curriculum_energydrop_default`
+- the first real Stage 06 comparison artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+- the initial Stage 06 result passed Tier 1 viability but failed the Tier 2 main gate against the matched-budget Stage 05 control
 - do not write prompts that keep Stage 05 as the default efficiency mainline
 - do not write prompts that reopen another narrow Stage 05 geometry micro-variant by default
 

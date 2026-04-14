@@ -11,14 +11,15 @@ This file keeps the current frozen results summary only.
 - Phase 3 standalone real-data baseline snapshot
 - FMPC Stage 04 frozen bridge snapshot
 - FMPC Stage 05 exploratory probe snapshot
-- Stage 06 opening snapshot
+- Stage 06 low-budget snapshot
 
 ## Current Operational Framing
 
 - `FMPC Stage 04 Incremental Bridge` remains the frozen implemented bridge result on `main`
 - `FMPC Stage 05 EF Core Probe` is now frozen as the high-budget mechanism-reference stage
 - `FMPC Stage 06 Low-Budget Efficiency` is now the active forward charter
-- there are no Stage 06 result artifacts yet because Stage 06 is opened here as a planning-only charter
+- the first Stage 06 result artifact now exists:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
 
 ## Frozen Toy-Benchmark Summary
 
@@ -844,9 +845,9 @@ Decision:
   - treat `stage05_v3c_scaled_continuation_blend_trajectory_contract` as the strongest tested narrow same-family micro-family candidate rather than promoting it
   - freeze the narrow v3-C contract-consolidation micro-family as locally saturated and move the next new Stage 05 mechanism pass above this micro-family rather than staying inside it
 
-## Stage 06 Opening Snapshot
+## Stage 06 Low-Budget Snapshot
 
-Current evidence that opens Stage 06:
+Current evidence that opened Stage 06:
 
 - the Stage 05 v2 budget-push validation showed that the same family had real long-budget upside and still selected the final epoch on every seed
 - the fixed-`1536` Stage 05 efficiency diagnostic showed that the closest same-family efficiency tweak was effectively a no-op
@@ -861,6 +862,25 @@ Current interpretation:
 
 - the repository no longer needs another narrow Stage 05 geometry micro-variant as the default next move
 - the project now needs a new efficiency-first charter that asks whether the validated scaffold can survive under low-budget and low-compute matched-budget constraints
+
+Current first Stage 06 result:
+
+- `stage06_v1_objective_curriculum_energydrop_default` is the first implemented Stage 06 probe
+- the matched-budget comparison artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+- at `128` epochs, the candidate passed Tier 1 viability:
+  - one-step mechanism-positive rate = `1.0`
+  - configured-step mechanism-positive rate = `1.0`
+- at `256` epochs, the candidate failed the Tier 2 main gate versus the matched-budget Stage 05 control:
+  - candidate configured-step energy delta mean = `-0.0013042642699526152`
+  - control configured-step energy delta mean = `-0.0013464605038717343`
+  - candidate configured-step residual delta mean = `-3.970322456158043e-06`
+  - control configured-step residual delta mean = `-4.0279469750049745e-06`
+- the result did not justify a `512` rescue:
+  - `tier2_positive_trend_for_rescue = false`
+  - `rescue_512_warranted = false`
+- the current recommended Stage 06 next move from this first artifact is:
+  - reject the current v1 candidate rather than promote it
 
 ## Where Detailed History Went
 

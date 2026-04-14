@@ -200,7 +200,7 @@ For general low-context repository orientation, use [LLM_BRIEF.md](/e:/CodeSpace
 - `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
 - `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
 - `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
-- `specs/stage_06_low_budget_efficiency.md` -> `FMPC Stage 06 Low-Budget Efficiency` (spec-only charter at this step)
+- `specs/stage_06_low_budget_efficiency.md` and `src/pc/stage_06_low_budget_efficiency/` -> `FMPC Stage 06 Low-Budget Efficiency`
 
 Interpretation:
 
@@ -209,7 +209,8 @@ Interpretation:
 - Stage 03 is the first sealed artifact-independent transport stage
 - Stage 04 is the current frozen bridge result on `main`
 - Stage 05 is the frozen high-budget mechanism-reference line
-- Stage 06 is the active low-budget efficiency-first charter
+- Stage 06 is the active low-budget efficiency-first charter and now has a first implemented probe line:
+  - `stage06_v1_objective_curriculum_energydrop_default`
 
 ## Repository Layout
 

@@ -86,13 +86,15 @@ This sync rule does not change authority precedence:
   - `stage_03_transport_core_v1/` -> `FMPC Stage 03 Transport Core v1`
   - `stage_04_incremental_bridge/` -> `FMPC Stage 04 Incremental Bridge`
   - `stage_05_ef_core_probe/` -> `FMPC Stage 05 EF Core Probe`
-  - `specs/stage_06_low_budget_efficiency.md` -> `FMPC Stage 06 Low-Budget Efficiency` (spec-only charter until implementation exists)
+  - `specs/stage_06_low_budget_efficiency.md` and `src/pc/stage_06_low_budget_efficiency/` -> `FMPC Stage 06 Low-Budget Efficiency`
 - FMPC Stage 03 is sealed as the first artifact-independent transport stage.
 - The current adopted implemented FMPC stage on `main` is:
   - `FMPC Stage 04 Incremental Bridge`
 - FMPC Stage 05 is now frozen as the high-budget mechanism-reference stage.
 - The current active forward charter is:
   - `FMPC Stage 06 Low-Budget Efficiency`
+- The first implemented Stage 06 probe line is:
+  - `stage06_v1_objective_curriculum_energydrop_default`
 - Unless something is explicitly labeled baseline or diagnostic, new FMPC work must not depend on:
   - teacher trajectories
   - teacher fixed points

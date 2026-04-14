@@ -121,6 +121,11 @@ Current known state:
   - low-compute
   - matched-budget
   - viability
+- the first implemented Stage 06 line is:
+  - `stage06_v1_objective_curriculum_energydrop_default`
+- the first real Stage 06 comparison artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+- the initial Stage 06 result passed Tier 1 viability but failed the Tier 2 main gate against the matched-budget Stage 05 control
 - task accuracy remains secondary, but cost is no longer secondary
 
 ## Current Recommended Next Move
@@ -143,6 +148,8 @@ Current known state:
   - `src/pc/stage_04_incremental_bridge/fmpc_tf2.py`
 - exploratory core probe:
   - `src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py`
+- Stage 06 low-budget efficiency probe:
+  - `src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py`
 
 ## Current Math Entry Points
 
@@ -166,6 +173,8 @@ Current known state:
   - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
   - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
   - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
+- Stage 06 initial low-budget artifact:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
 
 ## History
 

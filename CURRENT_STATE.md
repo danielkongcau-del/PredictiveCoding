@@ -104,11 +104,19 @@ Operational interpretation:
 
 ## Stage 06 Status
 
-Stage 06 is now formally open as the active forward charter.
+Stage 06 is now both formally open and code-backed.
 
 Definition:
 
 - Stage 06 asks whether the current scaffold can remain mechanism-positive under low-budget and low-compute matched-budget conditions
+
+Current implemented Stage 06 line:
+
+- `stage06_v1_objective_curriculum_energydrop_default`
+- implementation path:
+  - [src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
+- first real low-budget comparison artifact:
+  - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe)
 
 Current Stage 06 constraints:
 
@@ -129,6 +137,18 @@ Current main question:
 
 - low-budget / low-compute viability, not another narrow Stage 05 target-geometry variation
 
+Current Stage 06 result:
+
+- the first implemented candidate passed Tier 1 viability at `128` epochs:
+  - one-step and configured-step mechanism-positive rates were both `1.0`
+- but it failed the Tier 2 main gate at `256` epochs against the matched-budget Stage 05 control:
+  - configured-step energy delta mean was `-0.0013042642699526152` for Stage 06 v1 vs `-0.0013464605038717343` for the matched-budget Stage 05 control
+  - configured-step residual delta mean was `-3.970322456158043e-06` for Stage 06 v1 vs `-4.0279469750049745e-06` for the matched-budget Stage 05 control
+  - the pairwise gain fractions stayed negative
+- the result did not justify a `512` rescue:
+  - `tier2_positive_trend_for_rescue = false`
+  - `rescue_512_warranted = false`
+
 ## Current Recommendation
 
 - Keep the Stage 04 bridge result frozen on `main`.
@@ -136,12 +156,14 @@ Current main question:
 - Keep `stage05_v3c_stronger_semigroup_weight` as the current high-budget Stage 05 mechanism reference.
 - Do not treat `stage05_v3c_stronger_semigroup_weight` as an efficiency reference by default.
 - Treat the narrow Stage 05 v3-C contract-consolidation micro-family as closed from the current state.
-- Use Stage 06 as the active planning charter.
+- Use Stage 06 as the active implementation and validation charter.
+- Keep `stage06_v1_objective_curriculum_energydrop_default` as the first Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control.
 - Require any next new forward probe to be:
   - low-budget-first
   - matched-budget
   - mechanism-positive and cost-aware
   - above the saturated Stage 05 geometry micro-family
+  - materially different from the current Stage 06 v1 objective-contract line if another Stage 06 pass is opened
 
 ## Relevant Files
 
@@ -149,6 +171,8 @@ Current main question:
   - [src/pc/stage_04_incremental_bridge/fmpc_tf2.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_04_incremental_bridge/fmpc_tf2.py)
 - Stage 05 mechanism reference:
   - [src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_05_ef_core_probe/fmpc_ef_exploratory_probe.py)
+- Stage 06 implementation:
+  - [src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
 - Stage 06 charter:
   - [specs/stage_06_low_budget_efficiency.md](/e:/CodeSpace/PredictiveCoding/specs/stage_06_low_budget_efficiency.md)
 - current active plan:
@@ -168,3 +192,5 @@ Current main question:
   - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare)
 - Stage 05 continuation-strength diagnostic artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic)
+- Stage 06 first low-budget comparison artifact:
+  - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe)
