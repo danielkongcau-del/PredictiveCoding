@@ -22,6 +22,13 @@ If the task also references Google Drive materials, treat them only as supplemen
 
 Do not let those Drive materials override the repository docs.
 
+Default completion workflow for repository work:
+
+- after any completed code or documentation change, sync to GitHub and Google Drive by default
+- GitHub carries the authoritative repo update
+- Google Drive carries the matching supplementary report / artifact / summary update
+- do not write prompts that silently skip this sync step unless the user explicitly disables it or a concrete blocker is present
+
 ## Use This File For
 
 Read this file first when you want GPT to help write a task prompt.

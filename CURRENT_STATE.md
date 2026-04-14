@@ -23,6 +23,8 @@ For the full numbered stage map and directory layout, use [README.md](/e:/CodeSp
   - `feature_aware_tangents = false`
 - Historical corrective working reference:
   - `tf2_corrective_transport_default`
+- Default repository sync rule:
+  - after any completed code or documentation change, sync to GitHub and Google Drive by default unless the user explicitly disables one side or a concrete blocker prevents it
 
 ## Relevant Math Layer
 

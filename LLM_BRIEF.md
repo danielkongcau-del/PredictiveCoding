@@ -21,6 +21,12 @@ If Google Drive materials are also available, treat them as supplementary:
 - `PredictiveCoding_notes` for supplementary notes
 - `PredictiveCoding_results` for heavy result materials
 
+Default completion workflow:
+
+- after any completed code or documentation change, sync to GitHub and Google Drive by default
+- GitHub is the authoritative code/doc update surface
+- Google Drive is the supplementary report/artifact update surface
+
 ## Minimal Read Order
 
 Start here, then expand only as needed:

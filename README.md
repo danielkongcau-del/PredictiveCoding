@@ -104,6 +104,20 @@ Recommended Google Drive roots are:
 
 Those Drive directories may hold papers, design notes, tables, charts, and reports, but they do not override the current repository documents.
 
+## Default Sync Workflow
+
+Unless explicitly disabled by the user, every completed code change or documentation change should be synced to both:
+
+- GitHub:
+  - commit and push the authoritative repository update
+- Google Drive:
+  - update or create the matching report, note, or artifact-side summary
+
+This workflow is a default completion rule, not a change to authority:
+
+- the repository remains authoritative for code and current docs
+- Google Drive remains supplementary for reports and supporting materials
+
 For low-context web GPT prompt drafting, start with:
 
 1. `PROMPT_CONTEXT.md`

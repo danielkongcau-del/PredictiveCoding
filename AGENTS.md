@@ -56,6 +56,24 @@ This does not replace the mandatory read order above when editing code.
 6. Treat this repository as the sole authority for code and current state.
    - Google Drive materials may be used for papers, notes, and result reports.
    - They must not override the current repository docs.
+7. After any completed code change or documentation change, sync by default to both:
+   - GitHub for the authoritative repository update
+   - Google Drive for the matching report / artifact / summary-side update
+   - Only skip one of these if the user explicitly says not to, or a concrete technical blocker prevents the sync.
+
+## Default Sync Rule
+
+Unless the user explicitly says otherwise, every completed code or documentation change should end with a matching sync step:
+
+- GitHub:
+  - commit and push the repository update
+- Google Drive:
+  - update or create the matching result summary, report, or artifact-side record
+
+This sync rule does not change authority precedence:
+
+- GitHub repository contents remain the authority for code and current docs
+- Google Drive remains supplementary storage for reports, notes, and result materials
 
 ## Current FMPC Status
 
