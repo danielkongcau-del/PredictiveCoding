@@ -497,12 +497,24 @@ Current status update:
   - treat `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the strongest tested same-family directional predecessor
   - treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as the latest tested asymmetric continuation-corrector variant, not as the active reference
   - keep the continuation-target refinement direction alive, but do not default to another midpoint-feedback pass
+- the final single-axis continuation-strength diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
+- that continuation-strength diagnostic says:
+  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` is the local best existing same-family directional predecessor before the pass
+  - `stage05_v3c_scaled_continuation_blend_trajectory_contract` becomes the strongest tested narrow same-family micro-family candidate by configured-step mechanism ranking
+  - it keeps one-step and configured-step mechanism positive
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it still does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the immediate next move is therefore refined again:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat the narrow v3-C contract-consolidation micro-family as locally saturated
+  - do not continue with another midpoint / continuation / coupled / precision / scaled variant inside this micro-family by default
 
 ### 11. Consolidate The Main Stage 05 Trajectory Contract
 
 Objective:
 
-- consolidate the current refined v3-C layering into one main Stage 05 trajectory contract
+- close the current narrow v3-C contract-consolidation micro-family as a locally saturated line and move the next Stage 05 mechanism question above it
 
 Repository-level interpretation from the current evidence chain:
 
@@ -517,14 +529,15 @@ What this means:
 - semigroup consistency should no longer be treated as a permanently attached diagnostic add-on
 - trajectory curriculum still remains part of the main contract framing
 - current evidence does not yet justify replacing the main trajectory framing with endpoint / semigroup consistency alone
+- the narrow continuation / midpoint / coupled / precision / scaled contract-consolidation micro-family has now been given a final single-axis continuation-strength test and should be treated as locally saturated under the current fixed-budget mechanism-first threshold
 
 Immediate next implementation focus:
 
 - start from `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget reference
-- keep `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the strongest tested same-family directional predecessor
-- treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as the latest tested asymmetric continuation-corrector variant
-- refine the continuation-target contract direction so it can materially beat the active refined v3-C reference under the same mechanism-first rule
-- compare that consolidated contract against:
+- treat `stage05_v3c_scaled_continuation_blend_trajectory_contract` as the strongest tested narrow same-family micro-family candidate, but not as the active reference
+- do not default to another same-scaffold continuation-strength or contract-consolidation variant
+- formulate the next new Stage 05 mechanism pass above this micro-family rather than inside it
+- compare that next mechanism pass against:
   - the active refined v3-C reference
   - the fixed-budget v2 control
 
@@ -533,7 +546,7 @@ Non-goals:
 - do not reopen Stage 04 package-internal work
 - do not reopen another pure same-family budget escalation
 - do not reopen another pure same-family efficiency tweak
-- do not broaden v3-C into a parameter-search branch
+- do not keep broadening this narrow v3-C micro-family into a parameter-search branch
 - do not open a new charter by default before the consolidation question is tested
 
 ## Exploratory Acceptance Criteria

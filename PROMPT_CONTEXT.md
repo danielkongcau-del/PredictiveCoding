@@ -180,6 +180,16 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - it avoids an obvious report-only accuracy regression
   - it does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
   - its configured-step gain is weaker than the earlier `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` result
+- the fixed-budget continuation-strength diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
+- that continuation-strength diagnostic shows:
+  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` is the local best existing same-family directional predecessor before the pass
+  - `stage05_v3c_scaled_continuation_blend_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it directionally improves configured-step mechanism over `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
+  - it avoids an obvious report-only accuracy regression
+  - it becomes the strongest tested narrow same-family micro-family candidate by configured-step mechanism ranking
+  - it still does not materially displace `stage05_v3c_stronger_semigroup_weight` under the current threshold
+  - the narrow v3-C contract-consolidation micro-family is now judged locally saturated
 - do not write prompts as if Stage 05 has already replaced the active Stage 04 line on `main`
 
 ## Current Recommended Next Move
@@ -191,10 +201,11 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - do not draft the next Stage 05 step as another pure same-family efficiency tweak
 - do not draft the next Stage 05 step as a repeat of the already-closed refined v3-C versus promoted refined v3-B promotion question
 - do not draft the next Stage 05 step as if Stage 05 has already replaced frozen Stage 04 on `main`
-- if Stage 05 continues, draft the next step as a narrow implementation-first continuation-target refinement above the endpoint-line midpoint scaffold, while keeping `stage05_v3c_stronger_semigroup_weight` as the active reference and treating `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the strongest tested same-family directional predecessor
+- if Stage 05 continues, draft the next new mechanism step above the now-saturated narrow v3-C contract-consolidation micro-family rather than as another midpoint / continuation / coupled / precision / scaled variant inside it
 - keep:
   - the fixed-budget v2 control
   - `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget improvement reference
+- treat `stage05_v3c_scaled_continuation_blend_trajectory_contract` as the strongest tested narrow same-family micro-family candidate, not as the active reference
 - do not frame the next step as another recompare or as an automatic new charter
 
 ## What Prompt Writers Must Not Reopen

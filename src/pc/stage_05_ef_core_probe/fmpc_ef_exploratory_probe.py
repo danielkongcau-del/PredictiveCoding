@@ -62,6 +62,9 @@ STAGE05_V3C_ENDPOINT_LINE_MIDPOINT_CANDIDATE_NAME = (
 STAGE05_V3C_ENDPOINT_LINE_CONTINUATION_BLEND_CANDIDATE_NAME = (
     "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract"
 )
+STAGE05_V3C_SCALED_CONTINUATION_BLEND_CANDIDATE_NAME = (
+    "stage05_v3c_scaled_continuation_blend_trajectory_contract"
+)
 STAGE05_V3C_COUPLED_DEFECT_PROJECTION_CANDIDATE_NAME = (
     "stage05_v3c_coupled_defect_projection_trajectory_contract"
 )
@@ -129,6 +132,18 @@ ENDPOINT_LINE_CONTINUATION_BLEND_TRAJECTORY_CONTRACT = (
     "u_main_star = alpha * ((z_mid_star - z_t) / (alpha * r)) + (1 - alpha) * u_C_star; "
     "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
 )
+SCALED_CONTINUATION_BLEND_TRAJECTORY_CONTRACT = (
+    "u_B = u_boot(z_t, alpha * r, t; c); "
+    "z_B = z_t + alpha * r * u_B; "
+    "z_line_mid_star = z_t + alpha * (z_sg_star - z_t); "
+    "z_mid_star = (1 - kappa) * z_B + kappa * z_line_mid_star; "
+    "u_C_traj_star = stopgrad(u_hat(z_mid_star, r_s, s; c)); "
+    "u_C_sg_star = (z_sg_star - z_mid_star) / ((1 - alpha) * r); "
+    "kappa_eff = min(1.0, gamma_cont * kappa); "
+    "u_C_star = (1 - kappa_eff) * u_C_traj_star + kappa_eff * u_C_sg_star; "
+    "u_main_star = alpha * ((z_mid_star - z_t) / (alpha * r)) + (1 - alpha) * u_C_star; "
+    "L_main_traj = (lambda_tc + lambda_sg * r^2) * ||m_hat - (u_main_star - g_t)||^2"
+)
 COUPLED_DEFECT_PROJECTION_TRAJECTORY_CONTRACT = (
     "u_B = u_boot(z_t, alpha * r, t; c); "
     "z_B = z_t + alpha * r * u_B; "
@@ -175,6 +190,9 @@ MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_MIDPOINT = (
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_ENDPOINT_LINE_CONTINUATION_BLEND = (
     "endpoint_line_midpoint_with_continuation_target_blend_semigroup_internalized_trajectory_contract"
 )
+MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_SCALED_CONTINUATION_BLEND = (
+    "endpoint_line_midpoint_with_scaled_continuation_blend_contract"
+)
 MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_COUPLED_DEFECT_PROJECTION = (
     "endpoint_line_midpoint_with_coupled_local_defect_projection_predictor_corrector_contract"
 )
@@ -182,8 +200,11 @@ MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_PRECISION_WEIGHTED_CONTINUATION_CORRECTOR 
     "endpoint_line_midpoint_with_precision_weighted_continuation_corrector_contract"
 )
 CONTINUATION_TARGET_BLEND_IDENTITY = "kappa_closed_form_blend"
+CONTINUATION_BLEND_SCALE_IDENTITY = "fixed_gamma_cont_scaled_kappa"
 CONTINUATION_MAP_COEFFICIENT_IDENTITY = "local_continuation_map_closed_form_eta_cont"
 DEFECT_PROJECTION_COEFFICIENT_IDENTITY = "two_segment_quadratic_closed_form_rho"
+BASE_CONTINUATION_COEFFICIENT_IDENTITY = "kappa_closed_form_blend"
+EFFECTIVE_SCALED_CONTINUATION_BLEND_FORMULA = "kappa_eff = min(1.0, gamma_cont * kappa)"
 
 
 def _as_batch_first(name: str, array: np.ndarray) -> np.ndarray:
@@ -238,8 +259,10 @@ class FMPCEFExploratoryProbeConfig:
     use_midpoint_reconstructed_trajectory_contract: bool = False
     use_endpoint_line_midpoint_trajectory_contract: bool = False
     use_endpoint_line_continuation_blend_trajectory_contract: bool = False
+    use_scaled_continuation_blend_trajectory_contract: bool = False
     use_coupled_defect_projection_trajectory_contract: bool = False
     use_precision_weighted_continuation_corrector_trajectory_contract: bool = False
+    continuation_blend_scale: float = 1.0
     lambda_drift: float = 1.0
     lambda_traj_curr: float = 0.1
     alpha_floor: float = 0.5
@@ -287,6 +310,8 @@ class FMPCEFExploratoryProbeConfig:
             raise ValueError("lambda_traj_curr must be non-negative.")
         if self.lambda_sg < 0.0:
             raise ValueError("lambda_sg must be non-negative.")
+        if self.continuation_blend_scale <= 0.0:
+            raise ValueError("continuation_blend_scale must be positive.")
         if self.tangent_epsilon <= 0.0:
             raise ValueError("tangent_epsilon must be positive.")
         if self.alpha_warmup_epochs < 0:
@@ -371,6 +396,22 @@ class FMPCEFExploratoryProbeConfig:
                 "use_endpoint_line_midpoint_trajectory_contract=True."
             )
         if (
+            self.use_scaled_continuation_blend_trajectory_contract
+            and not self.use_endpoint_line_midpoint_trajectory_contract
+        ):
+            raise ValueError(
+                "use_scaled_continuation_blend_trajectory_contract requires "
+                "use_endpoint_line_midpoint_trajectory_contract=True."
+            )
+        if (
+            self.use_scaled_continuation_blend_trajectory_contract
+            and self.use_endpoint_line_continuation_blend_trajectory_contract
+        ):
+            raise ValueError(
+                "The scaled-continuation-blend and endpoint-line-continuation-blend "
+                "contracts are mutually exclusive."
+            )
+        if (
             self.use_coupled_defect_projection_trajectory_contract
             and not self.use_endpoint_line_midpoint_trajectory_contract
         ):
@@ -408,6 +449,22 @@ class FMPCEFExploratoryProbeConfig:
         ):
             raise ValueError(
                 "The precision-weighted-continuation-corrector and coupled-defect-projection "
+                "contracts are mutually exclusive."
+            )
+        if (
+            self.use_scaled_continuation_blend_trajectory_contract
+            and self.use_coupled_defect_projection_trajectory_contract
+        ):
+            raise ValueError(
+                "The scaled-continuation-blend and coupled-defect-projection contracts are "
+                "mutually exclusive."
+            )
+        if (
+            self.use_scaled_continuation_blend_trajectory_contract
+            and self.use_precision_weighted_continuation_corrector_trajectory_contract
+        ):
+            raise ValueError(
+                "The scaled-continuation-blend and precision-weighted-continuation-corrector "
                 "contracts are mutually exclusive."
             )
 
@@ -1181,6 +1238,22 @@ def build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_confi
     return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
 
 
+def build_stage05_v3c_scaled_continuation_blend_trajectory_contract_config(
+    **overrides: Any,
+) -> FMPCEFExploratoryProbeConfig:
+    """Return the single-axis scaled continuation-blend diagnostic on top of active refined v3-C."""
+
+    payload: dict[str, Any] = {
+        "use_midpoint_reconstructed_trajectory_contract": True,
+        "use_endpoint_line_midpoint_trajectory_contract": True,
+        "use_scaled_continuation_blend_trajectory_contract": True,
+        "continuation_blend_scale": 1.5,
+        "candidate_name_override": STAGE05_V3C_SCALED_CONTINUATION_BLEND_CANDIDATE_NAME,
+    }
+    payload.update(overrides)
+    return build_stage05_v3c_stronger_semigroup_weight_config(**payload)
+
+
 def build_stage05_v3c_coupled_defect_projection_trajectory_contract_config(
     **overrides: Any,
 ) -> FMPCEFExploratoryProbeConfig:
@@ -1222,6 +1295,8 @@ def _transport_family_name(config: FMPCEFExploratoryProbeConfig) -> str:
 def _candidate_name(config: FMPCEFExploratoryProbeConfig) -> str:
     if config.candidate_name_override is not None:
         return str(config.candidate_name_override)
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return STAGE05_V3C_SCALED_CONTINUATION_BLEND_CANDIDATE_NAME
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return STAGE05_V3C_PRECISION_WEIGHTED_CONTINUATION_CORRECTOR_CANDIDATE_NAME
     if config.use_coupled_defect_projection_trajectory_contract:
@@ -1300,6 +1375,11 @@ def _explicit_transport_drift_target_contract(
 def _pairwise_v2_placeholder(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any] | None:
     if not config.use_explicit_transport_drift_decomposition:
         return None
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return {
+            "status": "pending_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic",
+            "reference_candidate_name": STAGE05_V2_CANDIDATE_NAME,
+        }
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return {
             "status": (
@@ -1385,6 +1465,11 @@ def _pairwise_promoted_v3b_placeholder(
 def _pairwise_active_refined_v3c_placeholder(
     config: FMPCEFExploratoryProbeConfig,
 ) -> dict[str, Any] | None:
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return {
+            "status": "pending_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic",
+            "reference_candidate_name": STAGE05_V3C_STRONGER_SEMIGROUP_CANDIDATE_NAME,
+        }
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return {
             "status": (
@@ -1428,6 +1513,8 @@ def _pairwise_active_refined_v3c_placeholder(
 
 
 def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return "pending_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic"
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return (
             "pending_real_fixed_budget_v2_vs_active_v3c_vs_"
@@ -1459,6 +1546,8 @@ def _gap_closure_decision_placeholder(config: FMPCEFExploratoryProbeConfig) -> s
 
 
 def _recommended_next_move(config: FMPCEFExploratoryProbeConfig) -> str:
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return "run_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic"
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return (
             "run_fixed_budget_v2_vs_active_v3c_vs_"
@@ -1498,6 +1587,8 @@ def _semigroup_target_contract(config: FMPCEFExploratoryProbeConfig) -> str | No
 
 
 def _main_trajectory_contract_identity(config: FMPCEFExploratoryProbeConfig) -> str | None:
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_SCALED_CONTINUATION_BLEND
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return MAIN_TRAJECTORY_CONTRACT_IDENTITY_V3C_PRECISION_WEIGHTED_CONTINUATION_CORRECTOR
     if config.use_coupled_defect_projection_trajectory_contract:
@@ -1520,6 +1611,8 @@ def _main_trajectory_contract_identity(config: FMPCEFExploratoryProbeConfig) -> 
 def _main_trajectory_contract_target_contract(
     config: FMPCEFExploratoryProbeConfig,
 ) -> str | None:
+    if config.use_scaled_continuation_blend_trajectory_contract:
+        return SCALED_CONTINUATION_BLEND_TRAJECTORY_CONTRACT
     if config.use_precision_weighted_continuation_corrector_trajectory_contract:
         return PRECISION_WEIGHTED_CONTINUATION_CORRECTOR_TRAJECTORY_CONTRACT
     if config.use_coupled_defect_projection_trajectory_contract:
@@ -1542,6 +1635,7 @@ def _semigroup_consistency_absorbed_into_main_trajectory_contract(
 ) -> bool:
     return bool(
         config.use_fused_trajectory_semigroup_contract
+        or config.use_scaled_continuation_blend_trajectory_contract
         or config.use_midpoint_reconstructed_trajectory_contract
         or config.use_coupled_defect_projection_trajectory_contract
         or config.use_endpoint_line_continuation_blend_trajectory_contract
@@ -1555,6 +1649,7 @@ def _semigroup_consistency_is_auxiliary_only(
         return None
     return not bool(
         config.use_fused_trajectory_semigroup_contract
+        or config.use_scaled_continuation_blend_trajectory_contract
         or config.use_midpoint_reconstructed_trajectory_contract
         or config.use_coupled_defect_projection_trajectory_contract
     )
@@ -2053,7 +2148,14 @@ def build_midpoint_reconstructed_trajectory_targets(
         z_mid_star = z_mid_star_0
         u_short_star = u_short_star_0
         u_cont_traj_star = u_cont_traj_star_0
-        if (
+        if config.use_scaled_continuation_blend_trajectory_contract and continuation_active:
+            kappa_eff = np.minimum(
+                1.0,
+                float(config.continuation_blend_scale) * kappa,
+            )
+            u_cont_sg_star = (z_sg_star - z_mid_star) / continuation_r
+            u_cont_star = ((1.0 - kappa_eff) * u_cont_traj_star) + (kappa_eff * u_cont_sg_star)
+        elif (
             config.use_precision_weighted_continuation_corrector_trajectory_contract
             and continuation_active
         ):
@@ -2744,20 +2846,65 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
                 config.use_endpoint_line_midpoint_trajectory_contract
             ),
             "continuation_target_refinement_enabled": bool(
-                config.use_endpoint_line_continuation_blend_trajectory_contract
+                config.use_scaled_continuation_blend_trajectory_contract
+                or config.use_endpoint_line_continuation_blend_trajectory_contract
                 or config.use_coupled_defect_projection_trajectory_contract
                 or config.use_precision_weighted_continuation_corrector_trajectory_contract
             ),
             "continuation_target_blending_enabled": bool(
+                config.use_scaled_continuation_blend_trajectory_contract
+                or
                 config.use_endpoint_line_continuation_blend_trajectory_contract
                 or config.use_precision_weighted_continuation_corrector_trajectory_contract
             ),
             "endpoint_implied_continuation_target_enabled": bool(
-                config.use_endpoint_line_continuation_blend_trajectory_contract
+                config.use_scaled_continuation_blend_trajectory_contract
+                or config.use_endpoint_line_continuation_blend_trajectory_contract
                 or config.use_precision_weighted_continuation_corrector_trajectory_contract
             ),
             "continuation_target_blend_identity": (
-                CONTINUATION_MAP_COEFFICIENT_IDENTITY
+                CONTINUATION_BLEND_SCALE_IDENTITY
+                if config.use_scaled_continuation_blend_trajectory_contract
+                else CONTINUATION_MAP_COEFFICIENT_IDENTITY
+                if config.use_precision_weighted_continuation_corrector_trajectory_contract
+                else CONTINUATION_TARGET_BLEND_IDENTITY
+                if config.use_endpoint_line_continuation_blend_trajectory_contract
+                else None
+            ),
+            "scaled_continuation_blend_enabled": bool(
+                config.use_scaled_continuation_blend_trajectory_contract
+            ),
+            "continuation_blend_scale_identity": (
+                CONTINUATION_BLEND_SCALE_IDENTITY
+                if config.use_scaled_continuation_blend_trajectory_contract
+                else None
+            ),
+            "continuation_blend_scale_value": (
+                float(config.continuation_blend_scale)
+                if config.use_scaled_continuation_blend_trajectory_contract
+                else None
+            ),
+            "base_continuation_coefficient_identity": (
+                BASE_CONTINUATION_COEFFICIENT_IDENTITY
+                if (
+                    config.use_scaled_continuation_blend_trajectory_contract
+                    or config.use_endpoint_line_continuation_blend_trajectory_contract
+                )
+                else CONTINUATION_MAP_COEFFICIENT_IDENTITY
+                if config.use_precision_weighted_continuation_corrector_trajectory_contract
+                else None
+            ),
+            "effective_continuation_blend_formula": (
+                EFFECTIVE_SCALED_CONTINUATION_BLEND_FORMULA
+                if config.use_scaled_continuation_blend_trajectory_contract
+                else "kappa_eff = kappa"
+                if config.use_endpoint_line_continuation_blend_trajectory_contract
+                else None
+            ),
+            "continuation_coefficient_identity": (
+                CONTINUATION_BLEND_SCALE_IDENTITY
+                if config.use_scaled_continuation_blend_trajectory_contract
+                else CONTINUATION_MAP_COEFFICIENT_IDENTITY
                 if config.use_precision_weighted_continuation_corrector_trajectory_contract
                 else CONTINUATION_TARGET_BLEND_IDENTITY
                 if config.use_endpoint_line_continuation_blend_trajectory_contract
@@ -2768,13 +2915,6 @@ def _config_payload(config: FMPCEFExploratoryProbeConfig) -> dict[str, Any]:
             ),
             "continuation_map_closed_form_coefficient_enabled": bool(
                 config.use_precision_weighted_continuation_corrector_trajectory_contract
-            ),
-            "continuation_coefficient_identity": (
-                CONTINUATION_MAP_COEFFICIENT_IDENTITY
-                if config.use_precision_weighted_continuation_corrector_trajectory_contract
-                else CONTINUATION_TARGET_BLEND_IDENTITY
-                if config.use_endpoint_line_continuation_blend_trajectory_contract
-                else None
             ),
             "coupled_defect_projection_enabled": bool(
                 config.use_coupled_defect_projection_trajectory_contract
@@ -3954,22 +4094,58 @@ def run_fmpc_ef_exploratory_probe(
             config.use_endpoint_line_midpoint_trajectory_contract
         ),
         "continuation_target_refinement_enabled": bool(
-            config.use_endpoint_line_continuation_blend_trajectory_contract
+            config.use_scaled_continuation_blend_trajectory_contract
+            or config.use_endpoint_line_continuation_blend_trajectory_contract
             or config.use_coupled_defect_projection_trajectory_contract
             or config.use_precision_weighted_continuation_corrector_trajectory_contract
         ),
         "continuation_target_blending_enabled": bool(
+            config.use_scaled_continuation_blend_trajectory_contract
+            or
             config.use_endpoint_line_continuation_blend_trajectory_contract
             or config.use_precision_weighted_continuation_corrector_trajectory_contract
         ),
         "endpoint_implied_continuation_target_enabled": bool(
-            config.use_endpoint_line_continuation_blend_trajectory_contract
+            config.use_scaled_continuation_blend_trajectory_contract
+            or config.use_endpoint_line_continuation_blend_trajectory_contract
             or config.use_precision_weighted_continuation_corrector_trajectory_contract
         ),
         "continuation_target_blend_identity": (
-            CONTINUATION_MAP_COEFFICIENT_IDENTITY
+            CONTINUATION_BLEND_SCALE_IDENTITY
+            if config.use_scaled_continuation_blend_trajectory_contract
+            else CONTINUATION_MAP_COEFFICIENT_IDENTITY
             if config.use_precision_weighted_continuation_corrector_trajectory_contract
             else CONTINUATION_TARGET_BLEND_IDENTITY
+            if config.use_endpoint_line_continuation_blend_trajectory_contract
+            else None
+        ),
+        "scaled_continuation_blend_enabled": bool(
+            config.use_scaled_continuation_blend_trajectory_contract
+        ),
+        "continuation_blend_scale_identity": (
+            CONTINUATION_BLEND_SCALE_IDENTITY
+            if config.use_scaled_continuation_blend_trajectory_contract
+            else None
+        ),
+        "continuation_blend_scale_value": (
+            float(config.continuation_blend_scale)
+            if config.use_scaled_continuation_blend_trajectory_contract
+            else None
+        ),
+        "base_continuation_coefficient_identity": (
+            BASE_CONTINUATION_COEFFICIENT_IDENTITY
+            if (
+                config.use_scaled_continuation_blend_trajectory_contract
+                or config.use_endpoint_line_continuation_blend_trajectory_contract
+            )
+            else CONTINUATION_MAP_COEFFICIENT_IDENTITY
+            if config.use_precision_weighted_continuation_corrector_trajectory_contract
+            else None
+        ),
+        "effective_continuation_blend_formula": (
+            EFFECTIVE_SCALED_CONTINUATION_BLEND_FORMULA
+            if config.use_scaled_continuation_blend_trajectory_contract
+            else "kappa_eff = kappa"
             if config.use_endpoint_line_continuation_blend_trajectory_contract
             else None
         ),
@@ -3980,7 +4156,9 @@ def run_fmpc_ef_exploratory_probe(
             config.use_precision_weighted_continuation_corrector_trajectory_contract
         ),
         "continuation_coefficient_identity": (
-            CONTINUATION_MAP_COEFFICIENT_IDENTITY
+            CONTINUATION_BLEND_SCALE_IDENTITY
+            if config.use_scaled_continuation_blend_trajectory_contract
+            else CONTINUATION_MAP_COEFFICIENT_IDENTITY
             if config.use_precision_weighted_continuation_corrector_trajectory_contract
             else CONTINUATION_TARGET_BLEND_IDENTITY
             if config.use_endpoint_line_continuation_blend_trajectory_contract

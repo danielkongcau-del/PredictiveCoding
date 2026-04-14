@@ -1128,3 +1128,51 @@ Current decision:
 - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
 - treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as a tested asymmetric continuation-corrector variant rather than the active reference
 - keep the continuation-target refinement direction alive, but do not treat this exact `eta_cont` weighting as the new same-family leader
+
+#### 18.13.15 Final single-axis continuation-strength diagnostic
+
+The final narrow diagnostic inside the current v3-C contract-consolidation micro-family is:
+
+- `stage05_v3c_scaled_continuation_blend_trajectory_contract`
+
+This pass does not open a new Stage 05 family. It keeps the exact endpoint-line continuation-blend scaffold and changes only the continuation-side semigroup correction strength.
+
+Normative constraints:
+
+- keep the endpoint-line midpoint reconstruction unchanged
+- keep exactly one detached continuation re-evaluation at the reconstructed midpoint
+- do not add a second midpoint feedback step
+- do not add a second continuation re-evaluation
+- do not enable coupled defect projection
+- do not reintroduce a separate auxiliary semigroup loss
+- do not sweep a scale zoo inside this pass
+
+Using the current notation:
+
+- `u_B = u_boot(z_t, alpha * r, t; c)`
+- `z_B = z_t + alpha * r * u_B`
+- `z_sg^* = stopgrad(z_hat_split)`
+- `u_sg^* = (z_sg^* - z_t) / r`
+- `kappa = (lambda_sg * r^2) / (lambda_tc + lambda_sg * r^2)`
+- `z_line_mid^* = z_t + alpha * (z_sg^* - z_t)`
+- `z_mid^* = (1 - kappa) * z_B + kappa * z_line_mid^*`
+- `u_short^* = (z_mid^* - z_t) / (alpha * r)`
+- `u_C,traj^* = stopgrad(u_hat(z_mid^*, r_s, s; c))`
+- `u_C,sg^* = (z_sg^* - z_mid^*) / ((1 - alpha) * r)` for active continuation segments only
+- `gamma_cont = 1.5`
+- `kappa_eff = min(1.0, gamma_cont * kappa)`
+- `u_C^* = (1 - kappa_eff) * u_C,traj^* + kappa_eff * u_C,sg^*`
+- `u_main^* = alpha * u_short^* + (1 - alpha) * u_C^*`
+- `m_main^* = u_main^* - g_t`
+
+The unified main trajectory contract remains:
+
+- `lambda_main = lambda_tc + lambda_sg * r^2`
+- `L_main_traj = lambda_main * ||m_hat - m_main^*||^2`
+
+Interpretation:
+
+- semigroup consistency remains absorbed into the main trajectory contract
+- trajectory remains the main contract frame
+- this is a final single-axis strength diagnostic inside the existing micro-family, not a new mechanism family
+- this pass still does not justify `refactor_main_contract_around_endpoint_semigroup_consistency`

@@ -33,9 +33,9 @@ Current working interpretation:
 - the working-hypothesis-driven `Stage 05 v3-C` charter around endpoint / semigroup consistency is now open and has a first minimal diagnostic-only probe implementation
 - the refined fixed-budget `v2 vs promoted-v3B vs refined-v3C` recompare is now complete
 - the current Stage 05 structural interpretation is `absorb_semigroup_into_main_trajectory_contract`
-- the latest tested narrow refinement candidate is now `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract`
-- the strongest tested narrow same-family directional signal still comes from `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
-- the next immediate Stage 05 move is a narrower continuation-target contract refinement above the endpoint-line midpoint scaffold, not another midpoint-feedback pass by default
+- the latest tested narrow continuation-strength diagnostic candidate is now `stage05_v3c_scaled_continuation_blend_trajectory_contract`
+- the narrow v3-C contract-consolidation micro-family is now treated as locally saturated under the current fixed-budget mechanism-first threshold
+- the next immediate Stage 05 move should therefore go above this micro-family rather than default to another midpoint / continuation / coupled / precision / scaled variant
 - the refreshed frozen-bridge vs Stage 05 v2 comparison supports continued Stage 05 exploration
 - the dedicated Stage 05 v2 diagnostics and the completed longer-training validation both point first to training / budget limitation on the v2 reference
 - the stronger same-family Stage 05 v2 budget materially improves configured-step mechanism and report-only accuracy, but it still selects the final training epoch on every seed
@@ -56,7 +56,7 @@ Current working interpretation:
 - the fixed-budget same-family efficiency diagnostic closed the pure same-family schedule-tweak line and now serves as part of the evidence base behind the current Stage 05 `v3-B` line
 - the completed fixed-budget Stage 05 `v2 vs v3-A` comparison says the v3-A contract materially improves configured-step mechanism over the fixed-budget v2 reference
 - the completed fixed-budget refined v3-C recompare says `stage05_v3c_stronger_semigroup_weight` materially improves configured-step mechanism over both the promoted refined v3-B reference and the fixed-budget v2 control
-- the completed fixed-budget precision-weighted continuation-corrector comparison says `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`, but does not materially displace it
+- the completed fixed-budget continuation-strength diagnostic says `stage05_v3c_scaled_continuation_blend_trajectory_contract` becomes the strongest tested narrow same-family micro-family candidate, but still does not materially displace `stage05_v3c_stronger_semigroup_weight`
 - Stage 05 evaluation remains mechanism-first:
   - task accuracy is report-only and is not the current acceptance gate
 

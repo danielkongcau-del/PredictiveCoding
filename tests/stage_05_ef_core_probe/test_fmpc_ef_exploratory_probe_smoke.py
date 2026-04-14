@@ -40,6 +40,7 @@ from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import (
     build_stage05_v3c_fused_trajectory_semigroup_contract_config,
     build_stage05_v3c_midpoint_reconstructed_trajectory_contract_config,
     build_stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract_config,
+    build_stage05_v3c_scaled_continuation_blend_trajectory_contract_config,
     build_stage05_v3c_stronger_semigroup_weight_config,
     build_state_branch_input_tangent,
     build_fmpc_ef_exploratory_probe_config,
@@ -429,6 +430,21 @@ def test_endpoint_line_continuation_blend_v3c_builder_exposes_explicit_candidate
     assert config.lambda_sg == pytest.approx(0.10)
 
 
+def test_scaled_continuation_blend_v3c_builder_exposes_explicit_candidate_identity_and_scale() -> None:
+    config = build_stage05_v3c_scaled_continuation_blend_trajectory_contract_config()
+
+    assert (
+        config.candidate_name_override
+        == "stage05_v3c_scaled_continuation_blend_trajectory_contract"
+    )
+    assert config.use_midpoint_reconstructed_trajectory_contract is True
+    assert config.use_endpoint_line_midpoint_trajectory_contract is True
+    assert config.use_scaled_continuation_blend_trajectory_contract is True
+    assert config.use_endpoint_line_continuation_blend_trajectory_contract is False
+    assert config.continuation_blend_scale == pytest.approx(1.5)
+    assert config.lambda_sg == pytest.approx(0.10)
+
+
 def test_coupled_defect_projection_v3c_builder_exposes_explicit_candidate_identity_and_flag() -> None:
     config = build_stage05_v3c_coupled_defect_projection_trajectory_contract_config()
 
@@ -776,6 +792,72 @@ def test_endpoint_line_continuation_blend_v3c_targets_handle_alpha_near_one_stab
     assert np.all(np.isfinite(targets.unified_residual_target))
     assert np.allclose(targets.continuation_target_blend_shift_norm, 0.0)
     assert np.allclose(targets.endpoint_implied_continuation_velocity, 0.0)
+
+
+def test_scaled_continuation_blend_v3c_targets_have_expected_shapes_and_differ_from_continuation_blend() -> None:
+    base_config = build_stage05_v3c_endpoint_line_continuation_blend_trajectory_contract_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    scaled_config = build_stage05_v3c_scaled_continuation_blend_trajectory_contract_config(
+        run_seed=0,
+        data_seed=0,
+        model_init_seed=0,
+        psi_init_seed=0,
+        batch_order_seed=0,
+    )
+    split = load_digits_split(
+        split_seed=base_config.data_seed,
+        train_fraction=base_config.train_fraction,
+        val_fraction=base_config.val_fraction,
+        test_fraction=base_config.test_fraction,
+    )
+    x_batch = split.x_train[:8]
+    y_batch = split.y_train[:8]
+    model = _make_pc_model(base_config)
+    psi_network = _make_psi_network(base_config)
+    context = build_tf1_context(model, x_batch, y_batch)
+
+    continuation_blend_targets = build_midpoint_reconstructed_trajectory_targets(
+        context,
+        psi_network,
+        base_config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+        lambda_traj_curr=base_config.lambda_traj_curr,
+        lambda_sg=base_config.lambda_sg,
+    )
+    scaled_targets = build_midpoint_reconstructed_trajectory_targets(
+        context,
+        psi_network,
+        scaled_config,
+        context.z0,
+        t=0.25,
+        r=0.75,
+        alpha=0.5,
+        lambda_traj_curr=scaled_config.lambda_traj_curr,
+        lambda_sg=scaled_config.lambda_sg,
+    )
+
+    assert scaled_targets.endpoint_implied_continuation_velocity.shape == context.z0.shape
+    assert scaled_targets.blended_continuation_velocity.shape == context.z0.shape
+    assert scaled_targets.continuation_target_blend_shift_norm.shape == (
+        context.z0.shape[0],
+        1,
+    )
+    assert not np.allclose(
+        scaled_targets.blended_continuation_velocity,
+        continuation_blend_targets.blended_continuation_velocity,
+    )
+    assert not np.allclose(
+        scaled_targets.unified_residual_target,
+        continuation_blend_targets.unified_residual_target,
+    )
 
 
 def test_coupled_defect_projection_v3c_targets_expose_defect_correction_fields() -> None:
@@ -1331,6 +1413,91 @@ def test_endpoint_line_continuation_blend_v3c_probe_writes_expected_artifacts(tm
     assert config["transport"]["continuation_target_blending_enabled"] is True
     assert config["transport"]["endpoint_implied_continuation_target_enabled"] is True
     assert config["transport"]["continuation_target_blend_identity"] == "kappa_closed_form_blend"
+
+    assert "train_main_traj_contract_loss" in epoch_rows[0]
+    assert "train_mean_continuation_target_blend_shift_norm" in epoch_rows[0]
+    assert any(float(row["train_main_traj_contract_loss"]) > 0.0 for row in epoch_rows)
+
+
+def test_scaled_continuation_blend_v3c_probe_writes_expected_artifacts(tmp_path: Path) -> None:
+    result = load_run()(
+        output_root=tmp_path,
+        run_id="exploratory_probe_v3c_scaled_continuation_blend_smoke",
+        epochs=4,
+        warmup_epochs=2,
+        batch_size=128,
+        eval_steps=8,
+        transport_steps=2,
+        layer_dims=(64, 16, 10),
+        **{
+            key: value
+            for key, value in build_stage05_v3c_scaled_continuation_blend_trajectory_contract_config(
+                output_root=tmp_path,
+                run_id="unused",
+                epochs=4,
+                batch_size=128,
+                eval_steps=8,
+                transport_steps=2,
+                layer_dims=(64, 16, 10),
+            ).__dict__.items()
+            if key
+            not in {
+                "output_root",
+                "run_id",
+                "output_layout",
+                "warmup_epochs",
+                "epochs",
+                "batch_size",
+                "eval_steps",
+                "transport_steps",
+                "layer_dims",
+            }
+        },
+    )
+
+    config = _read_json(result.run_dir / "config.json")
+    summary = _read_json(result.run_dir / "summary.json")
+    epoch_rows = _read_csv(result.run_dir / "epoch_metrics.csv")
+
+    assert (
+        summary["candidate_name"]
+        == "stage05_v3c_scaled_continuation_blend_trajectory_contract"
+    )
+    assert summary["target_reconstruction_enabled"] is True
+    assert summary["midpoint_reconstruction_enabled"] is True
+    assert summary["endpoint_line_midpoint_reconstruction_enabled"] is True
+    assert summary["continuation_target_blending_enabled"] is True
+    assert summary["scaled_continuation_blend_enabled"] is True
+    assert summary["continuation_blend_scale_identity"] == "fixed_gamma_cont_scaled_kappa"
+    assert summary["continuation_blend_scale_value"] == pytest.approx(1.5)
+    assert summary["base_continuation_coefficient_identity"] == "kappa_closed_form_blend"
+    assert summary["effective_continuation_blend_formula"] == (
+        "kappa_eff = min(1.0, gamma_cont * kappa)"
+    )
+    assert summary["semigroup_consistency_absorbed_into_main_trajectory_contract"] is True
+    assert summary["semigroup_consistency_is_auxiliary_only"] is False
+    assert summary["main_trajectory_contract_identity"] == (
+        "endpoint_line_midpoint_with_scaled_continuation_blend_contract"
+    )
+    assert summary["pairwise_deltas_vs_active_refined_v3c_reference"]["status"] == (
+        "pending_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic"
+    )
+    assert summary["recommended_next_move"] == (
+        "run_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic"
+    )
+
+    assert (
+        config["transport"]["candidate_name"]
+        == "stage05_v3c_scaled_continuation_blend_trajectory_contract"
+    )
+    assert config["transport"]["scaled_continuation_blend_enabled"] is True
+    assert config["transport"]["continuation_blend_scale_identity"] == (
+        "fixed_gamma_cont_scaled_kappa"
+    )
+    assert config["transport"]["continuation_blend_scale_value"] == pytest.approx(1.5)
+    assert config["transport"]["base_continuation_coefficient_identity"] == (
+        "kappa_closed_form_blend"
+    )
 
     assert "train_main_traj_contract_loss" in epoch_rows[0]
     assert "train_mean_continuation_target_blend_shift_norm" in epoch_rows[0]

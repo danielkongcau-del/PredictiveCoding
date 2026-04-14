@@ -788,6 +788,52 @@ Decision:
   - treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as a tested asymmetric continuation-corrector variant rather than promoting it
   - continue the continuation-target refinement direction, but do not treat this exact `eta_cont` weighting as the new same-family leader
 
+## Stage 05 v3-C continuation-strength diagnostic
+
+Artifact:
+
+- `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
+
+Candidate:
+
+- `stage05_v3c_scaled_continuation_blend_trajectory_contract`
+
+Pairwise deltas versus active refined v3-C:
+
+- configured-step validation energy delta vs identity:
+  - `-0.00013847578449683687`
+- configured-step validation fixed-point residual delta vs identity:
+  - `-5.967061577316692e-07`
+- validation accuracy delta:
+  - `-3.700743415417188e-17`
+- test accuracy delta:
+  - `-0.0012345679012345883`
+
+Pairwise deltas versus fixed-budget v2:
+
+- configured-step validation energy delta vs identity:
+  - `-0.0011285431078297086`
+- configured-step validation fixed-point residual delta vs identity:
+  - `-4.8466951113740695e-06`
+- validation accuracy delta:
+  - `-0.007407407407407455`
+- test accuracy delta:
+  - `-0.004938271604938242`
+
+Decision:
+
+- it keeps one-step and configured-step mechanism positive on all comparison seeds
+- it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+- it directionally improves configured-step mechanism over `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
+- it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+- it becomes the strongest tested narrow same-family micro-family candidate by configured-step mechanism ranking
+- it still does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the narrow v3-C contract-consolidation micro-family is therefore treated as locally saturated
+- the current decision is therefore:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active fixed-budget Stage 05 improvement reference
+  - treat `stage05_v3c_scaled_continuation_blend_trajectory_contract` as the strongest tested narrow same-family micro-family candidate rather than promoting it
+  - freeze the narrow v3-C contract-consolidation micro-family as locally saturated and move the next new Stage 05 mechanism pass above this micro-family rather than staying inside it
+
 ## Where Detailed History Went
 
 Use these files for longer historical context:

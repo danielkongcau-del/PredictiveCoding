@@ -54,6 +54,56 @@ def _write_stage05_contextual_summary(path: Path) -> None:
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def _write_stage05_microfamily_summary(
+    path: Path,
+    *,
+    candidate_role: str,
+    candidate_name: str,
+    configured_step_energy_mean: float,
+    configured_step_residual_mean: float,
+    delta_vs_active_energy_mean: float,
+    delta_vs_active_residual_mean: float,
+    recommended_next_move: str,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "stage": path.parent.name,
+        "comparison_roles": {
+            "immediate_control": "stage_05_two_branch_corrected_residual_core_v2",
+            "active_reference_at_comparison_start": "stage05_v3c_stronger_semigroup_weight",
+            candidate_role: candidate_name,
+        },
+        "by_method": {
+            candidate_name: {
+                "configured_step_energy_delta_vs_identity": {
+                    "mean": configured_step_energy_mean,
+                    "std": 0.0,
+                },
+                "configured_step_fixed_point_residual_delta_vs_identity": {
+                    "mean": configured_step_residual_mean,
+                    "std": 0.0,
+                },
+                "val_accuracy": {"mean": 0.9, "std": 0.0},
+                "test_accuracy": {"mean": 0.9, "std": 0.0},
+            }
+        },
+        "pairwise_deltas_vs_active_refined_v3c_reference": {
+            "configured_step_energy_delta_vs_identity_delta": {
+                "mean": delta_vs_active_energy_mean,
+                "std": 0.0,
+            },
+            "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+                "mean": delta_vs_active_residual_mean,
+                "std": 0.0,
+            },
+            "val_accuracy_delta": {"mean": 0.0, "std": 0.0},
+            "test_accuracy_delta": {"mean": 0.0, "std": 0.0},
+        },
+        "recommended_next_move": recommended_next_move,
+    }
+    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
 def load_run():
     module = runpy.run_path(
         str(
@@ -1428,6 +1478,134 @@ def test_stage05_v2_active_v3c_precision_weighted_continuation_corrector_contrac
     ] == "stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract"
     assert report["decision"]["recommended_next_move"] == (
         "run_real_fixed_budget_v2_vs_active_v3c_vs_precision_weighted_continuation_corrector_contract_comparison"
+    )
+    shutil.rmtree(short_output_root, ignore_errors=True)
+
+
+def test_stage05_v3c_continuation_strength_diagnostic_writes_expected_artifacts(
+    tmp_path: Path,
+) -> None:
+    short_output_root = Path(tmp_path.anchor) / "pc_cont_strength_smoke"
+    shutil.rmtree(short_output_root, ignore_errors=True)
+
+    microfamily_root = short_output_root / "microfamily_refs"
+    _write_stage05_microfamily_summary(
+        microfamily_root / "endpoint_line_midpoint" / "aggregate_summary.json",
+        candidate_role="endpoint_line_midpoint_candidate",
+        candidate_name="stage05_v3c_endpoint_line_midpoint_trajectory_contract",
+        configured_step_energy_mean=-0.006015732548759099,
+        configured_step_residual_mean=-2.287737578720965e-05,
+        delta_vs_active_energy_mean=-4.511085708929404e-05,
+        delta_vs_active_residual_mean=-1.7559842071392397e-07,
+        recommended_next_move="keep_endpoint_line_midpoint_direction_and_refine_implementation",
+    )
+    _write_stage05_microfamily_summary(
+        microfamily_root / "endpoint_line_continuation_blend" / "aggregate_summary.json",
+        candidate_role="endpoint_line_continuation_blend_candidate",
+        candidate_name="stage05_v3c_endpoint_line_continuation_blend_trajectory_contract",
+        configured_step_energy_mean=-0.006077107269951781,
+        configured_step_residual_mean=-2.3154554470203098e-05,
+        delta_vs_active_energy_mean=-0.00010648557828197662,
+        delta_vs_active_residual_mean=-4.5277710370737165e-07,
+        recommended_next_move="keep_endpoint_line_continuation_blend_direction_and_refine_implementation",
+    )
+    _write_stage05_microfamily_summary(
+        microfamily_root / "coupled_defect_projection" / "aggregate_summary.json",
+        candidate_role="coupled_defect_projection_candidate",
+        candidate_name="stage05_v3c_coupled_defect_projection_trajectory_contract",
+        configured_step_energy_mean=-0.006064637700758028,
+        configured_step_residual_mean=-2.309891909200473e-05,
+        delta_vs_active_energy_mean=-9.401600908822323e-05,
+        delta_vs_active_residual_mean=-3.9714172550900373e-07,
+        recommended_next_move="keep_coupled_defect_projection_direction_and_refine_implementation",
+    )
+    _write_stage05_microfamily_summary(
+        microfamily_root / "precision_weighted" / "aggregate_summary.json",
+        candidate_role="precision_weighted_continuation_corrector_candidate",
+        candidate_name="stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract",
+        configured_step_energy_mean=-0.006033525050064575,
+        configured_step_residual_mean=-2.2958570229293478e-05,
+        delta_vs_active_energy_mean=-6.290335839477061e-05,
+        delta_vs_active_residual_mean=-2.5679286279775153e-07,
+        recommended_next_move="keep_precision_weighted_continuation_corrector_direction_and_refine_implementation",
+    )
+
+    result = load_run()(
+        output_root=short_output_root,
+        run_id="stage05_v3c_continuation_strength_smoke",
+        comparison_variant="stage05_v3c_continuation_strength_diagnostic",
+        comparison_scope="smoke_only",
+        seeds=(0,),
+        stage05_epochs=4,
+        stage05_eval_steps=5,
+        stage05_layer_dims=(64, 16, 10),
+        stage05_transport_steps=2,
+        active_v3c_lambda_sg=0.10,
+        endpoint_line_midpoint_summary_path=(
+            microfamily_root / "endpoint_line_midpoint" / "aggregate_summary.json"
+        ),
+        endpoint_line_continuation_blend_summary_path=(
+            microfamily_root
+            / "endpoint_line_continuation_blend"
+            / "aggregate_summary.json"
+        ),
+        coupled_defect_projection_summary_path=(
+            microfamily_root / "coupled_defect_projection" / "aggregate_summary.json"
+        ),
+        precision_weighted_continuation_corrector_summary_path=(
+            microfamily_root / "precision_weighted" / "aggregate_summary.json"
+        ),
+    )
+
+    run_dir = result.run_dir
+    assert (run_dir / "config.json").exists()
+    assert (run_dir / "aggregate_runs.csv").exists()
+    assert (run_dir / "aggregate_summary.json").exists()
+    assert (run_dir / "comparison_report.json").exists()
+    assert (run_dir / "comparison_report.md").exists()
+    assert (run_dir / "microfamily_ranking.csv").exists()
+    assert (run_dir / "postmortem_report.md").exists()
+
+    rows = _read_csv(run_dir / "aggregate_runs.csv")
+    summary = _read_json(run_dir / "aggregate_summary.json")
+    report = _read_json(run_dir / "comparison_report.json")
+
+    assert len(rows) == 4
+    assert {row["method_name"] for row in rows} == {
+        "stage_05_two_branch_corrected_residual_core_v2",
+        "stage05_v3c_stronger_semigroup_weight",
+        "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract",
+        "stage05_v3c_scaled_continuation_blend_trajectory_contract",
+    }
+    assert summary["stage"] == "stage05_v3c_continuation_strength_diagnostic"
+    assert summary["comparison_scope"] == "smoke_only"
+    assert summary["local_best_existing_microfamily_predecessor"] == (
+        "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract"
+    )
+    assert summary["comparison_roles"]["scaled_continuation_blend_candidate"] == (
+        "stage05_v3c_scaled_continuation_blend_trajectory_contract"
+    )
+    assert summary["comparison_protocol"]["stage_05_scaled_continuation_blend_candidate"][
+        "scaled_continuation_blend_enabled"
+    ] is True
+    assert summary["comparison_protocol"]["stage_05_scaled_continuation_blend_candidate"][
+        "continuation_blend_scale_value"
+    ] == 1.5
+    assert "pairwise_deltas_vs_endpoint_line_continuation_blend_reference" in summary
+    assert "scaled_continuation_blend_contract_ranking_position_in_microfamily" in summary
+    assert "final_decision" in summary
+    assert summary["final_decision"] == (
+        "pending_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic"
+    )
+
+    assert report["decision"]["scaled_continuation_blend_contract_candidate_name"] == (
+        "stage05_v3c_scaled_continuation_blend_trajectory_contract"
+    )
+    assert report["decision"]["local_best_existing_microfamily_predecessor"] == (
+        "stage05_v3c_endpoint_line_continuation_blend_trajectory_contract"
+    )
+    assert report["decision"]["final_decision"] == (
+        "pending_real_fixed_budget_stage05_v3c_continuation_strength_diagnostic"
     )
     shutil.rmtree(short_output_root, ignore_errors=True)
 

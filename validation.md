@@ -239,9 +239,10 @@ The next validation move is:
 - adopt `absorb_semigroup_into_main_trajectory_contract` as the current Stage 05 structural interpretation
 - do not keep endpoint / semigroup consistency framed as a permanently attached auxiliary-only term
 - do not yet adopt `refactor_main_contract_around_endpoint_semigroup_consistency`
+- treat the narrow v3-C contract-consolidation micro-family as locally saturated under the current fixed-budget mechanism-first threshold
 - do not open a new planning-only charter by default from the current state
 
-Any next narrower Stage 05 follow-up should preserve:
+Any next new Stage 05 mechanism pass should preserve:
 
 - artifact-independent target construction
 - deterministic artifact generation
@@ -252,7 +253,7 @@ Any next narrower Stage 05 follow-up should preserve:
 - the original v3-C probe as diagnostic-only control rather than the active fixed-budget reference
 - the current structural interpretation that semigroup consistency should be absorbed into the main trajectory contract
 
-Any next narrower Stage 05 follow-up should be accepted only if it:
+Any next new Stage 05 mechanism pass should be accepted only if it:
 
 - preserves explicit transport-drift decomposition from v3-A
 - preserves the refined v3-C scaffold as the active comparison reference
@@ -266,7 +267,7 @@ Any next narrower Stage 05 follow-up should be accepted only if it:
 - makes the consolidated main trajectory-contract identity explicit
 - keeps task accuracy as a secondary signal only
 
-Any next narrower Stage 05 follow-up must minimally produce:
+Any next new Stage 05 mechanism pass must minimally produce:
 
 - a comparison run or suite against:
   - the fixed-budget Stage 05 v2 control
@@ -280,6 +281,8 @@ Any next narrower Stage 05 follow-up must minimally produce:
   - pairwise deltas versus v2
   - a gap-closure style decision field
   - `recommended_next_move`
+
+Any next new Stage 05 mechanism pass should not be framed as another midpoint / continuation / coupled / precision / scaled variant inside the now-saturated narrow v3-C contract-consolidation micro-family.
 
 Current v3-C status:
 
@@ -375,6 +378,21 @@ Current v3-C status:
   - treat `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` as the strongest tested same-family directional predecessor rather than the active reference
   - treat `stage05_v3c_precision_weighted_continuation_corrector_trajectory_contract` as the latest tested asymmetric continuation-corrector variant rather than the active reference
   - require any next continuation-target refinement to beat the active refined v3-C reference under the same mechanism-first rule
+- the fixed-budget continuation-strength diagnostic now also exists under:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
+- that continuation-strength diagnostic says:
+  - `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract` is the local best existing same-family directional predecessor before the pass
+  - `stage05_v3c_scaled_continuation_blend_trajectory_contract` keeps one-step and configured-step mechanism positive
+  - it directionally improves configured-step mechanism over `stage05_v3c_stronger_semigroup_weight`
+  - it directionally improves configured-step mechanism over `stage05_v3c_endpoint_line_continuation_blend_trajectory_contract`
+  - it avoids an obvious report-only accuracy regression relative to `stage05_v3c_stronger_semigroup_weight`
+  - it becomes the strongest tested narrow same-family micro-family candidate by configured-step mechanism ranking
+  - it still does not materially improve configured-step mechanism over `stage05_v3c_stronger_semigroup_weight` under the current threshold
+- the next acceptance step is therefore finalized as:
+  - keep `stage05_v3c_stronger_semigroup_weight` as the active Stage 05 improvement reference
+  - keep fixed-budget `v2` as the immediate control
+  - treat the narrow v3-C contract-consolidation micro-family as locally saturated
+  - do not continue with another midpoint / continuation / coupled / precision / scaled variant inside this micro-family by default
 
 It should not be framed as:
 
@@ -417,6 +435,8 @@ It should not be framed as:
   - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_coupled_defect_projection_contract_comparison/`
 - Stage 05 precision-weighted continuation-corrector fixed-budget comparison:
   - `outputs/stage_05_ef_core_probe/stage05_v2_active_v3c_precision_weighted_continuation_corrector_contract_comparison/`
+- Stage 05 continuation-strength diagnostic:
+  - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
 - Stage 05 v3-C refinement diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_refinement_diagnostic/`
 - Stage 05 refined v3-C recompare:
