@@ -105,6 +105,11 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - the current authoritative Stage 06 v2 follow-up artifact is:
   - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
 - the post-semantic-alignment Stage 06 baseline passed Tier 1 viability but still failed the Tier 2 main gate against the matched-budget Stage 05 control
+- the post-v2 planning conclusion is now:
+  - `A2_aggregate_contract_itself_is_now_the_more_likely_bottleneck`
+  - `open_new_stage06_contract_family`
+  - planning-only provisional family:
+    - `stage06_B1_split_update_contract_family`
 - do not write prompts that keep Stage 05 as the default efficiency mainline
 - do not write prompts that reopen another narrow Stage 05 geometry micro-variant by default
 
@@ -122,18 +127,18 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - efficiency-first
   - above the saturated Stage 05 v3-C geometry micro-family
 - current tested follow-up state:
-  - `stay_within_stage06_A2_family`
-  - tested A2 follow-up:
-    - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-  - single changed axis:
-    - replace the current hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract
-  - current status:
-    - the v2 authoritative comparison artifact exists
-    - v2 did not replace the v1 baseline
-    - do not auto-write prompts for `v2.1` / `v2.2` retuning from the current state
-  - do not reopen:
-    - Stage 05 v3-A branchwise supervision
-    - a new Stage 06 contract family without a new planning decision
+  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+  - stayed inside `stay_within_stage06_A2_family`
+  - did not replace the v1 baseline
+  - do not auto-write prompts for `v2.1` / `v2.2` retuning from the current state
+- current planning-only next family:
+  - `open_new_stage06_contract_family`
+  - provisional family:
+    - `stage06_B1_split_update_contract_family`
+  - first planned probe:
+    - `stage06_v3_split_update_objective_contract_default`
+  - single primary changed axis:
+    - replace the simultaneous weighted-sum aggregate objective update path with a split-update supervision contract over the same reused Stage 05 targets
 - do not draft the next pass as:
   - another pure same-family budget push
   - another pure same-family efficiency tweak
@@ -172,6 +177,8 @@ Also do not casually open:
   - `specs/stage_05_ef_core_probe.md`
 - Stage 06 low-budget efficiency addendum:
   - `specs/stage_06_low_budget_efficiency.md`
+- Stage 06 planning-only next-family addendum:
+  - `specs/stage_06_split_update_contract_family.md`
 
 ## Current Prompt-Writing Style
 

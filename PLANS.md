@@ -166,22 +166,17 @@ Required framing:
 
 Current planning decision:
 
-- `stay_within_stage06_A2_family`
+- `open_new_stage06_contract_family`
 
 Current implementation status:
 
-- the narrow v2 follow-up surface now exists in code:
-  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-- the authoritative v2 comparison artifact now exists:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
-- this is still not a promotion
-- this still does not reopen A2 / B1 / C
-- this still does not reopen Stage 05 v3-A branchwise supervision
-- this still does not authorize a second parallel Stage 06 family
+- the v1 baseline and the v2 follow-up are both now artifact-backed
+- the v2 follow-up did not replace the v1 baseline
+- the next move should therefore no longer be framed as another narrow A2 schedule-retuning pass
 
 ### 4B. Directly Confirmed Baseline Facts
 
-Directly confirmed from the current Stage 06 source and the authoritative post-semantic-alignment artifact:
+Directly confirmed from the current Stage 06 source and the authoritative v1/v2 artifacts:
 
 - the current baseline candidate is:
   - `stage06_v1_objective_curriculum_energydrop_default`
@@ -200,6 +195,18 @@ Directly confirmed from the current Stage 06 source and the authoritative post-s
   - fails the Tier 2 main gate at `256`
   - does not justify a `512` rescue
   - does not show better cost-effectiveness than the matched-budget Stage 05 control under the current rule
+- the tested A2 follow-up is:
+  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+- its authoritative artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
+- v2 changes only one primary axis relative to v1:
+  - replace the hard late `L_traj -> L_semi` handoff with a persistent-overlap late objective contract
+- the authoritative v2 result:
+  - passes Tier 1 viability at `128`
+  - still fails the Tier 2 main gate at `256`
+  - still does not justify a `512` rescue
+  - shows only a small raw configured-step mechanism improvement over v1
+  - shows materially worse runtime proxy and worse mechanism gain per runtime than v1
 
 ### 4C. Planning Inference For The Next Probe
 
@@ -207,64 +214,48 @@ Current planning inference from those confirmed facts:
 
 - Stage 06 v1 already answered its baseline question
 - the v2 persistent-overlap follow-up also answered its immediate question:
-  - raw configured-step mechanism can move slightly above the v1 baseline
-  - but not enough to beat the matched-budget Stage 05 control
-  - and not efficiently enough to displace v1 as the Stage 06 baseline
-- the unresolved issue is no longer whether this exact hard-handoff versus persistent-overlap schedule axis should keep being retuned by default
-- any next Stage 06 pass should now return to higher-level planning rather than auto-opening a `v2.1` / `v2.2` overlap-retuning line
+  - it confirms that narrow schedule retuning inside the current A2 aggregate-objective line has low information gain from here
+  - it does not provide enough evidence to justify a `v2.1` / `v2.2` continuation
+- the more likely current bottleneck is now:
+  - `A2_aggregate_contract_itself_is_now_the_more_likely_bottleneck`
+- the next forward pass should therefore change contract family level, not just late schedule shape
 
-This is a planning conclusion grounded in the current authoritative v1 and v2 artifacts, not an approval for a new follow-up yet.
+This is a planning conclusion grounded in the current authoritative v1 and v2 artifacts. It is not yet a validated new mechanism result.
 
 ### 4D. Unique Primary Next Probe Charter
 
-Most recent tested follow-up:
+New planning-only family charter:
 
-- candidate name:
-  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+- provisional family name:
+  - `stage06_B1_split_update_contract_family`
+- first planned probe:
+  - `stage06_v3_split_update_objective_contract_default`
 - family decision:
-  - `stay_within_stage06_A2_family`
-- one-sentence tested hypothesis:
-  - the main remaining Tier 2 gap comes from the Stage 06 v1 hard late handoff from `L_traj` to `L_semi`; keeping both objectives active through the late low-budget phase should improve matched-budget configured-step mechanism without leaving the A2 aggregate-objective family
+  - `open_new_stage06_contract_family`
+- one-sentence hypothesis:
+  - the main remaining Tier 2 gap is more likely caused by destructive interference between trajectory-side and semigroup-side supervision inside one simultaneous aggregate update than by the exact late schedule shape, so the next probe should separate those updates at the contract level
 
 Single primary changed axis:
 
-- replace the Stage 06 v1 hard late objective handoff with a persistent overlap objective contract
-
-Changed contract:
-
-- move from:
-  - a single `beta_obj(k)` schedule that ends in a pure `L_semi` plateau
-- to:
-  - an overlap objective schedule that keeps non-zero trajectory-side weight and non-zero semigroup-side weight active through the late phase
-
-Current implementation-default overlap settings:
-
-- warmup fraction:
-  - `0.25`
-- ramp fraction:
-  - `0.50`
-- late semigroup objective weight:
-  - `0.75`
-- late trajectory objective weight:
-  - `0.25`
+- replace the current simultaneous weighted-sum aggregate objective update path with a split-update supervision contract over the same reused Stage 05 targets
 
 What remains unchanged:
 
 - Stage 05 two-branch parameterization
 - Stage 05 target-builder reuse
-- aggregate residual supervision
+- no default restoration of Stage 05 v3-A branchwise supervision
 - `r` as remaining horizon
 - `z_roll = z_t + r * u_psi(z_t, r, t; c)`
 - matched-budget control:
   - `stage05_v3c_stronger_semigroup_weight`
 - Stage 06 tier structure and gate semantics
-- energy-drop and fixed-point penalty families, unless a later artifact justifies reopening them
+- low-budget-first validation order
 
 Matched-budget protocol:
 
 - same shared Stage 06 control:
   - `stage05_v3c_stronger_semigroup_weight`
-- same shared seeds and low-budget protocol as the current Stage 06 comparison entry
+- same shared seeds and low-budget protocol as the current Stage 06 comparison line
 - no `1536+` existence proof
 
 Tier structure:
@@ -276,17 +267,25 @@ Tier structure:
 - Tier 3:
   - `512 epochs` rescue only after a credible Tier 2 trend
 
-Observed outcome:
+Acceptance gate:
 
-- it stays mechanism-positive at low budget
-- it does not materially beat the matched-budget Stage 05 control at Tier 2
-- it does not show clearly better cost-effectiveness than the matched-budget Stage 05 control
-- it therefore does not earn promotion and does not justify an automatic narrow `v2.x` continuation
+- stay mechanism-positive at low budget
+- materially beat the matched-budget Stage 05 control at Tier 2
+  - or show clearly better cost-effectiveness under the existing Stage 06 efficiency record
+- avoid an obvious report-only accuracy collapse
+
+Kill criteria:
+
+- if the first split-update probe still fails the Tier 2 main gate
+- and still does not show clearly better cost-effectiveness than the matched-budget Stage 05 control
+- then do not auto-open a second narrow same-family retune
 
 Artifact root naming:
 
+- planning addendum:
+  - `specs/stage_06_split_update_contract_family.md`
 - comparison root:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/`
+  - `outputs/stage_06_low_budget_efficiency/stage06_v3_split_update_comparison/`
 - candidate run root:
   - `outputs/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum/`
 
@@ -299,30 +298,43 @@ For the next Stage 06 pass, do not:
 - repair or rerun Stage 06 v1 as if it were the next direction
 - use long-budget-first validation
 - open multiple Stage 06 next-probe families in parallel
-- restore Stage 05 v3-A branchwise supervision
-- open a new Stage 06 spec addendum without a fresh planning decision above the now-tested v1/v2 A2 line
-- auto-open a `stage06_v2.x` schedule-retuning branch without a fresh planning decision
+- auto-open another `v2.x` schedule-retuning branch
+- restore Stage 05 v3-A branchwise supervision by default
 
-### 4F. Coding Boundary After The v2 Authoritative Comparison
+### 4F. Coding Boundary For The Future New-Family Pass
 
-No immediate further coding boundary is approved from this artifact alone.
+Before any coding begins, first keep these planning docs aligned:
 
-If a new Stage 06 pass is later approved after fresh planning, define its file boundary from that new charter rather than inheriting the old v2 implementation boundary by default.
+1. `PLANS.md`
+2. `CURRENT_STATE.md`
+3. `specs/stage_06_split_update_contract_family.md`
 
-Files that still should not be touched without that fresh planning decision:
+If a real implementation pass is later approved, the first code-facing files should be:
+
+1. `src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py`
+2. `experiments/stage_06_low_budget_efficiency/stage06_v3_split_update_comparison.py`
+3. `tests/stage_06_low_budget_efficiency/test_stage06_v3_split_update_comparison_smoke.py`
+
+Files that should not be touched in this planning-only pass:
+
+- any `src/` file
+- any `experiments/` file
+- any `tests/` file
+- any `outputs/` artifact
+
+Files that should still not be touched in the future coding pass unless strong new evidence appears:
 
 - any `src/pc/stage_05_ef_core_probe/` math or training file
 - any Stage 04 implementation or spec
-- any new `specs/stage_06_*.md` addendum
 - `validation.md` gate semantics
 - historical artifacts under `outputs/`
 
 Interpretation:
 
-- this next probe is still inside the current Stage 06 charter
-- it does not require a new spec addendum
-- it does not restore branchwise supervision
-- it should be implemented as one narrow objective-contract follow-up, not as a new mechanism family
+- this next probe is not another A2 schedule refinement
+- it does require a new minimal planning addendum before implementation
+- it still does not restore branchwise supervision by default
+- it should be implemented as one narrow new-family pass, not a broad Stage 06 search
 
 ### 5. Stage 06 Validation Contract Must Continue To Govern Any Follow-Up
 

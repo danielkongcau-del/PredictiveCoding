@@ -138,9 +138,15 @@ Current known state:
   - v2 remains non-promoted after the first authoritative low-budget comparison
   - v1 remains the authoritative Stage 06 baseline
   - do not auto-open a `v2.1` / `v2.2` retuning pass from the current state
+- current post-v2 planning conclusion is:
+  - `A2_aggregate_contract_itself_is_now_the_more_likely_bottleneck`
+  - `open_new_stage06_contract_family`
+  - planning-only provisional family:
+    - `stage06_B1_split_update_contract_family`
+  - planning-only first probe:
+    - `stage06_v3_split_update_objective_contract_default`
 - this does not mean:
   - restoring Stage 05 v3-A branchwise supervision
-  - opening a new Stage 06 contract family
   - reopening the saturated Stage 05 geometry micro-family
 
 ## Current Recommended Next Move
@@ -158,10 +164,16 @@ Current known state:
   - above the saturated Stage 05 micro-family
 - current tested Stage 06 follow-up:
   - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-  - remains inside `stay_within_stage06_A2_family`
+  - remained inside `stay_within_stage06_A2_family`
   - keeps A2 two-branch parameterization and target-builder reuse
   - does not restore Stage 05 v3-A branchwise supervision
   - is artifact-tested but not promoted over the v1 baseline
+- current planning-only next family:
+  - `open_new_stage06_contract_family`
+  - provisional family:
+    - `stage06_B1_split_update_contract_family`
+  - single primary changed axis:
+    - replace the simultaneous weighted-sum aggregate objective update path with a split-update supervision contract over the same reused Stage 05 targets
 
 ## Current Code Entry Points
 
@@ -184,6 +196,8 @@ Current known state:
   - `specs/stage_05_ef_core_probe.md`
 - Stage 06 low-budget efficiency addendum:
   - `specs/stage_06_low_budget_efficiency.md`
+- Stage 06 planning-only next-family addendum:
+  - `specs/stage_06_split_update_contract_family.md`
 
 ## Current Artifact Roots
 

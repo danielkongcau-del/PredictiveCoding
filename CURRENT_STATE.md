@@ -204,6 +204,30 @@ Current Stage 06 v2 follow-up result:
   - it does not replace v1 as the authoritative Stage 06 baseline
   - it does not justify auto-opening a `v2.1` / `v2.2` schedule-retuning line from the current state
 
+Current post-v2 planning conclusion:
+
+- directly confirmed from the current code and the authoritative v1/v2 artifacts:
+  - v1 proved low-budget Tier 1 viability for the A2 aggregate-objective line
+  - v2 tested the narrow persistent-overlap schedule axis inside the same A2 family
+  - v2 produced only a small raw mechanism improvement over v1
+  - v2 did so with materially worse runtime proxy and worse mechanism gain per runtime
+- current planning inference:
+  - the current bottleneck is more likely:
+    - `A2_aggregate_contract_itself_is_now_the_more_likely_bottleneck`
+  - not another narrow late-phase schedule retune inside the same A2 line
+- current planning-only next-family decision:
+  - `open_new_stage06_contract_family`
+  - provisional family:
+    - `stage06_B1_split_update_contract_family`
+  - first planned probe:
+    - `stage06_v3_split_update_objective_contract_default`
+  - single primary changed axis:
+    - replace the current simultaneous weighted-sum aggregate objective update path with a split-update supervision contract over the same reused Stage 05 trajectory and semigroup targets
+- this remains planning-only:
+  - no new family implementation exists yet
+  - v1 remains the authoritative baseline
+  - v2 remains the latest artifact-tested but non-promoted follow-up
+
 ## Current Recommendation
 
 - Keep the Stage 04 bridge result frozen on `main`.
@@ -216,6 +240,15 @@ Current Stage 06 v2 follow-up result:
 - Keep `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default` as an artifact-tested A2-family follow-up, not as the authoritative Stage 06 baseline.
 - Do not auto-promote the v2 persistent-overlap schedule tweak, because it still fails the Tier 2 main gate and does not improve cost-effectiveness enough to displace v1.
 - Do not auto-open another immediate `v2.x` schedule-retuning pass from the current state.
+- Treat the current post-v2 bottleneck as more likely an A2 aggregate-contract bottleneck than a remaining narrow schedule-shape bottleneck.
+- Current planning-only next-family decision:
+  - `open_new_stage06_contract_family`
+  - provisional family:
+    - `stage06_B1_split_update_contract_family`
+  - first planned probe:
+    - `stage06_v3_split_update_objective_contract_default`
+  - planning-only addendum:
+    - [specs/stage_06_split_update_contract_family.md](/e:/CodeSpace/PredictiveCoding/specs/stage_06_split_update_contract_family.md)
 - Require any next new forward probe to be:
   - low-budget-first
   - matched-budget
@@ -233,6 +266,8 @@ Current Stage 06 v2 follow-up result:
   - [src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
 - Stage 06 charter:
   - [specs/stage_06_low_budget_efficiency.md](/e:/CodeSpace/PredictiveCoding/specs/stage_06_low_budget_efficiency.md)
+- Stage 06 planning-only next-family addendum:
+  - [specs/stage_06_split_update_contract_family.md](/e:/CodeSpace/PredictiveCoding/specs/stage_06_split_update_contract_family.md)
 - current active plan:
   - [PLANS.md](/e:/CodeSpace/PredictiveCoding/PLANS.md)
 - current active validation contract:
