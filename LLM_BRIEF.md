@@ -127,6 +127,16 @@ Current known state:
   - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
 - the post-semantic-alignment Stage 06 baseline passed Tier 1 viability but still failed the Tier 2 main gate against the matched-budget Stage 05 control
 - task accuracy remains secondary, but cost is no longer secondary
+- the current planning-only next-probe decision is:
+  - `stay_within_stage06_A2_family`
+- the current single-axis planned follow-up is:
+  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+- the changed axis is:
+  - replace the Stage 06 v1 hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract
+- this does not mean:
+  - restoring Stage 05 v3-A branchwise supervision
+  - opening a new Stage 06 contract family
+  - reopening the saturated Stage 05 geometry micro-family
 
 ## Current Recommended Next Move
 
@@ -141,6 +151,11 @@ Current known state:
   - matched-budget
   - efficiency-first
   - above the saturated Stage 05 micro-family
+- current planning-only next probe:
+  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+  - `stay_within_stage06_A2_family`
+  - keep A2 two-branch parameterization and target-builder reuse
+  - do not restore Stage 05 v3-A branchwise supervision
 
 ## Current Code Entry Points
 

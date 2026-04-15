@@ -162,6 +162,162 @@ Required framing:
 - do not reopen the saturated Stage 05 geometry micro-family
 - do not merely retune the current Stage 06 v1 default coefficients without a clearer new mechanism hypothesis
 
+### 4A. Current Stage 06 Next-Probe Decision
+
+Current planning decision:
+
+- `stay_within_stage06_A2_family`
+
+This is a planning decision only.
+
+- it is not an implementation claim
+- it is not an artifact-backed promotion
+- it does not reopen A2 / B1 / C
+- it does not reopen Stage 05 v3-A branchwise supervision
+- it does not authorize a second parallel Stage 06 family
+
+### 4B. Directly Confirmed Baseline Facts
+
+Directly confirmed from the current Stage 06 source and the authoritative post-semantic-alignment artifact:
+
+- the current baseline candidate is:
+  - `stage06_v1_objective_curriculum_energydrop_default`
+- the current authoritative artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the baseline keeps the A2 scaffold boundary:
+  - Stage 05 two-branch parameterization
+  - Stage 05 target-builder reuse
+  - aggregate residual supervision
+  - no Stage 05 v3-A branchwise supervision restoration
+- the implemented Stage 06 v1 objective is a hard handoff contract:
+  - `L_6A(k) = (1 - beta_obj(k)) * L_traj + beta_obj(k) * L_semi + lambda_energy_drop * L_drop + lambda_fixed_point * L_fp`
+  - `beta_obj(k)` reaches `1` and stays there in the final quarter of training
+- the post-semantic-alignment rebaseline:
+  - passes Tier 1 viability at `128`
+  - fails the Tier 2 main gate at `256`
+  - does not justify a `512` rescue
+  - does not show better cost-effectiveness than the matched-budget Stage 05 control under the current rule
+
+### 4C. Planning Inference For The Next Probe
+
+Current planning inference from those confirmed facts:
+
+- Stage 06 v1 already answered its baseline question
+- the unresolved issue is no longer whether the A2 line can produce any low-budget mechanism-positive signal
+- the unresolved issue is whether the current hard handoff from trajectory supervision to semigroup supervision is too aggressive for the low-budget matched-budget regime
+- this is still an A2-family objective-contract question
+- it is not yet strong enough to justify opening a new Stage 06 mechanism family
+
+This is a working planning hypothesis, not a validated result.
+
+### 4D. Unique Primary Next Probe Charter
+
+Recommended next probe:
+
+- candidate name:
+  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+- family decision:
+  - `stay_within_stage06_A2_family`
+- one-sentence hypothesis:
+  - the main remaining Tier 2 gap comes from the Stage 06 v1 hard late handoff from `L_traj` to `L_semi`; keeping both objectives active through the late low-budget phase should improve matched-budget configured-step mechanism without leaving the A2 aggregate-objective family
+
+Single primary changed axis:
+
+- replace the Stage 06 v1 hard late objective handoff with a persistent overlap objective contract
+
+Changed contract:
+
+- move from:
+  - a single `beta_obj(k)` schedule that ends in a pure `L_semi` plateau
+- to:
+  - an overlap objective schedule that keeps non-zero trajectory-side weight and non-zero semigroup-side weight active through the late phase
+
+What remains unchanged:
+
+- Stage 05 two-branch parameterization
+- Stage 05 target-builder reuse
+- aggregate residual supervision
+- `r` as remaining horizon
+- `z_roll = z_t + r * u_psi(z_t, r, t; c)`
+- matched-budget control:
+  - `stage05_v3c_stronger_semigroup_weight`
+- Stage 06 tier structure and gate semantics
+- energy-drop and fixed-point penalty families, unless a later artifact justifies reopening them
+
+Matched-budget protocol:
+
+- same shared Stage 06 control:
+  - `stage05_v3c_stronger_semigroup_weight`
+- same shared seeds and low-budget protocol as the current Stage 06 comparison entry
+- no `1536+` existence proof
+
+Tier structure:
+
+- Tier 1:
+  - `128 epochs`
+- Tier 2:
+  - `256 epochs`
+- Tier 3:
+  - `512 epochs` rescue only after a credible Tier 2 trend
+
+Acceptance gate:
+
+- follow the existing Stage 06 hard gate in `validation.md`
+- for planning purposes, the next probe only earns continuation if it:
+  - stays mechanism-positive at low budget
+  - materially beats the matched-budget Stage 05 control at Tier 2
+  - or at minimum shows clearly better cost-effectiveness under the existing Stage 06 efficiency record
+
+Kill criteria:
+
+- if this overlap-contract follow-up still fails the Tier 2 main gate
+- and still does not show clearly better cost-effectiveness than the matched-budget Stage 05 control
+- then stop iterating inside this narrow A2 handoff-refinement line by default
+- at that point, reopen planning at the higher decision level:
+  - whether to `open_new_stage06_contract_family`
+
+Artifact root naming:
+
+- comparison root:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/`
+- candidate run root:
+  - `outputs/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum/`
+
+### 4E. Explicit Exclusion List
+
+For the next Stage 06 pass, do not:
+
+- reopen the Stage 05 continuation / midpoint / coupled / precision / scaled micro-family
+- change A2 / B1 / C
+- repair or rerun Stage 06 v1 as if it were the next direction
+- use long-budget-first validation
+- open multiple Stage 06 next-probe families in parallel
+- restore Stage 05 v3-A branchwise supervision
+- open a new Stage 06 spec addendum before the A2 overlap-contract follow-up is tested
+
+### 4F. Coding Boundary For The Future Implementation Pass
+
+If and only if the next pass becomes implementation-first, the first batch should touch only:
+
+1. `src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py`
+2. `experiments/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison.py`
+3. `tests/stage_06_low_budget_efficiency/test_stage06_v1_low_budget_comparison_smoke.py`
+
+Files that should not be touched in that first coding pass:
+
+- any `src/pc/stage_05_ef_core_probe/` math or training file
+- any Stage 04 implementation or spec
+- any new `specs/stage_06_*.md` addendum
+- `validation.md` gate semantics
+- historical artifacts under `outputs/`
+
+Interpretation:
+
+- this next probe is still inside the current Stage 06 charter
+- it does not require a new spec addendum
+- it does not restore branchwise supervision
+- it should be implemented as one narrow objective-contract follow-up, not as a new mechanism family
+
 ### 5. Stage 06 Validation Contract Must Continue To Govern Any Follow-Up
 
 - Tier 1:

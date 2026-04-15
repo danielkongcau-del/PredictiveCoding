@@ -156,6 +156,27 @@ Current Stage 06 result:
   - `rescue_512_warranted = false`
 - the old pre-alignment Stage 06 v1 artifact is now historical only and is superseded for current state judgment by the post-semantic-alignment rebaseline above
 
+Current Stage 06 v1 baseline positioning:
+
+- directly confirmed from the current code and the authoritative post-semantic-alignment artifact:
+  - Stage 06 v1 keeps the A2 scaffold boundary:
+    - Stage 05 two-branch parameterization
+    - Stage 05 target-builder reuse
+    - no Stage 05 v3-A branchwise supervision restoration
+  - the implemented objective is a hard handoff contract:
+    - `L_6A(k) = (1 - beta_obj(k)) * L_traj + beta_obj(k) * L_semi + lambda_energy_drop * L_drop + lambda_fixed_point * L_fp`
+    - `beta_obj(k)` reaches `1` and stays there in the final quarter of training
+  - the baseline therefore proves:
+    - the A2 aggregate-objective line can stay mechanism-positive at Tier 1
+    - the line can run at materially lower runtime than the matched-budget Stage 05 control
+- it does not prove:
+  - Tier 2 matched-budget superiority over `stage05_v3c_stronger_semigroup_weight`
+  - clearly better cost-effectiveness under the current Stage 06 gate
+  - that the current hard-handoff objective contract is promotable
+- operational consequence:
+  - `stage06_v1_objective_curriculum_energydrop_default` remains the authoritative Stage 06 baseline artifact
+  - it is not a promoted forward direction
+
 ## Current Recommendation
 
 - Keep the Stage 04 bridge result frozen on `main`.
@@ -165,6 +186,24 @@ Current Stage 06 result:
 - Treat the narrow Stage 05 v3-C contract-consolidation micro-family as closed from the current state.
 - Use Stage 06 as the active implementation and validation charter.
 - Keep `stage06_v1_objective_curriculum_energydrop_default` as the current post-semantic-alignment Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`.
+- Current planning-only next-probe decision:
+  - `stay_within_stage06_A2_family`
+  - recommended next probe:
+    - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+  - planning interpretation only:
+    - not implemented yet
+    - not approved by artifact evidence yet
+  - single primary changed axis:
+    - replace the current hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract that keeps both trajectory and semigroup supervision active through the late low-budget phase
+  - keep unchanged:
+    - A2 two-branch parameterization
+    - Stage 05 target-builder reuse
+    - aggregate residual supervision
+    - remaining-horizon rollout semantics
+    - matched-budget control `stage05_v3c_stronger_semigroup_weight`
+  - do not reopen:
+    - the Stage 05 saturated continuation / midpoint / coupled / precision / scaled micro-family
+    - Stage 05 v3-A branchwise supervision restoration
 - Require any next new forward probe to be:
   - low-budget-first
   - matched-budget
