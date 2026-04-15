@@ -1,0 +1,42 @@
+from __future__ import annotations
+
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SRC_ROOT = REPO_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+from pc.stage_06_low_budget_efficiency.fmpc_stage06_objective_curriculum import (
+    STAGE06_V2_COMPARISON_EXPERIMENT,
+    Stage06LowBudgetComparisonConfig,
+    Stage06LowBudgetComparisonRunResult,
+    run_stage06_v2_low_budget_comparison,
+)
+
+
+def run(
+    output_root: str | Path = "outputs/stage_06_low_budget_efficiency",
+    run_id: str | None = None,
+    **overrides: object,
+) -> Stage06LowBudgetComparisonRunResult:
+    config = Stage06LowBudgetComparisonConfig(
+        experiment_name=STAGE06_V2_COMPARISON_EXPERIMENT,
+        output_root=output_root,
+        run_id=run_id,
+        **overrides,
+    )
+    return run_stage06_v2_low_budget_comparison(config)
+
+
+def main() -> None:
+    result = run()
+    print("Stage 06 v2 low-budget comparison completed.")
+    print(f"Run directory: {result.run_dir}")
+    print(f"Summary: {result.run_dir / 'aggregate_summary.json'}")
+    print(f"Report: {result.run_dir / 'comparison_report.md'}")
+
+
+if __name__ == "__main__":
+    main()

@@ -129,10 +129,13 @@ Current known state:
 - task accuracy remains secondary, but cost is no longer secondary
 - the current planning-only next-probe decision is:
   - `stay_within_stage06_A2_family`
-- the current single-axis planned follow-up is:
+- the current single-axis implemented follow-up surface is:
   - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
 - the changed axis is:
   - replace the Stage 06 v1 hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract
+- current status:
+  - v2 implementation surface exists
+  - v1 remains the authoritative Stage 06 baseline until a dedicated v2 comparison artifact exists
 - this does not mean:
   - restoring Stage 05 v3-A branchwise supervision
   - opening a new Stage 06 contract family

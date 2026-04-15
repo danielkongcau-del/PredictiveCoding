@@ -122,10 +122,13 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
 - current planning-only next-probe decision:
   - `stay_within_stage06_A2_family`
   - use a narrow objective-contract follow-up above the current v1 baseline
-  - preferred planned probe:
+  - current implemented follow-up surface:
     - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
   - single changed axis:
     - replace the current hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract
+  - current status:
+    - v2 implementation surface exists
+    - v1 remains the authoritative baseline until a dedicated v2 comparison artifact exists
   - do not reopen:
     - Stage 05 v3-A branchwise supervision
     - a new Stage 06 contract family

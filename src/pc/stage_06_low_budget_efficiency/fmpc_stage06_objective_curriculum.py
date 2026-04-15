@@ -57,9 +57,18 @@ OutputLayout = Literal["single_dir", "run_id_subdir"]
 
 STAGE06_V1_CANDIDATE_NAME = "stage06_v1_objective_curriculum_energydrop_default"
 STAGE06_V1_METHOD_NAME = STAGE06_V1_CANDIDATE_NAME
+STAGE06_V2_CANDIDATE_NAME = (
+    "stage06_v2_persistent_overlap_objective_curriculum_energydrop_default"
+)
+STAGE06_V2_METHOD_NAME = STAGE06_V2_CANDIDATE_NAME
 STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME = "stage05_v3c_stronger_semigroup_weight"
+STAGE06_V1_SINGLE_RUN_STAGE = "stage06_v1_objective_curriculum"
+STAGE06_V2_SINGLE_RUN_STAGE = "stage06_v2_objective_curriculum"
 STAGE06_OBJECTIVE_CONTRACT_IDENTITY = (
     "objective_curriculum_plus_energydrop_fixed_point_contract"
+)
+STAGE06_V2_OBJECTIVE_CONTRACT_IDENTITY = (
+    "persistent_overlap_objective_curriculum_plus_energydrop_fixed_point_contract"
 )
 STAGE06_SCAFFOLD_PRESERVATION_IDENTITY = (
     "two_branch_parameterization_plus_stage05_target_reuse_without_branchwise_supervision"
@@ -73,6 +82,9 @@ STAGE06_OBJECTIVE_FORMULA = (
     "+ lambda_energy_drop * L_drop + lambda_fixed_point * L_fp"
 )
 STAGE06_BETA_SCHEDULE_IDENTITY = "piecewise_linear_quarter_half_quarter"
+STAGE06_V2_BETA_SCHEDULE_IDENTITY = (
+    "piecewise_linear_quarter_half_quarter_persistent_overlap"
+)
 STAGE06_TRAJECTORY_COMPONENT_CONTRACT = "L_traj = mean(||m_hat - m_traj_star||^2)"
 STAGE06_SEMIGROUP_COMPONENT_CONTRACT = (
     "L_semi = mean(r^2 * ||m_hat - m_semi_star||^2)"
@@ -87,8 +99,11 @@ STAGE06_FIXED_POINT_GRADIENT_PROXY = (
 )
 STAGE06_COMPARISON_STAGE = "stage06_v1_low_budget_comparison"
 STAGE06_COMPARISON_EXPERIMENT = "stage06_v1_low_budget_comparison"
+STAGE06_V2_COMPARISON_STAGE = "stage06_v2_low_budget_comparison"
+STAGE06_V2_COMPARISON_EXPERIMENT = "stage06_v2_low_budget_comparison"
 STAGE06_ALLOWED_ACCURACY_REGRESSION = 0.01
 STAGE06_IMPROVEMENT_FRACTION_THRESHOLD = 0.05
+STAGE06_V2_DEFAULT_BETA_OBJ_FINAL_VALUE = 0.75
 
 
 @dataclass
@@ -132,8 +147,12 @@ class Stage06ObjectiveCurriculumConfig:
     alpha_ramp_epochs: int = 3
     stage05_scaffold_lambda_traj_curr: float = 0.2
     stage05_scaffold_lambda_sg: float = 0.1
+    objective_schedule_variant: Literal["hard_handoff", "persistent_overlap"] = (
+        "hard_handoff"
+    )
     beta_obj_warmup_fraction: float = 0.25
     beta_obj_ramp_fraction: float = 0.50
+    beta_obj_final_value: float = 1.0
     lambda_energy_drop: float = 0.25
     lambda_fixed_point: float = 0.10
     delta_margin: float = 0.0
@@ -158,6 +177,19 @@ class Stage06ObjectiveCurriculumConfig:
             raise ValueError("beta_obj fractions must be non-negative.")
         if (self.beta_obj_warmup_fraction + self.beta_obj_ramp_fraction) > 1.0 + 1e-12:
             raise ValueError("beta_obj warmup+ramp fractions must not exceed 1.")
+        if not (0.0 <= self.beta_obj_final_value <= 1.0):
+            raise ValueError("beta_obj_final_value must lie in [0, 1].")
+        if self.objective_schedule_variant == "hard_handoff" and not np.isclose(
+            self.beta_obj_final_value,
+            1.0,
+        ):
+            raise ValueError("hard_handoff requires beta_obj_final_value == 1.0.")
+        if self.objective_schedule_variant == "persistent_overlap" and not (
+            0.0 < self.beta_obj_final_value < 1.0
+        ):
+            raise ValueError(
+                "persistent_overlap requires 0 < beta_obj_final_value < 1."
+            )
         if self.lambda_energy_drop < 0.0:
             raise ValueError("lambda_energy_drop must be non-negative.")
         if self.lambda_fixed_point < 0.0:
@@ -212,6 +244,8 @@ class Stage06FixedPointTerms:
 @dataclass(frozen=True)
 class Stage06ObjectiveTerms:
     beta_obj: float
+    trajectory_objective_weight: float
+    semigroup_objective_weight: float
     trajectory_loss: float
     semigroup_loss: float
     energy_drop_loss: float
@@ -230,6 +264,8 @@ class Stage06ObjectiveTerms:
 class Stage06EpochMetrics:
     epoch: int
     beta_obj: float
+    trajectory_objective_weight: float
+    semigroup_objective_weight: float
     alpha: float
     train_total_loss: float
     train_traj_loss: float
@@ -344,6 +380,7 @@ def beta_obj_for_epoch(
     *,
     warmup_fraction: float = 0.25,
     ramp_fraction: float = 0.50,
+    final_value: float = 1.0,
 ) -> float:
     if total_epochs <= 0:
         raise ValueError("total_epochs must be positive.")
@@ -353,14 +390,16 @@ def beta_obj_for_epoch(
         raise ValueError("fractions must be non-negative.")
     if warmup_fraction + ramp_fraction > 1.0 + 1e-12:
         raise ValueError("warmup_fraction + ramp_fraction must not exceed 1.")
+    if final_value < 0.0 or final_value > 1.0:
+        raise ValueError("final_value must lie in [0, 1].")
     warmup_end = warmup_fraction * float(total_epochs)
     ramp_end = (warmup_fraction + ramp_fraction) * float(total_epochs)
     if float(epoch_index) < warmup_end:
         return 0.0
     if float(epoch_index) >= ramp_end or ramp_end <= warmup_end:
-        return 1.0
+        return float(final_value)
     progress = (float(epoch_index) - warmup_end) / (ramp_end - warmup_end)
-    return float(np.clip(progress, 0.0, 1.0))
+    return float(final_value * np.clip(progress, 0.0, 1.0))
 
 
 def build_stage06_v1_objective_curriculum_energydrop_default_config(
@@ -375,8 +414,60 @@ def build_stage06_v1_objective_curriculum_energydrop_default_config(
     return Stage06ObjectiveCurriculumConfig(**payload)
 
 
+def build_stage06_v2_persistent_overlap_objective_curriculum_energydrop_default_config(
+    **overrides: Any,
+) -> Stage06ObjectiveCurriculumConfig:
+    payload: dict[str, Any] = {
+        "output_root": "outputs/stage_06_low_budget_efficiency",
+        "experiment_name": "fmpc_stage06_objective_curriculum",
+        "candidate_name_override": STAGE06_V2_CANDIDATE_NAME,
+        "objective_schedule_variant": "persistent_overlap",
+        "beta_obj_final_value": STAGE06_V2_DEFAULT_BETA_OBJ_FINAL_VALUE,
+    }
+    payload.update(overrides)
+    return Stage06ObjectiveCurriculumConfig(**payload)
+
+
 def _candidate_name(config: Stage06ObjectiveCurriculumConfig) -> str:
-    return config.candidate_name_override or STAGE06_V1_CANDIDATE_NAME
+    if config.candidate_name_override is not None:
+        return config.candidate_name_override
+    if config.objective_schedule_variant == "persistent_overlap":
+        return STAGE06_V2_CANDIDATE_NAME
+    return STAGE06_V1_CANDIDATE_NAME
+
+
+def _single_run_stage_name(config: Stage06ObjectiveCurriculumConfig) -> str:
+    if config.objective_schedule_variant == "persistent_overlap":
+        return STAGE06_V2_SINGLE_RUN_STAGE
+    return STAGE06_V1_SINGLE_RUN_STAGE
+
+
+def _objective_contract_identity(config: Stage06ObjectiveCurriculumConfig) -> str:
+    if config.objective_schedule_variant == "persistent_overlap":
+        return STAGE06_V2_OBJECTIVE_CONTRACT_IDENTITY
+    return STAGE06_OBJECTIVE_CONTRACT_IDENTITY
+
+
+def _objective_schedule_identity(config: Stage06ObjectiveCurriculumConfig) -> str:
+    if config.objective_schedule_variant == "persistent_overlap":
+        return STAGE06_V2_BETA_SCHEDULE_IDENTITY
+    return STAGE06_BETA_SCHEDULE_IDENTITY
+
+
+def _hard_late_handoff_enabled(config: Stage06ObjectiveCurriculumConfig) -> bool:
+    return bool(config.objective_schedule_variant == "hard_handoff")
+
+
+def _persistent_overlap_enabled(config: Stage06ObjectiveCurriculumConfig) -> bool:
+    return bool(config.objective_schedule_variant == "persistent_overlap")
+
+
+def _late_phase_trajectory_weight(config: Stage06ObjectiveCurriculumConfig) -> float:
+    return float(1.0 - config.beta_obj_final_value)
+
+
+def _late_phase_semigroup_weight(config: Stage06ObjectiveCurriculumConfig) -> float:
+    return float(config.beta_obj_final_value)
 
 
 def _build_stage05_scaffold_config(
@@ -430,7 +521,7 @@ def _config_payload(config: Stage06ObjectiveCurriculumConfig) -> dict[str, Any]:
     scaffold = _build_stage05_scaffold_config(config)
     return {
         "phase": "FMPC Stage 06 Low-Budget Efficiency",
-        "stage": "stage06_v1_objective_curriculum",
+        "stage": _single_run_stage_name(config),
         "candidate_name": _candidate_name(config),
         "transport": {
             "transport_family": "two_branch_residual_meanflow_core",
@@ -454,7 +545,7 @@ def _config_payload(config: Stage06ObjectiveCurriculumConfig) -> dict[str, Any]:
             "bootstrap_substeps": int(config.bootstrap_substeps),
         },
         "objective_contract": {
-            "contract_identity": STAGE06_OBJECTIVE_CONTRACT_IDENTITY,
+            "contract_identity": _objective_contract_identity(config),
             "candidate_name": _candidate_name(config),
             "objective_formula": STAGE06_OBJECTIVE_FORMULA,
             "trajectory_component_contract": STAGE06_TRAJECTORY_COMPONENT_CONTRACT,
@@ -463,13 +554,19 @@ def _config_payload(config: Stage06ObjectiveCurriculumConfig) -> dict[str, Any]:
             "fixed_point_contract": STAGE06_FIXED_POINT_CONTRACT,
             "fixed_point_gradient_proxy": STAGE06_FIXED_POINT_GRADIENT_PROXY,
             "rollout_time_semantics_identity": STAGE06_ROLLOUT_TIME_SEMANTICS_IDENTITY,
-            "beta_obj_schedule_identity": STAGE06_BETA_SCHEDULE_IDENTITY,
+            "beta_obj_schedule_identity": _objective_schedule_identity(config),
+            "objective_schedule_variant": config.objective_schedule_variant,
             "beta_obj_is_distinct_from_alpha": True,
             "beta_obj_warmup_fraction": float(config.beta_obj_warmup_fraction),
             "beta_obj_ramp_fraction": float(config.beta_obj_ramp_fraction),
+            "beta_obj_final_value": float(config.beta_obj_final_value),
             "beta_obj_final_plateau_fraction": float(
                 1.0 - config.beta_obj_warmup_fraction - config.beta_obj_ramp_fraction
             ),
+            "hard_late_handoff_enabled": _hard_late_handoff_enabled(config),
+            "persistent_overlap_enabled": _persistent_overlap_enabled(config),
+            "late_phase_trajectory_weight": _late_phase_trajectory_weight(config),
+            "late_phase_semigroup_weight": _late_phase_semigroup_weight(config),
             "lambda_energy_drop": float(config.lambda_energy_drop),
             "lambda_fixed_point": float(config.lambda_fixed_point),
             "delta_margin": float(config.delta_margin),
@@ -835,16 +932,18 @@ def _compute_stage06_objective_terms(
     )
     m_hat = predictions.total_residual
     output_size = float(m_hat.size)
+    semigroup_objective_weight = float(beta_obj)
+    trajectory_objective_weight = float(1.0 - semigroup_objective_weight)
 
     traj_error = m_hat - supervision.trajectory_targets
     trajectory_loss = float(np.mean(traj_error ** 2))
-    trajectory_delta = (2.0 * (1.0 - float(beta_obj)) / output_size) * traj_error
+    trajectory_delta = (2.0 * trajectory_objective_weight / output_size) * traj_error
 
     semi_error = m_hat - supervision.semigroup_targets
     semigroup_loss = float(np.mean(supervision.semigroup_loss_weights * (semi_error ** 2)))
     semigroup_delta = (
         2.0
-        * float(beta_obj)
+        * semigroup_objective_weight
         / output_size
         * supervision.semigroup_loss_weights
         * semi_error
@@ -873,8 +972,8 @@ def _compute_stage06_objective_terms(
         tangent_epsilon=fixed_point_tangent_epsilon,
     )
     total_loss = (
-        ((1.0 - float(beta_obj)) * trajectory_loss)
-        + (float(beta_obj) * semigroup_loss)
+        (trajectory_objective_weight * trajectory_loss)
+        + (semigroup_objective_weight * semigroup_loss)
         + (float(lambda_energy_drop) * energy_terms.loss)
         + (float(lambda_fixed_point) * fixed_point_terms.loss)
     )
@@ -890,6 +989,8 @@ def _compute_stage06_objective_terms(
     )
     return Stage06ObjectiveTerms(
         beta_obj=float(beta_obj),
+        trajectory_objective_weight=trajectory_objective_weight,
+        semigroup_objective_weight=semigroup_objective_weight,
         trajectory_loss=trajectory_loss,
         semigroup_loss=semigroup_loss,
         energy_drop_loss=float(energy_terms.loss),
@@ -1006,6 +1107,7 @@ def run_stage06_objective_curriculum(
             epoch_index,
             warmup_fraction=config.beta_obj_warmup_fraction,
             ramp_fraction=config.beta_obj_ramp_fraction,
+            final_value=config.beta_obj_final_value,
         )
         trajectory_alpha = alpha_for_epoch(scaffold_config, epoch_index)
         batch_total_losses: list[float] = []
@@ -1065,6 +1167,12 @@ def run_stage06_objective_curriculum(
             Stage06EpochMetrics(
                 epoch=epoch_index + 1,
                 beta_obj=float(beta_obj),
+                trajectory_objective_weight=float(
+                    objective_terms.trajectory_objective_weight
+                ),
+                semigroup_objective_weight=float(
+                    objective_terms.semigroup_objective_weight
+                ),
                 alpha=float(trajectory_alpha),
                 train_total_loss=float(np.mean(batch_total_losses)),
                 train_traj_loss=float(np.mean(batch_traj_losses)),
@@ -1161,7 +1269,7 @@ def run_stage06_objective_curriculum(
     runtime_proxy_seconds = float(train_wall_time_seconds + evaluation_wall_time_seconds)
     summary = {
         "phase": "FMPC Stage 06 Low-Budget Efficiency",
-        "stage": "stage06_v1_objective_curriculum",
+        "stage": _single_run_stage_name(config),
         "candidate_name": _candidate_name(config),
         "transport_family": "two_branch_residual_meanflow_core",
         "stage05_scaffold_reference": STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
@@ -1170,7 +1278,7 @@ def run_stage06_objective_curriculum(
         "stage05_target_builder_reuse_enabled": True,
         "stage05_branchwise_supervision_preserved": False,
         "stage06_supervision_contract_identity": STAGE06_SUPERVISION_CONTRACT_IDENTITY,
-        "objective_contract_identity": STAGE06_OBJECTIVE_CONTRACT_IDENTITY,
+        "objective_contract_identity": _objective_contract_identity(config),
         "objective_formula": STAGE06_OBJECTIVE_FORMULA,
         "trajectory_component_contract": STAGE06_TRAJECTORY_COMPONENT_CONTRACT,
         "semigroup_component_contract": STAGE06_SEMIGROUP_COMPONENT_CONTRACT,
@@ -1178,13 +1286,19 @@ def run_stage06_objective_curriculum(
         "fixed_point_contract": STAGE06_FIXED_POINT_CONTRACT,
         "fixed_point_gradient_proxy": STAGE06_FIXED_POINT_GRADIENT_PROXY,
         "rollout_time_semantics_identity": STAGE06_ROLLOUT_TIME_SEMANTICS_IDENTITY,
-        "beta_obj_schedule_identity": STAGE06_BETA_SCHEDULE_IDENTITY,
+        "beta_obj_schedule_identity": _objective_schedule_identity(config),
+        "objective_schedule_variant": config.objective_schedule_variant,
         "beta_obj_is_distinct_from_alpha": True,
         "beta_obj_warmup_fraction": float(config.beta_obj_warmup_fraction),
         "beta_obj_ramp_fraction": float(config.beta_obj_ramp_fraction),
+        "beta_obj_final_value": float(config.beta_obj_final_value),
         "beta_obj_final_plateau_fraction": float(
             1.0 - config.beta_obj_warmup_fraction - config.beta_obj_ramp_fraction
         ),
+        "hard_late_handoff_enabled": _hard_late_handoff_enabled(config),
+        "persistent_overlap_enabled": _persistent_overlap_enabled(config),
+        "late_phase_trajectory_weight": _late_phase_trajectory_weight(config),
+        "late_phase_semigroup_weight": _late_phase_semigroup_weight(config),
         "lambda_energy_drop": float(config.lambda_energy_drop),
         "lambda_fixed_point": float(config.lambda_fixed_point),
         "delta_margin": float(config.delta_margin),
@@ -1203,6 +1317,12 @@ def run_stage06_objective_curriculum(
         "stage05_scaffold_lambda_sg": float(config.stage05_scaffold_lambda_sg),
         "selected_epoch": int(selected_epoch),
         "selected_epoch_beta_obj": float(best_row["beta_obj"]),
+        "selected_epoch_trajectory_objective_weight": float(
+            best_row["trajectory_objective_weight"]
+        ),
+        "selected_epoch_semigroup_objective_weight": float(
+            best_row["semigroup_objective_weight"]
+        ),
         "selected_epoch_alpha": float(best_row["alpha"]),
         "selected_epoch_train_total_loss": float(best_row["train_total_loss"]),
         "selected_epoch_train_traj_loss": float(best_row["train_traj_loss"]),
@@ -1565,10 +1685,15 @@ def _shows_better_cost_effectiveness(
     )
 
 
-def _comparison_config_payload(config: Stage06LowBudgetComparisonConfig) -> dict[str, Any]:
+def _comparison_config_payload_for_candidate(
+    config: Stage06LowBudgetComparisonConfig,
+    *,
+    comparison_stage: str,
+    candidate_config: Stage06ObjectiveCurriculumConfig,
+) -> dict[str, Any]:
     return {
         "phase": "FMPC Stage 06 Low-Budget Efficiency",
-        "stage": STAGE06_COMPARISON_STAGE,
+        "stage": comparison_stage,
         "comparison_protocol": {
             "dataset_name": config.dataset_name,
             "seeds": [int(seed) for seed in config.seeds],
@@ -1582,7 +1707,29 @@ def _comparison_config_payload(config: Stage06LowBudgetComparisonConfig) -> dict
             "rescue_epochs": int(config.rescue_epochs),
             "allow_rescue_tier3": bool(config.allow_rescue_tier3),
         },
-        "candidate_name": STAGE06_V1_CANDIDATE_NAME,
+        "candidate_name": _candidate_name(candidate_config),
+        "candidate_stage": _single_run_stage_name(candidate_config),
+        "candidate_objective_contract_identity": _objective_contract_identity(
+            candidate_config
+        ),
+        "candidate_beta_obj_schedule_identity": _objective_schedule_identity(
+            candidate_config
+        ),
+        "candidate_objective_schedule_variant": candidate_config.objective_schedule_variant,
+        "candidate_hard_late_handoff_enabled": _hard_late_handoff_enabled(candidate_config),
+        "candidate_persistent_overlap_enabled": _persistent_overlap_enabled(
+            candidate_config
+        ),
+        "candidate_beta_obj_final_value": float(candidate_config.beta_obj_final_value),
+        "candidate_late_phase_trajectory_weight": _late_phase_trajectory_weight(
+            candidate_config
+        ),
+        "candidate_late_phase_semigroup_weight": _late_phase_semigroup_weight(
+            candidate_config
+        ),
+        "stage05_two_branch_parameterization_preserved": True,
+        "stage05_target_builder_reuse_enabled": True,
+        "stage05_branchwise_supervision_preserved": False,
         "matched_budget_control": STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
         "improvement_fraction_threshold": float(config.improvement_fraction_threshold),
         "allowed_accuracy_regression_threshold": float(
@@ -1591,9 +1738,17 @@ def _comparison_config_payload(config: Stage06LowBudgetComparisonConfig) -> dict
     }
 
 
-def _stage06_report_markdown(report: dict[str, Any]) -> str:
+def _comparison_config_payload(config: Stage06LowBudgetComparisonConfig) -> dict[str, Any]:
+    return _comparison_config_payload_for_candidate(
+        config,
+        comparison_stage=STAGE06_COMPARISON_STAGE,
+        candidate_config=build_stage06_v1_objective_curriculum_energydrop_default_config(),
+    )
+
+
+def _stage06_report_markdown(report: dict[str, Any], *, title: str) -> str:
     lines = [
-        "# Stage 06 v1 Low-Budget Comparison",
+        f"# {title}",
         "",
         f"- Tier 1 viable: `{report['decision']['passes_tier1_viability']}`",
         f"- Tier 2 main gate: `{report['decision']['passes_tier2_main_gate']}`",
@@ -1627,13 +1782,27 @@ def _stage06_report_markdown(report: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def run_stage06_v1_low_budget_comparison(
+def _run_stage06_low_budget_comparison(
     config: Stage06LowBudgetComparisonConfig,
+    *,
+    comparison_stage: str,
+    candidate_builder: Any,
+    candidate_method_name: str,
+    recommended_keep: str,
+    recommended_rescue: str,
+    recommended_reject: str,
+    report_title: str,
 ) -> Stage06LowBudgetComparisonRunResult:
     run_dir = _prepare_run_dir(
         Path(config.output_root) / config.experiment_name / config.resolved_run_id()
     )
-    _write_json(run_dir / "config.json", _comparison_config_payload(config))
+    candidate_config = candidate_builder()
+    comparison_config_payload = _comparison_config_payload_for_candidate(
+        config,
+        comparison_stage=comparison_stage,
+        candidate_config=candidate_config,
+    )
+    _write_json(run_dir / "config.json", comparison_config_payload)
     runs_root = run_dir / "runs"
     rows: list[dict[str, Any]] = []
     executed_tiers: list[int] = []
@@ -1644,7 +1813,7 @@ def run_stage06_v1_low_budget_comparison(
         for seed in config.seeds:
             seed_int = int(seed)
             stage06_result = run_stage06_objective_curriculum(
-                build_stage06_v1_objective_curriculum_energydrop_default_config(
+                candidate_builder(
                     output_root=runs_root,
                     output_layout="run_id_subdir",
                     run_id=f"{tier_label}_seed_{seed_int}",
@@ -1703,7 +1872,7 @@ def run_stage06_v1_low_budget_comparison(
     tier_summaries: dict[str, Any] = {}
     for tier_epochs in executed_tiers:
         candidate_summary = _method_summary(
-            _method_rows(rows, method_name=STAGE06_V1_CANDIDATE_NAME, tier_epochs=tier_epochs)
+            _method_rows(rows, method_name=candidate_method_name, tier_epochs=tier_epochs)
         )
         control_summary = _method_summary(
             _method_rows(
@@ -1714,7 +1883,7 @@ def run_stage06_v1_low_budget_comparison(
         )
         pairwise = _pairwise_summary(
             rows,
-            candidate_method=STAGE06_V1_CANDIDATE_NAME,
+            candidate_method=candidate_method_name,
             reference_method=STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
             tier_epochs=tier_epochs,
         )
@@ -1732,7 +1901,8 @@ def run_stage06_v1_low_budget_comparison(
     tier2_summary = tier_summaries[f"tier_{config.tier2_epochs}"]
     passes_tier1_viability = bool(
         tier1_summary["candidate"]["one_step_mechanism_positive_rate"] >= (2.0 / 3.0)
-        and tier1_summary["candidate"]["configured_step_mechanism_positive_rate"] >= (2.0 / 3.0)
+        and tier1_summary["candidate"]["configured_step_mechanism_positive_rate"]
+        >= (2.0 / 3.0)
         and float(tier1_summary["pairwise"]["test_accuracy_delta"]["mean"])
         >= -float(config.allowed_accuracy_regression_threshold)
     )
@@ -1760,7 +1930,7 @@ def run_stage06_v1_low_budget_comparison(
         candidate_summary = _method_summary(
             _method_rows(
                 rows,
-                method_name=STAGE06_V1_CANDIDATE_NAME,
+                method_name=candidate_method_name,
                 tier_epochs=int(config.rescue_epochs),
             )
         )
@@ -1773,7 +1943,7 @@ def run_stage06_v1_low_budget_comparison(
         )
         pairwise = _pairwise_summary(
             rows,
-            candidate_method=STAGE06_V1_CANDIDATE_NAME,
+            candidate_method=candidate_method_name,
             reference_method=STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
             tier_epochs=int(config.rescue_epochs),
         )
@@ -1792,24 +1962,54 @@ def run_stage06_v1_low_budget_comparison(
         tier2_summary["better_cost_effectiveness"]
     )
     if passes_tier2_main_gate:
-        recommended_stage06_next_move = (
-            "keep_stage06_v1_objective_curriculum_energydrop_default_direction"
-        )
+        recommended_stage06_next_move = recommended_keep
     elif rescue_512_warranted:
-        recommended_stage06_next_move = (
-            "run_stage06_v1_objective_curriculum_energydrop_default_512_rescue"
-        )
+        recommended_stage06_next_move = recommended_rescue
     elif tier2_positive_trend_for_rescue:
         recommended_stage06_next_move = "escalate_to_graph_shortcut_follow_up"
     else:
-        recommended_stage06_next_move = "reject_stage06_v1_objective_curriculum_energydrop_default"
+        recommended_stage06_next_move = recommended_reject
 
     summary = {
         "phase": "FMPC Stage 06 Low-Budget Efficiency",
-        "stage": STAGE06_COMPARISON_STAGE,
-        "candidate_name": STAGE06_V1_CANDIDATE_NAME,
+        "stage": comparison_stage,
+        "candidate_name": candidate_method_name,
         "matched_budget_control_name": STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
-        "comparison_protocol": _comparison_config_payload(config)["comparison_protocol"],
+        "comparison_protocol": comparison_config_payload["comparison_protocol"],
+        "candidate_stage": comparison_config_payload["candidate_stage"],
+        "candidate_objective_contract_identity": comparison_config_payload[
+            "candidate_objective_contract_identity"
+        ],
+        "candidate_beta_obj_schedule_identity": comparison_config_payload[
+            "candidate_beta_obj_schedule_identity"
+        ],
+        "candidate_objective_schedule_variant": comparison_config_payload[
+            "candidate_objective_schedule_variant"
+        ],
+        "candidate_hard_late_handoff_enabled": comparison_config_payload[
+            "candidate_hard_late_handoff_enabled"
+        ],
+        "candidate_persistent_overlap_enabled": comparison_config_payload[
+            "candidate_persistent_overlap_enabled"
+        ],
+        "candidate_beta_obj_final_value": comparison_config_payload[
+            "candidate_beta_obj_final_value"
+        ],
+        "candidate_late_phase_trajectory_weight": comparison_config_payload[
+            "candidate_late_phase_trajectory_weight"
+        ],
+        "candidate_late_phase_semigroup_weight": comparison_config_payload[
+            "candidate_late_phase_semigroup_weight"
+        ],
+        "stage05_two_branch_parameterization_preserved": comparison_config_payload[
+            "stage05_two_branch_parameterization_preserved"
+        ],
+        "stage05_target_builder_reuse_enabled": comparison_config_payload[
+            "stage05_target_builder_reuse_enabled"
+        ],
+        "stage05_branchwise_supervision_preserved": comparison_config_payload[
+            "stage05_branchwise_supervision_preserved"
+        ],
         "tier_summaries": tier_summaries,
         "passes_tier1_viability": passes_tier1_viability,
         "passes_tier2_main_gate": passes_tier2_main_gate,
@@ -1839,9 +2039,42 @@ def run_stage06_v1_low_budget_comparison(
         "tier_summaries": tier_summaries,
     }
     _write_json(run_dir / "comparison_report.json", report)
-    _write_text(run_dir / "comparison_report.md", _stage06_report_markdown(report))
+    _write_text(
+        run_dir / "comparison_report.md",
+        _stage06_report_markdown(report, title=report_title),
+    )
     return Stage06LowBudgetComparisonRunResult(
         run_dir=run_dir,
         summary=summary,
         report=report,
+    )
+
+
+def run_stage06_v1_low_budget_comparison(
+    config: Stage06LowBudgetComparisonConfig,
+) -> Stage06LowBudgetComparisonRunResult:
+    return _run_stage06_low_budget_comparison(
+        config,
+        comparison_stage=STAGE06_COMPARISON_STAGE,
+        candidate_builder=build_stage06_v1_objective_curriculum_energydrop_default_config,
+        candidate_method_name=STAGE06_V1_CANDIDATE_NAME,
+        recommended_keep="keep_stage06_v1_objective_curriculum_energydrop_default_direction",
+        recommended_rescue="run_stage06_v1_objective_curriculum_energydrop_default_512_rescue",
+        recommended_reject="reject_stage06_v1_objective_curriculum_energydrop_default",
+        report_title="Stage 06 v1 Low-Budget Comparison",
+    )
+
+
+def run_stage06_v2_low_budget_comparison(
+    config: Stage06LowBudgetComparisonConfig,
+) -> Stage06LowBudgetComparisonRunResult:
+    return _run_stage06_low_budget_comparison(
+        config,
+        comparison_stage=STAGE06_V2_COMPARISON_STAGE,
+        candidate_builder=build_stage06_v2_persistent_overlap_objective_curriculum_energydrop_default_config,
+        candidate_method_name=STAGE06_V2_CANDIDATE_NAME,
+        recommended_keep="keep_stage06_v2_persistent_overlap_objective_curriculum_energydrop_default_direction",
+        recommended_rescue="run_stage06_v2_persistent_overlap_objective_curriculum_energydrop_default_512_rescue",
+        recommended_reject="reject_stage06_v2_persistent_overlap_objective_curriculum_energydrop_default",
+        report_title="Stage 06 v2 Low-Budget Comparison",
     )

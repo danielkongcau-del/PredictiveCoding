@@ -179,6 +179,44 @@ Interpretation:
 - Stage 06 v1 does not preserve the Stage 05 v3-A branchwise transport / drift supervision contract
 - Stage 06 v1 does not continue the narrow Stage 05 v3-C midpoint / continuation micro-family
 
+Current narrow A2 follow-up implementation surface:
+
+- `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+
+This follow-up remains inside the same Stage 06 A2 family:
+
+- it keeps the Stage 05 two-branch parameterization
+- it keeps Stage 05 target-builder reuse
+- it keeps aggregate residual supervision
+- it keeps `r` as remaining horizon
+- it keeps:
+  - `z_roll = z_t + r * u_psi(z_t, r, t; c)`
+- it keeps the same energy-drop and fixed-point penalty families
+
+Its only changed axis is the late objective schedule contract:
+
+- it does not end in a pure `L_semi` plateau
+- instead, it keeps both trajectory-side and semigroup-side objective weights non-zero in the late phase
+
+The default v2 overlap schedule is:
+
+- `beta_obj(k) = 0` for `k < 0.25K`
+- linearly ramp from `0` to `0.75` over `[0.25K, 0.75K)`
+- `beta_obj(k) = 0.75` for `k >= 0.75K`
+
+Equivalent late-phase weights:
+
+- trajectory-side objective weight:
+  - `1 - beta_obj = 0.25`
+- semigroup-side objective weight:
+  - `beta_obj = 0.75`
+
+Interpretation:
+
+- Stage 06 v2 changes the objective schedule, not the Stage 06 family boundary
+- Stage 06 v2 does not restore Stage 05 v3-A branchwise supervision
+- Stage 06 v2 is an implemented follow-up surface, not an artifact-backed replacement for the current Stage 06 v1 baseline until a dedicated comparison artifact exists
+
 ### 19.6 Minimal Stage 06 acceptance framing
 
 Stage 06 keeps mechanism metrics primary, but it changes the budget contract.

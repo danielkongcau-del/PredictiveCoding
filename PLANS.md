@@ -168,13 +168,14 @@ Current planning decision:
 
 - `stay_within_stage06_A2_family`
 
-This is a planning decision only.
+Current implementation status:
 
-- it is not an implementation claim
-- it is not an artifact-backed promotion
-- it does not reopen A2 / B1 / C
-- it does not reopen Stage 05 v3-A branchwise supervision
-- it does not authorize a second parallel Stage 06 family
+- the narrow v2 follow-up surface now exists in code:
+  - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+- this is still not an artifact-backed promotion
+- this still does not reopen A2 / B1 / C
+- this still does not reopen Stage 05 v3-A branchwise supervision
+- this still does not authorize a second parallel Stage 06 family
 
 ### 4B. Directly Confirmed Baseline Facts
 
@@ -231,6 +232,17 @@ Changed contract:
   - a single `beta_obj(k)` schedule that ends in a pure `L_semi` plateau
 - to:
   - an overlap objective schedule that keeps non-zero trajectory-side weight and non-zero semigroup-side weight active through the late phase
+
+Current implementation-default overlap settings:
+
+- warmup fraction:
+  - `0.25`
+- ramp fraction:
+  - `0.50`
+- late semigroup objective weight:
+  - `0.75`
+- late trajectory objective weight:
+  - `0.25`
 
 What remains unchanged:
 

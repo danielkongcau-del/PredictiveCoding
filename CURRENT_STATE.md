@@ -188,11 +188,12 @@ Current Stage 06 v1 baseline positioning:
 - Keep `stage06_v1_objective_curriculum_energydrop_default` as the current post-semantic-alignment Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`.
 - Current planning-only next-probe decision:
   - `stay_within_stage06_A2_family`
-  - recommended next probe:
+  - current implemented follow-up surface:
     - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-  - planning interpretation only:
-    - not implemented yet
-    - not approved by artifact evidence yet
+  - current status:
+    - implementation surface exists
+    - no authoritative v2 comparison artifact exists yet
+    - v1 remains the only authoritative Stage 06 baseline artifact
   - single primary changed axis:
     - replace the current hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract that keeps both trajectory and semigroup supervision active through the late low-budget phase
   - keep unchanged:
