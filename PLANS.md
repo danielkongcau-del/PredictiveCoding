@@ -100,7 +100,7 @@ The first real Stage 06 probe is now:
 - objective-curriculum / optimization-contract hypothesis space
 - low-budget-first
 - matched-budget
-- scaffold-preserving by default
+- scaffold-preserving by default at the level of Stage 05 two-branch parameterization and Stage 05 target-builder reuse, not Stage 05 v3-A branchwise supervision
 
 What it tested:
 
@@ -109,7 +109,7 @@ What it tested:
 What the first result says:
 
 - the line is viable at Tier 1 (`128` epochs)
-- it does not materially beat the matched-budget Stage 05 control at Tier 2 (`256` epochs)
+- it does not materially beat the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight` at Tier 2 (`256` epochs)
 - it does not justify a `512` rescue from the current evidence
 
 That means current Stage 06 follow-up planning must:

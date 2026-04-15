@@ -61,6 +61,13 @@ STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME = "stage05_v3c_stronger_semigroup_wei
 STAGE06_OBJECTIVE_CONTRACT_IDENTITY = (
     "objective_curriculum_plus_energydrop_fixed_point_contract"
 )
+STAGE06_SCAFFOLD_PRESERVATION_IDENTITY = (
+    "two_branch_parameterization_plus_stage05_target_reuse_without_branchwise_supervision"
+)
+STAGE06_SUPERVISION_CONTRACT_IDENTITY = (
+    "aggregate_residual_supervision_over_stage05_targets"
+)
+STAGE06_ROLLOUT_TIME_SEMANTICS_IDENTITY = "remaining_horizon_forward_rollout"
 STAGE06_OBJECTIVE_FORMULA = (
     "L_6A(k) = (1 - beta_obj(k)) * L_traj + beta_obj(k) * L_semi "
     "+ lambda_energy_drop * L_drop + lambda_fixed_point * L_fp"
@@ -71,7 +78,7 @@ STAGE06_SEMIGROUP_COMPONENT_CONTRACT = (
     "L_semi = mean(r^2 * ||m_hat - m_semi_star||^2)"
 )
 STAGE06_ENERGY_DROP_CONTRACT = (
-    "z_roll = z_t - (t - r) * u_psi(z_t, r, t; c); "
+    "z_roll = z_t + r * u_psi(z_t, r, t; c); "
     "L_drop = mean(relu(E_theta(z_roll; c) - E_theta(z_t; c) + delta_margin))"
 )
 STAGE06_FIXED_POINT_CONTRACT = "L_fp = mean(||g_roll||_2^2)"
@@ -428,6 +435,11 @@ def _config_payload(config: Stage06ObjectiveCurriculumConfig) -> dict[str, Any]:
         "transport": {
             "transport_family": "two_branch_residual_meanflow_core",
             "stage05_scaffold_reference": STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
+            "stage05_scaffold_preservation_identity": STAGE06_SCAFFOLD_PRESERVATION_IDENTITY,
+            "stage05_two_branch_parameterization_preserved": True,
+            "stage05_target_builder_reuse_enabled": True,
+            "stage05_branchwise_supervision_preserved": False,
+            "stage06_supervision_contract_identity": STAGE06_SUPERVISION_CONTRACT_IDENTITY,
             "u_psi_family": "u_psi(z_t, r, t; c) = g_t + q_psi + d_psi",
             "explicit_transport_drift_decomposition_enabled": True,
             "trajectory_curriculum_enabled": True,
@@ -450,6 +462,7 @@ def _config_payload(config: Stage06ObjectiveCurriculumConfig) -> dict[str, Any]:
             "energy_drop_contract": STAGE06_ENERGY_DROP_CONTRACT,
             "fixed_point_contract": STAGE06_FIXED_POINT_CONTRACT,
             "fixed_point_gradient_proxy": STAGE06_FIXED_POINT_GRADIENT_PROXY,
+            "rollout_time_semantics_identity": STAGE06_ROLLOUT_TIME_SEMANTICS_IDENTITY,
             "beta_obj_schedule_identity": STAGE06_BETA_SCHEDULE_IDENTITY,
             "beta_obj_is_distinct_from_alpha": True,
             "beta_obj_warmup_fraction": float(config.beta_obj_warmup_fraction),
@@ -641,6 +654,23 @@ def _collect_stage06_supervision(
     return batch
 
 
+def _build_stage06_rollout_state(
+    z_points: np.ndarray,
+    velocity: np.ndarray,
+    remaining_horizon: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    z_array = _as_batch_first("z_points", z_points)
+    velocity_array = _as_batch_first("velocity", velocity)
+    horizon_array = _as_batch_first("remaining_horizon", remaining_horizon)
+    if z_array.shape != velocity_array.shape:
+        raise ValueError("z_points and velocity must share the same shape.")
+    if horizon_array.shape != (z_array.shape[0], 1):
+        raise ValueError("remaining_horizon must be shaped (batch, 1).")
+    z_roll = z_array + (horizon_array * velocity_array)
+    ensure_finite_array(z_roll, "stage06_z_roll")
+    return z_roll, horizon_array
+
+
 def compute_energy_drop_penalty_and_output_delta(
     current_energy: np.ndarray,
     rollout_energy: np.ndarray,
@@ -662,7 +692,7 @@ def compute_energy_drop_penalty_and_output_delta(
     margin = rolled - current + float(delta_margin)
     active_mask = (margin > 0.0).astype(np.float64)
     loss = float(np.mean(np.maximum(margin, 0.0)))
-    output_delta = (coeff * active_mask / float(current.shape[0])) * g_roll
+    output_delta = (-coeff * active_mask / float(current.shape[0])) * g_roll
     return Stage06EnergyDropTerms(
         loss=loss,
         output_delta=output_delta,
@@ -738,7 +768,7 @@ def evaluate_fixed_point_contraction_terms(
         epsilon=tangent_epsilon,
     )
     loss = float(np.mean(np.sum(g_roll * g_roll, axis=1, keepdims=True)))
-    output_delta = (-2.0 * coeff / float(z_array.shape[0])) * directional
+    output_delta = (2.0 * coeff / float(z_array.shape[0])) * directional
     return Stage06FixedPointTerms(
         loss=loss,
         output_delta=output_delta,
@@ -822,9 +852,11 @@ def _compute_stage06_objective_terms(
 
     g_t, current_energy = _chunked_teacher_free_state_features(context, supervision.z_points)
     u_hat = g_t + m_hat
-    rollout_coefficient = supervision.t_values - supervision.r_values
-    z_roll = supervision.z_points - (rollout_coefficient * u_hat)
-    ensure_finite_array(z_roll, "stage06_z_roll")
+    z_roll, rollout_coefficient = _build_stage06_rollout_state(
+        supervision.z_points,
+        u_hat,
+        supervision.r_values,
+    )
 
     rollout_flow, rollout_energy = _chunked_teacher_free_state_features(context, z_roll)
     energy_terms = compute_energy_drop_penalty_and_output_delta(
@@ -1133,6 +1165,11 @@ def run_stage06_objective_curriculum(
         "candidate_name": _candidate_name(config),
         "transport_family": "two_branch_residual_meanflow_core",
         "stage05_scaffold_reference": STAGE05_MATCHED_BUDGET_CONTROL_METHOD_NAME,
+        "stage05_scaffold_preservation_identity": STAGE06_SCAFFOLD_PRESERVATION_IDENTITY,
+        "stage05_two_branch_parameterization_preserved": True,
+        "stage05_target_builder_reuse_enabled": True,
+        "stage05_branchwise_supervision_preserved": False,
+        "stage06_supervision_contract_identity": STAGE06_SUPERVISION_CONTRACT_IDENTITY,
         "objective_contract_identity": STAGE06_OBJECTIVE_CONTRACT_IDENTITY,
         "objective_formula": STAGE06_OBJECTIVE_FORMULA,
         "trajectory_component_contract": STAGE06_TRAJECTORY_COMPONENT_CONTRACT,
@@ -1140,6 +1177,7 @@ def run_stage06_objective_curriculum(
         "energy_drop_contract": STAGE06_ENERGY_DROP_CONTRACT,
         "fixed_point_contract": STAGE06_FIXED_POINT_CONTRACT,
         "fixed_point_gradient_proxy": STAGE06_FIXED_POINT_GRADIENT_PROXY,
+        "rollout_time_semantics_identity": STAGE06_ROLLOUT_TIME_SEMANTICS_IDENTITY,
         "beta_obj_schedule_identity": STAGE06_BETA_SCHEDULE_IDENTITY,
         "beta_obj_is_distinct_from_alpha": True,
         "beta_obj_warmup_fraction": float(config.beta_obj_warmup_fraction),

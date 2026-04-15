@@ -124,6 +124,10 @@ Current Stage 06 constraints:
 - do not treat long-budget runs as the first existence proof
 - do not continue the narrow Stage 05 v3-C continuation / midpoint / coupled / precision / scaled micro-family by default
 - start from the validated Stage 05 scaffold, but move the next search above that micro-family
+- interpret that preserved scaffold as:
+  - the Stage 05 two-branch `u_psi = g_t + q_psi + d_psi` parameterization
+  - plus Stage 05 trajectory / semigroup target-builder reuse
+  - not the Stage 05 v3-A branchwise transport / drift supervision contract
 
 Current Stage 06 default hypothesis space:
 
@@ -141,9 +145,9 @@ Current Stage 06 result:
 
 - the first implemented candidate passed Tier 1 viability at `128` epochs:
   - one-step and configured-step mechanism-positive rates were both `1.0`
-- but it failed the Tier 2 main gate at `256` epochs against the matched-budget Stage 05 control:
-  - configured-step energy delta mean was `-0.0013042642699526152` for Stage 06 v1 vs `-0.0013464605038717343` for the matched-budget Stage 05 control
-  - configured-step residual delta mean was `-3.970322456158043e-06` for Stage 06 v1 vs `-4.0279469750049745e-06` for the matched-budget Stage 05 control
+- but it failed the Tier 2 main gate at `256` epochs against the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`:
+  - configured-step energy delta mean was `-0.0013042642699526152` for Stage 06 v1 vs `-0.0013464605038717343` for `stage05_v3c_stronger_semigroup_weight`
+  - configured-step residual delta mean was `-3.970322456158043e-06` for Stage 06 v1 vs `-4.0279469750049745e-06` for `stage05_v3c_stronger_semigroup_weight`
   - the pairwise gain fractions stayed negative
 - the result did not justify a `512` rescue:
   - `tier2_positive_trend_for_rescue = false`
@@ -157,7 +161,7 @@ Current Stage 06 result:
 - Do not treat `stage05_v3c_stronger_semigroup_weight` as an efficiency reference by default.
 - Treat the narrow Stage 05 v3-C contract-consolidation micro-family as closed from the current state.
 - Use Stage 06 as the active implementation and validation charter.
-- Keep `stage06_v1_objective_curriculum_energydrop_default` as the first Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control.
+- Keep `stage06_v1_objective_curriculum_energydrop_default` as the first Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`.
 - Require any next new forward probe to be:
   - low-budget-first
   - matched-budget

@@ -74,6 +74,8 @@ def test_stage06_low_budget_comparison_writes_expected_artifacts(tmp_path: Path)
     assert "materially_beats_matched_budget_stage05_control" in summary
     assert "shows_better_cost_effectiveness_than_stage05_control" in summary
     assert "recommended_stage06_next_move" in summary
+    assert summary["matched_budget_control_name"] == "stage05_v3c_stronger_semigroup_weight"
+    assert summary["comparison_protocol"]["dataset_name"] == "digits"
     assert "tier_2" in summary["tier_summaries"]
     assert "tier_3" in summary["tier_summaries"]
     assert "tier_2" in report["tier_summaries"]

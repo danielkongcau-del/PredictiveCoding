@@ -181,11 +181,12 @@ The current validation move is:
 - keep Stage 04 frozen as the implemented bridge result on `main`
 - keep Stage 05 frozen as the high-budget mechanism reference stage
 - keep `stage05_v3c_stronger_semigroup_weight` as the current high-budget Stage 05 mechanism reference
+- use `stage05_v3c_stronger_semigroup_weight` as the current matched-budget Stage 05 control for Stage 06 comparisons
 - treat the narrow v3-C contract-consolidation micro-family as locally saturated
 - keep Stage 06 under the low-budget gate above
 - treat `stage06_v1_objective_curriculum_energydrop_default` as the first real Stage 06 baseline artifact:
   - it passed Tier 1 viability
-  - it failed the Tier 2 main gate against the matched-budget Stage 05 control
+  - it failed the Tier 2 main gate against the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`
   - it did not justify a `512` rescue
 - require any later Stage 06 follow-up to remain:
   - matched-budget

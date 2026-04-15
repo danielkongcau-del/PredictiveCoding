@@ -19,6 +19,7 @@ from pc.stage_03_transport_core_v1.fmpc_tf1_flow import build_tf1_context
 from pc.stage_05_ef_core_probe.fmpc_ef_exploratory_probe import _make_pc_model
 from pc.stage_06_low_budget_efficiency.fmpc_stage06_objective_curriculum import (
     _build_stage05_scaffold_config,
+    _build_stage06_rollout_state,
     _make_psi_network,
     beta_obj_for_epoch,
     build_stage06_v1_objective_curriculum_energydrop_default_config,
@@ -80,7 +81,23 @@ def test_energy_drop_penalty_is_positive_when_rollout_energy_rises() -> None:
         delta_margin=0.0,
     )
     assert terms.loss > 0.0
-    assert np.all(terms.output_delta > 0.0)
+    assert np.all(terms.output_delta < 0.0)
+
+
+def test_stage06_rollout_state_uses_remaining_horizon_forward_semantics() -> None:
+    z_points = np.array([[1.0, -2.0], [0.5, 0.25]], dtype=np.float64)
+    velocity = np.array([[0.5, 1.0], [-1.0, 2.0]], dtype=np.float64)
+    remaining_horizon = np.array([[0.2], [0.4]], dtype=np.float64)
+
+    z_roll, coeff = _build_stage06_rollout_state(z_points, velocity, remaining_horizon)
+
+    np.testing.assert_allclose(coeff, remaining_horizon, atol=1e-12, rtol=1e-12)
+    np.testing.assert_allclose(
+        z_roll,
+        z_points + (remaining_horizon * velocity),
+        atol=1e-12,
+        rtol=1e-12,
+    )
 
 
 def test_fixed_point_terms_are_deterministic_on_rollout_state() -> None:
@@ -144,8 +161,15 @@ def test_stage06_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     assert summary["beta_obj_is_distinct_from_alpha"] is True
     assert summary["energy_drop_penalty_enabled"] is True
     assert summary["fixed_point_contraction_penalty_enabled"] is True
+    assert summary["rollout_time_semantics_identity"] == "remaining_horizon_forward_rollout"
     assert summary["midpoint_microfamily_continued"] is False
     assert summary["loss_breakdown_visible"] is True
+    assert summary["stage05_two_branch_parameterization_preserved"] is True
+    assert summary["stage05_target_builder_reuse_enabled"] is True
+    assert summary["stage05_branchwise_supervision_preserved"] is False
+    assert summary["stage06_supervision_contract_identity"] == (
+        "aggregate_residual_supervision_over_stage05_targets"
+    )
     assert summary["runtime_proxy_seconds"] >= 0.0
 
     assert config["objective_contract"]["contract_identity"] == (
@@ -154,8 +178,17 @@ def test_stage06_probe_writes_expected_artifacts(tmp_path: Path) -> None:
     assert config["objective_contract"]["beta_obj_schedule_identity"] == (
         "piecewise_linear_quarter_half_quarter"
     )
+    assert config["objective_contract"]["rollout_time_semantics_identity"] == (
+        "remaining_horizon_forward_rollout"
+    )
     assert config["objective_contract"]["energy_drop_penalty_enabled"] is True
     assert config["objective_contract"]["fixed_point_contraction_penalty_enabled"] is True
+    assert config["transport"]["stage05_two_branch_parameterization_preserved"] is True
+    assert config["transport"]["stage05_target_builder_reuse_enabled"] is True
+    assert config["transport"]["stage05_branchwise_supervision_preserved"] is False
+    assert config["transport"]["stage06_supervision_contract_identity"] == (
+        "aggregate_residual_supervision_over_stage05_targets"
+    )
 
     assert len(epoch_rows) == 3
     assert "beta_obj" in epoch_rows[0]

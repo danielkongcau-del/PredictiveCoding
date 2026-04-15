@@ -29,7 +29,7 @@ Stage 06 is:
 
 - a low-budget and low-compute viability stage
 - a matched-budget efficiency stage
-- scaffold-preserving by default
+- scaffold-preserving by default at the level of two-branch parameterization and Stage 05 target-builder reuse
 - mechanism-first, but no longer budget-indifferent
 
 Stage 06 is not:
@@ -45,7 +45,8 @@ Stage 05 remains important, but its role changes at Stage 06.
 
 - Stage 05 is frozen as the mechanism-first exploration stage
 - `stage05_v3c_stronger_semigroup_weight` remains the current high-budget Stage 05 mechanism reference
-- the fixed-budget Stage 05 v2 result remains the immediate same-family control when a low-budget matched-budget control is needed
+- `stage05_v3c_stronger_semigroup_weight` is also the current matched-budget Stage 05 control for Stage 06 comparisons
+- the fixed-budget Stage 05 v2 result remains contextual evidence about budget sensitivity and efficiency limits, not the current Stage 06 matched-budget control
 - the narrow v3-C contract-consolidation micro-family is treated as locally saturated and is excluded from default continuation
 
 Interpretation:
@@ -76,10 +77,16 @@ Stage 06 keeps the current validated scaffold boundary unless a later charter sa
 Preserved by default:
 
 - artifact-independent target construction
-- explicit transport-drift decomposition from Stage 05 v3-A
+- the Stage 05 two-branch parameterization rooted in the v3-A explicit transport-drift decomposition:
+  - `u_psi(z_t, r, t; c) = g_t + q_psi + d_psi`
 - the trajectory-level scaffold validated through Stage 05 v3-B
 - the endpoint / semigroup-consistency scaffold validated through Stage 05 v3-C
 - deterministic artifact generation
+
+Not preserved by default inside Stage 06 v1:
+
+- the Stage 05 v3-A branchwise transport / drift supervision contract itself
+- a requirement that Stage 06 update the two learned branches with explicit per-branch transport targets and drift targets
 
 Not preserved as default search directions:
 
@@ -120,23 +127,30 @@ The first implemented Stage 06 line is now fixed as:
 
 - `stage06_v1_objective_curriculum_energydrop_default`
 
-It preserves the validated Stage 05 scaffold and changes only the training contract.
+It preserves the validated Stage 05 two-branch parameterization and target-builder scaffold, and changes only the training contract.
 
 Normative implementation contract:
 
 - keep the Stage 05 transport output notation:
   - `u_psi(z_t, r, t; c)`
+- keep the Stage 05 two-branch parameterization:
+  - `u_psi(z_t, r, t; c) = g_t + q_psi + d_psi`
 - keep the Stage 05 local energy flow:
-  - `g_t = -∇_z E_theta(z_t; c)`
+  - `g_t = -grad_z E_theta(z_t; c)`
 - keep the Stage 05 trajectory-side target semantics as:
   - `L_traj`
 - keep the Stage 05 semigroup / endpoint-consistency target semantics as:
   - `L_semi`
+- keep Stage 05 target-builder reuse for those targets
+- do not claim that Stage 06 v1 preserves the Stage 05 v3-A branchwise supervision contract:
+  - Stage 06 v1 keeps the two-branch parameterization
+  - but it trains those branches through an aggregate residual objective over reused Stage 05 targets
 - add the one-step energy-drop penalty:
-  - `z_roll = z_t - (t - r) * u_psi(z_t, r, t; c)`
+  - `r` keeps the Stage 03 / Stage 05 meaning of remaining horizon
+  - `z_roll = z_t + r * u_psi(z_t, r, t; c)`
   - `L_drop = mean(relu(E_theta(z_roll; c) - E_theta(z_t; c) + delta_margin))`
 - add the fixed-point contraction penalty:
-  - `g_roll = -∇_z E_theta(z_roll; c)`
+  - `g_roll = -grad_z E_theta(z_roll; c)`
   - `L_fp = mean(||g_roll||_2^2)`
 
 The Stage 06 v1 total loss is:
@@ -161,7 +175,8 @@ The default Stage 06 `beta_obj(k)` schedule is:
 Interpretation:
 
 - `beta_obj(k)` remains distinct from the Stage 05 geometry parameter `alpha`
-- Stage 06 v1 preserves the Stage 05 scaffold
+- Stage 06 v1 preserves the Stage 05 two-branch parameterization and target-builder scaffold
+- Stage 06 v1 does not preserve the Stage 05 v3-A branchwise transport / drift supervision contract
 - Stage 06 v1 does not continue the narrow Stage 05 v3-C midpoint / continuation micro-family
 
 ### 19.6 Minimal Stage 06 acceptance framing
