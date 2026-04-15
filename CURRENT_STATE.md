@@ -115,7 +115,9 @@ Current implemented Stage 06 line:
 - `stage06_v1_objective_curriculum_energydrop_default`
 - implementation path:
   - [src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
-- first real low-budget comparison artifact:
+- current authoritative post-semantic-alignment baseline artifact:
+  - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline)
+- historical pre-alignment artifact:
   - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe)
 
 Current Stage 06 constraints:
@@ -143,15 +145,16 @@ Current main question:
 
 Current Stage 06 result:
 
-- the first implemented candidate passed Tier 1 viability at `128` epochs:
+- the post-semantic-alignment rebaseline passed Tier 1 viability at `128` epochs:
   - one-step and configured-step mechanism-positive rates were both `1.0`
 - but it failed the Tier 2 main gate at `256` epochs against the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`:
-  - configured-step energy delta mean was `-0.0013042642699526152` for Stage 06 v1 vs `-0.0013464605038717343` for `stage05_v3c_stronger_semigroup_weight`
-  - configured-step residual delta mean was `-3.970322456158043e-06` for Stage 06 v1 vs `-4.0279469750049745e-06` for `stage05_v3c_stronger_semigroup_weight`
+  - configured-step energy delta mean was `-0.001306768276636246` for Stage 06 v1 vs `-0.0013464605038717343` for `stage05_v3c_stronger_semigroup_weight`
+  - configured-step residual delta mean was `-3.975569074520645e-06` for Stage 06 v1 vs `-4.0279469750049745e-06` for `stage05_v3c_stronger_semigroup_weight`
   - the pairwise gain fractions stayed negative
 - the result did not justify a `512` rescue:
   - `tier2_positive_trend_for_rescue = false`
   - `rescue_512_warranted = false`
+- the old pre-alignment Stage 06 v1 artifact is now historical only and is superseded for current state judgment by the post-semantic-alignment rebaseline above
 
 ## Current Recommendation
 
@@ -161,7 +164,7 @@ Current Stage 06 result:
 - Do not treat `stage05_v3c_stronger_semigroup_weight` as an efficiency reference by default.
 - Treat the narrow Stage 05 v3-C contract-consolidation micro-family as closed from the current state.
 - Use Stage 06 as the active implementation and validation charter.
-- Keep `stage06_v1_objective_curriculum_energydrop_default` as the first Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`.
+- Keep `stage06_v1_objective_curriculum_energydrop_default` as the current post-semantic-alignment Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`.
 - Require any next new forward probe to be:
   - low-budget-first
   - matched-budget
@@ -196,5 +199,5 @@ Current Stage 06 result:
   - [outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare)
 - Stage 05 continuation-strength diagnostic artifact:
   - [outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic)
-- Stage 06 first low-budget comparison artifact:
-  - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe)
+- Stage 06 authoritative post-semantic-alignment baseline artifact:
+  - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline)

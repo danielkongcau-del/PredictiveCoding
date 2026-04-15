@@ -108,8 +108,8 @@ What it tested:
 
 What the first result says:
 
-- the line is viable at Tier 1 (`128` epochs)
-- it does not materially beat the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight` at Tier 2 (`256` epochs)
+- the post-semantic-alignment rebaseline confirms that the line is viable at Tier 1 (`128` epochs)
+- it still does not materially beat the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight` at Tier 2 (`256` epochs)
 - it does not justify a `512` rescue from the current evidence
 
 That means current Stage 06 follow-up planning must:
@@ -146,9 +146,12 @@ That means current Stage 06 follow-up planning must:
 
 Required interpretation:
 
-- `stage06_v1_objective_curriculum_energydrop_default` is now the first implemented Stage 06 baseline
+- `stage06_v1_objective_curriculum_energydrop_default` is now the current post-semantic-alignment Stage 06 baseline
 - it passed Tier 1 viability but failed the Tier 2 main gate
 - it is useful as the first real Stage 06 comparison anchor, not as the promoted new mainline
+- the authoritative artifact root is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the older `stage06_v1_initial_probe/` result remains historical only and should not be used as the current Stage 06 authority
 
 ### 4. Any Next Stage 06 Probe Must Move Above The Current v1 Contract
 

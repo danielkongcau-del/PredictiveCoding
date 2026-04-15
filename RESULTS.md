@@ -18,8 +18,8 @@ This file keeps the current frozen results summary only.
 - `FMPC Stage 04 Incremental Bridge` remains the frozen implemented bridge result on `main`
 - `FMPC Stage 05 EF Core Probe` is now frozen as the high-budget mechanism-reference stage
 - `FMPC Stage 06 Low-Budget Efficiency` is now the active forward charter
-- the first Stage 06 result artifact now exists:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+- the current authoritative Stage 06 result artifact is now:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
 
 ## Frozen Toy-Benchmark Summary
 
@@ -866,15 +866,16 @@ Current interpretation:
 Current first Stage 06 result:
 
 - `stage06_v1_objective_curriculum_energydrop_default` is the first implemented Stage 06 probe
-- the matched-budget comparison artifact is:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+- the current authoritative matched-budget comparison artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the older `stage06_v1_initial_probe/` artifact is pre-semantic-alignment history and is superseded for current Stage 06 judgment
 - at `128` epochs, the candidate passed Tier 1 viability:
   - one-step mechanism-positive rate = `1.0`
   - configured-step mechanism-positive rate = `1.0`
 - at `256` epochs, the candidate failed the Tier 2 main gate versus the matched-budget Stage 05 control:
-  - candidate configured-step energy delta mean = `-0.0013042642699526152`
+  - candidate configured-step energy delta mean = `-0.001306768276636246`
   - control configured-step energy delta mean = `-0.0013464605038717343`
-  - candidate configured-step residual delta mean = `-3.970322456158043e-06`
+  - candidate configured-step residual delta mean = `-3.975569074520645e-06`
   - control configured-step residual delta mean = `-4.0279469750049745e-06`
 - the result did not justify a `512` rescue:
   - `tier2_positive_trend_for_rescue = false`

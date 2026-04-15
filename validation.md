@@ -188,6 +188,7 @@ The current validation move is:
   - it passed Tier 1 viability
   - it failed the Tier 2 main gate against the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`
   - it did not justify a `512` rescue
+  - the current authoritative baseline is the post-semantic-alignment rerun, not the older pre-alignment artifact
 - require any later Stage 06 follow-up to remain:
   - matched-budget
   - low-budget-first
@@ -214,8 +215,8 @@ Relevant active reference artifacts remain:
   - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
 - Stage 05 continuation-strength diagnostic:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
-- Stage 06 first low-budget comparison:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+- Stage 06 authoritative post-semantic-alignment baseline:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
 
 ## Document Layering
 

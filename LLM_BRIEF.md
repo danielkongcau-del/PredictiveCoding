@@ -123,9 +123,9 @@ Current known state:
   - viability
 - the first implemented Stage 06 line is:
   - `stage06_v1_objective_curriculum_energydrop_default`
-- the first real Stage 06 comparison artifact is:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
-- the initial Stage 06 result passed Tier 1 viability but failed the Tier 2 main gate against the matched-budget Stage 05 control
+- the current authoritative Stage 06 comparison artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the post-semantic-alignment Stage 06 baseline passed Tier 1 viability but still failed the Tier 2 main gate against the matched-budget Stage 05 control
 - task accuracy remains secondary, but cost is no longer secondary
 
 ## Current Recommended Next Move
@@ -174,7 +174,7 @@ Current known state:
   - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
   - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
 - Stage 06 initial low-budget artifact:
-  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe/`
+  - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
 
 ## History
 
