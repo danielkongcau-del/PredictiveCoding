@@ -172,7 +172,9 @@ Current implementation status:
 
 - the narrow v2 follow-up surface now exists in code:
   - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-- this is still not an artifact-backed promotion
+- the authoritative v2 comparison artifact now exists:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
+- this is still not a promotion
 - this still does not reopen A2 / B1 / C
 - this still does not reopen Stage 05 v3-A branchwise supervision
 - this still does not authorize a second parallel Stage 06 family
@@ -204,22 +206,24 @@ Directly confirmed from the current Stage 06 source and the authoritative post-s
 Current planning inference from those confirmed facts:
 
 - Stage 06 v1 already answered its baseline question
-- the unresolved issue is no longer whether the A2 line can produce any low-budget mechanism-positive signal
-- the unresolved issue is whether the current hard handoff from trajectory supervision to semigroup supervision is too aggressive for the low-budget matched-budget regime
-- this is still an A2-family objective-contract question
-- it is not yet strong enough to justify opening a new Stage 06 mechanism family
+- the v2 persistent-overlap follow-up also answered its immediate question:
+  - raw configured-step mechanism can move slightly above the v1 baseline
+  - but not enough to beat the matched-budget Stage 05 control
+  - and not efficiently enough to displace v1 as the Stage 06 baseline
+- the unresolved issue is no longer whether this exact hard-handoff versus persistent-overlap schedule axis should keep being retuned by default
+- any next Stage 06 pass should now return to higher-level planning rather than auto-opening a `v2.1` / `v2.2` overlap-retuning line
 
-This is a working planning hypothesis, not a validated result.
+This is a planning conclusion grounded in the current authoritative v1 and v2 artifacts, not an approval for a new follow-up yet.
 
 ### 4D. Unique Primary Next Probe Charter
 
-Recommended next probe:
+Most recent tested follow-up:
 
 - candidate name:
   - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
 - family decision:
   - `stay_within_stage06_A2_family`
-- one-sentence hypothesis:
+- one-sentence tested hypothesis:
   - the main remaining Tier 2 gap comes from the Stage 06 v1 hard late handoff from `L_traj` to `L_semi`; keeping both objectives active through the late low-budget phase should improve matched-budget configured-step mechanism without leaving the A2 aggregate-objective family
 
 Single primary changed axis:
@@ -272,21 +276,12 @@ Tier structure:
 - Tier 3:
   - `512 epochs` rescue only after a credible Tier 2 trend
 
-Acceptance gate:
+Observed outcome:
 
-- follow the existing Stage 06 hard gate in `validation.md`
-- for planning purposes, the next probe only earns continuation if it:
-  - stays mechanism-positive at low budget
-  - materially beats the matched-budget Stage 05 control at Tier 2
-  - or at minimum shows clearly better cost-effectiveness under the existing Stage 06 efficiency record
-
-Kill criteria:
-
-- if this overlap-contract follow-up still fails the Tier 2 main gate
-- and still does not show clearly better cost-effectiveness than the matched-budget Stage 05 control
-- then stop iterating inside this narrow A2 handoff-refinement line by default
-- at that point, reopen planning at the higher decision level:
-  - whether to `open_new_stage06_contract_family`
+- it stays mechanism-positive at low budget
+- it does not materially beat the matched-budget Stage 05 control at Tier 2
+- it does not show clearly better cost-effectiveness than the matched-budget Stage 05 control
+- it therefore does not earn promotion and does not justify an automatic narrow `v2.x` continuation
 
 Artifact root naming:
 
@@ -305,17 +300,16 @@ For the next Stage 06 pass, do not:
 - use long-budget-first validation
 - open multiple Stage 06 next-probe families in parallel
 - restore Stage 05 v3-A branchwise supervision
-- open a new Stage 06 spec addendum before the A2 overlap-contract follow-up is tested
+- open a new Stage 06 spec addendum without a fresh planning decision above the now-tested v1/v2 A2 line
+- auto-open a `stage06_v2.x` schedule-retuning branch without a fresh planning decision
 
-### 4F. Coding Boundary For The Future Implementation Pass
+### 4F. Coding Boundary After The v2 Authoritative Comparison
 
-If and only if the next pass becomes implementation-first, the first batch should touch only:
+No immediate further coding boundary is approved from this artifact alone.
 
-1. `src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py`
-2. `experiments/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison.py`
-3. `tests/stage_06_low_budget_efficiency/test_stage06_v1_low_budget_comparison_smoke.py`
+If a new Stage 06 pass is later approved after fresh planning, define its file boundary from that new charter rather than inheriting the old v2 implementation boundary by default.
 
-Files that should not be touched in that first coding pass:
+Files that still should not be touched without that fresh planning decision:
 
 - any `src/pc/stage_05_ef_core_probe/` math or training file
 - any Stage 04 implementation or spec

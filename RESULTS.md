@@ -18,8 +18,10 @@ This file keeps the current frozen results summary only.
 - `FMPC Stage 04 Incremental Bridge` remains the frozen implemented bridge result on `main`
 - `FMPC Stage 05 EF Core Probe` is now frozen as the high-budget mechanism-reference stage
 - `FMPC Stage 06 Low-Budget Efficiency` is now the active forward charter
-- the current authoritative Stage 06 result artifact is now:
+- the current authoritative Stage 06 baseline artifact is now:
   - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the current authoritative Stage 06 v2 follow-up artifact is now:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
 
 ## Frozen Toy-Benchmark Summary
 
@@ -882,6 +884,33 @@ Current first Stage 06 result:
   - `rescue_512_warranted = false`
 - the current recommended Stage 06 next move from this first artifact is:
   - reject the current v1 candidate rather than promote it
+
+Current Stage 06 v2 follow-up result:
+
+- `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default` is the first artifact-tested A2-family follow-up above the v1 baseline
+- the authoritative v2 comparison artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
+- v2 keeps Tier 1 viability at `128` epochs:
+  - one-step mechanism-positive rate = `1.0`
+  - configured-step mechanism-positive rate = `1.0`
+- v2 still fails the Tier 2 main gate at `256` epochs against the matched-budget Stage 05 control:
+  - candidate configured-step energy delta mean = `-0.00132455709495799`
+  - control configured-step energy delta mean = `-0.0013464605038717343`
+  - candidate configured-step residual delta mean = `-4.016692873501399e-06`
+  - control configured-step residual delta mean = `-4.0279469750049745e-06`
+- v2 also does not justify a `512` rescue:
+  - `tier2_positive_trend_for_rescue = false`
+  - `rescue_512_warranted = false`
+- relative to the current v1 authoritative baseline, v2 shows:
+  - slightly stronger raw configured-step energy and residual means at both `128` and `256` epochs
+  - slightly lower validation accuracy at both tiers
+  - slightly higher test accuracy only at `256`
+  - materially worse runtime proxy and materially worse mechanism gain per runtime
+- current interpretation:
+  - v2 is a real, artifact-backed follow-up rather than a planning-only stub
+  - persistent overlap slightly improves raw mechanism relative to v1
+  - but the improvement is not strong enough to beat the matched-budget Stage 05 control
+  - and it is not efficient enough to replace v1 as the authoritative Stage 06 baseline
 
 ## Where Detailed History Went
 

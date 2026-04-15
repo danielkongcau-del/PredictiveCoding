@@ -100,8 +100,10 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - efficiency-first
 - the first implemented Stage 06 line is:
   - `stage06_v1_objective_curriculum_energydrop_default`
-- the current authoritative Stage 06 comparison artifact is:
+- the current authoritative Stage 06 baseline artifact is:
   - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the current authoritative Stage 06 v2 follow-up artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
 - the post-semantic-alignment Stage 06 baseline passed Tier 1 viability but still failed the Tier 2 main gate against the matched-budget Stage 05 control
 - do not write prompts that keep Stage 05 as the default efficiency mainline
 - do not write prompts that reopen another narrow Stage 05 geometry micro-variant by default
@@ -119,19 +121,19 @@ Add `PLANS.md` only if the prompt needs an explicit execution queue or charter.
   - matched-budget
   - efficiency-first
   - above the saturated Stage 05 v3-C geometry micro-family
-- current planning-only next-probe decision:
+- current tested follow-up state:
   - `stay_within_stage06_A2_family`
-  - use a narrow objective-contract follow-up above the current v1 baseline
-  - current implemented follow-up surface:
+  - tested A2 follow-up:
     - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
   - single changed axis:
     - replace the current hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract
   - current status:
-    - v2 implementation surface exists
-    - v1 remains the authoritative baseline until a dedicated v2 comparison artifact exists
+    - the v2 authoritative comparison artifact exists
+    - v2 did not replace the v1 baseline
+    - do not auto-write prompts for `v2.1` / `v2.2` retuning from the current state
   - do not reopen:
     - Stage 05 v3-A branchwise supervision
-    - a new Stage 06 contract family
+    - a new Stage 06 contract family without a new planning decision
 - do not draft the next pass as:
   - another pure same-family budget push
   - another pure same-family efficiency tweak

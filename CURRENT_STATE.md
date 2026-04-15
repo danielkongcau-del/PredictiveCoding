@@ -117,6 +117,8 @@ Current implemented Stage 06 line:
   - [src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py](/e:/CodeSpace/PredictiveCoding/src/pc/stage_06_low_budget_efficiency/fmpc_stage06_objective_curriculum.py)
 - current authoritative post-semantic-alignment baseline artifact:
   - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline)
+- current authoritative v2 follow-up comparison artifact:
+  - [outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison)
 - historical pre-alignment artifact:
   - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_initial_probe)
 
@@ -177,6 +179,31 @@ Current Stage 06 v1 baseline positioning:
   - `stage06_v1_objective_curriculum_energydrop_default` remains the authoritative Stage 06 baseline artifact
   - it is not a promoted forward direction
 
+Current Stage 06 v2 follow-up result:
+
+- directly confirmed from the dedicated v2 comparison artifact:
+  - candidate:
+    - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
+  - authoritative comparison artifact:
+    - [outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison)
+  - single changed axis:
+    - replace the v1 hard late `L_traj -> L_semi` handoff with a persistent-overlap late objective where late trajectory weight stays `0.25` and late semigroup weight stays `0.75`
+- the authoritative v2 result says:
+  - Tier 1 remains viable at `128` epochs
+  - Tier 2 still fails against the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`
+  - `tier2_positive_trend_for_rescue = false`
+  - `rescue_512_warranted = false`
+  - `materially_beats_matched_budget_stage05_control = false`
+  - `shows_better_cost_effectiveness_than_stage05_control = false`
+- relative to the current v1 baseline, v2 shows:
+  - slightly stronger raw configured-step mechanism at both `128` and `256` epochs
+  - but materially worse runtime proxy and worse mechanism gain per runtime
+  - no stronger rescue signal
+- operational consequence:
+  - v2 is now an implemented and artifact-tested Stage 06 follow-up
+  - it does not replace v1 as the authoritative Stage 06 baseline
+  - it does not justify auto-opening a `v2.1` / `v2.2` schedule-retuning line from the current state
+
 ## Current Recommendation
 
 - Keep the Stage 04 bridge result frozen on `main`.
@@ -186,25 +213,9 @@ Current Stage 06 v1 baseline positioning:
 - Treat the narrow Stage 05 v3-C contract-consolidation micro-family as closed from the current state.
 - Use Stage 06 as the active implementation and validation charter.
 - Keep `stage06_v1_objective_curriculum_energydrop_default` as the current post-semantic-alignment Stage 06 baseline artifact, but do not promote it past the current matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`.
-- Current planning-only next-probe decision:
-  - `stay_within_stage06_A2_family`
-  - current implemented follow-up surface:
-    - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-  - current status:
-    - implementation surface exists
-    - no authoritative v2 comparison artifact exists yet
-    - v1 remains the only authoritative Stage 06 baseline artifact
-  - single primary changed axis:
-    - replace the current hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract that keeps both trajectory and semigroup supervision active through the late low-budget phase
-  - keep unchanged:
-    - A2 two-branch parameterization
-    - Stage 05 target-builder reuse
-    - aggregate residual supervision
-    - remaining-horizon rollout semantics
-    - matched-budget control `stage05_v3c_stronger_semigroup_weight`
-  - do not reopen:
-    - the Stage 05 saturated continuation / midpoint / coupled / precision / scaled micro-family
-    - Stage 05 v3-A branchwise supervision restoration
+- Keep `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default` as an artifact-tested A2-family follow-up, not as the authoritative Stage 06 baseline.
+- Do not auto-promote the v2 persistent-overlap schedule tweak, because it still fails the Tier 2 main gate and does not improve cost-effectiveness enough to displace v1.
+- Do not auto-open another immediate `v2.x` schedule-retuning pass from the current state.
 - Require any next new forward probe to be:
   - low-budget-first
   - matched-budget
@@ -241,3 +252,5 @@ Current Stage 06 v1 baseline positioning:
   - [outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic](/e:/CodeSpace/PredictiveCoding/outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic)
 - Stage 06 authoritative post-semantic-alignment baseline artifact:
   - [outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline)
+- Stage 06 authoritative v2 follow-up comparison artifact:
+  - [outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison](/e:/CodeSpace/PredictiveCoding/outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison)

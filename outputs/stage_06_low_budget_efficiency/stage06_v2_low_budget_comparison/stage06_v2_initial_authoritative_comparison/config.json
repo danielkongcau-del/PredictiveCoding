@@ -1,0 +1,41 @@
+{
+  "phase": "FMPC Stage 06 Low-Budget Efficiency",
+  "stage": "stage06_v2_low_budget_comparison",
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "batch_size": 128,
+    "shuffle_batches": true,
+    "layer_dims": [
+      64,
+      16,
+      10
+    ],
+    "transport_steps": 2,
+    "eval_steps": 15,
+    "tier1_epochs": 128,
+    "tier2_epochs": 256,
+    "rescue_epochs": 512,
+    "allow_rescue_tier3": true
+  },
+  "candidate_name": "stage06_v2_persistent_overlap_objective_curriculum_energydrop_default",
+  "candidate_stage": "stage06_v2_objective_curriculum",
+  "candidate_objective_contract_identity": "persistent_overlap_objective_curriculum_plus_energydrop_fixed_point_contract",
+  "candidate_beta_obj_schedule_identity": "piecewise_linear_quarter_half_quarter_persistent_overlap",
+  "candidate_objective_schedule_variant": "persistent_overlap",
+  "candidate_hard_late_handoff_enabled": false,
+  "candidate_persistent_overlap_enabled": true,
+  "candidate_beta_obj_final_value": 0.75,
+  "candidate_late_phase_trajectory_weight": 0.25,
+  "candidate_late_phase_semigroup_weight": 0.75,
+  "stage05_two_branch_parameterization_preserved": true,
+  "stage05_target_builder_reuse_enabled": true,
+  "stage05_branchwise_supervision_preserved": false,
+  "matched_budget_control": "stage05_v3c_stronger_semigroup_weight",
+  "improvement_fraction_threshold": 0.05,
+  "allowed_accuracy_regression_threshold": 0.01
+}

@@ -189,6 +189,11 @@ The current validation move is:
   - it failed the Tier 2 main gate against the matched-budget Stage 05 control `stage05_v3c_stronger_semigroup_weight`
   - it did not justify a `512` rescue
   - the current authoritative baseline is the post-semantic-alignment rerun, not the older pre-alignment artifact
+- treat `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default` as an artifact-tested but non-promoted A2-family follow-up:
+  - it also passed Tier 1 viability
+  - it still failed the Tier 2 main gate against the matched-budget Stage 05 control
+  - it still did not justify a `512` rescue
+  - it did not show enough cost-effectiveness improvement to replace the v1 baseline
 - require any later Stage 06 follow-up to remain:
   - matched-budget
   - low-budget-first
@@ -217,6 +222,8 @@ Relevant active reference artifacts remain:
   - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
 - Stage 06 authoritative post-semantic-alignment baseline:
   - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- Stage 06 authoritative v2 follow-up comparison:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
 
 ## Document Layering
 

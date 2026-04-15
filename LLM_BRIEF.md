@@ -123,19 +123,21 @@ Current known state:
   - viability
 - the first implemented Stage 06 line is:
   - `stage06_v1_objective_curriculum_energydrop_default`
-- the current authoritative Stage 06 comparison artifact is:
+- the current authoritative Stage 06 baseline artifact is:
   - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- the current authoritative Stage 06 v2 follow-up artifact is:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
 - the post-semantic-alignment Stage 06 baseline passed Tier 1 viability but still failed the Tier 2 main gate against the matched-budget Stage 05 control
 - task accuracy remains secondary, but cost is no longer secondary
-- the current planning-only next-probe decision is:
-  - `stay_within_stage06_A2_family`
 - the current single-axis implemented follow-up surface is:
   - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
 - the changed axis is:
   - replace the Stage 06 v1 hard late `L_traj -> L_semi` handoff with a persistent overlap objective contract
 - current status:
-  - v2 implementation surface exists
-  - v1 remains the authoritative Stage 06 baseline until a dedicated v2 comparison artifact exists
+  - v2 authoritative comparison artifact now exists
+  - v2 remains non-promoted after the first authoritative low-budget comparison
+  - v1 remains the authoritative Stage 06 baseline
+  - do not auto-open a `v2.1` / `v2.2` retuning pass from the current state
 - this does not mean:
   - restoring Stage 05 v3-A branchwise supervision
   - opening a new Stage 06 contract family
@@ -154,11 +156,12 @@ Current known state:
   - matched-budget
   - efficiency-first
   - above the saturated Stage 05 micro-family
-- current planning-only next probe:
+- current tested Stage 06 follow-up:
   - `stage06_v2_persistent_overlap_objective_curriculum_energydrop_default`
-  - `stay_within_stage06_A2_family`
-  - keep A2 two-branch parameterization and target-builder reuse
-  - do not restore Stage 05 v3-A branchwise supervision
+  - remains inside `stay_within_stage06_A2_family`
+  - keeps A2 two-branch parameterization and target-builder reuse
+  - does not restore Stage 05 v3-A branchwise supervision
+  - is artifact-tested but not promoted over the v1 baseline
 
 ## Current Code Entry Points
 
@@ -191,8 +194,10 @@ Current known state:
   - `outputs/stage_05_ef_core_probe/stage05_v2_efficiency_diagnostic_at_1536/`
   - `outputs/stage_05_ef_core_probe/stage05_v2_promoted_v3b_refined_v3c_fixed_budget_recompare/`
   - `outputs/stage_05_ef_core_probe/stage05_v3c_continuation_strength_diagnostic/`
-- Stage 06 initial low-budget artifact:
+- Stage 06 authoritative baseline artifact:
   - `outputs/stage_06_low_budget_efficiency/stage06_v1_low_budget_comparison/stage06_v1_post_semantic_alignment_rebaseline/`
+- Stage 06 v2 authoritative follow-up artifact:
+  - `outputs/stage_06_low_budget_efficiency/stage06_v2_low_budget_comparison/stage06_v2_initial_authoritative_comparison/`
 
 ## History
 

@@ -1,0 +1,344 @@
+{
+  "comparison_protocol": {
+    "dataset_name": "digits",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "batch_size": 128,
+    "shuffle_batches": true,
+    "layer_dims": [
+      64,
+      16,
+      10
+    ],
+    "transport_steps": 2,
+    "eval_steps": 15,
+    "tier1_epochs": 128,
+    "tier2_epochs": 256,
+    "rescue_epochs": 512,
+    "allow_rescue_tier3": true
+  },
+  "decision": {
+    "passes_tier1_viability": true,
+    "passes_tier2_main_gate": false,
+    "tier2_positive_trend_for_rescue": false,
+    "rescue_512_warranted": false,
+    "materially_beats_matched_budget_stage05_control": false,
+    "shows_better_cost_effectiveness_than_stage05_control": false,
+    "recommended_stage06_next_move": "reject_stage06_v2_persistent_overlap_objective_curriculum_energydrop_default"
+  },
+  "tier_summaries": {
+    "tier_128": {
+      "candidate": {
+        "num_runs": 3,
+        "one_step_mechanism_positive_rate": 1.0,
+        "configured_step_mechanism_positive_rate": 1.0,
+        "one_step_energy_delta_vs_identity": {
+          "mean": -0.0006894065689899328,
+          "std": 0.00011596475823508354
+        },
+        "configured_step_energy_delta_vs_identity": {
+          "mean": -0.0006797084768547604,
+          "std": 0.00012049916943628456
+        },
+        "configured_step_fixed_point_residual_delta_vs_identity": {
+          "mean": -2.2852917567698218e-06,
+          "std": 4.2999583047566435e-07
+        },
+        "val_accuracy": {
+          "mean": 0.6938271604938272,
+          "std": 0.02013519312382726
+        },
+        "test_accuracy": {
+          "mean": 0.674074074074074,
+          "std": 0.0743205774977403
+        },
+        "val_output_mse": {
+          "mean": 0.07128307039619693,
+          "std": 0.0029498893777410804
+        },
+        "test_output_mse": {
+          "mean": 0.07141491744587679,
+          "std": 0.0037258442971698203
+        },
+        "runtime_proxy_seconds": {
+          "mean": 45.4394141333299,
+          "std": 2.780044274194552
+        },
+        "mechanism_gain_per_runtime": {
+          "mean": 1.511064567492835e-05,
+          "std": 3.2589988928457915e-06
+        },
+        "mechanism_gain_per_epoch": {
+          "mean": 5.310222475427816e-06,
+          "std": 9.413997612209731e-07
+        },
+        "configured_residual_gain_per_runtime": {
+          "mean": 5.0921472448207346e-08,
+          "std": 1.1749260953565899e-08
+        },
+        "configured_residual_gain_per_epoch": {
+          "mean": 1.7853841849764233e-08,
+          "std": 3.3593424255911277e-09
+        },
+        "selected_epoch": {
+          "mean": 128.0,
+          "std": 0.0
+        }
+      },
+      "control": {
+        "num_runs": 3,
+        "one_step_mechanism_positive_rate": 1.0,
+        "configured_step_mechanism_positive_rate": 1.0,
+        "one_step_energy_delta_vs_identity": {
+          "mean": -0.0006896891537088908,
+          "std": 0.00010883603985944688
+        },
+        "configured_step_energy_delta_vs_identity": {
+          "mean": -0.0006848087401235178,
+          "std": 0.00011111970163117971
+        },
+        "configured_step_fixed_point_residual_delta_vs_identity": {
+          "mean": -2.3026305832533627e-06,
+          "std": 4.0220341161560303e-07
+        },
+        "val_accuracy": {
+          "mean": 0.6864197530864198,
+          "std": 0.022697254704753384
+        },
+        "test_accuracy": {
+          "mean": 0.6777777777777777,
+          "std": 0.07200822998230953
+        },
+        "val_output_mse": {
+          "mean": 0.07104205235926393,
+          "std": 0.0028166992668810795
+        },
+        "test_output_mse": {
+          "mean": 0.07117600181963898,
+          "std": 0.0036200199449037693
+        },
+        "runtime_proxy_seconds": {
+          "mean": 67.7605507333307,
+          "std": 4.017280116304495
+        },
+        "mechanism_gain_per_runtime": {
+          "mean": 1.0100277820126953e-05,
+          "std": 1.4202874782981207e-06
+        },
+        "mechanism_gain_per_epoch": {
+          "mean": 5.350068282214983e-06,
+          "std": 8.681226689935915e-07
+        },
+        "configured_residual_gain_per_runtime": {
+          "mean": 3.4052648311864264e-08,
+          "std": 5.794976057967429e-09
+        },
+        "configured_residual_gain_per_epoch": {
+          "mean": 1.7989301431666896e-08,
+          "std": 3.1422141532468987e-09
+        },
+        "selected_epoch": {
+          "mean": 128.0,
+          "std": 0.0
+        }
+      },
+      "pairwise": {
+        "configured_step_energy_delta_vs_identity_delta": {
+          "mean": 5.10026326875727e-06,
+          "std": 9.48866931931256e-06
+        },
+        "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+          "mean": 1.7338826483540737e-08,
+          "std": 3.023616340906594e-08
+        },
+        "val_accuracy_delta": {
+          "mean": 0.007407407407407381,
+          "std": 0.003024061410843434
+        },
+        "test_accuracy_delta": {
+          "mean": -0.0037037037037037277,
+          "std": 0.003024061410843434
+        },
+        "runtime_proxy_seconds_delta": {
+          "mean": -22.321136600000802,
+          "std": 3.802449753369994
+        },
+        "configured_step_energy_gain_fraction": {
+          "mean": -0.009766087717688193,
+          "std": 0.014724211479403754
+        },
+        "configured_step_residual_gain_fraction": {
+          "mean": -0.00984908250159236,
+          "std": 0.013783087982979211
+        },
+        "mechanism_gain_per_runtime_delta": {
+          "mean": 5.010367854801397e-06,
+          "std": 1.8867062337299575e-06
+        },
+        "mechanism_gain_per_epoch_delta": {
+          "mean": -3.984580678716617e-08,
+          "std": 7.413022905712938e-08
+        }
+      },
+      "better_cost_effectiveness": false
+    },
+    "tier_256": {
+      "candidate": {
+        "num_runs": 3,
+        "one_step_mechanism_positive_rate": 1.0,
+        "configured_step_mechanism_positive_rate": 1.0,
+        "one_step_energy_delta_vs_identity": {
+          "mean": -0.0013404530923597873,
+          "std": 0.00011512948210578379
+        },
+        "configured_step_energy_delta_vs_identity": {
+          "mean": -0.00132455709495799,
+          "std": 0.00011331637155466758
+        },
+        "configured_step_fixed_point_residual_delta_vs_identity": {
+          "mean": -4.016692873501399e-06,
+          "std": 4.2173401143580274e-07
+        },
+        "val_accuracy": {
+          "mean": 0.7444444444444445,
+          "std": 0.010475656017578498
+        },
+        "test_accuracy": {
+          "mean": 0.7222222222222223,
+          "std": 0.049782333712730754
+        },
+        "val_output_mse": {
+          "mean": 0.06418798893823896,
+          "std": 0.003275868194727609
+        },
+        "test_output_mse": {
+          "mean": 0.06435843075939586,
+          "std": 0.004385063500221316
+        },
+        "runtime_proxy_seconds": {
+          "mean": 83.19701029999851,
+          "std": 4.550631416071874
+        },
+        "mechanism_gain_per_runtime": {
+          "mean": 1.5897540146517124e-05,
+          "std": 5.640950615394689e-07
+        },
+        "mechanism_gain_per_epoch": {
+          "mean": 5.174051152179648e-06,
+          "std": 4.426420763854202e-07
+        },
+        "configured_residual_gain_per_runtime": {
+          "mean": 4.8149794868103016e-08,
+          "std": 2.4614643010471052e-09
+        },
+        "configured_residual_gain_per_epoch": {
+          "mean": 1.569020653711484e-08,
+          "std": 1.6473984821711044e-09
+        },
+        "selected_epoch": {
+          "mean": 256.0,
+          "std": 0.0
+        }
+      },
+      "control": {
+        "num_runs": 3,
+        "one_step_mechanism_positive_rate": 1.0,
+        "configured_step_mechanism_positive_rate": 1.0,
+        "one_step_energy_delta_vs_identity": {
+          "mean": -0.001353648354671333,
+          "std": 0.00013710385158320203
+        },
+        "configured_step_energy_delta_vs_identity": {
+          "mean": -0.0013464605038717343,
+          "std": 0.00013677739568762113
+        },
+        "configured_step_fixed_point_residual_delta_vs_identity": {
+          "mean": -4.0279469750049745e-06,
+          "std": 5.300966821588212e-07
+        },
+        "val_accuracy": {
+          "mean": 0.7444444444444445,
+          "std": 0.010475656017578498
+        },
+        "test_accuracy": {
+          "mean": 0.7320987654320987,
+          "std": 0.050722564405368264
+        },
+        "val_output_mse": {
+          "mean": 0.0629941669887497,
+          "std": 0.002819594013215487
+        },
+        "test_output_mse": {
+          "mean": 0.06318422420449572,
+          "std": 0.003959913519690249
+        },
+        "runtime_proxy_seconds": {
+          "mean": 132.170750733334,
+          "std": 4.661112597541652
+        },
+        "mechanism_gain_per_runtime": {
+          "mean": 1.0164637947458538e-05,
+          "std": 6.695136486896891e-07
+        },
+        "mechanism_gain_per_epoch": {
+          "mean": 5.259611343248962e-06,
+          "std": 5.3428670190477e-07
+        },
+        "configured_residual_gain_per_runtime": {
+          "mean": 3.0383399067010364e-08,
+          "std": 2.9629815500495003e-09
+        },
+        "configured_residual_gain_per_epoch": {
+          "mean": 1.573416787111318e-08,
+          "std": 2.070690164682895e-09
+        },
+        "selected_epoch": {
+          "mean": 256.0,
+          "std": 0.0
+        }
+      },
+      "pairwise": {
+        "configured_step_energy_delta_vs_identity_delta": {
+          "mean": 2.19034089137445e-05,
+          "std": 4.528323934399888e-05
+        },
+        "configured_step_fixed_point_residual_delta_vs_identity_delta": {
+          "mean": 1.1254101503575115e-08,
+          "std": 1.7064740344502887e-07
+        },
+        "val_accuracy_delta": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "test_accuracy_delta": {
+          "mean": -0.009876543209876484,
+          "std": 0.0017459426695964424
+        },
+        "runtime_proxy_seconds_delta": {
+          "mean": -48.97374043333548,
+          "std": 3.5604693249848562
+        },
+        "configured_step_energy_gain_fraction": {
+          "mean": -0.01435645668798465,
+          "std": 0.033690754853292725
+        },
+        "configured_step_residual_gain_fraction": {
+          "mean": 0.0008304908967508221,
+          "std": 0.04095954530328374
+        },
+        "mechanism_gain_per_runtime_delta": {
+          "mean": 5.732902199058587e-06,
+          "std": 1.6854521140311034e-07
+        },
+        "mechanism_gain_per_epoch_delta": {
+          "mean": -8.556019106931445e-08,
+          "std": 1.7688765368749562e-07
+        }
+      },
+      "better_cost_effectiveness": false
+    }
+  }
+}
